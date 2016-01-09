@@ -1,5 +1,5 @@
 ########################################################
-# cmake file for building Arbor documentation
+# cmake file for building DQMCore documentation
 # @author rete , IPNL / CNRS
 ########################################################
 
