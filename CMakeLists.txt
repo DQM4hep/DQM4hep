@@ -28,7 +28,7 @@ SET( DQMViz_repository              "https://github.com/DQM4HEP/DQMViz.git" )
 SET( JsonCpp_repository             "https://github.com/open-source-parsers/jsoncpp.git" )
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/mirabitl/dimjc.git" )
-SET( streamlog_repository           "https://github.com/DQM4HEP/streamlog" )  # public (no authentication)
+SET( streamlog_repository           "https://github.com/DQM4HEP/streamlog" )
 SET( LCIO_repository                "svn://svn.freehep.org/lcio/tags" ) # public (no authentication)
 
 # ----- additional cmake args -----
@@ -171,9 +171,8 @@ SET( DQMVis_additional_cmake_args
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
     DEPENDS DIM ${DQMCore_package_depends}
-    #GIT_REPOSITORY ${DQMCore_repository}/${DQMCore_version}
-    #GIT_TAG ${DQMCore_version}
-    URL /home/rete/soft/DQMCore
+    GIT_REPOSITORY ${DQMCore_repository}
+    GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
     PREFIX DQMCore-${DQMCore_version}
     LIST_SEPARATOR %
@@ -212,9 +211,8 @@ IF( DQM4HEP_VIZ )
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
         DEPENDS DQMCore ${DQMCore_package_depends} DIM JsonCpp DIMJC 
-        #GIT_REPOSITORY ${DQMViz_repository}
-        #GIT_TAG ${DQMViz_version}
-        URL /home/rete/soft/DQMViz
+        GIT_REPOSITORY ${DQMViz_repository}
+        GIT_TAG ${DQMViz_version}
         CMAKE_ARGS ${common_cmake_args} ${DQMVis_additional_cmake_args}
 	    PREFIX DQMViz-${DQMViz_version}
 	    LIST_SEPARATOR %
