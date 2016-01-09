@@ -1,0 +1,11 @@
+<dqm4hep>
+    <runinfo>
+        <runnumber value="1"/>
+        <detector name="SDHCAL"/>
+        <description value="pouette description"/>
+        <parameters>
+            <parameter name="Energy" value="10"/>
+            <parameter name="RunType" value="Test"/>
+        </parameters>
+    </runinfo>
+</dqm4hep>

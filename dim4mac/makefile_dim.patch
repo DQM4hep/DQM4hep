@@ -1,0 +1,54 @@
+--- /Users/antoine/Downloads/dim_v20r13-2/makefile_dim	2005-04-04 15:22:00.000000000 +0200
++++ /opt/dimTest/makefile_dim	2015-06-15 11:23:31.000000000 +0200
+@@ -23,30 +23,36 @@
+ 
+ RANLIB = ranlib
+ 
+-ifeq ($(SHAREABLE),no)
+-all:	$(ODIR)/libdim.a $(ODIR)/dns
+-else
+-ifeq ($(JDIM),yes)
+-ifdef JDK_INCLUDE
+-all:	$(ODIR)/libdim.a $(ODIR)/libdim.so $(ODIR)/libjdim.so $(ODIR)/dns
+-else
+-all:
+-	echo "Please define JDK_INCLUDE";
++
++LIBSUFFIX = so
++ifeq ($(OS),Darwin)
++ LIBSUFFIX = dylib
+ endif
++
++ifeq ($(SHAREABLE),no)
++ all:	$(ODIR)/libdim.a $(ODIR)/dns
+ else
+-all:	$(ODIR)/libdim.a $(ODIR)/libdim.so $(ODIR)/dns
+-endif
++ ifeq ($(JDIM),yes)
++  ifdef JDK_INCLUDE
++   all:	$(ODIR)/libdim.a $(ODIR)/libdim.${LIBSUFFIX} $(ODIR)/libjdim.${LIBSUFFIX} $(ODIR)/dns
++  else
++   all:
++	 echo "Please define JDK_INCLUDE";
++  endif
++ else
++  all:	$(ODIR)/libdim.a $(ODIR)/libdim.${LIBSUFFIX} $(ODIR)/dns
++ endif
+ endif
+ 
+ $(ODIR)/libdim.a:	$(OBJS) $(UTILOBJS) $(UNIXOBJS)
+ 	ar crv $(ODIR)/libdim.a $(OBJS) $(UTILOBJS) $(UNIXOBJS)
+ 	$(RANLIB) $(ODIR)/libdim.a
+ 
+-$(ODIR)/libdim.so:	$(OBJS) $(UTILOBJS) $(UNIXOBJS)
+-	$(CXX) $(LIBFLAGS) $(OBJS) $(UTILOBJS) $(UNIXOBJS) -o $(ODIR)/libdim.so
++$(ODIR)/libdim.${LIBSUFFIX}:	$(OBJS) $(UTILOBJS) $(UNIXOBJS)
++	$(CXX) $(LIBFLAGS) '$(DIMDIR)/$(ODIR)/libdim.${LIBSUFFIX}' $(OBJS) $(UTILOBJS) $(UNIXOBJS) -o $(ODIR)/libdim.${LIBSUFFIX}
+ 
+-$(ODIR)/libjdim.so:	$(OBJS) $(UTILOBJS) $(UNIXOBJS) $(JOBJS)
+-	$(CXX) $(LIBFLAGS) $(OBJS) $(UTILOBJS) $(UNIXOBJS) $(JOBJS) -lgcc -o $(ODIR)/libjdim.so
++$(ODIR)/libjdim.${LIBSUFFIX}:	$(OBJS) $(UTILOBJS) $(UNIXOBJS) $(JOBJS)
++	$(CXX) $(LIBFLAGS) '$(DIMDIR)/$(ODIR)/libjdim.${LIBSUFFIX}' $(OBJS) $(UTILOBJS) $(UNIXOBJS) $(JOBJS) -lgcc -o $(ODIR)/libjdim.${LIBSUFFIX}
+ 
+ $(ODIR)/dns:	$(ODIR)/dns.o $(ODIR)/libdim.a
+ 	$(CC) $(CFLAGS) -L$(ODIR) $(ODIR)/dns.o -ldim -o $(ODIR)/dns $(EXTRALIBS)
