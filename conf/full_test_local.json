@@ -1,50 +1,50 @@
 {
-    "hosts" :
+    "HOSTS" :
     {
 
 	"rete-hp":[	    
 	    {
-	    "Name":"EVENT_COLLECTOR",
-	    "Arguments" : ["-c", "sdhcal_event_collector"],
-	    "Environnement" : [
-	    "DIM_DNS_NODE=localhost"
-	    ],
-	    "Program" : "/home/rete/soft/DQM4HEP/bin/dqm4hep_start_event_collector"
+		"NAME":"EVENT_COLLECTOR",
+		"ARGS" : ["-c", "sdhcal_event_collector"],
+		"ENV" : [
+		    "DIM_DNS_NODE=localhost"
+		],
+		"PROGRAM" : "/home/rete/soft/DQM4HEP/install/bin/dqm4hep_start_event_collector"
 	    },
 	    {
-	    "Name":"ME_COLLECTOR",
-	    "Arguments" : ["-c", "sdhcal_me_collector"],
-	    "Environnement" : [
-	    "DIM_DNS_NODE=localhost"
-	    ],
-	    "Program" : "/home/rete/soft/DQM4HEP/bin/dqm4hep_start_monitor_element_collector"
+		"NAME":"ME_COLLECTOR",
+		"ARGS" : ["-c", "sdhcal_me_collector"],
+		"ENV" : [
+		    "DIM_DNS_NODE=localhost"
+		],
+		"PROGRAM" : "/home/rete/soft/DQM4HEP/install/bin/dqm4hep_start_monitor_element_collector"
 	    },
 	    {
-		  "Name":"LCIO_EVENT_SERVICE",
-	    "Arguments" : ["-f", "/home/rete/data/sdhcaldata/simulation/mu-/single_mu-_30GeV.slcio", "-c", "sdhcal_event_collector", "-r"],
-	    "Environnement" : [
-	    "DIM_DNS_NODE=localhost"
-	    ],
-	    "Program" : "/home/rete/soft/DQM4HEP/bin/dqm4hep_start_lcio_file_service"
+		"NAME":"LCIO_EVENT_SERVICE",
+		"ARGS" : ["-f", "/home/rete/data/sdhcaldata/simulation/mu-/single_mu-_30GeV.slcio", "-c", "sdhcal_event_collector", "-r"],
+		"ENV" : [
+		    "DIM_DNS_NODE=localhost"
+		],
+		"PROGRAM" : "/home/rete/soft/DQM4HEP/install/bin/dqm4hep_start_lcio_file_service"
 	    },
 	    {
-		 "Name":"RANDOM_ANALYSIS_MODULE",
-	    "Arguments" : ["-f", "/home/rete/soft/DQM4HEP/conf/randommodule.xml", "-l"],
-	    "Environnement" : [
-	    "DIM_DNS_NODE=localhost",
-	    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4HEP/lib/libRandomModuleExample.so"
-	    ],
-	    "Program" : "/home/rete/soft/DQM4HEP/bin/dqm4hep_start_analysis_module"
+		"NAME":"RANDOM_ANALYSIS_MODULE",
+		"ARGS" : ["-f", "/home/rete/soft/DQMCore/conf/randommodule.xml", "-l"],
+		"ENV" : [
+		    "DIM_DNS_NODE=localhost",
+		    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4HEP/install/lib/libRandomModuleExample.so"
+		],
+		"PROGRAM" : "/home/rete/soft/DQM4HEP/install/bin/dqm4hep_start_analysis_module"
 	    },
 	    {
-		 "Name":"STANDALONE_RANDOM_ANALYSIS_MODULE",
-	    "Arguments" : ["-f", "/home/rete/soft/DQM4HEP/conf/standalonerandommodule.xml", "-l"],
-	    "Environnement" : [
-	    "DIM_DNS_NODE=localhost",
-	    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4HEP/lib/libStandaloneRandomModuleExample.so"
-	    ],
-	    "Program" : "/home/rete/soft/DQM4HEP/bin/dqm4hep_start_standalone_module"
+		"NAME":"STANDALONE_RANDOM_ANALYSIS_MODULE",
+		"ARGS" : ["-f", "/home/rete/soft/DQMCore/conf/standalonerandommodule.xml", "-l"],
+		"ENV" : [
+		    "DIM_DNS_NODE=localhost",
+		    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4HEP/install/lib/libStandaloneRandomModuleExample.so"
+		],
+		"PROGRAM" : "/home/rete/soft/DQM4HEP/install/bin/dqm4hep_start_standalone_module"
 	    }
-		]
-   }
+	]
+    }
 }
