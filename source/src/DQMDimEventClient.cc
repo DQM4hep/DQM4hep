@@ -96,8 +96,6 @@ DQMDimEventClient::DQMDimEventClient() :
 	m_serverClientId(0)
 {
 	pthread_mutex_init(&m_mutex, NULL);
-
-
 }
 
 //-------------------------------------------------------------------------------------------------
