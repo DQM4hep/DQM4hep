@@ -125,6 +125,18 @@ INSTALL (
     RUNTIME DESTINATION bin
 )
 
+
+# -------------------------------------------------
+# build db insert config file executable
+
+ADD_EXECUTABLE( dqm4hep_db_insert_config_file main/dqm4hep_db_insert_config_file.cc )
+TARGET_LINK_LIBRARIES( dqm4hep_db_insert_config_file ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep_db_insert_config_file
+    RUNTIME DESTINATION bin
+)
+
 # -------------------------------------------------
 # build examples
 
