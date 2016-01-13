@@ -28,6 +28,8 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMStandaloneModuleApplication.h"
 #include "dqm4hep/DQMPluginManager.h"
+#include "dqm4hep/DQMFileHandler.h"
+#include "dqm4hep/DQMFileHandlerFactory.h"
 #include "dqm4hep/DQMMonitorElementManager.h"
 #include "dqm4hep/DQMStandaloneModule.h"
 #include "dqm4hep/DQMMonitorElementSender.h"
@@ -85,7 +87,43 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 	if(this->isInitialized())
 		return STATUS_CODE_ALREADY_INITIALIZED;
 
-    TiXmlDocument xmlDocument(settingsFileName);
+	size_t splitterPosition = settingsFileName.find(":");
+
+	std::string fileHandlerType;
+	std::string filePattern;
+
+	if(splitterPosition != std::string::npos)
+	{
+		fileHandlerType = settingsFileName.substr(0, splitterPosition);
+		filePattern = settingsFileName.substr(splitterPosition+1);
+	}
+	else
+	{
+		fileHandlerType = "";
+		filePattern = settingsFileName;
+	}
+
+	streamlog_out(DEBUG) << "File handler type : " << fileHandlerType << std::endl;
+
+	DQMFileHandlerFactory fileHandlerFactory;
+	DQMFileHandler *pFileHandler = fileHandlerFactory.createFileHandler(fileHandlerType);
+
+	if(!pFileHandler)
+		return STATUS_CODE_FAILURE;
+
+	StatusCode statusCode = pFileHandler->download(filePattern);
+
+	if(statusCode != STATUS_CODE_SUCCESS)
+	{
+		delete pFileHandler;
+		return statusCode;
+	}
+
+	std::string localSettingsFile = pFileHandler->getLocalFileName();
+	delete pFileHandler;
+
+
+    TiXmlDocument xmlDocument(localSettingsFile);
 
     if (!xmlDocument.LoadFile())
     {
@@ -149,24 +187,9 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 
 	TiXmlHandle moduleHandle(pXmlElement);
 
-//	TiXmlElement *const pQualityTestsElement = moduleHandle.FirstChildElement("qualitytests").Element();
-//
-//	if(pQualityTestsElement)
-//	{
-//		TiXmlHandle qualityTestsHandle(pQualityTestsElement);
-//		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()->readSettings(qualityTestsHandle));
-//	}
-
-//	TiXmlElement *const pSettingsElement = moduleHandle.FirstChildElement("settings").Element();
-//
-//	if(pSettingsElement)
-//	{
-//		TiXmlHandle settingsHandle(pSettingsElement);
-
 	streamlog_out( MESSAGE ) << "Reading settings of active module '" << this->getModule()->getName() << "' ..." << std::endl;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getModule()->readSettings(moduleHandle));
 	streamlog_out( MESSAGE ) << "Reading settings of active module '" << this->getModule()->getName() << "' ... OK" << std::endl;
-//	}
 
 	streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ..." << std::endl;
 	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getModule()->initModule() );
