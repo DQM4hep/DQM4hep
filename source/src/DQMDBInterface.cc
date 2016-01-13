@@ -28,6 +28,8 @@
 
 #include "dqm4hep/DQMDBInterface.h"
 
+#include <fstream>
+
 namespace dqm4hep
 {
 
@@ -298,6 +300,73 @@ StatusCode DQMDBInterface::queryConfigFileDescription(const std::string &configF
 	}
 
 	fileDescription = (char *) pFileDescription;
+
+	// select again the current database
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDBInterface::insertConfigFile(const std::string &localFileName, const std::string &fileNameEntry,
+		const std::string &fileDescription, bool forceReplace)
+{
+	if(localFileName.empty() || fileNameEntry.empty())
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	if(!this->isConnected())
+		return STATUS_CODE_NOT_INITIALIZED;
+
+	std::ifstream ifile;
+	ifile.open(localFileName.c_str(), std::ios::in);
+
+	if(!ifile.is_open())
+	{
+		streamlog_out(ERROR) << "Couln't open file '" << localFileName << "' !" << std::endl;
+		return STATUS_CODE_FAILURE;
+	}
+
+	std::string fileContents;
+
+	while(!ifile.eof())
+	{
+		std::string str;
+		getline(ifile, str);
+		fileContents += str + "\n";
+	}
+
+	if(fileContents.empty())
+		return STATUS_CODE_FAILURE;
+
+	std::string queryUse = "USE " + m_database + " ;";
+
+	// construct the mysql query
+	std::stringstream query;
+
+	if(forceReplace)
+		query << "REPLACE ";
+	else
+		query << "INSERT ";
+
+	query << "INTO CONFIG_FILES VALUES "
+			<< "('" << fileNameEntry << "' ,"
+			<< "'" << fileDescription << "' ,"
+			<< "'" << fileContents << "') ;";
+
+	// select DQM4HEP database
+	if(m_database != "DQM4HEP")
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute("USE DQM4HEP ;"));
+
+	StatusCode statusCode = this->execute(query.str());
+
+	if(STATUS_CODE_SUCCESS != statusCode)
+	{
+		// select again the current database
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
+
+		return statusCode;
+	}
 
 	// select again the current database
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));

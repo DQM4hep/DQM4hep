@@ -131,6 +131,11 @@ public:
 	 */
 	StatusCode queryConfigFileDescription(const std::string &configFileName, std::string &fileDescription);
 
+	/** Insert a new new config file entry in the database
+	 */
+	StatusCode insertConfigFile(const std::string &localFileName, const std::string &fileNameEntry,
+			const std::string &fileDescription = "", bool forceReplace = false);
+
 private:
 	MYSQL                       *m_pMySQL;
 
