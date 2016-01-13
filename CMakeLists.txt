@@ -139,6 +139,25 @@ CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.h.cmake.in"
 ADD_SUBDIRECTORY( ./source )
 
 ###############################
+# Install scripts files
+FILE ( GLOB SCRIPTS_FILES scripts/* 
+	PATTERN "*~" EXCLUDE
+    PATTERN "*#*" EXCLUDE
+    PATTERN ".#*" EXCLUDE
+    PATTERN "*CVS" EXCLUDE
+    PATTERN "*.svn" EXCLUDE
+)
+
+INSTALL( 
+	FILES ${SCRIPTS_FILES} 
+	DESTINATION bin 
+    PERMISSIONS 
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
+)
+
+###############################
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
 
