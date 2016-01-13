@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
 				  "u"
 				 , "user"
 				 , "The MySQL database user name"
-				 , true
-				 , ""
+				 , false
+				 , "DQM4HEP"
 				 , "string");
 	pCommandLine->add(userArg);
 
@@ -61,8 +61,8 @@ int main(int argc, char* argv[])
 				  "k"
 				 , "host"
 				 , "The MySQL database host name"
-				 , true
-				 , ""
+				 , false
+				 , "localhost"
 				 , "string");
 	pCommandLine->add(hostArg);
 
@@ -70,8 +70,8 @@ int main(int argc, char* argv[])
 				  "p"
 				 , "password"
 				 , "The MySQL database password"
-				 , true
-				 , ""
+				 , false
+				 , "DQM4HEP"
 				 , "string");
 	pCommandLine->add(passwordArg);
 
@@ -158,46 +158,7 @@ int main(int argc, char* argv[])
 		}
 
 		streamlog_out(DEBUG) << "Config file key : " << configFilePrimaryKey << std::endl;
-//
-//		std::ifstream ifile;
-//		ifile.open(fileArg.getValue().c_str(), std::ios::in);
-//
-//		if(!ifile.is_open())
-//		{
-//			streamlog_out(ERROR) << "Couln't open file '" << fileArg.getValue() << "' !" << std::endl;
-//			throw StatusCodeException(STATUS_CODE_FAILURE);
-//		}
-//
-//		std::string fileContents;
-//
-//		while(!ifile.eof())
-//		{
-//			std::string str;
-//			getline(ifile, str);
-//			fileContents += str + "\n";
-//		}
-//
-//		streamlog_out(DEBUG) << "File contents : " << std::endl;
-//		streamlog_out(DEBUG) << fileContents << std::endl;
-//
-//		// construct the mysql query
-//		std::stringstream query;
-//
-//		if(forceReplaceArg.getValue())
-//			query << "REPLACE ";
-//		else
-//			query << "INSERT ";
-//
-//		query << "INTO CONFIG_FILES VALUES "
-//				<< "('" << configFilePrimaryKey << "' ,"
-//				<< "'" << fileDescriptionArg.getValue() << "' ,"
-//				<< "'" << fileContents << "') ;";
-//
-//		streamlog_out(DEBUG) << "Using database DQM4HEP ..." << std::endl;
-//		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDBInterface->execute("USE DQM4HEP ;"));
-//
-//		streamlog_out(DEBUG) << "Storing config file to db ..." << std::endl;
-//		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDBInterface->execute(query.str()));
+
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDBInterface->insertConfigFile(fileArg.getValue(), configFilePrimaryKey,
 				fileDescriptionArg.getValue(), forceReplaceArg.getValue()));
 	}
