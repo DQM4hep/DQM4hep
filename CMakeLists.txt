@@ -25,7 +25,6 @@ ELSE()
 ENDIF()
 
 
-
 ###############################
 # Define options
 
@@ -83,8 +82,11 @@ ENDIF()
 LIST( APPEND ROOT_COMPONENT_LIST Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree )
 FIND_PACKAGE( ROOT COMPONENTS ${ROOT_COMPONENT_LIST} REQUIRED )
 
-# ----- Find Threads or multithreading -----
+# ----- Find Threads for multithreading -----
 FIND_PACKAGE( Threads REQUIRED )
+
+# ----- Find MySQL package -----
+FIND_PACKAGE( MySQL REQUIRED )
 
 # ----- Find DIM package -----
 FIND_PACKAGE( DIM REQUIRED SHARED )
@@ -93,7 +95,7 @@ FIND_PACKAGE( DIM REQUIRED SHARED )
 FIND_PACKAGE( streamlog REQUIRED )
 
 # ----- Include package properties -----
-FOREACH( pkg streamlog ROOT DIM )
+FOREACH( pkg streamlog ROOT DIM MySQL )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
