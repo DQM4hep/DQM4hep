@@ -102,6 +102,10 @@ public:
 	template <typename T>
 	  StatusCode read(T *&pValue, dqm_uint &nVals);
 
+	StatusCode writeAddress(const void *&pAddress);
+
+	StatusCode readAddress(void *&pAddress);
+
 protected:
 
 	/** Reallocate the buffer with a new size.
