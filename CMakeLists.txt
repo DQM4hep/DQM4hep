@@ -10,16 +10,16 @@ PROJECT( DQM4HEP )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 3 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 1 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # versions of DQM4HEP subpackages
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
-SET( DQMCore_version              "v01-00-00" )
-SET( DQMViz_version               "v01-00-00" )
+SET( DQMCore_version              "v01-01-00" )
+SET( DQMViz_version               "v01-02-00" )
 SET( JsonCpp_version              "0.10.5" )
-SET( DIMJC_version                "v01-00-00" )
+SET( DIMJC_version                "v01-01-00" )
 SET( LCIO_version                 "v02-06")
 
 # ----- download settings -----
@@ -114,9 +114,9 @@ IF( NOT ILCUTIL_FOUND )
 		ExternalProject_Add( LCIO
 		    SVN_REPOSITORY "${LCIO_repository}/${LCIO_version}"
 		    CMAKE_ARGS ${common_cmake_args}
-		    PREFIX LCIO-${LCIO_version}
+		    PREFIX lcio
 		    LIST_SEPARATOR %
-		    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/LCIO-${LCIO_version}
+		    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lcio
 		)
 		
 		LIST( APPEND DQMCore_package_depends "LCIO" )
@@ -138,7 +138,7 @@ IF( NOT ILCUTIL_FOUND )
 ENDIF()
 
 # ----- DIM package -----
-ExternalProject_Add( DIM
+ExternalProject_Add( dim
     GIT_REPOSITORY ${DIM_repository}
     GIT_TAG ${DIM_version}
     CMAKE_ARGS ${common_cmake_args}
@@ -170,53 +170,53 @@ SET( DQMVis_additional_cmake_args
 
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS DIM ${DQMCore_package_depends}
+    DEPENDS dim ${DQMCore_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
-    PREFIX DQMCore-${DQMCore_version}
+    PREFIX DQMCore
     LIST_SEPARATOR %
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore-${DQMCore_version}
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
+)
+
+# ----- JsonCpp package -----
+ExternalProject_Add( jsoncpp
+    GIT_REPOSITORY ${JsonCpp_repository}
+    GIT_TAG ${JsonCpp_version}
+    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
+    PREFIX jsoncpp
+    LIST_SEPARATOR %
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp
+)
+
+# ----- DIMJC package -----
+ExternalProject_Add( dimjc
+	DEPENDS dim jsoncpp
+    GIT_REPOSITORY ${DIMJC_repository}
+    GIT_TAG ${DIMJC_version}
+    CMAKE_ARGS ${common_cmake_args} ${DIMJC_additional_cmake_args}
+    PREFIX dimjc
+    LIST_SEPARATOR %
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc
+)
+
+SET( DQMVis_additional_cmake_args 
+${DQMVis_additional_cmake_args} 
+"-DDIMJC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/dimjc"
 )
 
 
 IF( DQM4HEP_VIZ )
 
-	# ----- JsonCpp package -----
-    ExternalProject_Add( JsonCpp
-        GIT_REPOSITORY ${JsonCpp_repository}
-        GIT_TAG ${JsonCpp_version}
-        CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
-	    PREFIX JsonCpp-${JsonCpp_version}
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/JsonCpp-${JsonCpp_version}
-    )
-    
-    # ----- DIMJC package -----
-    ExternalProject_Add( DIMJC
-    	DEPENDS DIM JsonCpp
-	    GIT_REPOSITORY ${DIMJC_repository}
-	    GIT_TAG ${DIMJC_version}
-	    CMAKE_ARGS ${common_cmake_args} ${DIMJC_additional_cmake_args}
-	    PREFIX dim-${DIMJC_version}
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DIMJC-${DIMJC_version}
-	)
-	
-	SET( DQMVis_additional_cmake_args 
-	${DQMVis_additional_cmake_args} 
-	"-DDIMJC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/DIMJC-${DIMJC_version}"
-)
-
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
-        DEPENDS DQMCore ${DQMCore_package_depends} DIM JsonCpp DIMJC 
+        DEPENDS DQMCore ${DQMCore_package_depends} dim jsoncpp dimjc 
         GIT_REPOSITORY ${DQMViz_repository}
         GIT_TAG ${DQMViz_version}
         CMAKE_ARGS ${common_cmake_args} ${DQMVis_additional_cmake_args}
-	    PREFIX DQMViz-${DQMViz_version}
+	    PREFIX DQMViz
 	    LIST_SEPARATOR %
-	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMViz-${DQMViz_version}
+	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMViz
     )
 
 ENDIF()
