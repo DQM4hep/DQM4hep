@@ -160,6 +160,19 @@ IF( DQM4HEP_EXAMPLES )
         TARGETS StandaloneRandomModuleExample
         LIBRARY DESTINATION lib
     )
+    
+    IF( DQM4HEP_LCIO )
+    
+	    ADD_SHARED_LIBRARY( CaloHitModuleExample examples/module/lcio/CaloHitModule.cc )
+	    TARGET_LINK_LIBRARIES( CaloHitModuleExample ${PROJECT_NAME} )
+	
+	    INSTALL(
+	        TARGETS CaloHitModuleExample
+	        LIBRARY DESTINATION lib
+	    )
+	    
+	ENDIF()
+    
 ENDIF()
 
 # Build lcio file service
