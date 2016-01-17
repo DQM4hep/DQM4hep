@@ -40,49 +40,49 @@
 namespace dqm4hep
 {
 
-void DQMModuleApi::cd(DQMModule *const pModule)
+void DQMModuleApi::cd(const DQMModule *const pModule)
 {
 	pModule->getModuleApplication()->getMonitorElementManager()->cd();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::cd(DQMModule *const pModule, const std::string &dirName)
+StatusCode DQMModuleApi::cd(const DQMModule *const pModule, const std::string &dirName)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->cd(dirName);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::mkdir(DQMModule *const pModule, const std::string &dirName)
+StatusCode DQMModuleApi::mkdir(const DQMModule *const pModule, const std::string &dirName)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->mkdir(dirName);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMModuleApi::ls(DQMModule *const pModule, bool recursive)
+void DQMModuleApi::ls(const DQMModule *const pModule, bool recursive)
 {
 	pModule->getModuleApplication()->getMonitorElementManager()->ls(recursive);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const std::string &DQMModuleApi::pwd(DQMModule *const pModule)
+const std::string &DQMModuleApi::pwd(const DQMModule *const pModule)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->pwd();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::goUp(DQMModule *const pModule)
+StatusCode DQMModuleApi::goUp(const DQMModule *const pModule)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->goUp();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::rmdir(DQMModule *const pModule, const std::string &dirName)
+StatusCode DQMModuleApi::rmdir(const DQMModule *const pModule, const std::string &dirName)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->rmdir(dirName);
 }
@@ -90,35 +90,35 @@ StatusCode DQMModuleApi::rmdir(DQMModule *const pModule, const std::string &dirN
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookRealHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookIntHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookCharHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookShortHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookRealHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookRealHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -127,7 +127,7 @@ StatusCode DQMModuleApi::bookRealHistogram2D(DQMModule *const pModule, DQMMonito
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookIntHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookIntHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -136,7 +136,7 @@ StatusCode DQMModuleApi::bookIntHistogram2D(DQMModule *const pModule, DQMMonitor
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookCharHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookCharHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -145,7 +145,7 @@ StatusCode DQMModuleApi::bookCharHistogram2D(DQMModule *const pModule, DQMMonito
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookShortHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookShortHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -154,7 +154,7 @@ StatusCode DQMModuleApi::bookShortHistogram2D(DQMModule *const pModule, DQMMonit
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookProfile1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookProfile1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax, float yMin, float yMax)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookProfile1D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, yMin, yMax);
@@ -162,7 +162,7 @@ StatusCode DQMModuleApi::bookProfile1D(DQMModule *const pModule, DQMMonitorEleme
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookProfile2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookProfile2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax,
 		float zMin, float zMax)
@@ -172,28 +172,28 @@ StatusCode DQMModuleApi::bookProfile2D(DQMModule *const pModule, DQMMonitorEleme
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookInt(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const int &value)
+StatusCode DQMModuleApi::bookInt(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const int &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookInt(pMonitorElement, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookFloat(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const float &value)
+StatusCode DQMModuleApi::bookFloat(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const float &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookFloat(pMonitorElement, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookShort(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const short &value)
+StatusCode DQMModuleApi::bookShort(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const short &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookShort(pMonitorElement, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookString(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &value)
+StatusCode DQMModuleApi::bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookString(pMonitorElement, name, title, pModule->getName(), value);
 }
@@ -201,7 +201,7 @@ StatusCode DQMModuleApi::bookString(DQMModule *const pModule, DQMMonitorElement 
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookObject(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement,
+StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement,
 		const std::string &name, const std::string &title, TObject *pROOTObject)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement, name, title, pModule->getName(), pROOTObject);
@@ -210,35 +210,35 @@ StatusCode DQMModuleApi::bookObject(DQMModule *const pModule, DQMMonitorElement 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookRealHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookIntHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookCharHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookShortHistogram1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
+StatusCode DQMModuleApi::bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookRealHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookRealHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -247,7 +247,7 @@ StatusCode DQMModuleApi::bookRealHistogram2D(DQMModule *const pModule, DQMMonito
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookIntHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookIntHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -256,7 +256,7 @@ StatusCode DQMModuleApi::bookIntHistogram2D(DQMModule *const pModule, DQMMonitor
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookCharHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookCharHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -265,7 +265,7 @@ StatusCode DQMModuleApi::bookCharHistogram2D(DQMModule *const pModule, DQMMonito
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookShortHistogram2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookShortHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
@@ -274,7 +274,7 @@ StatusCode DQMModuleApi::bookShortHistogram2D(DQMModule *const pModule, DQMMonit
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookProfile1D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookProfile1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax, float yMin, float yMax)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookProfile1D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, yMin, yMax);
@@ -282,7 +282,7 @@ StatusCode DQMModuleApi::bookProfile1D(DQMModule *const pModule, DQMMonitorEleme
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookProfile2D(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+StatusCode DQMModuleApi::bookProfile2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax,
 		float zMin, float zMax)
@@ -292,35 +292,35 @@ StatusCode DQMModuleApi::bookProfile2D(DQMModule *const pModule, DQMMonitorEleme
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookInt(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const int &value)
+StatusCode DQMModuleApi::bookInt(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const int &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookInt(pMonitorElement, dirName, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookFloat(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const float &value)
+StatusCode DQMModuleApi::bookFloat(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const float &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookFloat(pMonitorElement, dirName, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookShort(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const short &value)
+StatusCode DQMModuleApi::bookShort(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const short &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookShort(pMonitorElement, dirName, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookString(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const std::string &value)
+StatusCode DQMModuleApi::bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const std::string &value)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookString(pMonitorElement, dirName, name, title, pModule->getName(), value);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMModuleApi::bookObject(DQMModule *const pModule, DQMMonitorElement *&pMonitorElement,
+StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement,
 		const std::string &dirName, const std::string &name, const std::string &title, TObject *pROOTObject)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement, dirName, name, title, pModule->getName(), pROOTObject);
@@ -432,6 +432,13 @@ StatusCode DQMModuleApi::runQualityTest(const DQMModule *const pModule, DQMMonit
 StatusCode DQMModuleApi::runQualityTests(const DQMModule *const pModule)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->runQualityTests();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMModuleApi::bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement, DQMMonitorElement *&pMonitorElement)
+{
+	return pModule->getModuleApplication()->getMonitorElementManager()->bookMonitorElement(pXmlElement, pModule->getName(), pMonitorElement);
 }
 
 } 

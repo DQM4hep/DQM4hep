@@ -318,6 +318,11 @@ public:
  			const std::string &moduleName, TObject *pROOTObject);
 
 
+
+ 	/** Book a monitor element from the xml element
+ 	 */
+ 	StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName, DQMMonitorElement *&pMonitorElement);
+
  	///////////////////////
  	// GETTERS INTERFACE //
  	///////////////////////
