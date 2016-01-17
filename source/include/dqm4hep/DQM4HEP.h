@@ -231,10 +231,14 @@ typedef std::vector<DQMStats> DQMStatsList;
 // macros for enumerators
 #define GET_ENUM_ENTRY(a, b)  a,
 #define GET_NAME_SWITCH(a, b) case a : return b;
+#define GET_STR_COMPARE(a, b) if(str == b) return a;
 
 #define GET_ENUM_ENTRY_2(a, b, c) a,
 #define GET_NAME_SWITCH_2(a, b, c) case a : return b;
 #define GET_PREFIX_SWITCH_2(a, b, c) case a : return c;
+#define GET_STR_COMPARE_1(a, b, c) if(str == b) return a;
+#define GET_STR_COMPARE_2(a, b, c) if(str == c) return a;
+
 
 // definitions of the status code table
 #define STATUS_CODE_TABLE(d)                                                                            \
@@ -440,28 +444,28 @@ inline std::string stateToString(const DQMState state)
 
 // definitions of the monitor element type table
 #define DQM_MONITOR_ELEMENT_TYPE_TABLE(d)                                \
-    d(NO_ELEMENT_TYPE,                 "NO_ELEMENT_TYPE")                 \
-    d(INT_ELEMENT_TYPE,                "INT_ELEMENT_TYPE")                \
-    d(REAL_ELEMENT_TYPE,               "REAL_ELEMENT_TYPE")               \
-    d(SHORT_ELEMENT_TYPE,              "SHORT_ELEMENT_TYPE")              \
-    d(STRING_ELEMENT_TYPE,             "STRING_ELEMENT_TYPE")             \
-    d(INT_HISTOGRAM_1D_ELEMENT_TYPE,   "INT_HISTOGRAM_1D_ELEMENT_TYPE")   \
-    d(REAL_HISTOGRAM_1D_ELEMENT_TYPE,  "REAL_HISTOGRAM_1D_ELEMENT_TYPE")  \
-    d(SHORT_HISTOGRAM_1D_ELEMENT_TYPE, "SHORT_HISTOGRAM_1D_ELEMENT_TYPE") \
-    d(CHAR_HISTOGRAM_1D_ELEMENT_TYPE,  "CHAR_HISTOGRAM_1D_ELEMENT_TYPE")  \
-    d(INT_HISTOGRAM_2D_ELEMENT_TYPE,   "INT_HISTOGRAM_2D_ELEMENT_TYPE")   \
-    d(REAL_HISTOGRAM_2D_ELEMENT_TYPE,  "REAL_HISTOGRAM_2D_ELEMENT_TYPE")  \
-    d(CHAR_HISTOGRAM_2D_ELEMENT_TYPE,  "CHAR_HISTOGRAM_2D_ELEMENT_TYPE")  \
-    d(SHORT_HISTOGRAM_2D_ELEMENT_TYPE, "SHORT_HISTOGRAM_2D_ELEMENT_TYPE") \
-    d(PROFILE_1D_ELEMENT_TYPE,         "PROFILE_1D_ELEMENT_TYPE")         \
-    d(PROFILE_2D_ELEMENT_TYPE,         "PROFILE_2D_ELEMENT_TYPE")         \
-    d(USER_DEFINED_ELEMENT_TYPE,       "USER_DEFINED_ELEMENT_TYPE")
+    d(NO_ELEMENT_TYPE,                 "NO_ELEMENT_TYPE",                 "")                 \
+    d(INT_ELEMENT_TYPE,                "INT_ELEMENT_TYPE",                "int")                \
+    d(REAL_ELEMENT_TYPE,               "REAL_ELEMENT_TYPE",               "float")\
+    d(SHORT_ELEMENT_TYPE,              "SHORT_ELEMENT_TYPE",              "short")\
+    d(STRING_ELEMENT_TYPE,             "STRING_ELEMENT_TYPE",             "string")\
+    d(INT_HISTOGRAM_1D_ELEMENT_TYPE,   "INT_HISTOGRAM_1D_ELEMENT_TYPE",   "TH1I")\
+    d(REAL_HISTOGRAM_1D_ELEMENT_TYPE,  "REAL_HISTOGRAM_1D_ELEMENT_TYPE",  "TH1F")\
+    d(SHORT_HISTOGRAM_1D_ELEMENT_TYPE, "SHORT_HISTOGRAM_1D_ELEMENT_TYPE", "TH1S")\
+    d(CHAR_HISTOGRAM_1D_ELEMENT_TYPE,  "CHAR_HISTOGRAM_1D_ELEMENT_TYPE",  "TH1C")\
+    d(INT_HISTOGRAM_2D_ELEMENT_TYPE,   "INT_HISTOGRAM_2D_ELEMENT_TYPE",   "TH2I")\
+    d(REAL_HISTOGRAM_2D_ELEMENT_TYPE,  "REAL_HISTOGRAM_2D_ELEMENT_TYPE",  "TH2F")\
+    d(CHAR_HISTOGRAM_2D_ELEMENT_TYPE,  "CHAR_HISTOGRAM_2D_ELEMENT_TYPE",  "TH2C")\
+    d(SHORT_HISTOGRAM_2D_ELEMENT_TYPE, "SHORT_HISTOGRAM_2D_ELEMENT_TYPE", "TH2S")\
+    d(PROFILE_1D_ELEMENT_TYPE,         "PROFILE_1D_ELEMENT_TYPE",         "TProfile")\
+    d(PROFILE_2D_ELEMENT_TYPE,         "PROFILE_2D_ELEMENT_TYPE",         "TProfile2D")\
+    d(USER_DEFINED_ELEMENT_TYPE,       "USER_DEFINED_ELEMENT_TYPE",       "user")
 
 /** DQMMonitorElementType enum
  */
 enum DQMMonitorElementType
 {
-	DQM_MONITOR_ELEMENT_TYPE_TABLE(GET_ENUM_ENTRY)
+	DQM_MONITOR_ELEMENT_TYPE_TABLE(GET_ENUM_ENTRY_2)
 	NUMBER_OF_DQM_MONITOR_ELEMENT_TYPES
 };
 
@@ -469,18 +473,30 @@ inline std::string monitorElementTypeToString(const DQMMonitorElementType type)
 {
 	switch (type)
 	{
-		DQM_MONITOR_ELEMENT_TYPE_TABLE(GET_NAME_SWITCH)
+		DQM_MONITOR_ELEMENT_TYPE_TABLE(GET_NAME_SWITCH_2)
 		default : throw dqm4hep::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 	}
+}
+
+inline DQMMonitorElementType stringToMonitorElementType(const std::string &str)
+{
+	DQM_MONITOR_ELEMENT_TYPE_TABLE(GET_STR_COMPARE_1)
+	else return NO_ELEMENT_TYPE;
+}
+
+inline DQMMonitorElementType stringToMonitorElementRootType(const std::string &str)
+{
+	DQM_MONITOR_ELEMENT_TYPE_TABLE(GET_STR_COMPARE_2)
+	else return NO_ELEMENT_TYPE;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 // definitions of the reset policy table
 #define DQM_RESET_POLICY_TABLE(d)                              \
-    d(NO_RESET_POLICY,           "NO_RESET_POLICY")             \
-    d(END_OF_CYCLE_RESET_POLICY, "END_OF_CYCLE_RESET_POLICY")   \
-    d(END_OF_RUN_RESET_POLICY,   "END_OF_RUN_RESET_POLICY")
+    d(NO_RESET_POLICY,           "NoReset")             \
+    d(END_OF_CYCLE_RESET_POLICY, "EndOfCycle")   \
+    d(END_OF_RUN_RESET_POLICY,   "EndOfRun")
 
 /** DQMResetPolicy enum
  *
@@ -502,6 +518,12 @@ inline std::string resetPolicyToString(const DQMResetPolicy policy)
   DQM_RESET_POLICY_TABLE(GET_NAME_SWITCH)
 		default : throw dqm4hep::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
  }
+}
+
+inline DQMResetPolicy stringToResetPolicy(const std::string &str)
+{
+	DQM_RESET_POLICY_TABLE(GET_STR_COMPARE)
+	else return NO_RESET_POLICY;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -535,6 +557,63 @@ struct DQMStats
 {
 	time_t          m_timeStamp;
 	unsigned int  m_statistics;
+};
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename T>
+class PositiveValidator
+{
+public:
+	static bool validate(const T &t) { return t >= static_cast<T>(0); }
+};
+
+template <typename T>
+class NegativeValidator
+{
+public:
+	static bool validate(const T &t) { return t<0; }
+};
+
+template <typename T>
+class NonNullValidator
+{
+public:
+	static bool validate(const T &t) { return fabs(static_cast<float>(t) - 0.f) < std::numeric_limits<T>::epsilon(); }
+};
+
+template <typename T>
+class IntervalValidator
+{
+public:
+	IntervalValidator(const T &min, const T &max) : m_min(min), m_max(max) {}
+
+	bool validate(const T &t) { return t>m_min && t<m_max; }
+private:
+	T     m_min;
+	T     m_max;
+};
+
+template <typename T>
+class BiggerThanValidator
+{
+public:
+	BiggerThanValidator(const T &compare) : m_compare(compare) {}
+
+	bool operator ()(const T &t) const { return t>m_compare; }
+private:
+	T     m_compare;
+};
+
+template <typename T>
+class LessThanValidator
+{
+public:
+	LessThanValidator(const T &compare) : m_compare(compare) {}
+
+	bool operator ()(const T &t) const { return t<m_compare; }
+private:
+	T     m_compare;
 };
 
 //-------------------------------------------------------------------------------------------------
