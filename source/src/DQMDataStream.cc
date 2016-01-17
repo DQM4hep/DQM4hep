@@ -49,6 +49,7 @@ DQMDataStream::DQMDataStream(dqm_uint maxBufferSize) :
 DQMDataStream::~DQMDataStream() 
 {
 	delete [] m_pBuffer;
+	m_pBuffer = NULL;
 	m_pBufferPtr = NULL;
 }
 
@@ -56,8 +57,6 @@ DQMDataStream::~DQMDataStream()
 
 void DQMDataStream::reset()
 {
-	delete [] m_pBuffer;
-	m_pBuffer = new char[m_maxBufferSize];
 	m_pBufferPtr = m_pBuffer;
 	memset(m_pBuffer, 0, m_maxBufferSize);
 	m_bufferSize = 0;
@@ -82,18 +81,17 @@ char *DQMDataStream::getBuffer() const
 
 StatusCode DQMDataStream::setBuffer(char *pBuffer, dqm_uint size)
 {
-	if(size > getMaxBufferSize())
+	if(size > this->getMaxBufferSize())
 	{
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, reallocBuffer(size, false));
 	}
 	else
-	{
 		reset();
-	}
 
 	memcpy(m_pBuffer, pBuffer, size);
 	m_bufferSize = size;
 	m_isValid = true;
+	m_pBufferPtr = m_pBuffer;
 
 	return STATUS_CODE_SUCCESS;
 }
