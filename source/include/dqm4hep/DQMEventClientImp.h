@@ -104,7 +104,7 @@ class DQMEventClientImp
 	/** Query an event to the collector (server) with a timeout
 	 *  and handle it without pushing it into the internal queue
 	 */
-	virtual StatusCode queryEvent(DQMEvent *&pEvent, int timeout) const = 0;
+	virtual StatusCode queryEvent(DQMEvent *&pEvent, int timeout) = 0;
 
 	/** Query an event to the collector.
 	 *

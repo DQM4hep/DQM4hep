@@ -50,9 +50,6 @@ void DimEventRpcInfo::rpcInfoHandler()
 	if(NULL == pBuffer || 0 == bufferSize)
 		return;
 
-	DQMDataStream dataStream(bufferSize+1);
-	dataStream.setBuffer(pBuffer, bufferSize);
-
 	DQMEvent *pEvent = NULL;
 
 	try
@@ -61,7 +58,8 @@ void DimEventRpcInfo::rpcInfoHandler()
 		// uses the sendEvent(evt) and queryEvent(...)
 		// functionalities at the same time
 		pthread_mutex_lock(&m_pEventClient->m_mutex);
-		StatusCode statusCode = m_pEventClient->getEventStreamer()->deserialize(pEvent, &dataStream);
+		m_pEventClient->m_dataStream.setBuffer(pBuffer, bufferSize);
+		StatusCode statusCode = m_pEventClient->getEventStreamer()->deserialize(pEvent, &m_pEventClient->m_dataStream);
 		pthread_mutex_unlock(&m_pEventClient->m_mutex);
 
 		if(statusCode != STATUS_CODE_SUCCESS)
@@ -93,7 +91,8 @@ DQMDimEventClient::DQMDimEventClient() :
 	m_maximumQueueSize(100),
 	m_pEventStreamer(NULL),
 	m_updateMode(false),
-	m_serverClientId(0)
+	m_serverClientId(0),
+	m_dataStream(5*1024*1024) // 5 Mo should be enough to start ...
 {
 	pthread_mutex_init(&m_mutex, NULL);
 }
@@ -211,26 +210,33 @@ StatusCode DQMDimEventClient::sendEvent(const DQMEvent *const pEvent)
 	if(NULL == pEvent)
 		return STATUS_CODE_INVALID_PARAMETER;
 
-	DQMDataStream dataStream(5*1024*1024);
-
 	// lock/unlock on de-serialization if the interface
 	// uses the sendEvent(evt) and queryEvent(...)
 	// functionalities at the same time
 	pthread_mutex_lock(&m_mutex);
-	StatusCode statusCode = m_pEventStreamer->serialize(pEvent, &dataStream);
-	pthread_mutex_unlock(&m_mutex);
+
+	m_dataStream.reset();
+	StatusCode statusCode = m_pEventStreamer->serialize(pEvent, &m_dataStream);
 
 	if(statusCode != STATUS_CODE_SUCCESS)
+	{
+		pthread_mutex_unlock(&m_mutex);
 		return statusCode;
+	}
 
-	char *pBuffer = dataStream.getBuffer();
-	unsigned int bufferSize = dataStream.getBufferSize();
+	char *pBuffer = m_dataStream.getBuffer();
+	unsigned int bufferSize = m_dataStream.getBufferSize();
 
 	if(NULL == pBuffer || 0 == bufferSize)
+	{
+		pthread_mutex_unlock(&m_mutex);
 		return STATUS_CODE_FAILURE;
+	}
 
 	std::string commandName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/COLLECT_RAW_EVENT";
 	DimClient::sendCommandNB((char*) commandName.c_str(), (void *) pBuffer, bufferSize);
+
+	pthread_mutex_unlock(&m_mutex);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -330,7 +336,7 @@ const std::string &DQMDimEventClient::getSubEventIdentifier() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout) const
+StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout)
 {
 	// check for initialization
 	if(!isConnectedToService())
@@ -344,11 +350,12 @@ StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout) const
 		return STATUS_CODE_NOT_INITIALIZED;
 	}
 
-	pthread_mutex_unlock(&m_mutex);
-
 	// check for valid parameters
 	if(timeout < 0)
+	{
+		pthread_mutex_unlock(&m_mutex);
 		return STATUS_CODE_INVALID_PARAMETER;
+	}
 
 	// rpc service name
 	std::string serviceName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/EVENT_RAW_REQUEST";
@@ -365,68 +372,18 @@ StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout) const
 
 	// check for message validity
 	if(NULL == pEventRawBuffer || 0 == bufferSize)
+	{
+		pthread_mutex_unlock(&m_mutex);
 		return STATUS_CODE_FAILURE;
+	}
 
 	// deserialize the event raw buffer
-	DQMDataStream dataStream(bufferSize+1);
-	dataStream.setBuffer(pEventRawBuffer, bufferSize);
-
-	// lock/unlock on de-serialization if the interface
-	// uses the sendEvent(evt) and queryEvent(...)
-	// functionalities at the same time
-	pthread_mutex_lock(&m_mutex);
-	StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &dataStream);
+	m_dataStream.setBuffer(pEventRawBuffer, bufferSize);
+	StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &m_dataStream);
 	pthread_mutex_unlock(&m_mutex);
 
 	return statusCode;
-
-//	// empty identifier means the whole event
-//	return this->querySubEvent(pEvent, "", timeout);
 }
-
-//-------------------------------------------------------------------------------------------------
-
-//StatusCode DQMDimEventClient::querySubEvent(DQMEvent *&pEvent, const std::string &subEventIdentifier, int timeout) const
-//{
-//	// check for initialization
-//	if(!isConnectedToService() || NULL == m_pEventStreamer)
-//		return STATUS_CODE_NOT_INITIALIZED;
-//
-//	// check for valid parameters
-//	if(timeout < 0)
-//		return STATUS_CODE_INVALID_PARAMETER;
-//
-//	// rpc service name
-//	std::string serviceName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/EVENT_RAW_REQUEST";
-//	pEvent = NULL;
-//
-//	// declare the rpc service info
-//	DimRpcInfo eventDimRpcInfo((char*) serviceName.c_str(), timeout, (void*) NULL, 0);
-//
-//	// send the query
-//	std::string identifier = subEventIdentifier;
-//	eventDimRpcInfo.setData((char*) identifier.c_str());
-//	// receive the query result
-//	char *pEventRawBuffer = (char*) eventDimRpcInfo.getData();
-//	int bufferSize = eventDimRpcInfo.getSize();
-//
-//	// check for message validity
-//	if(NULL == pEventRawBuffer || 0 == bufferSize)
-//		return STATUS_CODE_FAILURE;
-//
-//	// deserialize the event raw buffer
-//	DQMDataStream dataStream(bufferSize+1);
-//	dataStream.setBuffer(pEventRawBuffer, bufferSize);
-//
-//	// lock/unlock on de-serialization if the interface
-//	// uses the sendEvent(evt) and queryEvent(...)
-//	// functionalities at the same time
-//	pthread_mutex_lock(&m_mutex);
-//	StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &dataStream);
-//	pthread_mutex_unlock(&m_mutex);
-//
-//	return statusCode;
-//}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -608,9 +565,6 @@ void DQMDimEventClient::infoHandler()
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		DQMDataStream dataStream(bufferSize+1);
-		dataStream.setBuffer(pBuffer, bufferSize);
-
 		DQMEvent *pEvent = NULL;
 
 		try
@@ -619,7 +573,8 @@ void DQMDimEventClient::infoHandler()
 			// uses the sendEvent(evt) and queryEvent(...)
 			// functionalities at the same time
 			pthread_mutex_lock(&m_mutex);
-			StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &dataStream);
+			m_dataStream.setBuffer(pBuffer, bufferSize);
+			StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &m_dataStream);
 			pthread_mutex_unlock(&m_mutex);
 
 			if(statusCode != STATUS_CODE_SUCCESS)

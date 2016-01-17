@@ -31,6 +31,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMEventCollectorImp.h"
 #include "dqm4hep/DQMStatisticsService.h"
+#include "dqm4hep/DQMDataStream.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -171,10 +172,12 @@ private:
 	// remote procedure call
 	DimEventRequestRpc      *m_pEventRequestRpc;
 
+	DQMDataStream            m_dataStream;
+	DQMDataStream            m_subEventDataStream;
 	DQMEventStreamer        *m_pEventStreamer;
 
-	dqm_char                *m_pCurrentBuffer;
-	dqm_uint                 m_currentBufferSize;
+//	dqm_char                *m_pCurrentBuffer;
+//	dqm_uint                 m_currentBufferSize;
 	DQMEvent                *m_pCurrentEvent;
 
 	ClientMap                m_clientMap;

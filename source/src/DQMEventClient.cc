@@ -161,7 +161,7 @@ const std::string &DQMEventClient::getSubEventIdentifier() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::queryEvent(DQMEvent *&pEvent, int timeout) const
+StatusCode DQMEventClient::queryEvent(DQMEvent *&pEvent, int timeout)
 {
 	return m_pClientImp->queryEvent(pEvent, timeout);
 }

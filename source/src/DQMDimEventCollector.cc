@@ -30,6 +30,8 @@
 #include "dqm4hep/DQMEventStreamer.h"
 #include "dqm4hep/DQMDataStream.h"
 
+#include "UTIL/LCTOOLS.h"
+
 namespace dqm4hep
 {
 
@@ -44,6 +46,7 @@ DimEventRequestRpc::DimEventRequestRpc(DQMDimEventCollector *pCollector) :
 
 void DimEventRequestRpc::rpcHandler()
 {
+	std::cout << "Event request rpc !" << std::endl;
 	m_pCollector->handleEventRequest(this);
 }
 
@@ -58,17 +61,15 @@ DQMDimEventCollector::DQMDimEventCollector() :
 		m_pUpdateModeCommand(NULL),
 		m_pEventUpdateService(NULL),
 		m_pEventStreamer(NULL),
-		m_pCurrentBuffer(NULL),
-		m_currentBufferSize(0),
+//		m_pCurrentBuffer(NULL),
+//		m_currentBufferSize(0),
 		m_pCurrentEvent(NULL),
 		m_state(0),
-		m_clientRegisteredId(0)
+		m_clientRegisteredId(0),
+		m_dataStream(5*1024*1024),
+		m_subEventDataStream(5*1024*1024)
 {
-	m_pCurrentBuffer = new dqm_char[5];
-	char emptyBuffer[] = "EMPTY";
-	memcpy(m_pCurrentBuffer, &emptyBuffer[0], 5);
-	m_currentBufferSize = 5;
-
+	THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.write(std::string("EMPTY")));
 	DimServer::addClientExitHandler(this);
 }
 
@@ -81,9 +82,6 @@ DQMDimEventCollector::~DQMDimEventCollector()
 
 	if(m_pEventStreamer)
 		delete m_pEventStreamer;
-
-	if(m_pCurrentBuffer)
-		delete m_pCurrentBuffer;
 
 	if(m_pCurrentEvent)
 		delete m_pCurrentEvent;
@@ -129,7 +127,7 @@ StatusCode DQMDimEventCollector::startCollector()
 	m_pSubEventIdentifierCommand = new DimCommand(("DQM4HEP/EventCollector/" + getCollectorName() + "/SUB_EVENT_IDENTIFIER").c_str(), "C", this);
 	m_pClientRegitrationCommand = new DimCommand(("DQM4HEP/EventCollector/" + getCollectorName() + "/CLIENT_REGISTRATION").c_str(), "I", this);
 
-	m_pEventUpdateService = new DimService(("DQM4HEP/EventCollector/" + getCollectorName() + "/EVENT_RAW_UPDATE").c_str(), "C", (void*) m_pCurrentBuffer, m_currentBufferSize);
+	m_pEventUpdateService = new DimService(("DQM4HEP/EventCollector/" + getCollectorName() + "/EVENT_RAW_UPDATE").c_str(), "C", (void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 	m_pStatisticsService = new DQMStatisticsService("DQM4HEP/EventCollector/" + getCollectorName() + "/STATS");
 	m_pClientRegisteredService = new DimService(("DQM4HEP/EventCollector/" + getCollectorName() + "/CLIENT_REGISTERED").c_str(), m_clientRegisteredId);
 	m_pServerStateService = new DimService(("DQM4HEP/EventCollector/" + getCollectorName() + "/SERVER_STATE").c_str(), m_state);
@@ -173,6 +171,9 @@ StatusCode DQMDimEventCollector::stopCollector()
 
 	delete m_pEventRequestRpc;
 
+	m_dataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.write(std::string("EMPTY")));
+
 	m_isRunning = false;
 
 	return STATUS_CODE_SUCCESS;
@@ -205,44 +206,36 @@ void DQMDimEventCollector::handleEventReception(DimCommand *pDimCommand)
 	if(NULL == pBuffer || 0 == bufferSize)
 		return;
 
-	if(NULL != m_pCurrentBuffer)
-		delete [] m_pCurrentBuffer;
+	m_pStatisticsService->update(bufferSize);
+	DQMEvent *pEvent = NULL;
 
-	m_pCurrentBuffer = new dqm_char[bufferSize];
-
-	memcpy(m_pCurrentBuffer, pBuffer, bufferSize);
-	m_currentBufferSize = bufferSize;
-
-	m_pStatisticsService->update(m_currentBufferSize);
-
-	// if streamer is available, de-serialize the event
-	if(NULL != m_pEventStreamer)
+	try
 	{
-		DQMDataStream dataStream(bufferSize+1);
-		dataStream.setBuffer(pBuffer, bufferSize);
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
-		DQMEvent *pEvent = NULL;
+		// if streamer is available, de-serialize the event
+		if(NULL != m_pEventStreamer)
+		{
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventStreamer->deserialize(pEvent, &m_dataStream));
 
-		try
-		{
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventStreamer->deserialize(pEvent, &dataStream));
-		}
-		catch(StatusCodeException &exception)
-		{
+			// replace the current event
 			if(NULL != pEvent)
-				delete pEvent;
+			{
+				if(NULL != m_pCurrentEvent)
+					delete m_pCurrentEvent;
 
-			return;
+				m_pCurrentEvent = pEvent;
+			}
 		}
-
-		// replace the current event
+	}
+	catch(StatusCodeException &exception)
+	{
 		if(NULL != pEvent)
-		{
-			if(NULL != m_pCurrentEvent)
-				delete m_pCurrentEvent;
+			delete pEvent;
 
-			m_pCurrentEvent = pEvent;
-		}
+		streamlog_out(ERROR) << "Couldn't deserialize the buffer : " << exception.getStatusCode() << std::endl;
+
+		return;
 	}
 
 	this->updateEventService();
@@ -262,11 +255,11 @@ void DQMDimEventCollector::handleEventRequest(DimEventRequestRpc *pDimRpc)
 	{
 		try
 		{
-			DQMDataStream dataStream(5*1024*1024);
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventStreamer->serialize(m_pCurrentEvent, subEventIdentifier, &dataStream));
+			m_subEventDataStream.reset();
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventStreamer->serialize(m_pCurrentEvent, subEventIdentifier, &m_subEventDataStream));
 
-			dqm_char *pEventBuffer = dataStream.getBuffer();
-			int bufferSize = dataStream.getBufferSize();
+			dqm_char *pEventBuffer = m_subEventDataStream.getBuffer();
+			int bufferSize = m_subEventDataStream.getBufferSize();
 
 			pDimRpc->setData((void *) pEventBuffer, bufferSize);
 		}
@@ -274,9 +267,9 @@ void DQMDimEventCollector::handleEventRequest(DimEventRequestRpc *pDimRpc)
 		{
 		}
 	}
-	else if(NULL != m_pCurrentBuffer && 0 != m_currentBufferSize)
+	else if(NULL != m_dataStream.getBuffer() && 0 != m_dataStream.getBufferSize())
 	{
-		pDimRpc->setData((void *) m_pCurrentBuffer, m_currentBufferSize);
+		pDimRpc->setData((void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 	}
 	else
 	{
@@ -395,7 +388,7 @@ void DQMDimEventCollector::updateEventService()
 		return;
 
 	// event available ?
-	if(NULL == m_pCurrentBuffer || 0 == m_currentBufferSize)
+	if(NULL == m_dataStream.getBuffer() || 0 == m_dataStream.getBufferSize())
 		return;
 
 	int *clientIds = new int[m_clientMap.size()];
@@ -413,14 +406,13 @@ void DQMDimEventCollector::updateEventService()
 		if(!iter->second.m_subEventIdentifier.empty()
 		&& (NULL != m_pEventStreamer && NULL != m_pCurrentEvent))
 		{
-			DQMDataStream dataStream(5*1024*1024);
-
 			// try to serialize the sub event
-			if(STATUS_CODE_SUCCESS != m_pEventStreamer->serialize(m_pCurrentEvent, iter->second.m_subEventIdentifier, &dataStream))
+			m_subEventDataStream.reset();
+			if(STATUS_CODE_SUCCESS != m_pEventStreamer->serialize(m_pCurrentEvent, iter->second.m_subEventIdentifier, &m_subEventDataStream))
 				continue;
 
-			dqm_char *pEventBuffer = dataStream.getBuffer();
-			int bufferSize = dataStream.getBufferSize();
+			dqm_char *pEventBuffer = m_subEventDataStream.getBuffer();
+			int bufferSize = m_subEventDataStream.getBufferSize();
 
 			int clientIdArray[2];
 			clientIdArray[0] = iter->first;
@@ -436,7 +428,7 @@ void DQMDimEventCollector::updateEventService()
 	}
 
 	if(currentId != 0)
-		m_pEventUpdateService->selectiveUpdateService((void *) m_pCurrentBuffer, m_currentBufferSize, clientIds);
+		m_pEventUpdateService->selectiveUpdateService((void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize(), clientIds);
 
 	delete [] clientIds;
 
