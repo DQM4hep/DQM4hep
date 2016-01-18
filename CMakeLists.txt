@@ -34,6 +34,15 @@ SET( LCIO_repository                "svn://svn.freehep.org/lcio/tags" ) # public
 # ----- additional cmake args -----
 SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF" )
 SET( DQMCore_additional_cmake_args  "" )
+# ----- CLANG 7.0+ gives an error for #define private public -----
+# ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
+IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+	SET( DQMCore_additional_cmake_args 
+		${DQMCore_additional_cmake_args}
+		"-DCMAKE_CXX_FLAGS=-Wno-keyword-macro"
+	)
+ENDIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+
 
 # ----- dim os detection -----
 IF( APPLE )
@@ -84,13 +93,13 @@ MESSAGE( STATUS "DQM4HEP_VIZ: ${DQM4HEP_VIZ}" )
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 
-OPTION( DQM4HEP_LCIO "Build DQMCore with LCIO (requires LCIO installed)" OFF )
+OPTION( DQM4HEP_LCIO "Build DQMCore with LCIO (requires LCIO installed)" ON )
 MESSAGE( STATUS "DQM4HEP_LCIO: ${DQM4HEP_LCIO}" )
 
 OPTION( DQM4HEP_ELOG "Build DQMCore with ELog (requires ELog binary installed)" OFF )
 MESSAGE( STATUS "DQM4HEP_ELOG: ${DQM4HEP_ELOG}" )
 
-OPTION( DQM4HEP_EXAMPLES "Build DQMCore with examples" OFF )
+OPTION( DQM4HEP_EXAMPLES "Build DQMCore with examples" ON )
 MESSAGE( STATUS "DQM4HEP_EXAMPLES: ${DQM4HEP_EXAMPLES}" )
 
 SET( DQMCore_additional_cmake_args 
@@ -138,39 +147,51 @@ IF( NOT ILCUTIL_FOUND )
 ENDIF()
 
 # ----- DIM package -----
-ExternalProject_Add( dim
-    GIT_REPOSITORY ${DIM_repository}
-    GIT_TAG ${DIM_version}
-    CMAKE_ARGS ${common_cmake_args}
-    PREFIX dim
-    LIST_SEPARATOR %
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dim
-    BINARY_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dim
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/dim/external-project/build-command ${DIM_OS}
-    INSTALL_COMMAND ""
-)
+FIND_PACKAGE( DIM )
 
+IF ( NOT DIM_FOUND )
+	SET ( DIMDIR ${CMAKE_CURRENT_SOURCE_DIR}/dim )
+
+	IF ( APPLE ) # Apply patches included in the dim4mac directory
+	    SET ( DIM4MACDIR ${DIMDIR}/dim4mac )
+	    SET ( PATCHCOMMAND patch src/tcpip.c < ${DIM4MACDIR}/tcpip.c.patch COMMAND patch < ${DIM4MACDIR}/makefile_common.patch COMMAND patch < ${DIM4MACDIR}/makefile_dim.patch )
+	ELSE ()
+		SET ( PATCHCOMMAND "")
+	ENDIF ()
+
+	ExternalProject_Add( DIM
+	    GIT_REPOSITORY ${DIM_repository}
+	    GIT_TAG ${DIM_version}
+	    CMAKE_ARGS ${common_cmake_args}
+	    PREFIX dim
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${DIMDIR}
+	    BINARY_DIR ${DIMDIR}
+		PATCH_COMMAND ${PATCHCOMMAND}
+	    CONFIGURE_COMMAND ""
+	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS}
+	    INSTALL_COMMAND ""
+	)
+ENDIF ()
 
 SET( DQMCore_additional_cmake_args 
 	${DQMCore_additional_cmake_args} 
-	"-DDIMDIR=${CMAKE_CURRENT_SOURCE_DIR}/dim"
+	"-DDIMDIR=${DIMDIR}"
 )
 
 SET( DIMJC_additional_cmake_args 
 	${DIMJC_additional_cmake_args} 
-	"-DDIMDIR=${CMAKE_CURRENT_SOURCE_DIR}/dim"
+	"-DDIMDIR=${DIMDIR}"
 )
 
 SET( DQMVis_additional_cmake_args 
 	${DQMVis_additional_cmake_args} 
-	"-DDIMDIR=${CMAKE_CURRENT_SOURCE_DIR}/dim"
+	"-DDIMDIR=${DIMDIR}"
 )
-
 
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS dim ${DQMCore_package_depends}
+    # DEPENDS DIM ${DQMCore_package_depends} # Do not Work with find_package (DIM) (Complain about Target DIM not built)
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
@@ -178,39 +199,52 @@ ExternalProject_Add( DQMCore
     LIST_SEPARATOR %
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
 )
+ADD_DEPENDENCIES (DQMCore DIM ${DQMCore_package_depends})
 
 # ----- JsonCpp package -----
-ExternalProject_Add( jsoncpp
-    GIT_REPOSITORY ${JsonCpp_repository}
-    GIT_TAG ${JsonCpp_version}
-    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
-    PREFIX jsoncpp
-    LIST_SEPARATOR %
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp
-)
+FIND_PACKAGE( JSONCPP )
+
+IF ( NOT JSONCPP_FOUND )
+	SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
+
+	ExternalProject_Add( JSONCPP
+	    GIT_REPOSITORY ${JsonCpp_repository}
+	    GIT_TAG ${JsonCpp_version}
+	    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
+		PREFIX jsoncpp
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${JSONCPP_DIR}
+	    )
+ENDIF ()
 
 # ----- DIMJC package -----
-ExternalProject_Add( dimjc
-	DEPENDS dim jsoncpp
-    GIT_REPOSITORY ${DIMJC_repository}
-    GIT_TAG ${DIMJC_version}
-    CMAKE_ARGS ${common_cmake_args} ${DIMJC_additional_cmake_args}
-    PREFIX dimjc
-    LIST_SEPARATOR %
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc
-)
+FIND_PACKAGE( DIMJC )
 
-SET( DQMVis_additional_cmake_args 
-${DQMVis_additional_cmake_args} 
-"-DDIMJC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/dimjc"
-)
+IF ( NOT DIMJC_FOUND )
+	SET ( DIMJC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc )
 
+	ExternalProject_Add( dimjc
+		# DEPENDS DIM JSONCPP
+	    GIT_REPOSITORY ${DIMJC_repository}
+	    GIT_TAG ${DIMJC_version}
+	    CMAKE_ARGS ${common_cmake_args} ${DIMJC_additional_cmake_args}
+	    PREFIX dimjc
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${DIMJC_DIR}
+		)
+ENDIF ()
+ADD_DEPENDENCIES(DQMCore DIM JSONCPP)
+
+	SET( DQMVis_additional_cmake_args 
+	${DQMVis_additional_cmake_args} 
+"-DDIMJC_DIR=${DIMJC_DIR}"
+)
 
 IF( DQM4HEP_VIZ )
 
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
-        DEPENDS DQMCore ${DQMCore_package_depends} dim jsoncpp dimjc 
+        # DEPENDS DQMCore ${DQMCore_package_depends} dim jsoncpp dimjc 
         GIT_REPOSITORY ${DQMViz_repository}
         GIT_TAG ${DQMViz_version}
         CMAKE_ARGS ${common_cmake_args} ${DQMVis_additional_cmake_args}
@@ -220,6 +254,8 @@ IF( DQM4HEP_VIZ )
     )
 
 ENDIF()
+ADD_DEPENDENCIES( DQMCore ${DQMCore_package_depends} DIM JSONCPP DIMJC )
+
 
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()

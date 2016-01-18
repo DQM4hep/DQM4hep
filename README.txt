@@ -14,6 +14,7 @@ INSTALL:
 
 Needs ilcsoft installed (http://ilcsoft.desy.de/portal). Tested with the following version :
  * v01-17-03
+ * v01-17-08
 
 To install the package : 
 
@@ -22,6 +23,14 @@ To install the package :
   $ cmake -C $ILCSOFT/ILCSoft.cmake ..
   $ make
 
+On MAC-OSX
+if you encounter this error when compiling did: 
+	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"
+Check if OpenMotif is installed in /usr/OpenMotif
+If it’s not change MOTIFINC and MOTIFLIB variables in makefile_did accordingly
+Eg if using macport:
+	MOTIFINC = /opt/local/include
+	MOTIFLIB = /opt/local/lib
 
 BUG REPORT:
 ===========
