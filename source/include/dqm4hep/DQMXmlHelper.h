@@ -65,6 +65,11 @@ public:
 	template <typename T>
 	static StatusCode getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, T &attributeValue);
 
+	/** Get the attribute of the xml element and use a validator to validate the value
+	 */
+	template <typename T, typename Validator>
+	static StatusCode getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, T &attributeValue, Validator validator);
+
 	/** Read a parameter value from an xml element
 	 */
 	template <typename T>
@@ -78,6 +83,11 @@ public:
 	/** Create a quality test. Works if the quality test factory has been registered first
 	 */
 	static StatusCode createQualityTest(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
+
+	/** Create a built-in monitor element from a xml handle
+	 */
+	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+			DQMMonitorElement *&pMonitorElement);
 
 	/** Tokenize a string
 	 */
@@ -211,6 +221,19 @@ inline StatusCode DQMXmlHelper::getAttribute(const TiXmlElement *const pXmlEleme
 
 	if(!DQM4HEP::stringToType(attributeStr, attributeValue))
 		return STATUS_CODE_FAILURE;
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename T, typename Validator>
+inline StatusCode DQMXmlHelper::getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, T &attributeValue, Validator validator)
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute<T>(pXmlElement, attributeName, attributeValue));
+
+	if(!validator(attributeValue))
+		return STATUS_CODE_INVALID_PARAMETER;
 
 	return STATUS_CODE_SUCCESS;
 }

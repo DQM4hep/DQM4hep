@@ -45,6 +45,9 @@
 #include "TH2C.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
+#include "TROOT.h"
+#include "TClass.h"
+#include "TObject.h"
 
 // -- std headers
 #include <stdexcept>
@@ -1470,6 +1473,283 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 
 		return exception.getStatusCode();
 	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName, DQMMonitorElement *&pMonitorElement)
+{
+	if(NULL == pXmlElement)
+		return STATUS_CODE_INVALID_PTR;
+
+	std::string type;
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "type", type));
+
+	DQMMonitorElementType monitorElementType = stringToMonitorElementRootType(type);
+
+	if(NO_ELEMENT_TYPE == monitorElementType || monitorElementType >= NUMBER_OF_DQM_MONITOR_ELEMENT_TYPES)
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	std::string name;
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", name));
+
+	// empty path means current directory
+	std::string path;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pXmlElement, "path", path));
+
+	// create dir
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, this->mkdir(path));
+
+	// not mandatory
+	std::string title;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pXmlElement, "title", title));
+
+	// not mandatory
+	std::string description;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pXmlElement, "description", description));
+
+	// not mandatory
+	std::string drawOption;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pXmlElement, "drawOption", drawOption));
+
+	// not mandatory
+	std::string resetPolicyStr;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pXmlElement, "resetPolicy", resetPolicyStr));
+
+	// for scalar values
+	std::string value;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pXmlElement, "value", value));
+
+	switch(monitorElementType)
+	{
+	case INT_ELEMENT_TYPE :
+	{
+
+		int intValue;
+
+		if(!DQM4HEP::stringToType(value, intValue))
+			return STATUS_CODE_FAILURE;
+
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookInt(pMonitorElement, path, name, title, moduleName, intValue));
+
+		break;
+	}
+	case REAL_ELEMENT_TYPE :
+	{
+		float floatValue;
+
+		if(!DQM4HEP::stringToType(value, floatValue))
+			return STATUS_CODE_FAILURE;
+
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookFloat(pMonitorElement, path, name, title, moduleName, floatValue));
+
+		break;
+	}
+	case SHORT_ELEMENT_TYPE :
+	{
+
+		short shortValue;
+
+		if(!DQM4HEP::stringToType(value, shortValue))
+			return STATUS_CODE_FAILURE;
+
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookShort(pMonitorElement, path, name, title, moduleName, shortValue));
+
+		break;
+	}
+	case STRING_ELEMENT_TYPE :
+	{
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookString(pMonitorElement, path, name, title, moduleName, value));
+
+		break;
+	}
+	case INT_HISTOGRAM_1D_ELEMENT_TYPE :
+	{
+		int nBins;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
+    	float min, max;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookIntHistogram1D(pMonitorElement, path, name, title, moduleName, nBins, min, max));
+
+    	break;
+	}
+	case REAL_HISTOGRAM_1D_ELEMENT_TYPE :
+	{
+		int nBins;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
+    	float min, max;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookRealHistogram1D(pMonitorElement, path, name, title, moduleName, nBins, min, max));
+
+    	break;
+	}
+	case SHORT_HISTOGRAM_1D_ELEMENT_TYPE :
+	{
+		int nBins;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
+    	float min, max;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookShortHistogram1D(pMonitorElement, path, name, title, moduleName, nBins, min, max));
+
+    	break;
+	}
+	case CHAR_HISTOGRAM_1D_ELEMENT_TYPE :
+	{
+		int nBins;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
+    	float min, max;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookCharHistogram1D(pMonitorElement, path, name, title, moduleName, nBins, min, max));
+
+    	break;
+	}
+	case INT_HISTOGRAM_2D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookIntHistogram2D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY));
+
+    	break;
+	}
+	case REAL_HISTOGRAM_2D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookRealHistogram2D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY));
+
+    	break;
+	}
+	case CHAR_HISTOGRAM_2D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookCharHistogram2D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY));
+
+    	break;
+	}
+	case SHORT_HISTOGRAM_2D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookShortHistogram2D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY));
+
+    	break;
+	}
+	case PROFILE_1D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxX, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookProfile1D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, minY, maxY));
+
+    	break;
+	}
+	case PROFILE_2D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+    	float minZ, maxZ;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minZ", minZ));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minZ) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookProfile2D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY, minZ, maxZ));
+
+    	break;
+	}
+	case USER_DEFINED_ELEMENT_TYPE :
+	{
+		std::string rootClass;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "ROOTClass", rootClass));
+
+    	TClass *pClass = gROOT->GetClass(rootClass.c_str());
+
+    	if(!pClass)
+    		return STATUS_CODE_FAILURE;
+
+    	TObject *pObject = reinterpret_cast<TObject *>(pClass->New());
+    	delete pClass; // no longer needed
+
+    	if(!pObject)
+    		return STATUS_CODE_FAILURE;
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, path, name, title, moduleName, pObject));
+
+    	break;
+	}
+	default:
+		return STATUS_CODE_FAILURE;
+	}
+
+	pMonitorElement->setDrawOption(drawOption);
+	pMonitorElement->setDescription(description);
+	pMonitorElement->setResetPolicy(stringToResetPolicy(resetPolicyStr));
 
 	return STATUS_CODE_SUCCESS;
 }

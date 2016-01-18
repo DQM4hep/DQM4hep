@@ -49,6 +49,7 @@ DQMDataStream::DQMDataStream(dqm_uint maxBufferSize) :
 DQMDataStream::~DQMDataStream() 
 {
 	delete [] m_pBuffer;
+	m_pBuffer = NULL;
 	m_pBufferPtr = NULL;
 }
 
@@ -56,8 +57,6 @@ DQMDataStream::~DQMDataStream()
 
 void DQMDataStream::reset()
 {
-	delete [] m_pBuffer;
-	m_pBuffer = new char[m_maxBufferSize];
 	m_pBufferPtr = m_pBuffer;
 	memset(m_pBuffer, 0, m_maxBufferSize);
 	m_bufferSize = 0;
@@ -82,18 +81,17 @@ char *DQMDataStream::getBuffer() const
 
 StatusCode DQMDataStream::setBuffer(char *pBuffer, dqm_uint size)
 {
-	if(size > getMaxBufferSize())
+	if(size > this->getMaxBufferSize())
 	{
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, reallocBuffer(size, false));
 	}
 	else
-	{
 		reset();
-	}
 
 	memcpy(m_pBuffer, pBuffer, size);
 	m_bufferSize = size;
 	m_isValid = true;
+	m_pBufferPtr = m_pBuffer;
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -170,6 +168,58 @@ StatusCode DQMDataStream::reallocBuffer(dqm_uint newSize, bool copyCurrentBuffer
 }
 
 //-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDataStream::writeAddress(const void *&pAddress)
+{
+	dqm_uint size = sizeof(void *);
+	dqm_uint availableSize = getMaxBufferSize() - getBufferSize();
+
+	if(availableSize <= size+sizeof(dqm_uint))
+	{
+		dqm_uint newSize = m_maxBufferSize + 1*1024*1024;
+
+		if(size + sizeof(dqm_uint) > 1*1024*1024)
+			newSize = size + sizeof(dqm_uint);
+
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, reallocBuffer(newSize));
+	}
+
+	// get the current buffer ptr
+	dqm_uint *pCurrBuff = (dqm_uint *) m_pBufferPtr;
+
+	// write the address in the buffer
+	memcpy(m_pBufferPtr, reinterpret_cast<const void*>(&pAddress), size);
+
+	// increment again the buffer
+	m_pBufferPtr += size;
+	m_bufferSize += size;
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDataStream::readAddress(void *&pAddress)
+{
+	pAddress = NULL;
+
+	dqm_uint *pCurrBuff = (dqm_uint *) m_pBufferPtr;
+	dqm_uint size = sizeof(void *);
+
+	char *const pValue = new char[size];
+
+	// read and copy the asked buffer region
+	memcpy(pValue, m_pBufferPtr, sizeof(void *));
+
+	// increment the buffer ptr
+	m_pBufferPtr += size;
+
+	// read address
+	pAddress = *(reinterpret_cast<void **>(pValue));
+	delete [] pValue;
+
+	return STATUS_CODE_SUCCESS;
+}
 
 } 
 

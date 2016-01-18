@@ -123,7 +123,7 @@ public:
 	/** Query an event to the collector (server) with a timeout
 	 *  and handle it without pushing it into the internal queue
 	 */
-	StatusCode queryEvent(DQMEvent *&pEvent, int timeout) const;
+	StatusCode queryEvent(DQMEvent *&pEvent, int timeout);
 
 	/** Query an event to the collector.
 	 *

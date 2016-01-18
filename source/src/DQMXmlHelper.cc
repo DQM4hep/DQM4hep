@@ -69,5 +69,25 @@ StatusCode DQMXmlHelper::createQualityTest(const DQMModule *const pModule, const
     return STATUS_CODE_NOT_FOUND;
 }
 
+//----------------------------------------------------------------------------------------------------
+
+StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+		DQMMonitorElement *&pMonitorElement)
+{
+    for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
+        pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
+    {
+    	std::string meId;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "ID", meId));
+
+    	if(meId != meStringId)
+    		continue;
+
+    	return DQMModuleApi::bookMonitorElement(pModule, pXmlElement, pMonitorElement);
+    }
+
+	return STATUS_CODE_NOT_FOUND;
+}
+
 
 }

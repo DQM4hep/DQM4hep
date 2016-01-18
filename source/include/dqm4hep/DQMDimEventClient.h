@@ -34,6 +34,7 @@
 #include "dqm4hep/DQMEvent.h"
 #include "dqm4hep/DQMEventClientImp.h"
 #include "dqm4hep/DQMStreamer.h"
+#include "dqm4hep/DQMDataStream.h"
 
 #include "dic.hxx"
 
@@ -136,7 +137,7 @@ public:
 	/** Query an event to the collector (server) with a timeout
 	 *  and handle it without pushing it into the internal queue
 	 */
-	StatusCode queryEvent(DQMEvent *&pEvent, int timeout) const;
+	StatusCode queryEvent(DQMEvent *&pEvent, int timeout);
 
 	/** Query an event to the collector.
 	 *
@@ -194,6 +195,7 @@ private:
 	DQMEventQueue                 m_eventQueue;
 	unsigned int                m_maximumQueueSize;
 	DQMEventStreamer             *m_pEventStreamer;
+	DQMDataStream                 m_dataStream;
 
 	// client information on server
 	int                          m_serverClientId;
