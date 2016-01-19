@@ -223,7 +223,7 @@ FIND_PACKAGE( DIMJC )
 IF ( NOT DIMJC_FOUND )
 	SET ( DIMJC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc )
 
-	ExternalProject_Add( dimjc
+	ExternalProject_Add( DIMJC
 		# DEPENDS DIM JSONCPP
 	    GIT_REPOSITORY ${DIMJC_repository}
 	    GIT_TAG ${DIMJC_version}
