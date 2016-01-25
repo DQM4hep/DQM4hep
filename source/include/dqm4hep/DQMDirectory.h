@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/DQMPath.h"
 
 namespace dqm4hep
 {
@@ -130,7 +131,7 @@ public:
 
 	/** Get the full path name of the directory
 	 */
-	std::string getFullPathName() const;
+	DQMPath getFullPathName() const;
 
 	/** Whether the directory is a root directory
 	 */

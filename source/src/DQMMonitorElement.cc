@@ -255,13 +255,6 @@ void DQMMonitorElement::reset()
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElement::setFullPath(const std::string &fullPathName)
-{
-	m_fullPathName = fullPathName;
-}
-
-//-------------------------------------------------------------------------------------------------
-
 bool DQMMonitorElement::isHistogram() const
 {
 	if(m_type >= INT_HISTOGRAM_1D_ELEMENT_TYPE && m_type <= PROFILE_2D_ELEMENT_TYPE)
@@ -278,13 +271,6 @@ bool DQMMonitorElement::isScalar() const
 		return true;
 
 	return false;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const std::string &DQMMonitorElement::getFullPath() const
-{
-	return m_fullPathName;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -382,10 +368,6 @@ StatusCode DQMMonitorElement::serialize(DQMDataStream *const pDataStream) const
 
 	std::string drawOption = getDrawOption();
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(drawOption));
-
-	// deprecated
-	std::string fullPathName = getFullPath();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(fullPathName));
 
 	std::string path = getPath().getPath();
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(path));
@@ -488,10 +470,6 @@ StatusCode DQMMonitorElement::deserialize(DQMDataStream *const pDataStream)
 	std::string drawOption;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(drawOption));
 
-	// deprecated !
-	std::string fullPathName;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(fullPathName));
-
 	std::string path;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(path));
 
@@ -540,7 +518,7 @@ StatusCode DQMMonitorElement::deserialize(DQMDataStream *const pDataStream)
 		TNamed *pNamed = dynamic_cast<TNamed*>(m_pObject);
 
 		if(pNamed)
-			pNamed->SetName((fullPathName + "/" + elementName).c_str());
+			pNamed->SetName((DQMPath(path) + elementName).getPath().c_str());
 	}
 
 	m_name = elementName;
@@ -550,7 +528,6 @@ StatusCode DQMMonitorElement::deserialize(DQMDataStream *const pDataStream)
 	this->setTitle(elementTitle);
 	this->setQuality(static_cast<DQMQuality>(elementQuality));
 	this->setDrawOption(drawOption);
-	this->setFullPath(fullPathName); // deprecated
 	this->setPath(DQMPath(path));
 	this->setCollectorName(collectorName);
 	this->setDescription(elementDescription);

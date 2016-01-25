@@ -185,8 +185,8 @@ StatusCode DQMStorage::rmdir(const std::string &dirName)
 	if(pDirectory == m_pRootDir)
 		return STATUS_CODE_NOT_ALLOWED;
 
-	std::string fullPathDirName = pDirectory->getFullPathName();
-	std::string currentFullPathDirName = m_pCurrentDir->getFullPathName();
+	std::string fullPathDirName = pDirectory->getFullPathName().getPath();
+	std::string currentFullPathDirName = m_pCurrentDir->getFullPathName().getPath();
 	size_t pos = currentFullPathDirName.find(fullPathDirName);
 
 	// this mean that the directory that we try
@@ -267,10 +267,8 @@ bool DQMStorage::isOwner() const
 
 StatusCode DQMStorage::addMonitorElement(DQMMonitorElement *pMonitorElement)
 {
-	std::string fullPath = m_pCurrentDir->getFullPathName();
-
-	pMonitorElement->setFullPath(fullPath); 	// deprecated
-	pMonitorElement->setPath(DQMPath(fullPath));
+	DQMPath path = m_pCurrentDir->getFullPathName();
+	pMonitorElement->setPath(path);
 
 	return m_pCurrentDir->addMonitorElement(pMonitorElement);
 }
@@ -283,10 +281,8 @@ StatusCode DQMStorage::addMonitorElement(const std::string &dirName, DQMMonitorE
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mkdir(dirName));
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, findDir(dirName, pDirectory));
 
-	std::string fullPath = pDirectory->getFullPathName();
-
-	pMonitorElement->setFullPath(fullPath); 	// deprecated
-	pMonitorElement->setPath(DQMPath(fullPath));
+	DQMPath path = pDirectory->getFullPathName();
+	pMonitorElement->setPath(path);
 
 	return pDirectory->addMonitorElement(pMonitorElement);
 }
@@ -299,7 +295,6 @@ StatusCode DQMStorage::removeMonitorElement(const std::string &monitorElementNam
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentDir->findMonitorElement(monitorElementName, pMonitorElement));
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentDir->removeMonitorElement(pMonitorElement));
 
-	pMonitorElement->setFullPath(""); 	// deprecated
 	pMonitorElement->setPath(DQMPath(""));
 
 	if(isOwner())
@@ -319,7 +314,6 @@ StatusCode DQMStorage::removeMonitorElement(const std::string &dirName, const st
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->findMonitorElement(monitorElementName, pMonitorElement));
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->removeMonitorElement(pMonitorElement));
 
-	pMonitorElement->setFullPath(""); 	// deprecated
 	pMonitorElement->setPath(DQMPath(""));
 
 	if(isOwner())

@@ -29,6 +29,7 @@
 #include "dqm4hep/DQMDirectory.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMMonitorElement.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -120,6 +121,9 @@ StatusCode DQMDirectory::mkdir(const std::string &dirName)
 	if(containsDir(dirName))
 		return STATUS_CODE_ALREADY_PRESENT;
 
+	if(dirName.find("/") != std::string::npos || DQMCoreTool::containsSpecialCharacters(dirName) || dirName.empty())
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	DQMDirectory *pNewDirectory = new DQMDirectory(dirName, this);
 	m_directoryList.push_back(pNewDirectory);
 
@@ -130,6 +134,9 @@ StatusCode DQMDirectory::mkdir(const std::string &dirName)
 
 bool DQMDirectory::containsDir(const std::string &dirName) const
 {
+	if(dirName.find("/") != std::string::npos || DQMCoreTool::containsSpecialCharacters(dirName) || dirName.empty())
+		return false;
+
 	for(std::vector<DQMDirectory*>::const_iterator iter = m_directoryList.begin(), endIter = m_directoryList.end() ;
 			endIter != iter ; ++iter)
 	{
@@ -305,9 +312,9 @@ StatusCode DQMDirectory::clear(bool deepClean)
 
 //-------------------------------------------------------------------------------------------------
 
-std::string DQMDirectory::getFullPathName() const
+DQMPath DQMDirectory::getFullPathName() const
 {
-	std::string fullPathName = getName();
+	DQMPath fullPath = this->getName();
 	const DQMDirectory *pDir = this;
 
 	while(1)
@@ -316,14 +323,14 @@ std::string DQMDirectory::getFullPathName() const
 
 		if(NULL != pParentDir)
 		{
-			fullPathName = pParentDir->getName() + "/" + fullPathName;
+			fullPath = pParentDir->getName() + fullPath;
 			pDir = pParentDir;
 		}
 		else
 			break;
 	}
 
-	return fullPathName;
+	return fullPath;
 }
 
 //-------------------------------------------------------------------------------------------------

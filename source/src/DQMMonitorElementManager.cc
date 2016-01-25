@@ -30,6 +30,7 @@
 #include "dqm4hep/DQMMonitorElement.h"
 #include "dqm4hep/DQMStorage.h"
 #include "dqm4hep/DQMDirectory.h"
+#include "dqm4hep/DQMCoreTool.h"
 #include "dqm4hep/DQMPlugin.h"
 #include "dqm4hep/DQMPluginManager.h"
 #include "dqm4hep/DQMQualityTest.h"
@@ -77,47 +78,6 @@ DQMMonitorElementManager::~DQMMonitorElementManager()
 	m_qualityTestFactoryMap.clear();
 	m_qualityTestMap.clear();
 }
-
-//-------------------------------------------------------------------------------------------------
-
-//StatusCode DQMMonitorElementManager::readSettings(const TiXmlHandle xmlHandle)
-//{
-//    for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("qualitytest").Element(); NULL != pXmlElement;
-//        pXmlElement = pXmlElement->NextSiblingElement("qualitytest"))
-//    {
-//    	std::string type;
-//    	std::string name;
-//
-//    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "type", type));
-//    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", name));
-//
-//    	DQMQualityTestMap::const_iterator findIter = m_qualityTestMap.find(name);
-//
-//    	if(m_qualityTestMap.end() != findIter)
-//    	{
-//    		streamlog_out(WARNING) << "Quality test '" << name << "' is already registered ! \n Skipping" << std::endl;
-//    		continue;
-//    	}
-//
-//    	DQMQualityTest *pQualityTest = NULL;
-//    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->createQualityTest(type, name, pQualityTest));
-//
-//    	TiXmlHandle qTestHandle(pXmlElement);
-//
-//    	if(STATUS_CODE_SUCCESS != pQualityTest->readSettings(qTestHandle)
-//    	|| STATUS_CODE_SUCCESS != pQualityTest->init())
-//    	{
-//    		streamlog_out(WARNING) << "Couldn't initialize quality test '" << name << "' ! \n Skipping" << std::endl;
-//    		delete pQualityTest;
-//
-//    		continue;
-//    	}
-//
-//    	m_qualityTestMap[name] = pQualityTest;
-//    }
-//
-//	return STATUS_CODE_SUCCESS;
-//}
 
 //-------------------------------------------------------------------------------------------------
 
@@ -177,14 +137,14 @@ const std::string &DQMMonitorElementManager::getCurrentDirectoryName() const
 
 //-------------------------------------------------------------------------------------------------
 
-std::string DQMMonitorElementManager::getCurrentDirectoryFullPathName() const
+DQMPath DQMMonitorElementManager::getCurrentDirectoryFullPathName() const
 {
 	return m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::getFullPathName(const std::string &subDirName, std::string &fullPathName) const
+StatusCode DQMMonitorElementManager::getFullPathName(const std::string &subDirName, DQMPath &fullPathName) const
 {
 	DQMDirectory *pDirectory = NULL;
 	THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(subDirName, pDirectory));
@@ -203,12 +163,16 @@ StatusCode DQMMonitorElementManager::bookRealHistogram1D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1F((currentDirName + name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1F(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -246,12 +210,16 @@ StatusCode DQMMonitorElementManager::bookIntHistogram1D(DQMMonitorElement *&pMon
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1I((currentDirName + name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1I(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -289,12 +257,16 @@ StatusCode DQMMonitorElementManager::bookCharHistogram1D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1C((currentDirName + name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1C(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -332,12 +304,16 @@ StatusCode DQMMonitorElementManager::bookShortHistogram1D(DQMMonitorElement *&pM
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1S((currentDirName + name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1S(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -375,12 +351,16 @@ StatusCode DQMMonitorElementManager::bookRealHistogram2D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2F((currentDirName + name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2F(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -418,12 +398,16 @@ StatusCode DQMMonitorElementManager::bookIntHistogram2D(DQMMonitorElement *&pMon
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2I((currentDirName + name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2I(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -461,12 +445,16 @@ StatusCode DQMMonitorElementManager::bookCharHistogram2D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2C((currentDirName + name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2C(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -504,12 +492,16 @@ StatusCode DQMMonitorElementManager::bookShortHistogram2D(DQMMonitorElement *&pM
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2S((currentDirName + name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2S(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -547,12 +539,16 @@ StatusCode DQMMonitorElementManager::bookProfile1D(DQMMonitorElement *&pMonitorE
 	pMonitorElement = NULL;
 	TProfile *pProfile = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pProfile = new TProfile((currentDirName + name).c_str(), title.c_str(), nXBins, xMin, xMax, yMin, yMax);
+		pProfile = new TProfile(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, yMin, yMax);
 
 		if(NULL == pProfile)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -590,12 +586,16 @@ StatusCode DQMMonitorElementManager::bookProfile2D(DQMMonitorElement *&pMonitorE
 	pMonitorElement = NULL;
 	TProfile2D *pProfile = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-		std::string currentDirName = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName() + "/";
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
 
 		// create the histogram first
-		pProfile = new TProfile2D((currentDirName + name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax);
+		pProfile = new TProfile2D(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax);
 
 		if(NULL == pProfile)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -632,6 +632,9 @@ StatusCode DQMMonitorElementManager::bookInt(DQMMonitorElement *&pMonitorElement
 {
 	pMonitorElement = NULL;
 	TScalarInt *pScalarObject = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
 
 	try
 	{
@@ -674,6 +677,9 @@ StatusCode DQMMonitorElementManager::bookFloat(DQMMonitorElement *&pMonitorEleme
 	pMonitorElement = NULL;
 	TScalarFloat *pScalarObject = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		// create the histogram first
@@ -714,6 +720,9 @@ StatusCode DQMMonitorElementManager::bookShort(DQMMonitorElement *&pMonitorEleme
 {
 	pMonitorElement = NULL;
 	TScalarShort *pScalarObject = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
 
 	try
 	{
@@ -756,6 +765,9 @@ StatusCode DQMMonitorElementManager::bookString(DQMMonitorElement *&pMonitorElem
 	pMonitorElement = NULL;
 	TScalarString *pScalarObject = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		// create the histogram first
@@ -797,13 +809,11 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 {
 	pMonitorElement = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-//		// check if the root class passed by user has a dictionary
-//		// and thus can be handled by root i/o streamers
-//		if(!pROOTObject->IsA()->HasDictionary())
-//			throw StatusCodeException(STATUS_CODE_FAILURE);
-
 		// create the monitor element
 		pMonitorElement = new DQMMonitorElement(pROOTObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
 
@@ -835,14 +845,17 @@ StatusCode DQMMonitorElementManager::bookRealHistogram1D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1F((fullPath+name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1F(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -880,14 +893,17 @@ StatusCode DQMMonitorElementManager::bookIntHistogram1D(DQMMonitorElement *&pMon
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1I((fullPath+name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1I(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -925,14 +941,17 @@ StatusCode DQMMonitorElementManager::bookCharHistogram1D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1C((fullPath+name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1C(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -970,14 +989,17 @@ StatusCode DQMMonitorElementManager::bookShortHistogram1D(DQMMonitorElement *&pM
 	pMonitorElement = NULL;
 	TH1 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH1S((fullPath+name).c_str(), title.c_str(), nBins, minimum, maximum);
+		pHistogram = new TH1S(objectName.c_str(), title.c_str(), nBins, minimum, maximum);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1015,14 +1037,17 @@ StatusCode DQMMonitorElementManager::bookRealHistogram2D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2F((fullPath+name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2F(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1060,14 +1085,17 @@ StatusCode DQMMonitorElementManager::bookIntHistogram2D(DQMMonitorElement *&pMon
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2I((fullPath+name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2I(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1105,14 +1133,17 @@ StatusCode DQMMonitorElementManager::bookCharHistogram2D(DQMMonitorElement *&pMo
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2C((fullPath+name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2C(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1150,14 +1181,17 @@ StatusCode DQMMonitorElementManager::bookShortHistogram2D(DQMMonitorElement *&pM
 	pMonitorElement = NULL;
 	TH2 *pHistogram = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pHistogram = new TH2S((fullPath+name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+		pHistogram = new TH2S(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax);
 
 		if(NULL == pHistogram)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1195,14 +1229,17 @@ StatusCode DQMMonitorElementManager::bookProfile1D(DQMMonitorElement *&pMonitorE
 	pMonitorElement = NULL;
 	TProfile *pProfile = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pProfile = new TProfile((fullPath+name).c_str(), title.c_str(), nXBins, xMin, xMax, yMin, yMax);
+		pProfile = new TProfile(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, yMin, yMax);
 
 		if(NULL == pProfile)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1240,14 +1277,17 @@ StatusCode DQMMonitorElementManager::bookProfile2D(DQMMonitorElement *&pMonitorE
 	pMonitorElement = NULL;
 	TProfile2D *pProfile = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		DQMDirectory *pDirectory = NULL;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
-		std::string fullPath = pDirectory->getFullPathName() + "/";
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
 
 		// create the histogram first
-		pProfile = new TProfile2D((fullPath+name).c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax);
+		pProfile = new TProfile2D(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax);
 
 		if(NULL == pProfile)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1284,6 +1324,9 @@ StatusCode DQMMonitorElementManager::bookInt(DQMMonitorElement *&pMonitorElement
 {
 	pMonitorElement = NULL;
 	TScalarInt *pScalarObject = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
 
 	try
 	{
@@ -1326,6 +1369,9 @@ StatusCode DQMMonitorElementManager::bookFloat(DQMMonitorElement *&pMonitorEleme
 	pMonitorElement = NULL;
 	TScalarFloat *pScalarObject = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		// create the histogram first
@@ -1366,6 +1412,9 @@ StatusCode DQMMonitorElementManager::bookShort(DQMMonitorElement *&pMonitorEleme
 {
 	pMonitorElement = NULL;
 	TScalarShort *pScalarObject = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
 
 	try
 	{
@@ -1408,6 +1457,9 @@ StatusCode DQMMonitorElementManager::bookString(DQMMonitorElement *&pMonitorElem
 	pMonitorElement = NULL;
 	TScalarString *pScalarObject = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
 		// create the histogram first
@@ -1448,13 +1500,11 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 {
 	pMonitorElement = NULL;
 
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
 	try
 	{
-//		// check if the root class passed by user has a dictionary
-//		// and thus can be handled by root i/o streamers
-//		if(!pROOTObject->IsA()->HasDictionnary())
-//			throw StatusCodeException(STATUS_CODE_FAILURE);
-
 		// create the monitor element
 		pMonitorElement = new DQMMonitorElement(pROOTObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
 
@@ -1802,7 +1852,7 @@ StatusCode DQMMonitorElementManager::deleteMonitorElement(DQMMonitorElement *pMo
 	if(NULL == pMonitorElement)
 		return STATUS_CODE_INVALID_PTR;
 
-	const std::string fullPath = pMonitorElement->getFullPath();
+	const std::string fullPath = pMonitorElement->getPath().getPath();
 	const std::string name = pMonitorElement->getName();
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(fullPath, name));

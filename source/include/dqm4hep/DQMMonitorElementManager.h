@@ -109,11 +109,11 @@ public:
 
  	/** Get the current directory full path name (always defined)
  	 */
- 	std::string getCurrentDirectoryFullPathName() const;
+ 	DQMPath getCurrentDirectoryFullPathName() const;
 
  	/** Get the full path name of the sub directory
  	 */
- 	StatusCode getFullPathName(const std::string &subDirName, std::string &fullPathName) const;
+ 	StatusCode getFullPathName(const std::string &subDirName, DQMPath &fullPathName) const;
 
  public:
 

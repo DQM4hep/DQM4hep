@@ -86,12 +86,6 @@ public:
 	 */
 	virtual const std::string &getName() const;
 
-	/** WARNING ! DEPRECATED METHOD !
-	 *  Get the full path name (directory) of this element.
-	 *  Use getPath() instead
-	 */
-	const std::string &getFullPath() const;
-
 	/** Get the path (directory) of this element
 	 */
 	const DQMPath &getPath() const;
@@ -202,12 +196,6 @@ public:
 	StatusCode deserialize(DQMDataStream *const pDataStream);
 
 private:
-
-	/** WARNING ! DEPRECATED METHOD !
-	 *  Set the full path (directory) for the element
-	 */
-	void setFullPath(const std::string &fullPathName);
-
 	/** Run the given quality test
 	 */
 	StatusCode runQualityTest(const std::string &qualityTestName);
@@ -235,16 +223,15 @@ private:
 	std::string                     m_title;               ///< The element title
 	std::string                     m_description;        ///< The element description
 	std::string                     m_drawOption;         ///< The draw option to apply while drawing
-	std::string                     m_fullPathName;       ///< DEPRECATED ! The full path name (in directory structure)
 	std::string                     m_moduleName;         ///< The module name that have booked this element
 	std::string                     m_collectorName;      ///< The collector name that have collected this element
 
-	DQMPath                       m_path;
-	DQMMonitorElementType         m_type;                  ///< The element type
-	DQMQuality                    m_quality;               ///< The element quality has defined by the user
-	DQMResetPolicy                m_resetPolicy;          ///< The reset policy. See enumerator definition
+	DQMPath                         m_path;
+	DQMMonitorElementType           m_type;                  ///< The element type
+	DQMQuality                      m_quality;               ///< The element quality has defined by the user
+	DQMResetPolicy                  m_resetPolicy;          ///< The reset policy. See enumerator definition
 
-	unsigned int                   m_runNumber;           ///< The run number when the element is published
+	unsigned int                    m_runNumber;           ///< The run number when the element is published
 	bool                            m_toPublish;           ///< Whether the element has to be published at end of cycle
 
 	std::map<std::string, DQMQualityTest*>       m_qualityTestMap;         /// The quality test map to perform
