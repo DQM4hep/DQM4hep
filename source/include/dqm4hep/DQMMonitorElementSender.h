@@ -30,6 +30,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/DQMDataStream.h"
 
 namespace dqm4hep
 {
@@ -49,12 +50,13 @@ public:
 
 	/** Send the monitor element list to the collector
 	 */
-	StatusCode sendMonitorElements(const std::string &moduleName, const DQMMonitorElementList &monitorElementList) const;
+	StatusCode sendMonitorElements(const std::string &moduleName, const DQMMonitorElementList &monitorElementList);
 
 private:
 
 	std::string                    m_collectorName;    ///<  The collector name to which the monitor elements will be sent
-}; 
+	DQMDataStream                  m_dataStream;       ///< The data stream used to serialize the monitor elements
+};
 
 } 
 

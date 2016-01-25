@@ -36,7 +36,8 @@ namespace dqm4hep
 {
 
 DQMMonitorElementSender::DQMMonitorElementSender() :
-		m_collectorName("DEFAULT")
+		m_collectorName("DEFAULT"),
+		m_dataStream(4*1024*1024) // 4 Mo to start
 {
 	/* nop */
 }
@@ -53,7 +54,7 @@ void DQMMonitorElementSender::setCollectorName(const std::string &collectorName)
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementSender::sendMonitorElements(const std::string &moduleName, const DQMMonitorElementList &monitorElementList) const
+StatusCode DQMMonitorElementSender::sendMonitorElements(const std::string &moduleName, const DQMMonitorElementList &monitorElementList)
 {
 	if(moduleName.empty() || monitorElementList.empty())
 		return STATUS_CODE_INVALID_PARAMETER;
@@ -61,14 +62,13 @@ StatusCode DQMMonitorElementSender::sendMonitorElements(const std::string &modul
 	DQMMonitorElementPublication publication;
 	publication.m_publication[moduleName] = monitorElementList;
 
-	DQMDataStream dataStream(5*1024*1024);
-
 	// stream the whole publication
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.serialize(&dataStream));
+	m_dataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.serialize(&m_dataStream));
 
 	// and send the buffer
-	dqm_char *pBuffer = dataStream.getBuffer();
-	dqm_uint bufferSize = dataStream.getBufferSize();
+	dqm_char *pBuffer = m_dataStream.getBuffer();
+	dqm_uint bufferSize = m_dataStream.getBufferSize();
 
 	std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/";
 	commandName += "MONITOR_ELEMENT_PACKET_RECEPTION";
