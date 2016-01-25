@@ -113,8 +113,10 @@ DQMMonitorElementCollector::DQMMonitorElementCollector() :
 		m_pMonitorElementNameListRpc(NULL),
 		m_pMonitorElementPacketRpc(NULL),
 		m_pMonitorElementCollectorInfoRpc(NULL),
-		m_pCommandHandler(NULL)
+		m_pCommandHandler(NULL),
+		m_dataStream(5*1024*1024)
 {
+	/* nop */
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -240,12 +242,11 @@ StatusCode DQMMonitorElementCollector::handleMEPacketReception(DimCommand *pComm
 			throw StatusCodeException(STATUS_CODE_SUCCESS);
 		}
 
-		DQMDataStream dataStream(10*1024*1024);
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dataStream.setBuffer(pBuffer, bufferSize));
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
 		DQMMonitorElementPublication publication;
-
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.deserialize(&dataStream));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.deserialize(&m_dataStream));
 
 		if(publication.m_publication.empty())
 		{
@@ -306,7 +307,8 @@ StatusCode DQMMonitorElementCollector::handleMEPacketReception(DimCommand *pComm
 
 DQMMonitorElementNameListRpc::DQMMonitorElementNameListRpc(char *rpcName, DQMMonitorElementCollector *pCollector) :
 		DimRpc(rpcName, "C", "C"),
-		m_pCollector(pCollector)
+		m_pCollector(pCollector),
+		m_dataStream(1024*1024)
 {
 	/* nop */
 }
@@ -326,12 +328,11 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		DQMDataStream dataStream(128*1024);
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dataStream.setBuffer(pBuffer, bufferSize));
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
 		DQMMonitorElementListNameRequest request;
-
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&dataStream));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
 
 		DQMMonitorElementInfoList infoList;
 
@@ -377,11 +378,11 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 		}
 
 		// serialize the packet
-		DQMDataStream outDataStream(1024*1024);
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, infoList.serialize(&outDataStream));
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, infoList.serialize(&m_dataStream));
 
 		// and set it as data to send back
-		setData((void*) outDataStream.getBuffer(), outDataStream.getBufferSize());
+		setData((void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -396,7 +397,8 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 
 DQMMonitorElementPacketRpc::DQMMonitorElementPacketRpc(char *rpcName, DQMMonitorElementCollector *pCollector) :
 		DimRpc(rpcName, "C", "C"),
-		m_pCollector(pCollector)
+		m_pCollector(pCollector),
+		m_dataStream(5*1024*1024)
 {
 	/* nop */
 }
@@ -416,12 +418,11 @@ void DQMMonitorElementPacketRpc::rpcHandler()
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		DQMDataStream dataStream(1024*1024);
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dataStream.setBuffer(pBuffer, bufferSize));
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
 		DQMMonitorElementRequest request;
-
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&dataStream));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
 
 		DQMMonitorElementPublication monitorElementPublication;
 
@@ -471,12 +472,11 @@ void DQMMonitorElementPacketRpc::rpcHandler()
 			}
 		}
 
-		DQMDataStream meDataStream(5*1024*1024);
-
 		// serialize the packet
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementPublication.serialize(&meDataStream));
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementPublication.serialize(&m_dataStream));
 
-		setData((void*) meDataStream.getBuffer(), meDataStream.getBufferSize());
+		setData((void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -491,7 +491,8 @@ void DQMMonitorElementPacketRpc::rpcHandler()
 
 DQMMonitorElementCollectorInfoRpc::DQMMonitorElementCollectorInfoRpc(char *rpcName, DQMMonitorElementCollector *pCollector) :
 		DimRpc(rpcName, "C", "C"),
-		m_pCollector(pCollector)
+		m_pCollector(pCollector),
+		m_dataStream(128*1024)
 {
 	/* nop */
 }
@@ -503,7 +504,6 @@ void DQMMonitorElementCollectorInfoRpc::rpcHandler()
 	try
 	{
 		// data stream
-		DQMDataStream dataStream(128*1024);
 		DQMCollectorInfo collectorInfo;
 
 		// uname
@@ -526,11 +526,12 @@ void DQMMonitorElementCollectorInfoRpc::rpcHandler()
 			collectorInfo.m_moduleListName.push_back(iter->first);
 
 		// serialize the packet
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, collectorInfo.serialize(&dataStream));
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, collectorInfo.serialize(&m_dataStream));
 
 		// get the buffer
-		dqm_char *pBuffer = dataStream.getBuffer();
-		dqm_uint bufferSize = dataStream.getBufferSize();
+		dqm_char *pBuffer = m_dataStream.getBuffer();
+		dqm_uint bufferSize = m_dataStream.getBufferSize();
 
 		// and set it as data to send back
 		setData((void*) pBuffer, bufferSize);

@@ -31,6 +31,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMPath.h"
+#include "dqm4hep/DQMDataStream.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -50,6 +51,9 @@ private:
 	DQMPath        m_pathToCompare;
 };
 
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 class DQMMonitorElementNameListRpc : public DimRpc
 {
 public:
@@ -58,6 +62,7 @@ public:
 
 private:
 	DQMMonitorElementCollector   *m_pCollector;
+	DQMDataStream                 m_dataStream;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -71,6 +76,7 @@ public:
 
 private:
 	DQMMonitorElementCollector   *m_pCollector;
+	DQMDataStream                 m_dataStream;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -84,6 +90,7 @@ public:
 
 private:
 	DQMMonitorElementCollector   *m_pCollector;
+	DQMDataStream                 m_dataStream;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -197,6 +204,7 @@ private:
 
 	// storage
 	DQMMonitorElementListMap           m_monitorElementListMap;
+	DQMDataStream                      m_dataStream;    ///< To deserialize incoming monitor elements from modules
 
 	friend class DQMCollectorCommandHandler;
 	friend class DQMMonitorElementNameListRpc;
