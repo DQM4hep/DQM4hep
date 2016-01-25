@@ -60,7 +60,7 @@ IF( NOT MySQL_DIR )
         /opt/local
         /opt/products/mysql/5.0.45
         /opt/products/mysql/5.0.26
-        PATH_SUFFIXES include include/mysql include/mysql5/mysql
+        PATH_SUFFIXES include include/mysql include/mysql5/mysql mysql/include
     )
 ENDIF()
 
@@ -96,7 +96,7 @@ IF( NOT MySQL_DIR )
         /opt/local
         /opt/products/mysql/5.0.45
         /opt/products/mysql/5.0.26
-        PATH_SUFFIXES lib64 lib64/mysql lib64/mysql5/mysql lib lib/mysql lib/mysql5/mysql
+        PATH_SUFFIXES lib64 lib64/mysql lib64/mysql5/mysql lib lib/mysql lib/mysql5/mysql mysql/lib
     )
 ENDIF()
 IF( MySQL_LIBRARIES )
