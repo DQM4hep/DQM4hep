@@ -30,8 +30,6 @@
 #include "dqm4hep/DQMEventStreamer.h"
 #include "dqm4hep/DQMDataStream.h"
 
-#include "UTIL/LCTOOLS.h"
-
 namespace dqm4hep
 {
 
