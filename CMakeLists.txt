@@ -31,6 +31,19 @@ SET( DIMJC_repository               "https://github.com/mirabitl/dimjc.git" )
 SET( streamlog_repository           "https://github.com/DQM4HEP/streamlog" )
 SET( LCIO_repository                "svn://svn.freehep.org/lcio/tags" ) # public (no authentication)
 
+# the external project in used are 
+# set gradually along the CMakeLists.txt
+# When a project is added with ExternalProject_Add(...)
+# these variables are set to the package name
+# Mandatory packages are directly set
+SET( DQMCore_package_depends "DQMCore" )
+SET( DQMViz_package_depends "" )
+SET( jsoncpp_package_depends "" )
+SET( dim_package_depends "" )
+SET( dimjc_package_depends "" )
+SET( streamlog_package_depends "" )
+SET( lcio_package_depends "" )
+
 # ----- additional cmake args -----
 SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF" )
 SET( DQMCore_additional_cmake_args  "" )
@@ -128,7 +141,7 @@ IF( NOT ILCUTIL_FOUND )
 		    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lcio
 		)
 		
-		LIST( APPEND DQMCore_package_depends "LCIO" )
+		SET( lcio_package_depends "LCIO" )
 		LIST( APPEND DQMCore_additional_cmake_args "-DDQM4HEP_LCIO=ON" )
 		
 	ENDIF()
@@ -142,7 +155,7 @@ IF( NOT ILCUTIL_FOUND )
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/streamlog
 	)
 	
-	LIST( APPEND DQMCore_package_depends "streamlog" )
+	SET( streamlog_package_depends "streamlog" )
 	
 ENDIF()
 
@@ -159,7 +172,7 @@ IF ( NOT DIM_FOUND )
 		SET ( PATCHCOMMAND "")
 	ENDIF ()
 
-	ExternalProject_Add( DIM
+	ExternalProject_Add( dim
 	    GIT_REPOSITORY ${DIM_repository}
 	    GIT_TAG ${DIM_version}
 	    CMAKE_ARGS ${common_cmake_args}
@@ -172,6 +185,8 @@ IF ( NOT DIM_FOUND )
 	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS}
 	    INSTALL_COMMAND ""
 	)
+	
+	SET( dim_package_depends "dim" )
 ENDIF ()
 
 SET( DQMCore_additional_cmake_args 
@@ -191,7 +206,7 @@ SET( DQMVis_additional_cmake_args
 
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    # DEPENDS DIM ${DQMCore_package_depends} # Do not Work with find_package (DIM) (Complain about Target DIM not built)
+    DEPENDS ${dim_package_depends} ${streamlog_package_depends} ${lcio_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
@@ -199,7 +214,6 @@ ExternalProject_Add( DQMCore
     LIST_SEPARATOR %
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
 )
-ADD_DEPENDENCIES (DQMCore DIM ${DQMCore_package_depends})
 
 # ----- JsonCpp package -----
 FIND_PACKAGE( JSONCPP )
@@ -207,15 +221,18 @@ FIND_PACKAGE( JSONCPP )
 IF ( NOT JSONCPP_FOUND )
 	SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
 
-	ExternalProject_Add( JSONCPP
+	ExternalProject_Add( jsoncpp
 	    GIT_REPOSITORY ${JsonCpp_repository}
 	    GIT_TAG ${JsonCpp_version}
 	    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
 		PREFIX jsoncpp
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${JSONCPP_DIR}
-	    )
-ENDIF ()
+	)
+	
+	SET( jsoncpp_package_depends "jsoncpp" )
+	
+ENDIF()
 
 # ----- DIMJC package -----
 FIND_PACKAGE( DIMJC )
@@ -223,28 +240,30 @@ FIND_PACKAGE( DIMJC )
 IF ( NOT DIMJC_FOUND )
 	SET ( DIMJC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc )
 
-	ExternalProject_Add( DIMJC
-		# DEPENDS DIM JSONCPP
+	ExternalProject_Add( dimjc
+		DEPENDS ${jsoncpp_package_depends} ${dim_package_depends}
 	    GIT_REPOSITORY ${DIMJC_repository}
 	    GIT_TAG ${DIMJC_version}
 	    CMAKE_ARGS ${common_cmake_args} ${DIMJC_additional_cmake_args}
 	    PREFIX dimjc
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${DIMJC_DIR}
-		)
+	)
+	
+	SET( dimjc_package_depends "dimjc" )
+		
 ENDIF ()
-ADD_DEPENDENCIES(DQMCore DIM JSONCPP)
 
-	SET( DQMVis_additional_cmake_args 
+SET( DQMVis_additional_cmake_args 
 	${DQMVis_additional_cmake_args} 
-"-DDIMJC_DIR=${DIMJC_DIR}"
+	"-DDIMJC_DIR=${DIMJC_DIR}"
 )
 
 IF( DQM4HEP_VIZ )
 
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
-        # DEPENDS DQMCore ${DQMCore_package_depends} dim jsoncpp dimjc 
+        DEPENDS ${DQMCore_package_depends} ${dim_package_depends} ${jsoncpp_package_depends} ${dimjc_package_depends} ${streamlog_package_depends} 
         GIT_REPOSITORY ${DQMViz_repository}
         GIT_TAG ${DQMViz_version}
         CMAKE_ARGS ${common_cmake_args} ${DQMVis_additional_cmake_args}
@@ -254,8 +273,6 @@ IF( DQM4HEP_VIZ )
     )
 
 ENDIF()
-ADD_DEPENDENCIES( DQMCore ${DQMCore_package_depends} DIM JSONCPP DIMJC )
-
 
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
