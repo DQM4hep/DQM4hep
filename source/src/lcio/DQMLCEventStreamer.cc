@@ -84,7 +84,7 @@ DQMLCEventStreamer::~DQMLCEventStreamer()
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, DQMDataStream *const pDataStream) const
+StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, DQMDataStream *const pDataStream)
 {
 	if(NULL == pEvent)
 		return STATUS_CODE_INVALID_PTR;
@@ -146,7 +146,7 @@ StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, DQMDataSt
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCEventStreamer::deserialize(DQMEvent *&pEvent, DQMDataStream *const pDataStream) const
+StatusCode DQMLCEventStreamer::deserialize(DQMEvent *&pEvent, DQMDataStream *const pDataStream)
 {
 	pEvent = NULL;
 
@@ -224,7 +224,7 @@ StatusCode DQMLCEventStreamer::deserialize(DQMEvent *&pEvent, DQMDataStream *con
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) const
+StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, const std::string &subEventIdentifier, DQMDataStream *const pDataStream)
 {
 	// no sub event queried -> serialize the whole event
 	if(subEventIdentifier.empty())
@@ -323,7 +323,7 @@ DQMPlugin* DQMLCEventStreamer::clone() const
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMLCParametersStreamer::serialize(const EVENT::LCParameters *const pLCParameters,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	// write int keys/values
 	EVENT::StringVec keys;
@@ -406,7 +406,7 @@ StatusCode DQMLCParametersStreamer::serialize(const EVENT::LCParameters *const p
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMLCParametersStreamer::deserialize(EVENT::LCParameters *&pLCParameters,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	dqm_int nInt = 0;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(nInt));
@@ -509,7 +509,7 @@ DQMLCCollectionStreamer::~DQMLCCollectionStreamer()
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMLCCollectionStreamer::serialize(const EVENT::LCCollection *const pLCCollection,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	if(pLCCollection->getTypeName() != m_collectionType)
 		return STATUS_CODE_INVALID_PARAMETER;
@@ -542,7 +542,7 @@ StatusCode DQMLCCollectionStreamer::serialize(const EVENT::LCCollection *const p
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMLCCollectionStreamer::deserialize(EVENT::LCCollection *&pLCCollection,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	pLCCollection = NULL;
 
@@ -590,7 +590,7 @@ StatusCode DQMLCCollectionStreamer::deserialize(EVENT::LCCollection *&pLCCollect
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMLCGenericObjectStreamer::serialize(const EVENT::LCObject *const pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	const EVENT::LCGenericObject *const pLCGenericObject = dynamic_cast<const EVENT::LCGenericObject *const>(pLCObject);
 
@@ -633,7 +633,7 @@ StatusCode DQMLCGenericObjectStreamer::serialize(const EVENT::LCObject *const pL
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMLCGenericObjectStreamer::deserialize(EVENT::LCObject *&pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	pLCObject = NULL;
 
@@ -682,7 +682,7 @@ StatusCode DQMLCGenericObjectStreamer::deserialize(EVENT::LCObject *&pLCObject,
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMCalorimeterHitStreamer::serialize(const EVENT::LCObject *const pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	const EVENT::CalorimeterHit *const pCaloHit = dynamic_cast<const EVENT::CalorimeterHit *const>(pLCObject);
 
@@ -716,7 +716,7 @@ StatusCode DQMCalorimeterHitStreamer::serialize(const EVENT::LCObject *const pLC
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMCalorimeterHitStreamer::deserialize(EVENT::LCObject *&pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	pLCObject = NULL;
 
@@ -765,7 +765,7 @@ StatusCode DQMCalorimeterHitStreamer::deserialize(EVENT::LCObject *&pLCObject,
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMRawCalorimeterHitStreamer::serialize(const EVENT::LCObject *const pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	const EVENT::RawCalorimeterHit *const pCaloHit = dynamic_cast<const EVENT::RawCalorimeterHit *const>(pLCObject);
 
@@ -790,7 +790,7 @@ StatusCode DQMRawCalorimeterHitStreamer::serialize(const EVENT::LCObject *const 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMRawCalorimeterHitStreamer::deserialize(EVENT::LCObject *&pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	pLCObject = 0;
 
@@ -830,7 +830,7 @@ StatusCode DQMRawCalorimeterHitStreamer::deserialize(EVENT::LCObject *&pLCObject
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMTPCHitStreamer::serialize(const EVENT::LCObject *const pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	const EVENT::TPCHit *const pTPCHit = dynamic_cast<const EVENT::TPCHit *const>(pLCObject);
 
@@ -864,7 +864,7 @@ StatusCode DQMTPCHitStreamer::serialize(const EVENT::LCObject *const pLCObject,
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMTPCHitStreamer::deserialize(EVENT::LCObject *&pLCObject,
-		DQMDataStream *const pDataStream) const
+		DQMDataStream *const pDataStream)
 {
 	pLCObject = 0;
 
@@ -925,7 +925,7 @@ StatusCode DQMTPCHitStreamer::deserialize(EVENT::LCObject *&pLCObject,
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMClusterStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMClusterStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream)
 {
 	const EVENT::Cluster *const pCluster = dynamic_cast<const EVENT::Cluster *const>(pLCObject);
 
@@ -1002,7 +1002,7 @@ StatusCode DQMClusterStreamer::serialize(const EVENT::LCObject *const pLCObject,
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMClusterStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMClusterStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream)
 {
 	IMPL::ClusterImpl *pCluster = new IMPL::ClusterImpl();
 
@@ -1122,7 +1122,7 @@ StatusCode DQMClusterStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataS
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMParticleIDStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMParticleIDStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream)
 {
 	const EVENT::ParticleID *const pParticleID = dynamic_cast<const EVENT::ParticleID *const>(pLCObject);
 
@@ -1155,7 +1155,7 @@ StatusCode DQMParticleIDStreamer::serialize(const EVENT::LCObject *const pLCObje
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMParticleIDStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMParticleIDStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream)
 {
 	pLCObject = 0;
 	IMPL::ParticleIDImpl *pParticleID = new IMPL::ParticleIDImpl();
@@ -1204,7 +1204,7 @@ StatusCode DQMParticleIDStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDa
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCFloatVecStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMLCFloatVecStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream)
 {
 	const EVENT::LCFloatVec *const pFloatVec = dynamic_cast<const EVENT::LCFloatVec *const>(pLCObject);
 
@@ -1225,7 +1225,7 @@ StatusCode DQMLCFloatVecStreamer::serialize(const EVENT::LCObject *const pLCObje
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCFloatVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMLCFloatVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream)
 {
 	pLCObject = 0;
 	EVENT::LCFloatVec *pFloatVec = new EVENT::LCFloatVec();
@@ -1259,7 +1259,7 @@ StatusCode DQMLCFloatVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDa
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCIntVecStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMLCIntVecStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream)
 {
 	const EVENT::LCIntVec *const pIntVec = dynamic_cast<const EVENT::LCIntVec *const>(pLCObject);
 
@@ -1280,7 +1280,7 @@ StatusCode DQMLCIntVecStreamer::serialize(const EVENT::LCObject *const pLCObject
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCIntVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMLCIntVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream)
 {
 	pLCObject = 0;
 	EVENT::LCIntVec *pIntVec = new EVENT::LCIntVec();
@@ -1314,7 +1314,7 @@ StatusCode DQMLCIntVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMData
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCStrVecStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMLCStrVecStreamer::serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream)
 {
 	const EVENT::LCStrVec *const pStrVec = dynamic_cast<const EVENT::LCStrVec *const>(pLCObject);
 
@@ -1335,7 +1335,7 @@ StatusCode DQMLCStrVecStreamer::serialize(const EVENT::LCObject *const pLCObject
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMLCStrVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const
+StatusCode DQMLCStrVecStreamer::deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream)
 {
 	pLCObject = 0;
 	EVENT::LCStrVec *pStrVec = new EVENT::LCStrVec();

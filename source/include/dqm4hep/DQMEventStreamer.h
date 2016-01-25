@@ -48,11 +48,11 @@ public:
 
 	/** Serialize a DQMEvent object and store it in the data stream
 	 */
-	virtual StatusCode serialize(const DQMEvent *const pObject, DQMDataStream *const pDataStream) const = 0;
+	virtual StatusCode serialize(const DQMEvent *const pObject, DQMDataStream *const pDataStream) = 0;
 
 	/** De-serialize a DQMEvent given from the data stream
 	 */
-	virtual StatusCode deserialize(DQMEvent *&pObject, DQMDataStream *const pDataStream) const = 0;
+	virtual StatusCode deserialize(DQMEvent *&pObject, DQMDataStream *const pDataStream) = 0;
 
 	/** Serialize a part of a DQMEvent object identified by the reg exp 'subEventIdentifier' and store it in the data stream
 	 *
@@ -61,7 +61,7 @@ public:
 	 *
 	 *  The identifier decoding has to be performed by the user, based on the event contents itself
 	 */
-	virtual StatusCode serialize(const DQMEvent *const pObject, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) const = 0;
+	virtual StatusCode serialize(const DQMEvent *const pObject, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

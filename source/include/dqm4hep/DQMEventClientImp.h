@@ -81,7 +81,7 @@ class DQMEventClientImp
 
 	/** Get the event streamer
 	 */
-	virtual const DQMEventStreamer *getEventStreamer() const = 0;
+	virtual DQMEventStreamer *getEventStreamer() const = 0;
 
 	/** Set the queue size that stores the received events
 	 */

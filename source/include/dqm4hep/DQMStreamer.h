@@ -53,11 +53,11 @@ public:
 
 	/** Serialize a given object and store it in the data stream
 	 */
-	virtual StatusCode serialize(const T *const pObject, DQMDataStream *const pDataStream) const = 0;
+	virtual StatusCode serialize(const T *const pObject, DQMDataStream *const pDataStream) = 0;
 
 	/** De-serialize a given from the data stream
 	 */
-	virtual StatusCode deserialize(T *&pObject, DQMDataStream *const pDataStream) const = 0;
+	virtual StatusCode deserialize(T *&pObject, DQMDataStream *const pDataStream) = 0;
 };
 
 //-------------------------------------------------------------------------------------------------

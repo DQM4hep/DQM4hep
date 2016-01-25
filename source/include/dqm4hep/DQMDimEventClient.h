@@ -114,7 +114,7 @@ public:
 
 	/** Get the event streamer
 	 */
-	const DQMEventStreamer *getEventStreamer() const;
+	DQMEventStreamer *getEventStreamer() const;
 
 	/** Set the maximum queue size that stores the received events
 	 */

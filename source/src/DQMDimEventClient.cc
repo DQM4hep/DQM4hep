@@ -262,7 +262,7 @@ StatusCode DQMDimEventClient::setEventStreamer(DQMEventStreamer *pEventStreamer)
 
 //-------------------------------------------------------------------------------------------------
 
-const DQMEventStreamer *DQMDimEventClient::getEventStreamer() const
+DQMEventStreamer *DQMDimEventClient::getEventStreamer() const
 {
 	return m_pEventStreamer;
 }

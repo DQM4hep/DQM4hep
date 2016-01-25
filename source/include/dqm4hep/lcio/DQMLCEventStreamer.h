@@ -58,11 +58,11 @@ class DQMLCParametersStreamer : public DQMStreamer<EVENT::LCParameters>
 public:
 	/** Serialize the LCParameters in dataStream
 	 */
-	StatusCode serialize(const EVENT::LCParameters *const pLCarameters, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCParameters *const pLCarameters, DQMDataStream *const pDataStream);
 
 	/** Deserialize the LCParameters from dataStream
 	 */
-	StatusCode deserialize(EVENT::LCParameters *&pLCParameters, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCParameters *&pLCParameters, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -83,11 +83,11 @@ class DQMLCEventStreamer : public DQMEventStreamerPlugin
 
 	/** Serialize the event and store it into a data stream.
 	 */
-	StatusCode serialize(const DQMEvent *const pEvent, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const DQMEvent *const pEvent, DQMDataStream *const pDataStream);
 
 	/** De-serialize the lcio event.
 	 */
-	StatusCode deserialize(DQMEvent *&pEvent, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(DQMEvent *&pEvent, DQMDataStream *const pDataStream);
 
 	/** Serialize the a part of the event and store it into a data stream.
 	 *
@@ -95,7 +95,7 @@ class DQMLCEventStreamer : public DQMEventStreamerPlugin
 	 *  concatenated with semi columns : "collectionName1:collectionName2:collectionName3"
 	 *  If the sub event identifier is empty the whole event is serialized
 	 */
-	StatusCode serialize(const DQMEvent *const pObject, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const DQMEvent *const pObject, const std::string &subEventIdentifier, DQMDataStream *const pDataStream);
 
 	/** Clone the lcio streamer
 	 */
@@ -125,11 +125,11 @@ public:
 
 	/** Serialize an LCCollection
 	 */
-	StatusCode serialize(const EVENT::LCCollection *const pLCCollection, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCCollection *const pLCCollection, DQMDataStream *const pDataStream);
 
 	/** Deserialize an LCCollection. The collection must be allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCCollection *&pLCCollection, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCCollection *&pLCCollection, DQMDataStream *const pDataStream);
 
 protected:
 
@@ -148,11 +148,11 @@ class DQMLCGenericObjectStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize an LCGenericObject
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a LCGenericObject. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -165,11 +165,11 @@ class DQMCalorimeterHitStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize an CalorimeterHit
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a CalorimeterHit. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -182,11 +182,11 @@ class DQMRawCalorimeterHitStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize an RawCalorimeterHit
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a RawCalorimeterHit. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -199,11 +199,11 @@ class DQMTPCHitStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize a TPCHit
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a TPCHit. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -216,11 +216,11 @@ class DQMClusterStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize an Cluster
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a Cluster. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -233,11 +233,11 @@ class DQMParticleIDStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize an ParticleID
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a ParticleID. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -250,11 +250,11 @@ class DQMLCFloatVecStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize a LCFloatVec
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a LCFloatVec. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -267,11 +267,11 @@ class DQMLCIntVecStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize a LCIntVec
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a LCIntVec. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -284,11 +284,11 @@ class DQMLCStrVecStreamer : public DQMLCObjectStreamer
 public:
 	/** Serialize a LCStrVec
 	 */
-	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode serialize(const EVENT::LCObject *const pLCObject, DQMDataStream *const pDataStream);
 
 	/** Deserialize a LCStrVec. The object is allocated in this function
 	 */
-	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream) const;
+	StatusCode deserialize(EVENT::LCObject *&pLCObject, DQMDataStream *const pDataStream);
 };
 
 } 

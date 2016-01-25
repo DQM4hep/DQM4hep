@@ -126,7 +126,7 @@ StatusCode DQMEventClient::setEventStreamer(DQMEventStreamer *pEventStreamer)
 
 //-------------------------------------------------------------------------------------------------
 
-const DQMEventStreamer *DQMEventClient::getEventStreamer() const
+DQMEventStreamer *DQMEventClient::getEventStreamer() const
 {
 	return m_pClientImp->getEventStreamer();
 }

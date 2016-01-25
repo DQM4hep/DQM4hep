@@ -44,12 +44,10 @@ class DQMStorage;
 class ME_FULL_NAME_COMPARE
 {
 public:
-	ME_FULL_NAME_COMPARE(const std::string &fullNameToCompare);
 	ME_FULL_NAME_COMPARE(const DQMPath &fullPathToCompare);
 	bool operator ()(DQMMonitorElement *pMonitorElement);
 private:
 	DQMPath        m_pathToCompare;
-	std::string    m_fullNameToCompare;
 };
 
 class DQMMonitorElementNameListRpc : public DimRpc

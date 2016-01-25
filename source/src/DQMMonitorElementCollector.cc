@@ -41,18 +41,8 @@
 namespace dqm4hep
 {
 
-ME_FULL_NAME_COMPARE::ME_FULL_NAME_COMPARE(const std::string &fullNameToCompare) :
-		m_fullNameToCompare(fullNameToCompare),
-		m_pathToCompare(DQMPath(fullNameToCompare))
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
 ME_FULL_NAME_COMPARE::ME_FULL_NAME_COMPARE(const DQMPath &fullNameToCompare) :
-		m_pathToCompare(fullNameToCompare),
-		m_fullNameToCompare(fullNameToCompare.getPath())
+		m_pathToCompare(fullNameToCompare)
 {
 	/* nop */
 }
@@ -64,12 +54,7 @@ bool ME_FULL_NAME_COMPARE::operator ()(DQMMonitorElement *pMonitorElement)
 	if(NULL == pMonitorElement)
 		return false;
 
-//	std::string fullPath = pMonitorElement->getFullPath();
-//	std::string name = pMonitorElement->getName();
 	DQMPath mePath = pMonitorElement->getPath() + pMonitorElement->getName();
-
-//	if(fullPath + name == m_fullNameToCompare)
-//		return true;
 
 	if(m_pathToCompare == mePath)
 		return true;
@@ -382,7 +367,6 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 
 				DQMMonitorElementInfo info;
 				info.m_moduleName = moduleName;
-//				info.m_monitorElementFullPath = pMonitorElement->getFullPath();
 				info.m_monitorElementFullPath = pMonitorElement->getPath().getPath();
 				info.m_monitorElementName = pMonitorElement->getName();
 				info.m_monitorElementType = monitorElementTypeToString(pMonitorElement->getType());
