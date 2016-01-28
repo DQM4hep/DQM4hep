@@ -392,10 +392,10 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		this->getMonitorElementSender()->setCollectorName(m_settings.m_monitorElementCollector);
 
 		// configure streamer
-		DQMEventStreamerPlugin *pEventStreamer = NULL;
+		DQMEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMEventStreamer>(m_settings.m_eventStreamer);
 
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=,
-				DQMPluginManager::instance()->getCastedPluginClone(m_settings.m_eventStreamer, pEventStreamer ) );
+		if(!pEventStreamer)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// configure data client
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->setEventStreamer(pEventStreamer));
@@ -442,11 +442,12 @@ StatusCode DQMAnalysisModuleApplication::configureCycle(const TiXmlHandle xmlHan
 		}
 
 		// find the cycle plug-in
-		m_pCycle = NULL;
-
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: querying cycle to PluginManager ... OK" << std::endl;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=,
-				DQMPluginManager::instance()->getCastedPluginClone<DQMCycle>(m_settings.m_cycleType, m_pCycle));
+		m_pCycle = DQMPluginManager::instance()->createPluginClass<DQMCycle>(m_settings.m_cycleType);
+
+		if(!m_pCycle)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: querying cycle to PluginManager ... OK" << std::endl;
 
 		m_pCycle->setCycleValue(m_settings.m_cycleValue);
@@ -485,12 +486,12 @@ StatusCode DQMAnalysisModuleApplication::configureModule(const TiXmlHandle xmlHa
 		if(this->getModuleName().empty())
 			this->setModuleName(name);
 
-		DQMAnalysisModule *pAnalysisModule = NULL;
-
 		streamlog_out( MESSAGE ) << "Query analysis module to PluginManager ... " << std::endl;
 
-		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=,
-				DQMPluginManager::instance()->getCastedPluginClone< DQMAnalysisModule >( this->getModuleType(), pAnalysisModule ) );
+		DQMAnalysisModule *pAnalysisModule = DQMPluginManager::instance()->createPluginClass<DQMAnalysisModule>(this->getModuleType());
+
+		if(!pAnalysisModule)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		this->setModule(pAnalysisModule);
 
@@ -506,7 +507,7 @@ StatusCode DQMAnalysisModuleApplication::configureModule(const TiXmlHandle xmlHa
 		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getModule()->initModule() );
 		streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ... OK" << std::endl;
 
-		m_applicationName = this->getModule()->getType() + "/" + this->getModule()->getName();
+		m_applicationName = this->getModule()->getName();
 
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureModule: configuring ... OK" << std::endl;
 	}

@@ -40,6 +40,7 @@
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/DQMQualityTest.h"
 #include "dqm4hep/DQMModuleApi.h"
+#include "dqm4hep/DQMPlugin.h"
 
 // -- root headers
 #include "TRandom.h"
@@ -96,20 +97,15 @@ public:
 	{
 		return true;
 	}
-
-	DQMQualityTest *clone(const std::string &name) const
-	{
-		return new RandomQualityTest(name);
-	}
 };
 
 // module plugin declaration
-RandomModule aRandomModule;
+DQM_PLUGIN_DECL( RandomModule ,  "RandomModule" )
 
 //-------------------------------------------------------------------------------------------------
 
 RandomModule::RandomModule()
- : DQMAnalysisModule("RandomModule")
+ : DQMAnalysisModule()
 {
 	setDetectorName("random module detector");
 	setVersion(1, 0, 0);
@@ -403,13 +399,6 @@ StatusCode RandomModule::endOfRun(DQMRun *pRun)
 	streamlog_out(MESSAGE) << "End time " << timeStr << std::endl;
 
 	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin *RandomModule::clone() const
-{
-	return new RandomModule();
 }
 
 } 

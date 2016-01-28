@@ -37,6 +37,7 @@
 #include "dqm4hep/DQMMonitorElement.h"
 #include "dqm4hep/DQMModuleApi.h"
 #include "dqm4hep/DQMXmlHelper.h"
+#include "dqm4hep/DQMPlugin.h"
 
 // -- root headers
 #include "TRandom.h"
@@ -45,12 +46,12 @@ namespace dqm4hep
 {
 
 // module plugin declaration
-StandaloneRandomModule aStandaloneRandomModule;
+DQM_PLUGIN_DECL( StandaloneRandomModule , "StandaloneRandomModule" )
 
 //-------------------------------------------------------------------------------------------------
 
 StandaloneRandomModule::StandaloneRandomModule()
- : DQMStandaloneModule("StandaloneRandomModule")
+ : DQMStandaloneModule()
 {
 	setVersion(1, 0, 0);
 }
@@ -142,13 +143,6 @@ StatusCode StandaloneRandomModule::process()
 	m_pTestElement->get<TH1F>()->Fill(randomValue);
 
 	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin *StandaloneRandomModule::clone() const
-{
-	return new StandaloneRandomModule();
 }
 
 } 

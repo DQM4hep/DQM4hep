@@ -31,7 +31,6 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMPlugin.h"
 
 namespace dqm4hep
 {
@@ -51,12 +50,12 @@ class DQMModule;
  *  When the timeout is reached, the cycle ends. The default timeout value
  *  is 10 seconds and can be changed via the method setTimeout(secs)
  */
-class DQMCycle : public DQMPlugin
+class DQMCycle
 {
 public:
-	/** Constructor with cycle type
+	/** Constructor
 	 */
-	DQMCycle(const std::string &cycleType);
+	DQMCycle();
 
 	/** Destructor
 	 */
@@ -88,10 +87,6 @@ public:
 	 */
 	DQMModuleApplication *getModuleApplication() const;
 
-	/** Get the cycle type
-	 */
-	const std::string &getType() const;
-
 	/** Get the processing rate. May be called after a processCycle()
 	 *  to get the correct value
 	 */
@@ -101,19 +96,11 @@ public:
 	 */
 	virtual StatusCode processCycle() = 0;
 
-	/** Allocate a clone of this cycle
-	 */
-	virtual DQMPlugin *clone() const = 0;
-
 protected:
-
-	const std::string               m_cycleType;
-
 	DQMModuleApplication            *m_pApplication;
-
-	float                           m_processingRate;
-	float                           m_cycleValue;
-	unsigned int                   m_cycleTimeout;
+	float                            m_processingRate;
+	float                            m_cycleValue;
+	unsigned int                     m_cycleTimeout;
 };
 
 } 

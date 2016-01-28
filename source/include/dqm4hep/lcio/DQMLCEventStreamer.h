@@ -70,7 +70,7 @@ public:
 
 /** DQMLCEventStreamer class
  */ 
-class DQMLCEventStreamer : public DQMEventStreamerPlugin
+class DQMLCEventStreamer : public DQMEventStreamer
 {
  public:
 	/** Constructor
@@ -97,12 +97,7 @@ class DQMLCEventStreamer : public DQMEventStreamerPlugin
 	 */
 	StatusCode serialize(const DQMEvent *const pObject, const std::string &subEventIdentifier, DQMDataStream *const pDataStream);
 
-	/** Clone the lcio streamer
-	 */
-	DQMPlugin *clone() const;
-
 private:
-
 	DQMLCCollectionStreamerMap           m_lcCollectionStreamerMap;
 	DQMLCParametersStreamer              m_lcParametersStreamer;
 };

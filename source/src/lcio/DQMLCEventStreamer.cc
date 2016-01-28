@@ -30,6 +30,7 @@
 #include "dqm4hep/lcio/DQMLCEvent.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMPlugin.h"
 
 // -- lcio headers
 #include "IMPL/LCEventImpl.h"
@@ -53,12 +54,11 @@ namespace dqm4hep
 {
 
 // declare a streamer plug-in
-DQMLCEventStreamer 	aLCEventStreamer;
+DQM_PLUGIN_DECL( DQMLCEventStreamer , "LCIOStreamer" )
 
 //-------------------------------------------------------------------------------------------------
 
-DQMLCEventStreamer::DQMLCEventStreamer() :
-		DQMEventStreamerPlugin("LCIOStreamer")
+DQMLCEventStreamer::DQMLCEventStreamer()
 {
 	m_lcCollectionStreamerMap[EVENT::LCIO::LCGENERICOBJECT] = new DQMLCCollectionStreamer(EVENT::LCIO::LCGENERICOBJECT, new DQMLCGenericObjectStreamer());
 	m_lcCollectionStreamerMap[EVENT::LCIO::CALORIMETERHIT]  = new DQMLCCollectionStreamer(EVENT::LCIO::CALORIMETERHIT,  new DQMCalorimeterHitStreamer());
@@ -310,13 +310,6 @@ StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, const std
 	}
 
 	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin* DQMLCEventStreamer::clone() const
-{
-	return new DQMLCEventStreamer();
 }
 
 //-------------------------------------------------------------------------------------------------

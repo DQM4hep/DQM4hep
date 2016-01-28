@@ -66,39 +66,6 @@ public:
 	virtual const std::string &getName() const = 0;
 };
 
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-/** DQMApplicationPlugin class
- */
-class DQMApplicationPlugin : public DQMPlugin, public DQMApplication
-{
-public:
-	/** Constructor
-	 */
-	DQMApplicationPlugin(const std::string &pluginName);
-
-	/** Destructor
-	 */
-	virtual ~DQMApplicationPlugin();
-};
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-inline DQMApplicationPlugin::DQMApplicationPlugin(const std::string &pluginName) :
-		DQMPlugin(pluginName)
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
-inline DQMApplicationPlugin::~DQMApplicationPlugin()
-{
-	/* nop */
-}
-
 } 
 
 #endif  //  DQMAPPLICATION_H

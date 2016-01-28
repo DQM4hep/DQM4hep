@@ -50,7 +50,6 @@ public:
 	StatusCode readSettings(const TiXmlHandle xmlHandle);
 	StatusCode process();
 	StatusCode endModule();
-	DQMPlugin *clone() const;
 
 protected:
 	DQMMonitorElement                        *m_pTestElement;

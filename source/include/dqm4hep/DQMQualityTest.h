@@ -31,7 +31,6 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMPlugin.h"
 #include "dqm4hep/DQMStreamable.h"
 
 namespace dqm4hep

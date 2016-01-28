@@ -41,6 +41,7 @@
 #include "dqm4hep/DQMEvent.h"
 #include "dqm4hep/DQMQualityTest.h"
 #include "dqm4hep/DQMModuleApi.h"
+#include "dqm4hep/DQMPlugin.h"
 
 // -- root headers
 #include "TRandom.h"
@@ -55,12 +56,13 @@
 namespace dqm4hep
 {
 // module plugin declaration
+DQM_PLUGIN_DECL( CaloHitModule , "CaloHitModule" )
 CaloHitModule aCaloHitModule;
 
 //-------------------------------------------------------------------------------------------------
 
 CaloHitModule::CaloHitModule()
- : DQMAnalysisModule("CaloHitModule")
+ : DQMAnalysisModule()
 {
 	setDetectorName("NO DETECTOR");
 	setVersion(1, 0, 0);
@@ -259,13 +261,6 @@ StatusCode CaloHitModule::endOfRun(DQMRun *pRun)
 	streamlog_out(MESSAGE) << "End time " << timeStr << std::endl;
 
 	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin *CaloHitModule::clone() const
-{
-	return new CaloHitModule();
 }
 
 } 

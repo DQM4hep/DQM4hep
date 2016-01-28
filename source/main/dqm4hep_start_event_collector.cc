@@ -158,10 +158,10 @@ int main(int argc, char* argv[])
 		// configure streamer
 		if(streamerArg.isSet())
 		{
-			DQMEventStreamerPlugin *pEventStreamer = NULL;
+			DQMEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMEventStreamer>(streamerArg.getValue());
 
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=,
-					DQMPluginManager::instance()->getCastedPluginClone(streamerArg.getValue(), pEventStreamer));
+			if(!pEventStreamer)
+				throw StatusCodeException(STATUS_CODE_FAILURE);
 
 			pApplication->setEventStreamer(pEventStreamer);
 		}

@@ -31,8 +31,8 @@
 namespace dqm4hep
 {
 
-DQMStandaloneModule::DQMStandaloneModule( const std::string &moduleType ) :
-		DQMModule( moduleType )
+DQMStandaloneModule::DQMStandaloneModule() :
+		DQMModule()
 {
 	/* nop */
 }

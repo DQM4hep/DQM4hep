@@ -42,12 +42,12 @@ namespace dqm4hep
 {
 
 // plug-in declaration
-DQMEventCounterCycle anEventCounterCycle;
+DQM_PLUGIN_DECL( DQMEventCounterCycle , "EventCounterCycle" )
 
 //-------------------------------------------------------------------------------------------------
 
 DQMEventCounterCycle::DQMEventCounterCycle() :
-		DQMCycle("EventCounterCycle")
+		DQMCycle()
 {
 	// default value
 	setCycleValue(100);
@@ -152,21 +152,6 @@ StatusCode DQMEventCounterCycle::processCycle()
 
 	return STATUS_CODE_SUCCESS;
 }
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin *DQMEventCounterCycle::clone() const
-{
-	DQMCycle *pCycle = new DQMEventCounterCycle();
-
-	pCycle->setTimeout(this->getTimeout());
-	pCycle->setCycleValue(this->getCycleValue());
-	pCycle->setModuleApplication(this->getModuleApplication());
-
-	return pCycle;
-}
-
-//-------------------------------------------------------------------------------------------------
 
 } 
 

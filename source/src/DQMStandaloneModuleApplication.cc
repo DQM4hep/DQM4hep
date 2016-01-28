@@ -174,12 +174,12 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 	if(this->getModuleName().empty())
 		this->setModuleName(name);
 
-	DQMStandaloneModule *pStandaloneModule = NULL;
-
 	streamlog_out( MESSAGE ) << "Query analysis module to PluginManager ... " << std::endl;
 
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=,
-			DQMPluginManager::instance()->getCastedPluginClone< DQMStandaloneModule >( this->getModuleType(), pStandaloneModule ) );
+	DQMStandaloneModule *pStandaloneModule = DQMPluginManager::instance()->createPluginClass<DQMStandaloneModule>(this->getModuleType());
+
+	if(!pStandaloneModule)
+		return STATUS_CODE_FAILURE;
 
 	this->setModule(pStandaloneModule);
 
@@ -195,7 +195,7 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getModule()->initModule() );
 	streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ... OK" << std::endl;
 
-	m_name = this->getModule()->getType() + "/" + this->getModule()->getName();
+	m_name = this->getModule()->getName();
 
 	DimBrowser browser;
 	int nServers = browser.getServers();

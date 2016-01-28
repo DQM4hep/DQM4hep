@@ -166,11 +166,6 @@ StatusCode DQMArchiver::archive(DQMModule *pModule, bool archiveAll)
 	if(m_firstArchive)
 	{
 		// write module info in the file
-		TObjString *pModuleTypeString = new TObjString();
-		pModuleTypeString->SetString(pModule->getType().c_str());
-		m_pArchiveFile->WriteTObject(pModuleTypeString);
-		delete pModuleTypeString;
-
 		TObjString *pModuleNameString = new TObjString();
 		pModuleNameString->SetString(pModule->getName().c_str());
 		m_pArchiveFile->WriteTObject(pModuleNameString);

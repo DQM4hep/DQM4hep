@@ -31,9 +31,7 @@
 namespace dqm4hep
 {
 
-DQMCycle::DQMCycle(const std::string &type) :
-		DQMPlugin(type),
-		m_cycleType(type),
+DQMCycle::DQMCycle() :
 		m_pApplication(NULL),
 		m_processingRate(0.f),
 		m_cycleValue(0.f),
@@ -93,19 +91,10 @@ DQMModuleApplication *DQMCycle::getModuleApplication() const
 
 //-------------------------------------------------------------------------------------------------
 
-const std::string &DQMCycle::getType() const
-{
-	return this->getPluginName();
-}
-
-//-------------------------------------------------------------------------------------------------
-
 float DQMCycle::getProcessingRate() const
 {
 	return m_processingRate;
 }
-
-//-------------------------------------------------------------------------------------------------
 
 } 
 

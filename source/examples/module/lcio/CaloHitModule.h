@@ -51,7 +51,6 @@ public:
 	StatusCode startOfRun(DQMRun *pRun);
 	StatusCode endOfRun(DQMRun *pRun);
 	StatusCode endModule();
-	DQMPlugin *clone() const;
 
 protected:
 	DQMMonitorElement                        *m_pHitsEnergyElement;

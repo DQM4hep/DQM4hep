@@ -35,8 +35,7 @@
 namespace dqm4hep
 {
 
-DQMPluginManager::DQMPluginManager() :
-		m_registerNextPlugin(true)
+DQMPluginManager::DQMPluginManager()
 {
 	/* nop */
 }
@@ -131,55 +130,12 @@ StatusCode DQMPluginManager::loadLibrary( const std::string &libraryName )
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMPluginManager::getPlugin( const std::string &pluginName, DQMPlugin *&pPlugin ) const
+DQMPlugin *DQMPluginManager::getPlugin( const std::string &pluginName ) const
 {
-	pPlugin = NULL;
-
 	if( ! isPluginRegistered( pluginName ) )
-		return STATUS_CODE_NOT_FOUND;
+		return 0;
 
-	pPlugin = m_pluginMap.find( pluginName )->second;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMPluginManager::getPluginClone( const std::string &pluginName, DQMPlugin *&pPlugin ) const
-{
-	pPlugin = NULL;
-
-	if( ! isPluginRegistered( pluginName ) )
-		return STATUS_CODE_NOT_FOUND;
-
-	m_registerNextPlugin = false;
-	pPlugin = m_pluginMap.find( pluginName )->second->clone();
-	m_registerNextPlugin = true;
-
-	if( NULL == pPlugin )
-		return STATUS_CODE_FAILURE;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMPluginManager::takePlugin( const std::string &pluginName, DQMPlugin *&pPlugin )
-{
-	pPlugin = NULL;
-
-	if( ! isPluginRegistered( pluginName ) )
-		return STATUS_CODE_NOT_FOUND;
-
-	DQMPluginMap::iterator findIter = m_pluginMap.find( pluginName );
-	pPlugin = findIter->second;
-
-	if( NULL == pPlugin )
-		return STATUS_CODE_FAILURE;
-
-	m_pluginMap.erase( findIter );
-
-	return STATUS_CODE_SUCCESS;
+	return m_pluginMap.find( pluginName )->second;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -212,12 +168,10 @@ StatusCode DQMPluginManager::registerPlugin( DQMPlugin *pPlugin )
 	if( NULL == pPlugin )
 		return STATUS_CODE_INVALID_PTR;
 
-	if(!m_registerNextPlugin)
-		return STATUS_CODE_SUCCESS;
-
 	// check if the plug is already registered
 	if( isPluginRegistered( pPlugin->getPluginName() ) )
 	{
+		delete pPlugin;
 		pPlugin = NULL;
 		return STATUS_CODE_ALREADY_PRESENT;
 	}

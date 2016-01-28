@@ -31,8 +31,8 @@
 namespace dqm4hep
 {
 
-DQMAnalysisModule::DQMAnalysisModule( const std::string &moduleType ) :
-		DQMModule(moduleType)
+DQMAnalysisModule::DQMAnalysisModule() :
+		DQMModule()
 {
 	/* nop */
 }

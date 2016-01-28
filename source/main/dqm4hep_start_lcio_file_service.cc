@@ -122,8 +122,15 @@ int main(int argc, char* argv[])
 	// event collector client
 	DQMEventClient *pEventClient = new DQMEventClient();
 
-	DQMLCEventStreamer *pEventStreamer = NULL;
-	THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->takeCastedPlugin<DQMLCEventStreamer>( "LCIOStreamer", pEventStreamer ) );
+	DQMLCEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMLCEventStreamer>("LCIOStreamer");
+
+	if(!pEventStreamer)
+	{
+		streamlog_out(ERROR) << "Couldn't get the lcio streamer" << std::endl;
+		streamlog_out(ERROR) << "Plugin registered ? " << DQMPluginManager::instance()->isPluginRegistered("LCIOStreamer") << std::endl;
+
+		return 1;
+	}
 
 	pEventClient->setEventStreamer(pEventStreamer);
 	pEventClient->setCollectorName(eventCollectorNameArg.getValue());

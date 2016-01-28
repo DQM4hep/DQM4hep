@@ -30,19 +30,21 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMVersion.h"
 
 namespace dqm4hep
 {
+
+class DQMPluginManager;
 
 /** DQMPlugin class
  */ 
 class DQMPlugin
 {
+	friend class DQMPluginManager;
 public:
 	/** Constructor
 	 */
-	DQMPlugin( const std::string &pluginName, bool shouldRegister = true );
+	DQMPlugin(const std::string &pluginName);
 
 	/** Destructor
 	 */
@@ -52,24 +54,13 @@ public:
 	 */
 	const std::string &getPluginName() const;
 
-	/** Get the plugin version
+	/** Create a new instance of the wrapped class
 	 */
-	const DQMVersion &getVersion() const;
-
-	/** Clone the plug-in
-	 */
-	virtual DQMPlugin *clone() const = 0;
-
-protected:
-	/** Set the plugin version
-	 */
-	void setVersion( unsigned int major, unsigned int minor, unsigned int patch );
+	virtual void *create() const = 0;
 
 private:
-
 	const std::string              m_pluginName;
-	DQMVersion                     m_version;
-}; 
+};
 
 } 
 

@@ -32,7 +32,6 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMStreamer.h"
-#include "dqm4hep/DQMPlugin.h"
 
 namespace dqm4hep
 {
@@ -44,7 +43,7 @@ class DQMEventStreamer : public DQMStreamer<DQMEvent>
 public:
 	/** Destructor
 	 */
-	virtual ~DQMEventStreamer();
+	virtual ~DQMEventStreamer() {}
 
 	/** Serialize a DQMEvent object and store it in the data stream
 	 */
@@ -63,46 +62,6 @@ public:
 	 */
 	virtual StatusCode serialize(const DQMEvent *const pObject, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) = 0;
 };
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-class DQMEventStreamerPlugin : public DQMEventStreamer, public DQMPlugin
-{
-public:
-	/** Constructor
-	 */
-	DQMEventStreamerPlugin(const std::string &pluginName);
-
-	/** Destructor
-	 */
-	virtual ~DQMEventStreamerPlugin();
-};
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-inline DQMEventStreamer::~DQMEventStreamer()
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-inline DQMEventStreamerPlugin::DQMEventStreamerPlugin(const std::string &pluginName) :
-		DQMPlugin(pluginName)
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
-inline DQMEventStreamerPlugin::~DQMEventStreamerPlugin()
-{
-	/* nop */
-}
-
 
 } 
 

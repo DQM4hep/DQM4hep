@@ -46,7 +46,7 @@ class DQMStandaloneModule : public DQMModule
 public:
 	/** Constructor
 	 */
-	DQMStandaloneModule( const std::string &moduleType );
+	DQMStandaloneModule();
 
 	/** Destructor
 	 */

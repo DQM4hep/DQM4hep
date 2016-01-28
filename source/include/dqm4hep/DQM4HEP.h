@@ -227,6 +227,18 @@ typedef std::vector<DQMStats> DQMStatsList;
 #define NOTIFY_METHOD_CALLED \
 		streamlog_out(DEBUG) << "Method called : " << __FUNCTION__ << std::endl;
 
+//-------------------------------------------------------------------------------------------------
+
+#define DQM_PLUGIN_DECL( ClassName , ClassStr ) \
+		class DQMPlugin_##ClassName : public dqm4hep::DQMPlugin \
+		{ \
+		public: \
+			DQMPlugin_##ClassName () : dqm4hep::DQMPlugin(ClassStr) {} \
+			void *create() const { return new ClassName () ; } \
+		}; \
+		DQMPlugin_##ClassName instance_DQMPlugin_##ClassName;
+
+//-------------------------------------------------------------------------------------------------
 
 // macros for enumerators
 #define GET_ENUM_ENTRY(a, b)  a,

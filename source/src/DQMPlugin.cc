@@ -32,12 +32,10 @@
 namespace dqm4hep
 {
 
-DQMPlugin::DQMPlugin( const std::string &pluginName, bool shouldRegister ) :
+DQMPlugin::DQMPlugin(const std::string &pluginName) :
 		m_pluginName( pluginName )
 {
-	if( shouldRegister )
-		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=,
-				DQMPluginManager::instance()->registerPlugin( this ) );
+	THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->registerPlugin( this ) );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -52,20 +50,6 @@ DQMPlugin::~DQMPlugin()
 const std::string &DQMPlugin::getPluginName() const
 {
 	return m_pluginName;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const DQMVersion &DQMPlugin::getVersion() const
-{
-	return m_version;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMPlugin::setVersion( unsigned int major, unsigned int minor, unsigned int patch )
-{
-	m_version.set( major, minor, patch );
 }
 
 } 

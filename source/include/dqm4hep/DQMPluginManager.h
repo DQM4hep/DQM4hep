@@ -62,53 +62,19 @@ public:
 	 */
 	StatusCode loadLibrary( const std::string &libraryName );
 
-
-
 	/** Get the plug-in by name
 	 */
-	StatusCode getPlugin( const std::string &pluginName, DQMPlugin *&pPlugin ) const;
+	DQMPlugin *getPlugin( const std::string &pluginName ) const;
 
 	/** Get the plug-in clone. A new plug-in instance is allocated and returned
 	 *  to the user. Ownership of the plug-in transfered to the caller.
 	 */
-	StatusCode getPluginClone( const std::string &pluginName, DQMPlugin *&pPlugin ) const;
-
-	/** Find and returns the plug-in by name.
-	 *  The plug-in is removed from the registered plug-ins
-	 */
-	StatusCode takePlugin( const std::string &pluginName, DQMPlugin *&pPlugin );
+	template <typename T>
+	T *createPluginClass( const std::string &pluginName ) const;
 
 	/** Whether the plug-in is registered within the plug-in manager
 	 */
 	bool isPluginRegistered( const std::string &pluginName ) const;
-
-
-
-	/** Get the plug-in by name.
-	 *  The found plug-in is casted in the asked type
-	 */
-	template <typename T>
-	StatusCode getCastedPlugin( const std::string &pluginName, T *&pPlugin ) const;
-
-	/** Get the plug-in clone. A new plug-in instance is allocated and returned
-	 *  to the user. Ownership of the plug-in transfered to the caller.
-	 *  The found plug-in is casted in the asked type
-	 */
-	template <typename T>
-	StatusCode getCastedPluginClone( const std::string &pluginName, T *&pPlugin ) const;
-
-	/** Find and returns the plug-in by name.
-	 *  The plug-in is removed from the registered plug-ins.
-	 *  The found plug-in is casted in the asked type
-	 */
-	template <typename T>
-	StatusCode takeCastedPlugin( const std::string &pluginName, T *&pPlugin );
-
-	/** Whether the plug-in is registered within the plug-in manager.
-	 *  The found plug-in is casted in the asked type
-	 */
-	template <typename T>
-	bool isCastedPluginRegistered( const std::string &pluginName ) const;
 
 	/** Get the plug-in name list
 	 */
@@ -128,95 +94,26 @@ private:
 	StatusCode registerPlugin( DQMPlugin *pPlugin );
 
 private:
-
 	DQMPluginMap              m_pluginMap;
-	mutable bool            m_registerNextPlugin;
 };
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
 template <typename T>
-inline StatusCode DQMPluginManager::getCastedPlugin( const std::string &pluginName, T *&pPlugin ) const
+inline T *DQMPluginManager::createPluginClass( const std::string &pluginName ) const
 {
-	pPlugin = NULL;
-	DQMPlugin *pTestPlugin = NULL;
+	DQMPlugin *pPlugin = this->getPlugin( pluginName );
 
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getPlugin( pluginName, pTestPlugin ) );
+	if(!pPlugin)
+		return 0;
 
-	pPlugin = dynamic_cast< T * >( pTestPlugin );
+	void *pClass = pPlugin->create();
 
-	if(NULL == pPlugin)
-		return STATUS_CODE_FAILURE;
+	if(NULL == pClass)
+		return 0;
 
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-template <typename T>
-inline StatusCode DQMPluginManager::getCastedPluginClone( const std::string &pluginName, T *&pPlugin ) const
-{
-	pPlugin = NULL;
-	DQMPlugin *pTestPlugin = NULL;
-
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getPlugin( pluginName, pTestPlugin ) );
-
-	m_registerNextPlugin = false;
-	pTestPlugin = pTestPlugin->clone();
-	m_registerNextPlugin = true;
-
-	pPlugin = dynamic_cast< T * >( pTestPlugin );
-
-	if(NULL == pPlugin)
-		return STATUS_CODE_FAILURE;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-template <typename T>
-inline StatusCode DQMPluginManager::takeCastedPlugin( const std::string &pluginName, T *&pPlugin )
-{
-	pPlugin = NULL;
-	DQMPlugin *pTestPlugin = NULL;
-
-	if( ! isPluginRegistered( pluginName ) )
-		return STATUS_CODE_NOT_FOUND;
-
-	DQMPluginMap::iterator findIter = m_pluginMap.find( pluginName );
-	pTestPlugin = findIter->second;
-
-	if( NULL == pTestPlugin )
-		return STATUS_CODE_FAILURE;
-
-	pPlugin = dynamic_cast< T * >( pTestPlugin );
-
-	if(NULL == pPlugin)
-		return STATUS_CODE_FAILURE;
-
-	m_pluginMap.erase( findIter );
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-template <typename T>
-inline bool DQMPluginManager::isCastedPluginRegistered( const std::string &pluginName ) const
-{
-	DQMPluginMap::const_iterator findIter = m_pluginMap.find( pluginName );
-
-	if( findIter == m_pluginMap.end() )
-		return false;
-
-	T *pCastedPlugin = dynamic_cast< T * >( findIter->second );
-
-	if( NULL == pCastedPlugin )
-		return false;
-
-	return true;
+	return static_cast<T *>(pClass);
 }
 
 } 

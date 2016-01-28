@@ -48,7 +48,7 @@ class DQMAnalysisModule : public DQMModule
 public:
 	/** Constructor
 	 */
-	DQMAnalysisModule( const std::string &moduleType );
+	DQMAnalysisModule();
 
 	/** Destructor
 	 */

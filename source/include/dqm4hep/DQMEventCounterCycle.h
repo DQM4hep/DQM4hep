@@ -51,10 +51,6 @@ public:
 	/** Process a cycle
 	 */
 	StatusCode processCycle();
-
-	/** Allocate a clone of this cycle
-	 */
-	DQMPlugin *clone() const;
 }; 
 
 } 

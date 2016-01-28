@@ -32,8 +32,7 @@
 namespace dqm4hep
 {
 
-DQMModule::DQMModule( const std::string &type ) :
-		DQMPlugin( type ),
+DQMModule::DQMModule() :
 		m_name( "" ),
 		m_pModuleApplication(NULL)
 {
@@ -63,13 +62,6 @@ const std::string &DQMModule::getName() const
 
 //-------------------------------------------------------------------------------------------------
 
-const std::string &DQMModule::getType() const
-{
-	return this->getPluginName();
-}
-
-//-------------------------------------------------------------------------------------------------
-
 const std::string &DQMModule::getDetectorName() const
 {
 	return m_detectorName;
@@ -80,6 +72,20 @@ const std::string &DQMModule::getDetectorName() const
 void DQMModule::setDetectorName( const std::string &detectorName )
 {
 	m_detectorName = detectorName;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const DQMVersion &DQMModule::getVersion() const
+{
+	return m_version;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMModule::setVersion(unsigned int major, unsigned int minor, unsigned int patch)
+{
+	m_version.set(major, minor, patch);
 }
 
 //-------------------------------------------------------------------------------------------------

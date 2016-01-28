@@ -42,12 +42,12 @@ namespace dqm4hep
 {
 
 // plug-in declaration
-DQMTimerCycle aTimerCycle;
+DQM_PLUGIN_DECL( DQMTimerCycle , "TimerCycle" )
 
 //-------------------------------------------------------------------------------------------------
 
 DQMTimerCycle::DQMTimerCycle() :
-		DQMCycle("TimerCycle")
+		DQMCycle()
 {
 	setCycleValue(30.f);
 }
@@ -145,21 +145,6 @@ StatusCode DQMTimerCycle::processCycle()
 
 	return STATUS_CODE_SUCCESS;
 }
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin *DQMTimerCycle::clone() const
-{
-	DQMCycle *pCycle = new DQMTimerCycle();
-
-	pCycle->setTimeout(this->getTimeout());
-	pCycle->setCycleValue(this->getCycleValue());
-	pCycle->setModuleApplication(this->getModuleApplication());
-
-	return pCycle;
-}
-
-//-------------------------------------------------------------------------------------------------
 
 } 
 

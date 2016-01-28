@@ -32,7 +32,6 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMVersion.h"
-#include "dqm4hep/DQMPlugin.h"
 
 namespace dqm4hep
 {
@@ -51,16 +50,16 @@ class TiXmlHandle;
  *
  * 	@author R.Ete
  */ 
-class DQMModule : public DQMPlugin
+class DQMModule
 {
 	friend class DQMModuleApi;           // to book monitor elements
 	friend class DQMArchiver;            // to archive monitor elements
 	friend class DQMModuleApplication;   // to run it
 
 public:
-	/** Constructor with module type
+	/** Constructor
 	 */
-	DQMModule( const std::string &type );
+	DQMModule();
 
 	/** Destructor
 	 */
@@ -70,13 +69,13 @@ public:
 	 */
 	const std::string &getName() const;
 
-	/** Get the module type
-	 */
-	const std::string &getType() const;
-
 	/** Get the detector name associated to this module
 	 */
 	const std::string &getDetectorName() const;
+
+	/** Get the module version
+	 */
+	const DQMVersion &getVersion() const;
 
 	/** Initialize the module.
 	 *  It is generally in this method that monitor elements are booked.
@@ -107,10 +106,6 @@ public:
 	 */
 	virtual StatusCode endModule() = 0;
 
-	/** Clone the module
-	 */
-	virtual DQMPlugin *clone() const = 0;
-
 protected:
 	/** Set the detector name for this module
 	 */
@@ -119,6 +114,10 @@ protected:
 	/** Set the module name
 	 */
 	void setName( const std::string &name );
+
+	/** Set the module version
+	 */
+	void setVersion(unsigned int major, unsigned int minor, unsigned int patch);
 
 private:
 	/** Get the module application in which the module is registered
@@ -131,8 +130,9 @@ private:
 
 	// members
 	std::string                   m_name;                       ///< The module name
-	std::string                   m_detectorName;              ///< The detector name for this module
-	DQMModuleApplication         *m_pModuleApplication;       ///< The monitor element manager
+	std::string                   m_detectorName;               ///< The detector name for this module
+	DQMVersion                    m_version;                    ///< The module version
+	DQMModuleApplication         *m_pModuleApplication;         ///< The monitor element manager
 }; 
 
 } 

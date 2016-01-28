@@ -42,7 +42,7 @@
 using namespace std;
 using namespace dqm4hep;
 
-DQMApplicationPlugin *pApplication = NULL;
+DQMApplication *pApplication = NULL;
 
 // simple function to exit the program
 void exit_application(int returnCode)
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
 			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->loadLibraries());
 		}
 
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->getCastedPluginClone<DQMApplicationPlugin>(applicationName, pApplication));
+		pApplication = DQMPluginManager::instance()->createPluginClass<DQMApplication>(applicationName);
 	}
 	catch(StatusCodeException &exception)
 	{
