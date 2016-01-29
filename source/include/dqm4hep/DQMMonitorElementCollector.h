@@ -32,6 +32,7 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMPath.h"
 #include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMMessaging.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -42,14 +43,145 @@ namespace dqm4hep
 class DQMMonitorElementCollector;
 class DQMStorage;
 
-class ME_FULL_NAME_COMPARE
+/** ModuleMeInfo class
+ */
+class ModuleMeInfo
+{
+private:
+	/** MeInfo struct
+	 */
+	struct MeInfo
+	{
+		std::set<int>         m_clientList;
+		DQMMonitorElement    *m_pMonitorElement;
+	};
+	typedef std::map<std::string,  MeInfo> MeInfoMap;
+
+public:
+	/** Constructor
+	 */
+	ModuleMeInfo();
+
+	/** Destructor
+	 */
+	~ModuleMeInfo();
+
+	/** Set the list of monitor element available on the module application
+	 */
+	void setAvailableMeList(const DQMMonitorElementInfoList &meNameList);
+
+	/** Get the list of monitor element available on the module application
+	 */
+	const DQMMonitorElementInfoList &getAvailableMeList() const;
+
+	/** Update the monitor element entry.
+	 *  Return whether the monitor element was updated
+	 */
+	bool updateMonitorElement(DQMMonitorElement *pMonitorElement);
+
+	/** Get a specific monitor element.
+	 *  Return NULL is the entry doesn't exists
+	 */
+	DQMMonitorElement *getMonitorElement(const std::string &meName, bool partialCompare = false, bool lowerCaseCompare = false) const;
+
+	/** Get the subscribed me name list. Simply iterate over stored monitor element
+	 *  and add the element to list if a client has subscribed to it
+	 */
+	StringSet getSubscribedList() const;
+
+	/** Get the subscribed me name list for a particular client
+	 */
+	StringSet getSubscribedList(int clientID) const;
+
+	/** Get the subscribed me list for a particular client
+	 */
+	DQMMonitorElementList getSubscribedMeList(int clientID) const;
+
+	/** Subscribe client to a monitor element.
+	 *
+	 *  Return a pair :
+	 *    * first -> the new size of the subscriber clients
+	 *    * second -> whether the client was inserted in the subscriber list
+	 */
+	std::pair<size_t, bool> subscribe(int clientID, const std::string &meName);
+
+	/** Un-subscribe client from a monitor element.
+	 *
+	 *  Return a pair :
+	 *    * first -> the new size of the subscriber clients
+	 *    * second -> whether the client was erased from the subscriber list
+	 */
+	std::pair<size_t, bool> unsubscribe(int clientID, const std::string &meName);
+
+	/** Unsubscribe all the elements for this client.
+	 *  Return true if the client at least unsubscribe to one element
+	 */
+	bool unsubscribe(int clientID);
+
+	/** Get the number of clients that have subscribe from a particular a monitor element
+	 */
+	size_t getNSubscribers(const std::string &meName) const;
+
+	/** Get the number of clients that have subscribes to this module
+	 */
+	size_t getNSubscribers() const;
+
+	/** Get the list of subscribers for a particular monitor element
+	 */
+	std::set<int> getSubscribers(const std::string &meName) const;
+
+private:
+	DQMMonitorElementInfoList                          m_availableMeList;
+	StringSet                                          m_requestedMeList;
+	MeInfoMap                                          m_meInfoMap;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+/** ClientInfo class
+ */
+class ClientInfo
 {
 public:
-	ME_FULL_NAME_COMPARE(const DQMPath &fullPathToCompare);
-	bool operator ()(DQMMonitorElement *pMonitorElement);
+	/** Constructor for monitor element clients
+	 */
+	ClientInfo(int clientID);
+
+	/** Constructor for module clients
+	 */
+	ClientInfo(int clientId, const std::string &moduleName);
+
+	/** Get the module name.
+	 *  Valid only if the client is a module.
+	 */
+	const std::string &getModuleName() const;
+
+	/** Whether the client is a module.
+	 *  Opposite is a monitor element client
+	 */
+	bool isModule() const;
+
+	/** Get the client id
+	 */
+	int getClientID() const;
+
+	/** Set update mode (default is false)
+	 */
+	void setUpdateMode(bool update);
+
+	/** Whether the client works in update mode
+	 */
+	bool hasUpdateMode() const;
+
 private:
-	DQMPath        m_pathToCompare;
+	int                  m_clientID;
+	bool                 m_updateMode;
+	bool                 m_isModule;
+	std::string          m_moduleName;
 };
+
+typedef std::map<int, ClientInfo>  ClientMap;
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -58,20 +190,6 @@ class DQMMonitorElementNameListRpc : public DimRpc
 {
 public:
 	DQMMonitorElementNameListRpc(char *rpcName, DQMMonitorElementCollector *pCollector);
-	void rpcHandler();
-
-private:
-	DQMMonitorElementCollector   *m_pCollector;
-	DQMDataStream                 m_dataStream;
-};
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-class DQMMonitorElementPacketRpc : public DimRpc
-{
-public:
-	DQMMonitorElementPacketRpc(char *rpcName, DQMMonitorElementCollector *pCollector);
 	void rpcHandler();
 
 private:
@@ -96,37 +214,9 @@ private:
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-/** DQMCollectorCommandHandler class
- *  Handles commands to receive from the clients
- */
-class DQMCollectorCommandHandler : public DimCommandHandler
-{
-public:
-	/** Constructor
-	 */
-	DQMCollectorCommandHandler(DQMMonitorElementCollector *pCollector);
-
-	/** Destructor
-	 */
-	~DQMCollectorCommandHandler();
-
-	/** The command handler
-	 */
-	void commandHandler();
-
-	// from module applications
-	DimCommand           *m_pMEPacketReceptionCommand;
-
-	// the collector
-	DQMMonitorElementCollector        *m_pCollector;
-};
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
 /** DQMMonitorElementCollector class
  */ 
-class DQMMonitorElementCollector
+class DQMMonitorElementCollector : public DimServer
 {
 public:
 	/** Constructor
@@ -162,53 +252,114 @@ public:
 	 */
 	bool isRunning() const;
 
-	/** Reset the collector, returning back to its empty state
-	 */
-	void reset();
-
 public:
 	typedef std::map<std::string, DQMMonitorElementList> DQMMonitorElementListMap; ///< Module name to element list map
+	typedef std::map<std::string, ModuleMeInfo>          ModuleMeInfoMap;  ///< Module element storage
+	typedef std::set<DQMMonitorElement *>                DQMMonitorElementSet;
+	typedef std::map<int, DQMMonitorElementSet>          ClientUpdateMap;  ///< Map of monitor element list to update
 
 	static const std::string         m_emptyBufferStr;
 
 private:
+	/** Dim command handler
+	 */
+	void commandHandler();
+
+	/** Dim client exit handler
+	 */
+	void clientExitHandler();
+
+
+	/** Update client side with the monitor elements
+	 */
+	void updateClients(const ClientUpdateMap &clientUpdateMap);
+
 	/** Handle the monitor element packet reception from a module application
 	 */
-	StatusCode handleMEPacketReception(DimCommand *pCommand);
+	void handleMeCollectUpdate(DimCommand *pCommand);
 
-	/** Handle the monitor element name list request
+	/** Handle the available list of monitor element on module side
 	 */
-	StatusCode handleMENameListRequest(DimCommand *pCommand);
+	void handleAvailableListUpdate(DimCommand *pCommand);
 
-	/** Handle the monitor element packet request
+	/** Handle a client subscription
 	 */
-	StatusCode handleMEPacketRequest(DimCommand *pCommand);
+	void handleClientSubscription(int clientID, DimCommand *pCommand);
 
-	/** Handle the collector info request
+	/** Handle a client unsubscription
 	 */
-	StatusCode handleCollectorInfoRequest(DimCommand *pCommand);
+	void handleClientUnsubscription(int clientID, DimCommand *pCommand);
 
+	/** Handle client (de)registration
+	 */
+	void handleClientRegistration(int clientId, bool shouldRegister);
+
+	/** Handle client automatic update mode
+	 */
+	void handleClientUpdateMode(int clientId, bool updateMode);
+
+	/** Handle client me name request list update
+	 */
+	void handleClientRequestList(int clientId, DimCommand *pCommand);
+
+
+	/** Update the monitor element publication service for a specific client
+	 */
+	void sendMeUpdate(int clientID);
+
+	/** Notify the module that users are watching a different set of
+	 *  monitor elements provided by the module
+	 */
+	void notifyWatchedMe(const std::string &moduleName);
+
+
+	/** Register a monitor element client
+	 */
+	void registerClient(int clientId);
+
+	/** Register a module client
+	 */
+	void registerClient(int clientId, const std::string moduleName);
+
+	/** De-register a client
+	 */
+	void deregisterClient(int clientId);
+
+	/** Get the module client ID.
+	 *  Return 0 is not found (invalid for dim)
+	 */
+	int getModuleClientID(const std::string &moduleName) const;
+
+private:
 	// collector name
 	std::string                        m_collectorName;
 
+	// dim related
 	DQMMonitorElementNameListRpc      *m_pMonitorElementNameListRpc;
-	DQMMonitorElementPacketRpc        *m_pMonitorElementPacketRpc;
 	DQMMonitorElementCollectorInfoRpc *m_pMonitorElementCollectorInfoRpc;
 
-	DQMCollectorCommandHandler        *m_pCommandHandler;
+	DimCommand                        *m_pCollectMeCommand;
+	DimCommand                        *m_pAvailableMeListCommand;
+	DimCommand                        *m_pMeQueryCommand;
+	DimCommand                        *m_pSetUpdateModeCommand;
+	DimCommand                        *m_pSubscribeCommand;
+	DimCommand                        *m_pUnsubscribeCommand;
+	DimCommand                        *m_pSetSubscriptionCommand;
 
+	DimService                        *m_pMeUpdateService;
+	DimService                        *m_pNotifyWatchedMeService;
 	DQMStatisticsService              *m_pStatisticsService;
 
 	// runtime
 	DQMState                           m_collectorState;
-
-	// storage
-	DQMMonitorElementListMap           m_monitorElementListMap;
 	DQMDataStream                      m_dataStream;    ///< To deserialize incoming monitor elements from modules
+
+	// clients and storage
+	ModuleMeInfoMap                    m_moduleMeInfoMap;
+	ClientMap                          m_clientMap;
 
 	friend class DQMCollectorCommandHandler;
 	friend class DQMMonitorElementNameListRpc;
-	friend class DQMMonitorElementPacketRpc;
 	friend class DQMMonitorElementCollectorInfoRpc;
 }; 
 
