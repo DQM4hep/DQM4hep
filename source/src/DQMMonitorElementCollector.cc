@@ -949,11 +949,13 @@ void DQMMonitorElementCollector::notifyWatchedMe(const std::string &moduleName)
 
 	StringSet watchedMeList = moduleFindIter->second.getSubscribedList();
 
-	// no element watched ?
-	if(watchedMeList.empty())
-		return;
-
 	m_dataStream.reset();
+
+	if(STATUS_CODE_SUCCESS != m_dataStream.write(static_cast<dqm_uint>(watchedMeList.size())))
+	{
+		m_dataStream.reset();
+		return;
+	}
 
 	for(StringSet::iterator iter = watchedMeList.begin(), endIter = watchedMeList.end() ;
 			endIter != iter ; ++iter)
@@ -964,9 +966,6 @@ void DQMMonitorElementCollector::notifyWatchedMe(const std::string &moduleName)
 			return;
 		}
 	}
-
-	if(m_dataStream.getBufferSize() == 0)
-		return;
 
 	int clientIds[2];
 	clientIds[0] = clientId;

@@ -31,31 +31,85 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMMessaging.h"
+
+#include "dic.hxx"
 
 namespace dqm4hep
 {
 
+class DQMModuleApi;
+class DQMModuleApplication;
+
 /** DQMMonitorElementSender class
  */ 
-class DQMMonitorElementSender 
+class DQMMonitorElementSender : public DimClient
 {
+	friend class DQMModuleApi;
 public:
 	/** Constructor
 	 */
-	DQMMonitorElementSender();
+	DQMMonitorElementSender(DQMModuleApplication *pApplication);
+
+	/** Destructor
+	 */
+	~DQMMonitorElementSender();
 
 	/** Set the collector name to which the elements will be sent
 	 */
-	void setCollectorName(const std::string &collectorName);
+	StatusCode setCollectorName(const std::string &collectorName);
 
-	/** Send the monitor element list to the collector
+	/** Send the subscribed monitor element to the collector
 	 */
-	StatusCode sendMonitorElements(const std::string &moduleName, const DQMMonitorElementList &monitorElementList);
+	StatusCode sendMonitorElements();
+
+	/** Connect the sender to the collector
+	 */
+	StatusCode connectToService();
+
+	/** Disconnect the sender to the collector
+	 */
+	StatusCode disconnectFromService();
+
+	/** Whether the sender is connected to the collector
+	 */
+	bool isConnected() const;
 
 private:
+	/**
+	 */
+	void infoHandler();
 
-	std::string                    m_collectorName;    ///<  The collector name to which the monitor elements will be sent
-	DQMDataStream                  m_dataStream;       ///< The data stream used to serialize the monitor elements
+	/**
+	 */
+	void addAvailableMonitorElement(DQMMonitorElement *pMonitorElement);
+
+	/**
+	 */
+	void removeAvailableMonitorElement(const std::string &monitorElementName);
+
+	/**
+	 */
+	void sendAvailableMonitorElementList();
+
+private:
+	typedef std::map<std::string, DQMMonitorElementInfo> DQMMonitorElementInfoMap;
+
+	// from ui
+	DQMModuleApplication          *m_pApplication;           ///< The module application that sends elements to the collector
+	std::string                    m_collectorName;          ///<  The collector name to which the monitor elements will be sent
+
+	DQMDataStream                  m_dataStream;             ///< The data stream used to serialize the monitor elements
+	DQMDataStream                  m_inDataStream;           ///< The data stream used to serialize dim info
+
+	// internal
+	StringSet                      m_subscribedMeList;      ///< The subscribed monitor element list
+	DQMMonitorElementInfoMap       m_availableMeMap;        ///< The available monitor element list
+	pthread_mutex_t                m_mutex;                 ///< Mutex to lock unlock on service update
+	bool                           m_sendAvailableMeList;   ///< Whether the list of available me has to be re-sent to the collector
+	bool                           m_isConnected;           ///< Whether the sender is connected to the collector
+
+	DimUpdatedInfo                *m_pSubscribedListInfo;   ///< The dim info to receive subscribed me list from collector
 };
 
 } 
