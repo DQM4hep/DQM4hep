@@ -60,11 +60,12 @@ StatusCode DQMMonitorElementCollectorApplication::run()
 	if(m_applicationState == RUNNING_STATE)
 		return STATUS_CODE_FAILURE;
 
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementCollector->start());
-
 	m_applicationState = RUNNING_STATE;
 
+	DimServer::addClientExitHandler(m_pMonitorElementCollector);
 	DimServer::start( ("DQM4HEP/" + getType() + "/" + getName()).c_str() );
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementCollector->start());
 
 	while(!m_shouldExit)
 	{

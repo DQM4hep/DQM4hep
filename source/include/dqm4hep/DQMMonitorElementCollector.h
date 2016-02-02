@@ -55,7 +55,7 @@ private:
 		std::set<int>         m_clientList;
 		DQMMonitorElement    *m_pMonitorElement;
 	};
-	typedef std::map<std::string,  MeInfo> MeInfoMap;
+	typedef std::map<std::string,  MeInfo *> MeInfoMap;
 
 public:
 	/** Constructor
@@ -253,10 +253,10 @@ public:
 	bool isRunning() const;
 
 public:
-	typedef std::map<std::string, DQMMonitorElementList> DQMMonitorElementListMap; ///< Module name to element list map
-	typedef std::map<std::string, ModuleMeInfo>          ModuleMeInfoMap;  ///< Module element storage
-	typedef std::set<DQMMonitorElement *>                DQMMonitorElementSet;
-	typedef std::map<int, DQMMonitorElementSet>          ClientUpdateMap;  ///< Map of monitor element list to update
+	typedef std::map<std::string, DQMMonitorElementList>   DQMMonitorElementListMap; ///< Module name to element list map
+	typedef std::map<std::string, ModuleMeInfo *>          ModuleMeInfoMap;  ///< Module element storage
+	typedef std::set<DQMMonitorElement *>                  DQMMonitorElementSet;
+	typedef std::map<int, DQMMonitorElementSet>            ClientUpdateMap;  ///< Map of monitor element list to update
 
 	static const std::string         m_emptyBufferStr;
 
@@ -272,7 +272,7 @@ private:
 
 	/** Update client side with the monitor elements
 	 */
-	void updateClients(const ClientUpdateMap &clientUpdateMap);
+	void updateClients(const ClientUpdateMap &clientUpdateMap, bool forceUpdate = false);
 
 	/** Handle the monitor element packet reception from a module application
 	 */
@@ -290,10 +290,6 @@ private:
 	 */
 	void handleClientUnsubscription(int clientID, DimCommand *pCommand);
 
-	/** Handle client (de)registration
-	 */
-	void handleClientRegistration(int clientId, bool shouldRegister);
-
 	/** Handle client automatic update mode
 	 */
 	void handleClientUpdateMode(int clientId, bool updateMode);
@@ -301,6 +297,10 @@ private:
 	/** Handle client me name request list update
 	 */
 	void handleClientRequestList(int clientId, DimCommand *pCommand);
+
+	/** Handle the me query of target client id
+	 */
+	void handleMeQuery(int clientId, DimCommand *pCommand);
 
 
 	/** Update the monitor element publication service for a specific client
@@ -315,15 +315,15 @@ private:
 
 	/** Register a monitor element client
 	 */
-	void registerClient(int clientId);
+	bool registerClient(int clientId);
 
 	/** Register a module client
 	 */
-	void registerClient(int clientId, const std::string moduleName);
+	bool registerClient(int clientId, const std::string moduleName);
 
 	/** De-register a client
 	 */
-	void deregisterClient(int clientId);
+	bool deregisterClient(int clientId);
 
 	/** Get the module client ID.
 	 *  Return 0 is not found (invalid for dim)
@@ -345,13 +345,15 @@ private:
 	DimCommand                        *m_pSubscribeCommand;
 	DimCommand                        *m_pUnsubscribeCommand;
 	DimCommand                        *m_pSetSubscriptionCommand;
+	DimCommand                        *m_pQuerySubscribedCommand;
 
 	DimService                        *m_pMeUpdateService;
 	DimService                        *m_pNotifyWatchedMeService;
+	DimService                        *m_pCollectorStateService;
 	DQMStatisticsService              *m_pStatisticsService;
 
 	// runtime
-	DQMState                           m_collectorState;
+	int                                m_collectorState;
 	DQMDataStream                      m_dataStream;    ///< To deserialize incoming monitor elements from modules
 
 	// clients and storage

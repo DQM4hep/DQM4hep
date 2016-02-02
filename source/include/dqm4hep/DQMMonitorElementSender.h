@@ -110,6 +110,7 @@ private:
 	bool                           m_isConnected;           ///< Whether the sender is connected to the collector
 
 	DimUpdatedInfo                *m_pSubscribedListInfo;   ///< The dim info to receive subscribed me list from collector
+	DimUpdatedInfo                *m_pCollectorStateInfo;   ///< The dim info to receive when the collector state changes
 };
 
 } 

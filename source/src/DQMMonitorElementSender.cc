@@ -43,7 +43,7 @@ DQMMonitorElementSender::DQMMonitorElementSender(DQMModuleApplication *pApplicat
 		m_collectorName("DEFAULT"),
 		m_dataStream(4*1024*1024),    // 4 Mo to start
 		m_inDataStream(1024*1024),
-		m_sendAvailableMeList(false)
+		m_sendAvailableMeList(true)
 {
 	pthread_mutex_init(&m_mutex, NULL);
 }
@@ -99,22 +99,36 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 
 	DQMMonitorElementPublication publication;
 
-	DQMMonitorElementPublication::PublicationMap::iterator publicationIter =
-			publication.m_publication.insert(
-					DQMMonitorElementPublication::PublicationMap::value_type(moduleName, DQMMonitorElementList() ) ).first;
+	DQMMonitorElementPublication::iterator publicationIter =
+			publication.insert(
+					DQMMonitorElementPublication::value_type(moduleName, DQMMonitorElementList() ) ).first;
 
 	// build the publication to send
+	streamlog_out(DEBUG) << "N subscribed me : " << subscribedMeList.size() << std::endl;
+
 	for(StringSet::iterator iter = subscribedMeList.begin(), endIter = subscribedMeList.end() ;
 			endIter != iter ; ++iter)
 	{
 		size_t pos = iter->find_last_of('/');
 
-		// invalid name ????
-		if(pos == std::string::npos)
-			continue;
+		streamlog_out(DEBUG) << "Full me name : " << *iter << std::endl;
+		streamlog_out(DEBUG) << "Last of / pos : " << pos << std::endl;
 
-		std::string path = iter->substr(0, pos-1);
-		std::string meName = iter->substr(pos+1);
+		std::string path;
+		std::string meName;
+
+		if(pos == std::string::npos)
+		{
+			path = "/";
+			meName = *iter;
+		}
+		else
+		{
+			path = iter->substr(0, pos+1);
+			meName = iter->substr(pos+1);
+		}
+
+		streamlog_out(DEBUG) << "Me path : " << path << " , name : " << meName << std::endl;
 
 		if(path.empty() || meName.empty())
 			continue;
@@ -124,10 +138,12 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 		if(STATUS_CODE_SUCCESS !=  DQMModuleApi::getMonitorElement(m_pApplication->getModule(), path, meName, pMonitorElement))
 			continue;
 
+		streamlog_out(DEBUG) << "Found !!" << std::endl;
+
 		publicationIter->second.push_back(pMonitorElement);
 	}
 
-	if(publication.m_publication.empty())
+	if(publication.empty())
 		return STATUS_CODE_SUCCESS;
 
 	streamlog_out(MESSAGE) << "Number of monitor element sent : " << publicationIter->second.size() << std::endl;
@@ -155,6 +171,9 @@ StatusCode DQMMonitorElementSender::connectToService()
 	std::string serviceName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/NOTIFY_WATCHED_ME_SVC";
 	m_pSubscribedListInfo = new DimUpdatedInfo( (char *) serviceName.c_str() , (void *) m_inDataStream.getBuffer() , m_inDataStream.getBufferSize() ,  this );
 
+	serviceName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/COLLECTOR_STATE_SVC";
+	m_pCollectorStateInfo = new DimUpdatedInfo( (char *) serviceName.c_str(), STOPPED_STATE , this );
+
 	m_isConnected = true;
 
 	return STATUS_CODE_SUCCESS;
@@ -168,6 +187,7 @@ StatusCode DQMMonitorElementSender::disconnectFromService()
 		return STATUS_CODE_SUCCESS;
 
 	delete m_pSubscribedListInfo;
+	delete m_pCollectorStateInfo;
 
 	m_isConnected = false;
 
@@ -185,40 +205,67 @@ bool DQMMonitorElementSender::isConnected() const
 
 void DQMMonitorElementSender::infoHandler()
 {
-	dqm_char *pBuffer = (dqm_char *) m_pSubscribedListInfo->getData();
-	dqm_uint bufferSize = m_pSubscribedListInfo->getSize();
+	DimInfo *pInfo = getInfo();
 
-	if(!pBuffer || bufferSize == 0)
-		return;
+	streamlog_out(DEBUG) << "Received info : " << pInfo->getName() << std::endl;
 
-	m_inDataStream.reset();
-	m_inDataStream.setBuffer(pBuffer, bufferSize);
-
-	StringVector subscribedMeList;
-	dqm_uint size;
-
-	if(STATUS_CODE_SUCCESS != m_inDataStream.read(size))
+	if(pInfo == m_pSubscribedListInfo)
 	{
+		dqm_char *pBuffer = (dqm_char *) m_pSubscribedListInfo->getData();
+		dqm_uint bufferSize = m_pSubscribedListInfo->getSize();
+
+		if(!pBuffer || bufferSize == 0)
+			return;
+
 		m_inDataStream.reset();
-		return;
-	}
+		m_inDataStream.setBuffer(pBuffer, bufferSize);
 
-	subscribedMeList.resize(size);
+		StringVector subscribedMeList;
+		dqm_uint size;
 
-	for(dqm_uint i=0 ; i<size ; i++)
-	{
-		if(STATUS_CODE_SUCCESS != m_inDataStream.read(subscribedMeList[i]))
+		if(STATUS_CODE_SUCCESS != m_inDataStream.read(size))
 		{
 			m_inDataStream.reset();
 			return;
 		}
-	}
 
-	// update the list
-	pthread_mutex_lock(&m_mutex);
-	m_subscribedMeList.clear();
-	m_subscribedMeList.insert( subscribedMeList.begin(), subscribedMeList.end() );
-	pthread_mutex_unlock(&m_mutex);
+		subscribedMeList.resize(size);
+
+		for(dqm_uint i=0 ; i<size ; i++)
+		{
+			if(STATUS_CODE_SUCCESS != m_inDataStream.read(subscribedMeList[i]))
+			{
+				m_inDataStream.reset();
+				return;
+			}
+		}
+
+		// update the list
+		pthread_mutex_lock(&m_mutex);
+		std::cout << "Received subscribed list size : " << subscribedMeList.size() << std::endl;
+		m_subscribedMeList.clear();
+		m_subscribedMeList.insert( subscribedMeList.begin(), subscribedMeList.end() );
+		pthread_mutex_unlock(&m_mutex);
+	}
+	else if(pInfo == m_pCollectorStateInfo)
+	{
+		if(m_pCollectorStateInfo->getInt() == RUNNING_STATE)
+		{
+			streamlog_out(DEBUG) << "Force update available list on next EOC !" << std::endl;
+
+			pthread_mutex_lock(&m_mutex);
+			m_sendAvailableMeList = true;
+			pthread_mutex_unlock(&m_mutex);
+		}
+		else if(m_pCollectorStateInfo->getInt() == STOPPED_STATE)
+		{
+			streamlog_out(DEBUG) << "Server is down -> Clearing subscribed me list !" << std::endl;
+
+			pthread_mutex_lock(&m_mutex);
+			m_subscribedMeList.clear();
+			pthread_mutex_unlock(&m_mutex);
+		}
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -226,6 +273,9 @@ void DQMMonitorElementSender::infoHandler()
 void DQMMonitorElementSender::addAvailableMonitorElement(DQMMonitorElement *pMonitorElement)
 {
 	std::string fullName = ( pMonitorElement->getPath() + pMonitorElement->getName() ).getPath();
+
+	if(fullName.at(0) != '/')
+		fullName = "/" + fullName;
 
 	// prepare for insert
 	DQMMonitorElementInfoMap::value_type insertValue( fullName , DQMMonitorElementInfo() );
@@ -243,6 +293,8 @@ void DQMMonitorElementSender::addAvailableMonitorElement(DQMMonitorElement *pMon
 	ret.first->second.m_monitorElementType = monitorElementTypeToString(pMonitorElement->getType());
 	ret.first->second.m_monitorElementName = pMonitorElement->getName();
 	ret.first->second.m_monitorElementDescription = pMonitorElement->getDescription();
+
+	std::cout << "me : " << pMonitorElement->getName() << " added in sender" << std::endl;
 
 	// for future update on the collector side
 	m_sendAvailableMeList = true;

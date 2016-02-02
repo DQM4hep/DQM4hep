@@ -28,18 +28,61 @@
 #include "dqm4hep/DQMMonitorElementClient.h"
 #include "dqm4hep/DQMDataStream.h"
 #include "dqm4hep/DQMMessaging.h"
+#include "dqm4hep/DQMMonitorElement.h"
+
+// -- std headers
+#include <algorithm>
 
 namespace dqm4hep
 {
 
+DQMMeCollectorInfoRpcInfo::DQMMeCollectorInfoRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient) :
+		DimRpcInfo(rpcInfoName, (void*) DQMMonitorElementClient::m_emptyBufferStr.c_str(), DQMMonitorElementClient::m_emptyBufferStr.size()),
+		m_pClient(pClient)
+{
+	/* nop */
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMeCollectorInfoRpcInfo::rpcInfoHandler()
+{
+	m_pClient->handleMeCollectorInfoRpcInfo(this);
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+DQMMeListNameRpcInfo::DQMMeListNameRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient) :
+		DimRpcInfo(rpcInfoName, (void*) DQMMonitorElementClient::m_emptyBufferStr.c_str(), DQMMonitorElementClient::m_emptyBufferStr.size()),
+		m_pClient(pClient)
+{
+	/* nop */
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMeListNameRpcInfo::rpcInfoHandler()
+{
+	m_pClient->handleMeListNameRpcInfo(this);
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 const std::string DQMMonitorElementClient::m_emptyBufferStr = "EMPTY";
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 DQMMonitorElementClient::DQMMonitorElementClient() :
 		m_isConnected(false),
-		m_pMonitorElementCollectorInfoRpcInfo(NULL),
-		m_pMonitorElementListNameRpcInfo(NULL),
-		m_pMonitorElementPacketRpcInfo(NULL),
-		m_pHandler(NULL)
+		m_pMeCollectorInfoRpcInfo(NULL),
+		m_pMeListNameRpcInfo(NULL),
+		m_inDataStream(4*1024*1024),
+		m_outDataStream(1024*1024),
+		m_updateMode(false),
+		m_isCollectorRunning(false)
 {
 	/* nop */
 }
@@ -84,21 +127,28 @@ StatusCode DQMMonitorElementClient::connectToService()
 	std::string collectorName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/";
 	std::stringstream ss;
 
-	ss << collectorName << "COLLECTOR_INFO";
-	m_pMonitorElementCollectorInfoRpcInfo = new DQMMonitorElementCollectorInfoRpcInfo((char*) ss.str().c_str(), this);
+	ss << collectorName << "COLLECTOR_INFO_RPC";
+	m_pMeCollectorInfoRpcInfo = new DQMMeCollectorInfoRpcInfo((char*) ss.str().c_str(), this);
 
 	ss.str("");
-	ss << collectorName << "MONITOR_ELEMENT_NAME_LIST";
-	m_pMonitorElementListNameRpcInfo = new DQMMonitorElementListNameRpcInfo((char*) ss.str().c_str(), this);
+	ss << collectorName << "MONITOR_ELEMENT_NAME_LIST_RPC";
+	m_pMeListNameRpcInfo = new DQMMeListNameRpcInfo((char*) ss.str().c_str(), this);
 
 	ss.str("");
-	ss << collectorName << "MONITOR_ELEMENT_PACKET";
-	m_pMonitorElementPacketRpcInfo = new DQMMonitorElementPacketRpcInfo((char*) ss.str().c_str(), this);
+	ss << collectorName << "ME_UPDATE_SVC";
+	m_pMeUpdateInfo = new DimUpdatedInfo( (char*) ss.str().c_str() , (void *) NULL , 0, this );
+
+	ss.str("");
+	ss << collectorName << "COLLECTOR_STATE_SVC";
+	m_pCollectorStateInfo = new DimInfo( (char*) ss.str().c_str() , static_cast<int>(STOPPED_STATE) , this );
 
 	m_isConnected = true;
 
-	if(m_pHandler)
-		m_pHandler->handleClientConnection(this);
+	this->setUpdateMode(this->getUpdateMode());
+
+	for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onMonitorElementClientConnect(this);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -110,17 +160,16 @@ StatusCode DQMMonitorElementClient::disconnectFromService()
 	if(!isConnectedToService())
 		return STATUS_CODE_SUCCESS;
 
-	delete m_pMonitorElementCollectorInfoRpcInfo;
-	m_pMonitorElementCollectorInfoRpcInfo = NULL;
-	delete m_pMonitorElementListNameRpcInfo;
-	m_pMonitorElementListNameRpcInfo = NULL;
-	delete m_pMonitorElementPacketRpcInfo;
-	m_pMonitorElementPacketRpcInfo = NULL;
+	delete m_pMeCollectorInfoRpcInfo; m_pMeCollectorInfoRpcInfo = NULL;
+	delete m_pMeListNameRpcInfo; m_pMeListNameRpcInfo = NULL;
+	delete m_pMeUpdateInfo; m_pMeUpdateInfo = NULL;
+	delete m_pCollectorStateInfo; m_pCollectorStateInfo = NULL;
 
 	m_isConnected = false;
 
-	if(m_pHandler)
-		m_pHandler->handleClientDisconnection(this);
+	for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onMonitorElementClientDisconnect(this);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -134,98 +183,199 @@ bool DQMMonitorElementClient::isConnectedToService() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementClient::setHandler(Handler *pHandler)
-{
-	if(isConnectedToService())
-		return STATUS_CODE_NOT_ALLOWED;
-
-	m_pHandler = pHandler;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMMonitorElementClient::sendCollectorInfoRequest()
+StatusCode DQMMonitorElementClient::queryCollectorInfo()
 {
 	if(!isConnectedToService())
 		return STATUS_CODE_NOT_ALLOWED;
 
 	char buf[] = "\0";
-	m_pMonitorElementCollectorInfoRpcInfo->setData((void *) &buf[0], 1);
+	m_pMeCollectorInfoRpcInfo->setData((void *) &buf[0], 1);
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementClient::sendMonitorElementListNameRequest(const DQMMonitorElementListNameRequest &request)
+StatusCode DQMMonitorElementClient::queryAvailableMonitorElements(const DQMMonitorElementListNameRequest &request)
 {
 	if(!isConnectedToService())
 		return STATUS_CODE_NOT_ALLOWED;
 
 	// serialize the list
-	DQMDataStream dataStream(10*1024); // should be enough for this request
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.serialize(&dataStream));
+	m_outDataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.serialize(&m_outDataStream));
 
-	// send the request
-	m_pMonitorElementListNameRpcInfo->setData((void *) dataStream.getBuffer(), dataStream.getBufferSize());
+	// send query
+	m_pMeListNameRpcInfo->setData((void *) m_outDataStream.getBuffer(), m_outDataStream.getBufferSize());
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementClient::sendMonitorElementPublicationRequest(const DQMMonitorElementRequest &request)
+StatusCode DQMMonitorElementClient::querySubscribedMonitorElements(const DQMMonitorElementRequest &request)
 {
 	if(!isConnectedToService())
 		return STATUS_CODE_NOT_ALLOWED;
 
 	// serialize the request
-	DQMDataStream dataStream(1024*1024); // should be enough for this request
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,  request.serialize(&dataStream));
+	m_outDataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.serialize(&m_outDataStream));
 
 	// send the request
-	m_pMonitorElementPacketRpcInfo->setData((void *) dataStream.getBuffer(), dataStream.getBufferSize());
+	std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/QUERY_ME_CMD";
+	DimClient::sendCommandNB( commandName.c_str() , (void *) m_outDataStream.getBuffer() , m_outDataStream.getBufferSize() );
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 
-DQMMonitorElementCollectorInfoRpcInfo::DQMMonitorElementCollectorInfoRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient) :
-		DimRpcInfo(rpcInfoName, (void*) DQMMonitorElementClient::m_emptyBufferStr.c_str(), DQMMonitorElementClient::m_emptyBufferStr.size()),
-		m_pClient(pClient)
+StatusCode DQMMonitorElementClient::querySubscribedMonitorElements()
 {
-	/* nop */
+	// send empty request.
+	DQMMonitorElementRequest request;
+	return this->querySubscribedMonitorElements(request);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollectorInfoRpcInfo::rpcInfoHandler()
+StatusCode DQMMonitorElementClient::subscribe(const DQMMonitorElementRequest &request)
+{
+	if(!isConnectedToService())
+		return STATUS_CODE_NOT_ALLOWED;
+
+	for(DQMMonitorElementRequest::const_iterator iter = request.begin(), endIter = request.end() ;
+			endIter != iter ; ++iter)
+	{
+		std::cout << "Sending subscription : " << iter->first << " , " << iter->second << std::endl;
+	}
+
+	// serialize the request
+	m_outDataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,  request.serialize(&m_outDataStream));
+
+	// send the request
+	std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/SUBSCRIBE_CMD";
+	DimClient::sendCommandNB( commandName.c_str() , (void *) m_outDataStream.getBuffer( ), m_outDataStream.getBufferSize() );
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMMonitorElementClient::unsubscribe(const DQMMonitorElementRequest &request)
+{
+	if(!isConnectedToService())
+		return STATUS_CODE_NOT_ALLOWED;
+
+	// serialize the request
+	m_outDataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,  request.serialize(&m_outDataStream));
+
+	// send the request
+	std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/UNSUBSCRIBE_CMD";
+	DimClient::sendCommandNB( commandName.c_str() , (void *) m_outDataStream.getBuffer( ), m_outDataStream.getBufferSize() );
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMMonitorElementClient::replaceSubscription(const DQMMonitorElementRequest &request)
+{
+	if(!isConnectedToService())
+		return STATUS_CODE_NOT_ALLOWED;
+
+	// serialize the request
+	m_outDataStream.reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,  request.serialize(&m_outDataStream));
+
+	// send the request
+	std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/SET_SUBSCRIPTION_CMD";
+	DimClient::sendCommandNB( commandName.c_str() , (void *) m_outDataStream.getBuffer( ), m_outDataStream.getBufferSize() );
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMonitorElementClient::setUpdateMode(bool updateMode)
+{
+	if(this->isConnectedToService())
+	{
+		std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/SET_UPDATE_MODE_CMD";
+		DimClient::sendCommandNB( commandName.c_str() , static_cast<int>(updateMode) );
+	}
+
+	m_updateMode = updateMode;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool DQMMonitorElementClient::getUpdateMode() const
+{
+	return m_updateMode;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool DQMMonitorElementClient::addListener(DQMMonitorElementClientListener *pListener)
+{
+	if(NULL == pListener)
+		return false;
+
+	std::vector<DQMMonitorElementClientListener *>::iterator findIter = std::find( m_listeners.begin(), m_listeners.end(), pListener );
+
+	// if already added, return ok
+	if(m_listeners.end() != findIter)
+		return true;
+
+	m_listeners.push_back(pListener);
+
+	return true;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMonitorElementClient::removeListener(DQMMonitorElementClientListener *pListener)
+{
+	if(NULL == pListener)
+		return;
+
+	std::vector<DQMMonitorElementClientListener *>::iterator findIter = std::find( m_listeners.begin(), m_listeners.end(), pListener );
+
+	if(m_listeners.end() == findIter)
+		return;
+
+	m_listeners.erase(findIter);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMonitorElementClient::handleMeCollectorInfoRpcInfo(DimRpcInfo *pRpcInfo)
 {
 	try
 	{
-		if(NULL == m_pClient->m_pHandler)
-			throw StatusCodeException(STATUS_CODE_FAILURE);
-
-		dqm_char *pBuffer = static_cast<dqm_char *>(getData());
-		dqm_uint bufferSize = getSize();
-
-		if(NULL == pBuffer || 0 == bufferSize)
-			throw StatusCodeException(STATUS_CODE_FAILURE);
-
-		if(strcmp(pBuffer, DQMMonitorElementClient::m_emptyBufferStr.c_str()) == 0)
+		if(m_listeners.empty())
 			return;
 
-		DQMDataStream dataStream(512*1024); // should be enough ...
+		dqm_char *pBuffer = static_cast<dqm_char *>(pRpcInfo->getData());
+		dqm_uint bufferSize = pRpcInfo->getSize();
+
+		if(NULL == pBuffer || 0 == bufferSize)
+			return;
+
+		m_inDataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_inDataStream.setBuffer(pBuffer, bufferSize));
+
+		// deserialize and notify
 		DQMCollectorInfo collectorInfo;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, collectorInfo.deserialize(&m_inDataStream));
 
-		// deserialize and call the user call back function
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dataStream.setBuffer(pBuffer, bufferSize));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, collectorInfo.deserialize(&dataStream));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pClient->m_pHandler->receiveCollectorInfo(m_pClient, collectorInfo));
+		for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+				endIter != iter ; ++iter)
+			(*iter)->monitorElementCollectorInfoReceived(this, collectorInfo);
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -236,40 +386,30 @@ void DQMMonitorElementCollectorInfoRpcInfo::rpcInfoHandler()
 }
 
 //-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 
-DQMMonitorElementListNameRpcInfo::DQMMonitorElementListNameRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient) :
-		DimRpcInfo(rpcInfoName, (void*) DQMMonitorElementClient::m_emptyBufferStr.c_str(), DQMMonitorElementClient::m_emptyBufferStr.size()),
-		m_pClient(pClient)
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMMonitorElementListNameRpcInfo::rpcInfoHandler()
+void DQMMonitorElementClient::handleMeListNameRpcInfo(DimRpcInfo *pRpcInfo)
 {
 	try
 	{
-		if(NULL == m_pClient->m_pHandler)
-			throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+		if(m_listeners.empty())
+			return;
 
-		dqm_char *pBuffer = static_cast<dqm_char*>(getData());
-		dqm_uint bufferSize = getSize();
+		dqm_char *pBuffer = static_cast<dqm_char*>(pRpcInfo->getData());
+		dqm_uint bufferSize = pRpcInfo->getSize();
 
 		if(NULL == pBuffer || 0 == bufferSize)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
-		if(strcmp(pBuffer, DQMMonitorElementClient::m_emptyBufferStr.c_str()) == 0)
-			return;
+		m_inDataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_inDataStream.setBuffer(pBuffer, bufferSize));
 
-		DQMDataStream dataStream(5512*1024); // should be enough ...
+		// deserialize and notify
 		DQMMonitorElementInfoList monitorElementInfoList;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementInfoList.deserialize(&m_inDataStream));
 
-		// deserialize and call the user call back function
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dataStream.setBuffer(pBuffer, bufferSize));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementInfoList.deserialize(&dataStream));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pClient->m_pHandler->receiveMonitorElementNameList(m_pClient, monitorElementInfoList));
+		for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+				endIter != iter ; ++iter)
+			(*iter)->availableMonitorElementListReceived(this, monitorElementInfoList);
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -280,47 +420,100 @@ void DQMMonitorElementListNameRpcInfo::rpcInfoHandler()
 }
 
 //-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 
-DQMMonitorElementPacketRpcInfo::DQMMonitorElementPacketRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient) :
-		DimRpcInfo(rpcInfoName, (void*) DQMMonitorElementClient::m_emptyBufferStr.c_str(), DQMMonitorElementClient::m_emptyBufferStr.size()),
-		m_pClient(pClient)
+void DQMMonitorElementClient::infoHandler()
 {
-	/* nop */
-}
+	DimInfo *pInfo = getInfo();
 
-//-------------------------------------------------------------------------------------------------
+	std::cout << "Received info : " << pInfo->getName() << std::endl;
 
-void DQMMonitorElementPacketRpcInfo::rpcInfoHandler()
-{
-	try
+	if(pInfo == m_pMeUpdateInfo)
 	{
-		if(NULL == m_pClient->m_pHandler)
-			throw StatusCodeException(STATUS_CODE_FAILURE);
-
-		dqm_char *pBuffer = static_cast<dqm_char *>(getData());
-		dqm_uint bufferSize = getSize();
-
-		if(NULL == pBuffer || 0 == bufferSize)
-			throw StatusCodeException(STATUS_CODE_FAILURE);
-
-		if(strcmp(pBuffer, DQMMonitorElementClient::m_emptyBufferStr.c_str()) == 0)
-			return;
-
-		DQMDataStream dataStream(512*1024); // should be enough ...
 		DQMMonitorElementPublication monitorElementPublication;
 
-		// deserialize and call the user call back function
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dataStream.setBuffer(pBuffer, bufferSize));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementPublication.deserialize(&dataStream));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pClient->m_pHandler->receiveMonitorElementPublication(m_pClient, monitorElementPublication));
+		try
+		{
+			if(m_listeners.empty())
+				return;
+
+			dqm_char *pBuffer = static_cast<dqm_char *>(m_pMeUpdateInfo->getData());
+			dqm_uint bufferSize = m_pMeUpdateInfo->getSize();
+
+			if(NULL == pBuffer || 0 == bufferSize)
+				throw StatusCodeException(STATUS_CODE_FAILURE);
+
+			m_inDataStream.reset();
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_inDataStream.setBuffer(pBuffer, bufferSize));
+
+			// deserialize and call the user call back function
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementPublication.deserialize(&m_inDataStream));
+
+			for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+					endIter != iter ; ++iter)
+				(*iter)->monitorElementsReceived(this, monitorElementPublication);
+		}
+		catch(StatusCodeException &exception)
+		{
+		}
+		catch(...)
+		{
+		}
+
+		std::cout << "Clearing publication !" << std::endl;
+		this->clearPublication(monitorElementPublication);
 	}
-	catch(StatusCodeException &exception)
+	else if(pInfo == m_pCollectorStateInfo)
 	{
+		bool isCollectorRunning = static_cast<bool>(m_pCollectorStateInfo->getInt());
+		std::cout << "Received collector state : " << isCollectorRunning << std::endl;
+
+		if(isCollectorRunning == m_isCollectorRunning)
+			return;
+
+		m_isCollectorRunning = isCollectorRunning;
+
+		if(m_isCollectorRunning)
+		{
+			// send back update mode info to collector
+			this->setUpdateMode(this->getUpdateMode());
+
+			// notify server state !
+			for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+					endIter != iter ; ++iter)
+				(*iter)->onServerStartup(this);
+		}
+		else
+		{
+			// notify server state !
+			for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+					endIter != iter ; ++iter)
+				(*iter)->onServerShutdown(this);
+		}
 	}
-	catch(...)
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMonitorElementClient::clearPublication(DQMMonitorElementPublication &publication)
+{
+	for(DQMMonitorElementPublication::iterator iter = publication.begin(), endIter = publication.end() ;
+			endIter != iter ; ++iter)
 	{
+		for(DQMMonitorElementList::iterator meIter = iter->second.begin(), meEndIter = iter->second.end() ;
+				meEndIter != meIter ; ++meIter)
+		{
+			delete *meIter;
+		}
 	}
+
+	publication.clear();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool DQMMonitorElementClient::isCollectorRunning() const
+{
+	return m_isCollectorRunning;
 }
 
 } 

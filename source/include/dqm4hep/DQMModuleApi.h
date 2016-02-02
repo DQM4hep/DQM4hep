@@ -342,9 +342,9 @@ public:
 	 */
 	static StatusCode deleteMonitorElement(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement);
 
-	/** Delete the monitor element (by element name)
-	 */
-	static StatusCode deleteMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElement);
+//	/** Delete the monitor element (by element name)
+//	 */
+//	static StatusCode deleteMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElement);
 
 public:
 

@@ -92,28 +92,40 @@ StatusCode DQMModuleApi::rmdir(const DQMModule *const pModule, const std::string
 
 StatusCode DQMModuleApi::bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram1D(pMonitorElement, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -122,7 +134,10 @@ StatusCode DQMModuleApi::bookRealHistogram2D(const DQMModule *const pModule, DQM
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -131,7 +146,10 @@ StatusCode DQMModuleApi::bookIntHistogram2D(const DQMModule *const pModule, DQMM
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -140,7 +158,10 @@ StatusCode DQMModuleApi::bookCharHistogram2D(const DQMModule *const pModule, DQM
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -149,7 +170,10 @@ StatusCode DQMModuleApi::bookShortHistogram2D(const DQMModule *const pModule, DQ
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -157,7 +181,10 @@ StatusCode DQMModuleApi::bookShortHistogram2D(const DQMModule *const pModule, DQ
 StatusCode DQMModuleApi::bookProfile1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookProfile1D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookProfile1D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -167,35 +194,50 @@ StatusCode DQMModuleApi::bookProfile2D(const DQMModule *const pModule, DQMMonito
 		int nYBins, float yMin, float yMax,
 		float zMin, float zMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookProfile2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookProfile2D(pMonitorElement, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookInt(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const int &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookInt(pMonitorElement, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookInt(pMonitorElement, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookFloat(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const float &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookFloat(pMonitorElement, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookFloat(pMonitorElement, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookShort(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const short &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookShort(pMonitorElement, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookShort(pMonitorElement, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookString(pMonitorElement, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookString(pMonitorElement, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 
@@ -204,7 +246,10 @@ StatusCode DQMModuleApi::bookString(const DQMModule *const pModule, DQMMonitorEl
 StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement,
 		const std::string &name, const std::string &title, TObject *pROOTObject)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement, name, title, pModule->getName(), pROOTObject);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement, name, title, pModule->getName(), pROOTObject));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -212,28 +257,40 @@ StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorEl
 
 StatusCode DQMModuleApi::bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram1D(pMonitorElement, dirName, name, title, pModule->getName(), nBins, minimum, maximum));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -242,7 +299,10 @@ StatusCode DQMModuleApi::bookRealHistogram2D(const DQMModule *const pModule, DQM
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookRealHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -251,7 +311,10 @@ StatusCode DQMModuleApi::bookIntHistogram2D(const DQMModule *const pModule, DQMM
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookIntHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -260,7 +323,10 @@ StatusCode DQMModuleApi::bookCharHistogram2D(const DQMModule *const pModule, DQM
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookCharHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -269,7 +335,10 @@ StatusCode DQMModuleApi::bookShortHistogram2D(const DQMModule *const pModule, DQ
 		int nXBins, float xMin, float xMax,
 		int nYBins, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookShortHistogram2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -277,7 +346,10 @@ StatusCode DQMModuleApi::bookShortHistogram2D(const DQMModule *const pModule, DQ
 StatusCode DQMModuleApi::bookProfile1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		int nXBins, float xMin, float xMax, float yMin, float yMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookProfile1D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, yMin, yMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookProfile1D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, yMin, yMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -287,35 +359,50 @@ StatusCode DQMModuleApi::bookProfile2D(const DQMModule *const pModule, DQMMonito
 		int nYBins, float yMin, float yMax,
 		float zMin, float zMax)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookProfile2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookProfile2D(pMonitorElement, dirName, name, title, pModule->getName(), nXBins, xMin, xMax, nYBins, yMin, yMax, zMin, zMax));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookInt(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const int &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookInt(pMonitorElement, dirName, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookInt(pMonitorElement, dirName, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookFloat(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const float &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookFloat(pMonitorElement, dirName, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookFloat(pMonitorElement, dirName, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookShort(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const short &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookShort(pMonitorElement, dirName, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookShort(pMonitorElement, dirName, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title, const std::string &value)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookString(pMonitorElement, dirName, name, title, pModule->getName(), value);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookString(pMonitorElement, dirName, name, title, pModule->getName(), value));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -323,7 +410,10 @@ StatusCode DQMModuleApi::bookString(const DQMModule *const pModule, DQMMonitorEl
 StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement,
 		const std::string &dirName, const std::string &name, const std::string &title, TObject *pROOTObject)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement, dirName, name, title, pModule->getName(), pROOTObject);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement, dirName, name, title, pModule->getName(), pROOTObject));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -366,15 +456,23 @@ DQMMonitorElement *DQMModuleApi::getMonitorElement(const DQMModule *const pModul
 
 StatusCode DQMModuleApi::deleteMonitorElement(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->deleteMonitorElement(pMonitorElement);
+	std::string fullName = (pMonitorElement->getPath() + pMonitorElement->getName()).getPath();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->deleteMonitorElement(pMonitorElement));
+	pModule->getModuleApplication()->getMonitorElementSender()->removeAvailableMonitorElement(fullName);
+
+	return STATUS_CODE_SUCCESS;
 }
 
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMModuleApi::deleteMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElementName)
-{
-	return pModule->getModuleApplication()->getMonitorElementManager()->deleteMonitorElement(dirName, monitorElementName);
-}
+////-------------------------------------------------------------------------------------------------
+//
+//StatusCode DQMModuleApi::deleteMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElementName)
+//{
+//	std::string fullName = DQMPath(dir) +
+//	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->deleteMonitorElement(dirName, monitorElementName));
+//	pModule->getModuleApplication()->getMonitorElementSender()->removeAvailableMonitorElement(pMonitorElement);
+//
+//	return STATUS_CODE_SUCCESS;
+//}
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -438,7 +536,10 @@ StatusCode DQMModuleApi::runQualityTests(const DQMModule *const pModule)
 
 StatusCode DQMModuleApi::bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement, DQMMonitorElement *&pMonitorElement)
 {
-	return pModule->getModuleApplication()->getMonitorElementManager()->bookMonitorElement(pXmlElement, pModule->getName(), pMonitorElement);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookMonitorElement(pXmlElement, pModule->getName(), pMonitorElement));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 } 

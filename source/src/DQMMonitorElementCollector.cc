@@ -50,13 +50,13 @@ ModuleMeInfo::ModuleMeInfo()
 
 ModuleMeInfo::~ModuleMeInfo()
 {
-	std::cout << "~ModuleMeInfo !!" << std::endl;
-
 	for(MeInfoMap::iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
-		if(NULL != iter->second.m_pMonitorElement)
-			delete iter->second.m_pMonitorElement;
+		if(NULL != iter->second->m_pMonitorElement)
+			delete iter->second->m_pMonitorElement;
+
+		delete iter->second;
 	}
 }
 
@@ -84,32 +84,39 @@ bool ModuleMeInfo::updateMonitorElement(DQMMonitorElement *pMonitorElement)
 	// full name = path + name
 	std::string fullName = (pMonitorElement->getPath() + pMonitorElement->getName()).getPath();
 
+	if(fullName.at(0) != '/')
+		fullName = "/" + fullName;
+
 	// look for an existing entry
 	MeInfoMap::iterator findIter = m_meInfoMap.find(fullName);
 
 	if(findIter == m_meInfoMap.end())
 	{
-		std::pair<MeInfoMap::iterator, bool> ret = m_meInfoMap.insert(MeInfoMap::value_type(fullName, MeInfo()));
+		MeInfo *pMeInfo = new MeInfo();
+		std::pair<MeInfoMap::iterator, bool> ret = m_meInfoMap.insert(MeInfoMap::value_type(fullName, pMeInfo));
 
 		if(!ret.second)
+		{
+			delete pMeInfo;
 			return false;
+		}
 
 		findIter = ret.first;
 
 		// initialize monitor element pointer
-		findIter->second.m_pMonitorElement = NULL;
+		findIter->second->m_pMonitorElement = NULL;
 	}
 
 	// here, findIter is always defined !
-	if(NULL != findIter->second.m_pMonitorElement)
+	if(NULL != findIter->second->m_pMonitorElement)
 	{
 		// destroy it !
-		delete findIter->second.m_pMonitorElement;
-		findIter->second.m_pMonitorElement = NULL;
+		delete findIter->second->m_pMonitorElement;
+		findIter->second->m_pMonitorElement = NULL;
 	}
 
 	// replace it !
-	findIter->second.m_pMonitorElement = pMonitorElement;
+	findIter->second->m_pMonitorElement = pMonitorElement;
 
 	return true;
 }
@@ -142,7 +149,7 @@ DQMMonitorElement *ModuleMeInfo::getMonitorElement(const std::string &meName, bo
 				continue;
 		}
 
-		return iter->second.m_pMonitorElement;
+		return iter->second->m_pMonitorElement;
 	}
 
 	return NULL;
@@ -157,7 +164,7 @@ StringSet ModuleMeInfo::getSubscribedList() const
 	for(MeInfoMap::const_iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
-		if( ! iter->second.m_clientList.empty() )
+		if( ! iter->second->m_clientList.empty() )
 			requestedMeList.insert( iter->first );
 	}
 
@@ -173,7 +180,7 @@ StringSet ModuleMeInfo::getSubscribedList(int clientID) const
 	for(MeInfoMap::const_iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
-		if( iter->second.m_clientList.find(clientID) != iter->second.m_clientList.end() )
+		if( iter->second->m_clientList.find(clientID) != iter->second->m_clientList.end() )
 			requestedMeList.insert( iter->first );
 	}
 
@@ -189,9 +196,18 @@ DQMMonitorElementList ModuleMeInfo::getSubscribedMeList(int clientID) const
 	for(MeInfoMap::const_iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
-		if( iter->second.m_clientList.find(clientID) != iter->second.m_clientList.end() )
-			if( NULL != iter->second.m_pMonitorElement )
-				meList.push_back( iter->second.m_pMonitorElement );
+		streamlog_out(DEBUG) << "getSubscribedMeList(), me : " << iter->first << std::endl;
+
+		if( iter->second->m_clientList.find(clientID) != iter->second->m_clientList.end() )
+		{
+			streamlog_out(DEBUG) << "client " << clientID << " subscribed to it !" << std::endl;
+
+			if( NULL != iter->second->m_pMonitorElement )
+			{
+				streamlog_out(DEBUG) << "Element is not null. Pushed back !" << std::endl;
+				meList.push_back( iter->second->m_pMonitorElement );
+			}
+		}
 	}
 
 	return meList;
@@ -203,13 +219,35 @@ std::pair<size_t, bool> ModuleMeInfo::subscribe(int clientID, const std::string 
 {
 	MeInfoMap::iterator findIter = m_meInfoMap.find(meName);
 
-	// create the entry if not existing
+	// if not existing, look if available
 	if(findIter == m_meInfoMap.end())
-		findIter = m_meInfoMap.insert(MeInfoMap::value_type(meName, MeInfo())).first;
+	{
+		bool found = false;
+
+		for(DQMMonitorElementInfoList::iterator iter = m_availableMeList.begin(), endIter = m_availableMeList.end() ;
+				endIter != iter ; ++iter)
+		{
+			std::string fullName = (DQMPath(iter->m_monitorElementFullPath) + iter->m_monitorElementName).getPath();
+
+			if(fullName.at(0) != '/')
+				fullName = "/" + fullName;
+
+			if(fullName == meName)
+			{
+				found = true;
+				break;
+			}
+		}
+
+		if(found)
+			findIter = m_meInfoMap.insert(MeInfoMap::value_type(meName, new MeInfo())).first;
+		else
+			return std::pair<size_t, bool>( 0 , false );
+	}
 
 	// add client and return (new) size of client list
-	bool inserted = findIter->second.m_clientList.insert(clientID).second;
-	size_t newSize = findIter->second.m_clientList.size();
+	bool inserted = findIter->second->m_clientList.insert(clientID).second;
+	size_t newSize = findIter->second->m_clientList.size();
 
 	return std::pair<size_t, bool>( newSize , inserted );
 }
@@ -224,8 +262,8 @@ std::pair<size_t, bool> ModuleMeInfo::unsubscribe(int clientID, const std::strin
 		return std::pair<size_t, bool>( 0 , true );
 
 	// remove client id and return (new) size of client list
-	bool erased = ( findIter->second.m_clientList.erase(clientID) != 0 );
-	size_t newSize = findIter->second.m_clientList.size();
+	bool erased = ( findIter->second->m_clientList.erase(clientID) != 0 );
+	size_t newSize = findIter->second->m_clientList.size();
 
 	return std::pair<size_t, bool>( newSize , erased );
 }
@@ -239,7 +277,7 @@ bool ModuleMeInfo::unsubscribe(int clientID)
 	for(MeInfoMap::iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
-		if(iter->second.m_clientList.erase(clientID))
+		if(iter->second->m_clientList.erase(clientID))
 			unsubscribeAtLeastToOne = true;
 	}
 
@@ -251,7 +289,7 @@ bool ModuleMeInfo::unsubscribe(int clientID)
 size_t ModuleMeInfo::getNSubscribers(const std::string &meName) const
 {
 	MeInfoMap::const_iterator findIter = m_meInfoMap.find(meName);
-	return ( ( findIter == m_meInfoMap.end() ) ? 0 : findIter->second.m_clientList.size() );
+	return ( ( findIter == m_meInfoMap.end() ) ? 0 : findIter->second->m_clientList.size() );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -263,7 +301,7 @@ size_t ModuleMeInfo::getNSubscribers() const
 	for(MeInfoMap::const_iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
-		clientList.insert(iter->second.m_clientList.begin(), iter->second.m_clientList.end());
+		clientList.insert(iter->second->m_clientList.begin(), iter->second->m_clientList.end());
 	}
 
 	return clientList.size();
@@ -276,7 +314,7 @@ std::set<int> ModuleMeInfo::getSubscribers(const std::string &meName) const
 	MeInfoMap::const_iterator findIter = m_meInfoMap.find(meName);
 
 	if(findIter != m_meInfoMap.end())
-		return findIter->second.m_clientList;
+		return findIter->second->m_clientList;
 
 	return std::set<int>();
 }
@@ -404,8 +442,16 @@ StatusCode DQMMonitorElementCollector::start()
 	m_pMonitorElementCollectorInfoRpc = new DQMMonitorElementCollectorInfoRpc((char *)ss.str().c_str(), this);
 
 	// from modules
+	ss.str("");
 	ss << baseName << "COLLECT_ME_CMD";
 	m_pCollectMeCommand = new DimCommand((char *)ss.str().c_str(), "C", this);
+
+	ss.str("");
+	ss << baseName << "NOTIFY_WATCHED_ME_SVC";
+	m_pNotifyWatchedMeService = new DimService((char *)ss.str().c_str(), "C",
+			(void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+
+
 
 	// from clients
 	ss.str("");
@@ -441,12 +487,19 @@ StatusCode DQMMonitorElementCollector::start()
 	m_pMeUpdateService = new DimService((char *)ss.str().c_str(), "C",
 			(void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 
-	ss.str("");
-	ss << baseName << "NOTIFY_WATCHED_ME_SVC";
-	m_pNotifyWatchedMeService = new DimService((char *)ss.str().c_str(), "C",
-			(void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 
 	m_collectorState = RUNNING_STATE;
+
+	ss.str("");
+	ss << baseName << "COLLECTOR_STATE_SVC";
+	m_pCollectorStateService = new DimService((char *)ss.str().c_str(), m_collectorState);
+
+	// for registration on dns ...
+	sleep(1);
+
+	// notify server running !
+	streamlog_out(DEBUG) << "Server started !" << std::endl;
+	m_pCollectorStateService->updateService(m_collectorState);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -473,6 +526,8 @@ StatusCode DQMMonitorElementCollector::stop()
 	delete m_pNotifyWatchedMeService;
 
 	m_collectorState = STOPPED_STATE;
+	m_pCollectorStateService->updateService(m_collectorState);
+	delete m_pCollectorStateService;
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -481,7 +536,7 @@ StatusCode DQMMonitorElementCollector::stop()
 
 DQMState DQMMonitorElementCollector::getState() const
 {
-	return m_collectorState;
+	return static_cast<DQMState>(m_collectorState);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -493,7 +548,7 @@ bool DQMMonitorElementCollector::isRunning() const
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::updateClients(const ClientUpdateMap &clientUpdateMap)
+void DQMMonitorElementCollector::updateClients(const ClientUpdateMap &clientUpdateMap, bool forceUpdate)
 {
 	for(ClientUpdateMap::const_iterator iter = clientUpdateMap.begin(), endIter = clientUpdateMap.end() ;
 			endIter != iter ; ++iter)
@@ -501,11 +556,18 @@ void DQMMonitorElementCollector::updateClients(const ClientUpdateMap &clientUpda
 		ClientMap::iterator clientIter = m_clientMap.find(iter->first);
 
 		if(clientIter == m_clientMap.end())
+		{
+			streamlog_out(DEBUG) << "Client no " << iter->first << " not registered. Skipping ..." << std::endl;
 			continue;
+		}
 
-		if(!clientIter->second.hasUpdateMode())
+		if(!clientIter->second.hasUpdateMode() && !forceUpdate)
+		{
+			streamlog_out(DEBUG) << "Client no " << iter->first << " is not in update mode. Skipping ..." << std::endl;
 			continue;
+		}
 
+		streamlog_out(DEBUG) << "Sending updates to client no " << iter->first << std::endl;
 		this->sendMeUpdate(clientIter->first);
 	}
 }
@@ -515,6 +577,8 @@ void DQMMonitorElementCollector::updateClients(const ClientUpdateMap &clientUpda
 void DQMMonitorElementCollector::commandHandler()
 {
 	DimCommand *pReceivedCommand = getCommand();
+
+	std::cout << "Received command : " << pReceivedCommand->getName() << std::endl;
 
 	// from modules
 	if(pReceivedCommand == m_pCollectMeCommand)
@@ -528,7 +592,7 @@ void DQMMonitorElementCollector::commandHandler()
 	// from client side
 	else if(pReceivedCommand == m_pMeQueryCommand)
 	{
-		this->sendMeUpdate(getClientId());
+		this->handleMeQuery(getClientId(), m_pMeQueryCommand);
 	}
 	else if(pReceivedCommand == m_pSetUpdateModeCommand)
 	{
@@ -553,10 +617,7 @@ void DQMMonitorElementCollector::commandHandler()
 void DQMMonitorElementCollector::clientExitHandler()
 {
 	int clientId = getClientId();
-
-	// need to look for both module client and me client
-
-
+	this->deregisterClient(clientId);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -580,7 +641,7 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 		DQMMonitorElementPublication publication;
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.deserialize(&m_dataStream));
 
-		if(publication.m_publication.empty())
+		if(publication.empty())
 		{
 			streamlog_out(WARNING) << "Empty publication, skipping packet ..." << std::endl;
 			throw StatusCodeException(STATUS_CODE_SUCCESS);
@@ -591,8 +652,8 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 
 		// update the monitor element with ones received !
 		// build the monitor element list to update for each client
-		for(DQMMonitorElementPublication::PublicationMap::iterator iter = publication.m_publication.begin(),
-				endIter = publication.m_publication.end() ; endIter != iter ; ++iter)
+		for(DQMMonitorElementPublication::iterator iter = publication.begin(),
+				endIter = publication.end() ; endIter != iter ; ++iter)
 		{
 			ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(iter->first);
 
@@ -610,7 +671,7 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 			for(DQMMonitorElementList::iterator meIter = iter->second.begin(), meEndIter = iter->second.end() ;
 									meEndIter != meIter ; ++meIter)
 			{
-				bool updated = findIter->second.updateMonitorElement(*meIter);
+				bool updated = findIter->second->updateMonitorElement(*meIter);
 
 				if(!updated)
 					delete *meIter;
@@ -621,7 +682,12 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 
 				// get the client ids that have subscribed to these elements
 				std::string meFullName = ( (*meIter)->getPath() + (*meIter)->getName() ).getPath();
-				std::set<int> clientIdSet = findIter->second.getSubscribers(meFullName);
+
+				if(meFullName.at(0) != '/')
+					meFullName = "/" + meFullName;
+
+				streamlog_out(DEBUG) << "meFullName on collect : " << meFullName << std::endl;
+				std::set<int> clientIdSet = findIter->second->getSubscribers(meFullName);
 
 				// add the monitor element entry into the update map
 				for(std::set<int>::iterator cliIter = clientIdSet.begin(), cliEndIter = clientIdSet.end() ;
@@ -634,6 +700,7 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 
 		m_pStatisticsService->update(nElements);
 
+		streamlog_out(DEBUG) << "Received n elements : " << nElements << " from " << publication.size() << " modules" << std::endl;
 		this->updateClients(clientUpdateMap);
 	}
 	catch(StatusCodeException &exception)
@@ -671,49 +738,25 @@ void DQMMonitorElementCollector::handleAvailableListUpdate(DimCommand *pCommand)
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, availableMeList.deserialize(&m_dataStream));
 
 		// register client, even if maybe already registered
-		this->registerClient(getClientId(), moduleName);
+		bool newClient = this->registerClient(getClientId(), moduleName);
 
 		// look for module entry to update
 		ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(moduleName);
 
 		// if not found, add the entry
 		if(findIter == m_moduleMeInfoMap.end())
-			findIter = m_moduleMeInfoMap.insert(ModuleMeInfoMap::value_type(moduleName, ModuleMeInfo())).first;
+			findIter = m_moduleMeInfoMap.insert(ModuleMeInfoMap::value_type(moduleName, new ModuleMeInfo())).first;
 
 		// update the entry
-		findIter->second.setAvailableMeList(availableMeList);
+		findIter->second->setAvailableMeList(availableMeList);
+		streamlog_out(DEBUG) << "Received " << availableMeList.size() << " available element from module " << moduleName << std::endl;
+
+		if(newClient)
+			this->notifyWatchedMe(moduleName);
 	}
 	catch(const StatusCodeException &exception)
 	{
 		streamlog_out(WARNING) << "Exception caught : " << exception.toString() << std::endl;
-	}
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMMonitorElementCollector::handleClientRegistration(int clientId, bool shouldRegister)
-{
-	ClientMap::iterator findIter = m_clientMap.find(clientId);
-
-	if(shouldRegister)
-	{
-		if(findIter == m_clientMap.end())
-			m_clientMap.insert(ClientMap::value_type(clientId, ClientInfo(clientId)));
-	}
-	else
-	{
-		if(findIter != m_clientMap.end())
-		{
-			// first, we need to unsubscribe to all elements for all modules
-			for(ModuleMeInfoMap::iterator iter = m_moduleMeInfoMap.begin(), endIter = m_moduleMeInfoMap.end() ;
-					endIter != iter ; ++iter)
-			{
-				iter->second.unsubscribe(clientId);
-			}
-
-			// remove client from map
-			m_clientMap.erase(findIter);
-		}
 	}
 }
 
@@ -726,15 +769,70 @@ void DQMMonitorElementCollector::handleClientUpdateMode(int clientId, bool updat
 	if(findIter != m_clientMap.end())
 	{
 		if( ! findIter->second.hasUpdateMode() && updateMode)
-			this->sendMeUpdate(clientId);
+		{
+			streamlog_out(DEBUG) << "Client no " << clientId << " update mode switched ON. Sending updates !" << std::endl;
+ 			this->sendMeUpdate(clientId);
+		}
 
+		streamlog_out(DEBUG) << "Client no " << clientId << " setting update mode to " << updateMode << std::endl;
 		findIter->second.setUpdateMode(updateMode);
+
+		return;
+	}
+
+	streamlog_out(DEBUG) << "Client no " << clientId << " not registered !" << std::endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMMonitorElementCollector::handleClientRequestList(int clientId, DimCommand *pCommand)
+{
+	if(!this->isRunning())
+		return;
+
+	try
+	{
+		dqm_char *pBuffer = static_cast<dqm_char *>(pCommand->getData());
+		dqm_uint bufferSize = pCommand->getSize();
+
+		if(NULL == pBuffer || 0 == bufferSize)
+			return;
+
+		this->registerClient(clientId);
+
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+
+		DQMMonitorElementRequest request;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
+
+		for(DQMMonitorElementRequest::iterator iter = request.begin(), endIter = request.end() ;
+				endIter != iter ; ++iter)
+		{
+			ModuleMeInfoMap::iterator moduleIter = m_moduleMeInfoMap.find(iter->first);
+
+			if(moduleIter == m_moduleMeInfoMap.end())
+				continue;
+
+			streamlog_out(DEBUG) << "Found module : " << iter->first << std::endl;
+
+			// first unsubscribe to all elements
+			moduleIter->second->unsubscribe(clientId);
+			moduleIter->second->subscribe(clientId, iter->second);
+
+			// in case the subscribed element is different
+			this->notifyWatchedMe(iter->first);
+		}
+	}
+	catch(const StatusCodeException &exception)
+	{
+		streamlog_out(WARNING) << "Exception caught : " << exception.toString() << std::endl;
 	}
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::handleClientRequestList(int clientID, DimCommand *pCommand)
+void DQMMonitorElementCollector::handleMeQuery(int clientId, DimCommand *pCommand)
 {
 	if(!this->isRunning())
 		return;
@@ -750,41 +848,80 @@ void DQMMonitorElementCollector::handleClientRequestList(int clientID, DimComman
 		m_dataStream.reset();
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
-		dqm_uint nModules = 0;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(nModules));
+		DQMMonitorElementRequest request;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
 
-		for(dqm_uint m=0 ; m<nModules ; m++)
+		// if nothing specified in the request, just send updates
+		if(request.empty())
 		{
-			std::string moduleName;
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(moduleName));
-
-			dqm_uint nElements = 0;
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(nElements));
-
-			// look for module entry to update
-			ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(moduleName);
-			bool updateRequestListService = false;
-
-			// first unsubscribe all elements
-			if(findIter != m_moduleMeInfoMap.end())
-			{
-				if(findIter->second.unsubscribe(clientID))
-					updateRequestListService = true;
-			}
-
-			// subscribe to elements one by one
-			for(dqm_uint e=0 ; e<nElements ; e++)
-			{
-				std::string meName;
-				THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(meName));
-
-				if(findIter != m_moduleMeInfoMap.end())
-					findIter->second.subscribe(clientID, meName);
-			}
-
-			// watched element list has changed ! Notify module !
-			this->notifyWatchedMe(moduleName);
+			streamlog_out(DEBUG) << "Sending me updates from client query" << std::endl;
+			this->sendMeUpdate(clientId);
+			return;
 		}
+
+		this->registerClient(clientId);
+
+		StringSet updateModuleList;
+		DQMMonitorElementPublication monitorElementPublication;
+
+		streamlog_out(DEBUG) << "Request size : " << request.size() << std::endl;
+
+		for(DQMMonitorElementRequest::iterator iter = request.begin(), endIter = request.end() ;
+				endIter != iter ; ++iter)
+		{
+			ModuleMeInfoMap::iterator moduleIter = m_moduleMeInfoMap.find(iter->first);
+
+			if(moduleIter == m_moduleMeInfoMap.end())
+				continue;
+
+			streamlog_out(DEBUG) << "Found module : " << iter->first << std::endl;
+
+			// subscribe to me if not done yet
+			if( moduleIter->second->subscribe(clientId, iter->second).second )
+			{
+				streamlog_out(DEBUG) << "New subscription for element : " << iter->second << std::endl;
+				updateModuleList.insert(iter->first);
+			}
+			else
+			{
+				streamlog_out(DEBUG) << "Element : " << iter->second << " already subscribed !" << std::endl;
+			}
+
+			// find the monitor element
+			DQMMonitorElement *pMonitorElement = moduleIter->second->getMonitorElement(iter->second);
+
+			if(NULL == pMonitorElement)
+				continue;
+
+			streamlog_out(DEBUG) << "Element : " << iter->second << " found !" << std::endl;
+			monitorElementPublication[iter->first].push_back(pMonitorElement);
+		}
+
+		for(StringSet::iterator iter = updateModuleList.begin(), endIter = updateModuleList.end() ;
+				endIter != iter ; ++iter)
+		{
+			streamlog_out(DEBUG) << "Module " << *iter << " notified to send new me list !" << std::endl;
+			this->notifyWatchedMe(*iter);
+		}
+
+		if(monitorElementPublication.empty())
+			return;
+
+		m_dataStream.reset();
+		StatusCode statusCode = monitorElementPublication.serialize(&m_dataStream);
+
+		if(statusCode != STATUS_CODE_SUCCESS)
+		{
+			m_dataStream.reset();
+			return;
+		}
+
+		int clientIds[2];
+		clientIds[0] = clientId;
+		clientIds[1] = 0;
+
+		streamlog_out(DEBUG) << "Me update service called (on query) !" << std::endl;
+		m_pMeUpdateService->selectiveUpdateService((void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize() , &clientIds[0]);
 	}
 	catch(const StatusCodeException &exception)
 	{
@@ -794,7 +931,7 @@ void DQMMonitorElementCollector::handleClientRequestList(int clientID, DimComman
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::handleClientSubscription(int clientID, DimCommand *pCommand)
+void DQMMonitorElementCollector::handleClientSubscription(int clientId, DimCommand *pCommand)
 {
 	if(!this->isRunning())
 		return;
@@ -810,30 +947,40 @@ void DQMMonitorElementCollector::handleClientSubscription(int clientID, DimComma
 		m_dataStream.reset();
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
-		dqm_uint nModules = 0;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(nModules));
+		DQMMonitorElementRequest request;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
 
-		for(dqm_uint m=0 ; m<nModules ; m++)
+		// if nothing specified in the request, return
+		if(request.empty())
 		{
-			std::string moduleName;
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(moduleName));
+			streamlog_out(DEBUG) << "No element to subscribe !" << std::endl;
+			return;
+		}
 
-			dqm_uint nElements = 0;
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(nElements));
+		this->registerClient(clientId);
 
-			// look for module entry to update
-			ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(moduleName);
-			bool updateRequestListService = false;
+		StringSet updateModuleList;
 
-			// subscribe to elements one by one
-			for(dqm_uint e=0 ; e<nElements ; e++)
+		for(DQMMonitorElementRequest::iterator iter = request.begin(), endIter = request.end() ;
+				endIter != iter ; ++iter)
+		{
+			ModuleMeInfoMap::iterator moduleIter = m_moduleMeInfoMap.find(iter->first);
+
+			if(moduleIter == m_moduleMeInfoMap.end())
+				continue;
+
+			if( moduleIter->second->subscribe(clientId, iter->second).second )
 			{
-				std::string meName;
-				THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(meName));
-
-				if(findIter != m_moduleMeInfoMap.end())
-					findIter->second.subscribe(clientID, meName);
+				streamlog_out(DEBUG) << "New subscription for element : " << iter->second << std::endl;
+				updateModuleList.insert(iter->first);
 			}
+		}
+
+		for(StringSet::iterator iter = updateModuleList.begin(), endIter = updateModuleList.end() ;
+				endIter != iter ; ++iter)
+		{
+			streamlog_out(DEBUG) << "Module " << *iter << " notified to send new me list !" << std::endl;
+			this->notifyWatchedMe(*iter);
 		}
 	}
 	catch(const StatusCodeException &exception)
@@ -844,7 +991,7 @@ void DQMMonitorElementCollector::handleClientSubscription(int clientID, DimComma
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::handleClientUnsubscription(int clientID, DimCommand *pCommand)
+void DQMMonitorElementCollector::handleClientUnsubscription(int clientId, DimCommand *pCommand)
 {
 	if(!this->isRunning())
 		return;
@@ -860,30 +1007,40 @@ void DQMMonitorElementCollector::handleClientUnsubscription(int clientID, DimCom
 		m_dataStream.reset();
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
-		dqm_uint nModules = 0;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(nModules));
+		DQMMonitorElementRequest request;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
 
-		for(dqm_uint m=0 ; m<nModules ; m++)
+		// if nothing specified in the request, return
+		if(request.empty())
 		{
-			std::string moduleName;
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(moduleName));
+			streamlog_out(DEBUG) << "No element to unsubscribe !" << std::endl;
+			return;
+		}
 
-			dqm_uint nElements = 0;
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(nElements));
+		this->registerClient(clientId);
 
-			// look for module entry to update
-			ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(moduleName);
-			bool updateRequestListService = false;
+		StringSet updateModuleList;
 
-			// subscribe to elements one by one
-			for(dqm_uint e=0 ; e<nElements ; e++)
+		for(DQMMonitorElementRequest::iterator iter = request.begin(), endIter = request.end() ;
+				endIter != iter ; ++iter)
+		{
+			ModuleMeInfoMap::iterator moduleIter = m_moduleMeInfoMap.find(iter->first);
+
+			if(moduleIter == m_moduleMeInfoMap.end())
+				continue;
+
+			if( moduleIter->second->unsubscribe(clientId, iter->second).second )
 			{
-				std::string meName;
-				THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(meName));
-
-				if(findIter != m_moduleMeInfoMap.end())
-					findIter->second.unsubscribe(clientID, meName);
+				streamlog_out(DEBUG) << "Element un-subscribed : " << iter->second << std::endl;
+				updateModuleList.insert(iter->first);
 			}
+		}
+
+		for(StringSet::iterator iter = updateModuleList.begin(), endIter = updateModuleList.end() ;
+				endIter != iter ; ++iter)
+		{
+			streamlog_out(DEBUG) << "Module " << *iter << " notified to send new me list !" << std::endl;
+			this->notifyWatchedMe(*iter);
 		}
 	}
 	catch(const StatusCodeException &exception)
@@ -894,28 +1051,36 @@ void DQMMonitorElementCollector::handleClientUnsubscription(int clientID, DimCom
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::sendMeUpdate(int clientID)
+void DQMMonitorElementCollector::sendMeUpdate(int clientId)
 {
 	if(!this->isRunning())
 		return;
+
+	this->registerClient(clientId);
 
 	DQMMonitorElementPublication monitorElementPublication;
+	streamlog_out(DEBUG) << "Building publication to send to client" << std::endl;
 
 	for(ModuleMeInfoMap::const_iterator iter = m_moduleMeInfoMap.begin(), endIter = m_moduleMeInfoMap.end() ;
 			endIter != iter ; ++iter)
 	{
 		std::string moduleName = iter->first;
 
-		DQMMonitorElementList subscribedMeList = iter->second.getSubscribedMeList(clientID);
+		DQMMonitorElementList subscribedMeList = iter->second->getSubscribedMeList(clientId);
 
 		if(subscribedMeList.empty())
 			continue;
 
-		monitorElementPublication.m_publication.insert(DQMMonitorElementPublication::PublicationMap::value_type(moduleName, subscribedMeList));
+		streamlog_out(DEBUG) << "Module " << moduleName << ", total me list = " << subscribedMeList.size() << std::endl;
+
+		monitorElementPublication.insert(DQMMonitorElementPublication::value_type(moduleName, subscribedMeList));
 	}
 
-	if(monitorElementPublication.m_publication.empty())
+	if(monitorElementPublication.empty())
+	{
+		streamlog_out(DEBUG) << "Empty publication ! Nothing will be sent !" << std::endl;
 		return;
+	}
 
 	m_dataStream.reset();
 	StatusCode statusCode = monitorElementPublication.serialize(&m_dataStream);
@@ -927,9 +1092,10 @@ void DQMMonitorElementCollector::sendMeUpdate(int clientID)
 	}
 
 	int clientIds[2];
-	clientIds[0] = clientID;
+	clientIds[0] = clientId;
 	clientIds[1] = 0;
 
+	streamlog_out(DEBUG) << "Me update service called (on update)!" << std::endl;
 	m_pMeUpdateService->selectiveUpdateService((void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize() , &clientIds[0]);
 }
 
@@ -947,7 +1113,7 @@ void DQMMonitorElementCollector::notifyWatchedMe(const std::string &moduleName)
 	if(moduleFindIter == m_moduleMeInfoMap.end())
 		return;
 
-	StringSet watchedMeList = moduleFindIter->second.getSubscribedList();
+	StringSet watchedMeList = moduleFindIter->second->getSubscribedList();
 
 	m_dataStream.reset();
 
@@ -976,41 +1142,52 @@ void DQMMonitorElementCollector::notifyWatchedMe(const std::string &moduleName)
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::registerClient(int clientId)
+bool DQMMonitorElementCollector::registerClient(int clientId)
 {
 	ClientMap::iterator findIter = m_clientMap.find(clientId);
 
 	if(findIter != m_clientMap.end())
-		return;
+		return false;
 
 	// just insert a new client
 	m_clientMap.insert( ClientMap::value_type( clientId, ClientInfo(clientId) ) );
+	DimServer::setClientExitHandler(clientId);
+
+	return true;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::registerClient(int clientId, const std::string moduleName)
+bool DQMMonitorElementCollector::registerClient(int clientId, const std::string moduleName)
 {
 	ClientMap::iterator findIter = m_clientMap.find(clientId);
 
 	if(findIter != m_clientMap.end())
-		return;
+		return false;
+
+	streamlog_out(DEBUG) << "Registering module " << moduleName << " with client id " << clientId << std::endl;
 
 	// insert a new client
 	m_clientMap.insert( ClientMap::value_type( clientId, ClientInfo(clientId, moduleName) ) );
 
 	// create monitor element storage
-	m_moduleMeInfoMap.insert( ModuleMeInfoMap::value_type( moduleName, ModuleMeInfo() ) );
+	m_moduleMeInfoMap.insert( ModuleMeInfoMap::value_type( moduleName, new ModuleMeInfo() ) );
+
+	DimServer::setClientExitHandler(clientId);
+
+	return true;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementCollector::deregisterClient(int clientId)
+bool DQMMonitorElementCollector::deregisterClient(int clientId)
 {
 	ClientMap::iterator findIter = m_clientMap.find(clientId);
 
 	if(findIter == m_clientMap.end())
-		return;
+		return false;
+
+	DimServer::clearClientExitHandler(clientId);
 
 	// module client case
 	if(findIter->second.isModule())
@@ -1020,7 +1197,12 @@ void DQMMonitorElementCollector::deregisterClient(int clientId)
 		ModuleMeInfoMap::iterator moduleFindIter = m_moduleMeInfoMap.find(moduleName);
 
 		if(moduleFindIter != m_moduleMeInfoMap.end())
+		{
+			delete moduleFindIter->second;
 			m_moduleMeInfoMap.erase(moduleFindIter);
+		}
+
+		streamlog_out(DEBUG) << "Deregistering module " << moduleName << " with client id " << clientId << std::endl;
 	}
 	// monitor element client case
 	else
@@ -1033,17 +1215,19 @@ void DQMMonitorElementCollector::deregisterClient(int clientId)
 		{
 			// this returns if at least one element has been removed
 			// from the watched list. Use it to trigger update if necessary
-			bool updateService = iter->second.unsubscribe(clientId);
+			bool updateService = iter->second->unsubscribe(clientId);
 
 			if(updateService)
 				this->notifyWatchedMe(iter->first);
 		}
+
+		streamlog_out(DEBUG) << "Registering me client " << clientId << std::endl;
 	}
 
 	// finally remove the client from the map
 	m_clientMap.erase(findIter);
 
-	return;
+	return true;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1112,7 +1296,7 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 			if(moduleName.find(request.m_moduleName) == std::string::npos && !request.m_moduleName.empty())
 				continue;
 
-			const std::vector<DQMMonitorElementInfo> &availableMeList = iter->second.getAvailableMeList();
+			const std::vector<DQMMonitorElementInfo> &availableMeList = iter->second->getAvailableMeList();
 
 			for(std::vector<DQMMonitorElementInfo>::const_iterator meIter = availableMeList.begin(), meEndIter = availableMeList.end() ;
 					meEndIter != meIter ; ++meIter)
