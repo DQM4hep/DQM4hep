@@ -38,7 +38,7 @@ morekeywords={string,fstream,ofstream,ifstream}
 \usetheme{CambridgeUS}
 
 
-\title[DQM4HEP]{Data Quality Monitoring for High Energy Physics (DQM4HEP) \\ Version 03-02-00}
+\title[DQM4HEP - v03-02-00]{Data Quality Monitoring for High Energy Physics (DQM4HEP) \\ Version 03-02-00}
 \institute[UCBL - IPNL - UGent]{Université Claude Bernard Lyon 1 - Institut de Physique Nucléaire de Lyon / Ghent University}
 \author[Eté - Pingault - Mirabito]{{\bf \large R. \'Eté, A. Pingault, L. Mirabito}}
 \date{\today}
@@ -70,7 +70,7 @@ morekeywords={string,fstream,ofstream,ifstream}
    
    
   %% OVERVIEW %%
-   \section{Overview}
+   \section{Overview and packaging}
   
   
   %% GENERAL %%
@@ -86,7 +86,7 @@ morekeywords={string,fstream,ofstream,ifstream}
         \item Visualization interface (Qt GUI)
         \item Large scale process management
         \item IO support for any data type (opt. LCIO)
-        \item Full size detector (ILD) to single prototype (CALICE)  
+        \item Full size detector (ILD) to single prototype (CALICE) design
         \item ELog interface
       \end{itemize}
     \end{block}
@@ -111,7 +111,7 @@ morekeywords={string,fstream,ofstream,ifstream}
       Sub-packages :
       \begin{itemize}
         \item \textbf{dim} : Distributed Information Management (Delphi). Manage client/server communications
-        \item \textbf{dimjc} : DIM Job Control (L. Mirabito). Process management using dim.
+        \item \textbf{dimjc} : DIM Job Control (L. Mirabito). Remote process management using dim.
         \item \textbf{jsoncpp} : Json I/O for dimjc
         \item \textbf{streamlog} : logging library (used in ILCSOFT)
         \item \textbf{DQMCore} : Core part of the DQM system. Client/server interfaces, analysis, IO, run control interface, plugin management ...
@@ -549,6 +549,7 @@ morekeywords={string,fstream,ofstream,ifstream}
     
   \end{frame}
     
+  \section{Conclusion and plans}
     
   %% CONCLUSION %%
   \begin{frame}
