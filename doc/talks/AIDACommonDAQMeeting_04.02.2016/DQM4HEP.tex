@@ -439,6 +439,29 @@ morekeywords={string,fstream,ofstream,ifstream}
   ~ \\
   For an experiment with a simple event structure, it can be useful to define a raw event streamer and propagate the event through the DQM system without taking care about the network interface. \\
     \end{frame}
+    
+    
+    \begin{frame}[containsverbatim]
+      \frametitle{\secname}
+      \framesubtitle{Module API}
+      
+      Data processing performed in \textbf{modules} (standalone or analysis). \\
+      Modules \textbf{book} monitor elements, \textbf{fill} them and \textbf{publish} them to a single collector. \\
+      ~ \\
+      A monitor element is a wrapper around a ROOT TObject with some additional attributes : \\
+      $\rightarrow$ Type, name, path (i.e "/Efficiency/Layer2/"), collector name, quality flag, reset policy, title, description, run number, quality test results. \\
+      ~ \\
+      The \verb|DQMModuleApi| class provide a static interface to perform operations within the application :
+      \begin{itemize}
+        \item Monitor elements management (book, delete, reset, from xml)
+        \item Directory structure management (mkdir, cd, ls, rmdir, pwd)
+        \item Quality test management (register, add, remove, run, from xml)
+      \end{itemize}
+      ~ \\
+      Quality tests can be run on a particular monitor element to test the quality of the processed data (chi2, Kolmogorov, user defined). \\ 
+      ~ \\
+      Note that \textbf{QTest results are sent to the collector together with the monitor element} ! 
+    \end{frame}
   
   
   \begin{frame}
