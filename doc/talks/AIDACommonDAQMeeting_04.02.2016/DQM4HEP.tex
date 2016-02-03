@@ -170,7 +170,7 @@ morekeywords={string,fstream,ofstream,ifstream}
     \begin{minipage}{0.52\textwidth}
         Event collector (\verb|DQMEventCollector|) and \\
         Event client (\verb|DQMEventClient|) \\
-        linked via DIM (TPC/IP).\\
+        linked via DIM (TCP/IP).\\
         ~ \\
         Receiver interface with 2 modes :
         \begin{itemize}
@@ -461,12 +461,24 @@ morekeywords={string,fstream,ofstream,ifstream}
     \framesubtitle{ Run Control GUI }
     \begin{center}
       \begin{overlayarea}{\textwidth}{\textheight}
-        \begin{center}
-          \begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/RunControl/RunControl_Infos.png}\end{onlyenv}
-          \begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/RunControl/RunControl_SOR.png}\end{onlyenv}
-          \begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/RunControl/RunControl_Status.png}\end{onlyenv}
-          \begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/RunControl/RunControl_logging.png}\end{onlyenv}
+      \begin{columns}
+    	\column{.3\textwidth}
+	           \vspace{-2em}
+           \begin{center}
+          \begin{onlyenv}<1>\includegraphics[width=\textwidth]{figs/RunControl/RunControl_Infos.png}\end{onlyenv}
+          \begin{onlyenv}<2>\includegraphics[width=\textwidth]{figs/RunControl/RunControl_SOR.png}\end{onlyenv}
+          \begin{onlyenv}<3>\includegraphics[width=\textwidth]{figs/RunControl/RunControl_Status.png}\end{onlyenv}
+          \begin{onlyenv}<4>\includegraphics[width=\textwidth]{figs/RunControl/RunControl_logging.png}\end{onlyenv}
         \end{center}
+    	\column{.7\textwidth}
+        \begin{itemize}
+         \uncover<1->{ \item Parametrisation of run with run number, detector name, run description and parameters }
+       	 \uncover<2->{ \item Send SOR and EOR signals }
+       	 \uncover<3->{\item Control run status ( State, Started/Stopped time ) }
+       	 \uncover<4->{\item Every action is logged for easy information overview } 
+      \end{itemize}
+      
+      \end{columns}
       \end{overlayarea}
     \end{center}
   \end{frame}
@@ -477,12 +489,12 @@ morekeywords={string,fstream,ofstream,ifstream}
     \frametitle{\secname}
     \framesubtitle{ Job Control GUI }
       \begin{overlayarea}{\textwidth}{\textheight}
-      \begin{center}
-        \begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_KillSwitch.png}\end{onlyenv}
-        \begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_LiveStatus.png}\end{onlyenv}
-        \begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Module.png}\end{onlyenv}
-        \begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_MultiHost.png}\end{onlyenv}
-        \begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Update.png}\end{onlyenv}
+      	\begin{center}
+        		\begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_KillSwitch.png}\end{onlyenv}
+       		\begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_LiveStatus.png}\end{onlyenv}
+        		\begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Module.png}\end{onlyenv}
+        		\begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_MultiHost.png}\end{onlyenv}
+        		\begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Update.png}\end{onlyenv}
       \end{center}
     \end{overlayarea}
   \end{frame}
@@ -497,19 +509,17 @@ morekeywords={string,fstream,ofstream,ifstream}
       \begin{center}
         \begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Browse.png}\end{onlyenv}
         \begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_DNSNode.png}\end{onlyenv}
-%         \begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<6>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<7>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<8>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<9>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<10>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<11>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<12>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<13>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<14>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
-%         \begin{onlyenv}<15>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/}\end{onlyenv}
+         \begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_MESelection}\end{onlyenv}
+         \begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_FullList}\end{onlyenv}
+         \begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_Search}\end{onlyenv}
+         \begin{onlyenv}<6>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_SearchResult}\end{onlyenv}
+         \begin{onlyenv}<7>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Content}\end{onlyenv}
+         \begin{onlyenv}<8>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Tabs}\end{onlyenv}
+         \begin{onlyenv}<9>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_TabsMenu}\end{onlyenv}
+         \begin{onlyenv}<10>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistosMenu}\end{onlyenv}
+         \begin{onlyenv}<11>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistoInfo}\end{onlyenv}
+         \begin{onlyenv}<12>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistoQuality}\end{onlyenv}
+         \begin{onlyenv}<13>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_AutoUpdate.png}\end{onlyenv}
       \end{center}
     \end{overlayarea}
     
