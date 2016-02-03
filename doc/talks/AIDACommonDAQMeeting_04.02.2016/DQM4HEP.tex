@@ -488,39 +488,101 @@ morekeywords={string,fstream,ofstream,ifstream}
   \begin{frame}
     \frametitle{\secname}
     \framesubtitle{ Job Control GUI }
+
       \begin{overlayarea}{\textwidth}{\textheight}
       	\begin{center}
-        		\begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_KillSwitch.png}\end{onlyenv}
+        		\begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_KillSwitch.png}\end{onlyenv}
        		\begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_LiveStatus.png}\end{onlyenv}
-        		\begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Module.png}\end{onlyenv}
+        		\begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Module.png}\end{onlyenv}
         		\begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_MultiHost.png}\end{onlyenv}
-        		\begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Update.png}\end{onlyenv}
+        		\begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/JobInterface/JobInterface_Update.png}\end{onlyenv}
       \end{center}
+      \vspace{-5em}
+       \begin{minipage}{\textwidth}
+
+        \begin{itemize}
+         \uncover<1->{ \item Load and display a list of applications (Collectors, Modules, etc.) available on different hosts }
+       	 \uncover<2->{ \item Displays informations(Name, Host, PID, Status, etc.) about applications }
+	 \uncover<3->{ \item Infos can be updated in "real time"}
+       	 \uncover<4->{\item Manage Applications (Start/Kill/Restart) with contextual menu }
+       	 \uncover<5->{\item Kill method can be adjusted } 
+      \end{itemize}
+
+    \end{minipage}
+
+      
     \end{overlayarea}
   \end{frame}
   
   
    %% Monitoring Control %%
+   %% Browser %%
  \begin{frame}
+    \frametitle{\secname}
+    \framesubtitle{ Browser }
+    
+    \begin{overlayarea}{\textwidth}{\textheight}
+    	       \begin{center}
+
+        \begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Browse.png}\end{onlyenv}
+                       \end{center}
+
+       \begin{columns}
+       
+	 \column{.35\textwidth} 
+	 \vspace{-2em}
+
+	     	       \begin{center}
+        \begin{onlyenv}<2>\includegraphics[width=1.5\textwidth]{figs/Browser/Browser_DNSNode.png}\end{onlyenv}
+         \begin{onlyenv}<3>\includegraphics[width=1.5\textwidth]{figs/Browser/Browser_MESelection}\end{onlyenv}
+         \begin{onlyenv}<4>\includegraphics[width=1.5\textwidth]{figs/Browser/Browser_FullList}\end{onlyenv}
+         \begin{onlyenv}<5>\includegraphics[width=1.5\textwidth]{figs/Browser/Browser_Search}\end{onlyenv}
+         \begin{onlyenv}<6>\includegraphics[width=1.5\textwidth]{figs/Browser/Browser_SearchResult}\end{onlyenv}
+               \end{center}
+
+         \column{.55\textwidth}
+           \end{columns}
+               \end{overlayarea}
+    
+  \end{frame}
+  
+  
+ %% Control Gui %%
+\begin{frame}
     \frametitle{\secname}
     \framesubtitle{ Monitoring Gui }
     
-    \begin{overlayarea}{\textwidth}{\textheight}
+        \begin{overlayarea}{\textwidth}{\textheight}
+\vspace {-1em}
       \begin{center}
-        \begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Browse.png}\end{onlyenv}
-        \begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_DNSNode.png}\end{onlyenv}
-         \begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_MESelection}\end{onlyenv}
-         \begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_FullList}\end{onlyenv}
-         \begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_Search}\end{onlyenv}
-         \begin{onlyenv}<6>\includegraphics[width=0.8\textwidth]{figs/Browser/Browser_SearchResult}\end{onlyenv}
-         \begin{onlyenv}<7>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Content}\end{onlyenv}
-         \begin{onlyenv}<8>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Tabs}\end{onlyenv}
-         \begin{onlyenv}<9>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_TabsMenu}\end{onlyenv}
-         \begin{onlyenv}<10>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistosMenu}\end{onlyenv}
-         \begin{onlyenv}<11>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistoInfo}\end{onlyenv}
-         \begin{onlyenv}<12>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistoQuality}\end{onlyenv}
-         \begin{onlyenv}<13>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_AutoUpdate.png}\end{onlyenv}
+
+         \begin{onlyenv}<1>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Content}\end{onlyenv}
+         \begin{onlyenv}<2>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_Tabs}\end{onlyenv}
+         \begin{onlyenv}<3>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_TabsMenu}\end{onlyenv}
+         \begin{onlyenv}<4>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistosMenu}\end{onlyenv}
+         \begin{onlyenv}<5>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistoInfo}\end{onlyenv}
+         \begin{onlyenv}<6>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_HistoQuality}\end{onlyenv}
+         \begin{onlyenv}<7>\includegraphics[width=0.8\textwidth]{figs/MonitoringGui/MG_AutoUpdate.png}\end{onlyenv}
       \end{center}
+
+
+            \vspace{-3em}
+       \begin{minipage}{\textwidth}
+
+        \begin{itemize}
+         \uncover<1-1>{ \item List of histograms added from Browser }
+         \vspace{-1.5em}
+       	 \uncover<2->{ \item Multiple canvas area available}
+	 \uncover<4->{ \item Real ROOT histograms (Can be fitted, zoomed, etc.) }
+       	 \uncover<5-6>{\item Histograms descriptions and Quality}
+          \vspace{-1.5em}
+       	 \uncover<7->{\item Auto Update }
+
+      \end{itemize}
+
+    \end{minipage}
+
+      
     \end{overlayarea}
     
   \end{frame}
