@@ -40,7 +40,7 @@ morekeywords={string,fstream,ofstream,ifstream}
 
 \title[DQM4HEP]{Data Quality Monitoring for High Energy Physics (DQM4HEP) \\ Version 03-02-00}
 \institute[UCBL - IPNL - UGent]{Université Claude Bernard Lyon 1 - Institut de Physique Nucléaire de Lyon / Ghent University}
-\author[Eté - Pingault - Mirabito]{{\bf \large Eté Rémi, Antoine Pingault, Laurent Mirabito}}
+\author[Eté - Pingault - Mirabito]{{\bf \large R. \'Eté, A. Pingault, L. Mirabito}}
 \date{\today}
 
 \DeclareUnicodeCharacter{00A0}{ }
@@ -86,6 +86,7 @@ morekeywords={string,fstream,ofstream,ifstream}
         \item Visualization interface (Qt GUI)
         \item Large scale process management
         \item IO support for any data type (opt. LCIO)
+        \item Full size detector (ILD) to single prototype (CALICE)  
         \item ELog interface
       \end{itemize}
     \end{block}
@@ -526,99 +527,23 @@ morekeywords={string,fstream,ofstream,ifstream}
   \end{frame}
     
     
-    
-  %%%%%%%%%%%
-  %% TESTS %%
-  %%%%%%%%%%%  
-  
-  \section{DQM4HEP tests}
-
-  \begin{frame}
-  \frametitle{\secname}
-
-  Tests of the framework were performed using the SDHCAL electronics (SDHCAL Difs). \\
-  Ideas were to test : \\
-  
-  \begin{itemize}
-    \item Easy to deploy ? configure ?
-    \item Easy to use interfaces ?
-    \item Network saturation with many analysis
-    \item Test specific SDHCAL DQM tools :
-    \begin{itemize}
-      \item Raw data converter service (Streamout)
-      \item Event reconstruction tool (Trivent)
-      \item Online analysis
-      \item Online data taking (/dev/shm reader)
-    \end{itemize}
-  \end{itemize}
-  
-  \end{frame}
-  
-  
-  \begin{frame}
-  \frametitle{\secname}
-  \framesubtitle{Deployment}
-  
-  \centering \includegraphics[width=0.72\textwidth]{figs/DQM4HEP_DEPLOYEMENT_TEST.pdf}
-  
-  \end{frame}
-  
-  
-  \begin{frame}
-  \frametitle{\secname}
-  \framesubtitle{Results}
-
-  \textbullet ~~ Easy package installation/update (CMake + GIT) \\
-  ~ \\
-  
-  \textbullet ~~ Input file : SDHCAL TB December 726280 (20 GeV pion run) \\
-  ~ \\  
-
-  \textbullet ~~ Job control really makes life easier ! \\
-  Easy to start, stop, restart and reconfigure programs. Easy to detect configuration problems ! \\
-  ~ \\
-  \begin{minipage}{0.6\textwidth}
-    Gui can display :
-    \begin{itemize}
-      \item total efficiency mapping (47 plots)
-      \item total multiplicity mapping (47 plots)
-      \item global efficiency/multiplicity and statistics (4 plots) 
-    \end{itemize}
-
-    at the same time, with frequent updates (every 5 seconds) without lagging. Gui handling still ok.
-  \end{minipage}
-  \begin{minipage}{0.38\textwidth}
-    \begin{center}
-      \includegraphics[width=\textwidth]{figs/AsicEff42.png} \\
-      Disconnected DIF in layer 42 !
-    \end{center}
-  \end{minipage}
-  
-  More tests : \\
-  ~ \\
-  \textbullet ~~ Static code analyser (cppcheck) : no errors, POSIX norm ok \\
-  ~ \\
-  \textbullet ~~ Online data taking (/dev/shm) : OK ! \\
-  ~ \\
-  
-  \end{frame}
-  
-  
+  %% CONCLUSION %%
   \begin{frame}
   \frametitle{\secname}
   \framesubtitle{Conclusions and plans}
 
-  \begin{block}{Conclusion}
+  \begin{block}{Conclusion and plans}
     \begin{itemize}
       \item Network decouples/links different part of the system.
       \item Plugins (modules, data streaming) to configure and run the system 
       \item Tools for data feed in the system from the DAQ (event client interface)
       \item GUIs to control/monitor the system
-      \item Tests OK, numbers ... ?
+      \item Tests are OK but performance tests : timing, statistics, compression (network, streaming)
+      \item ILCSOFT release ?
     \end{itemize}
   \end{block}
   
-  \begin{block}{Plans}
+  \begin{block}{Plans for SDHCAL}
     \begin{itemize}
       \item Full implementation of SDHCAL DQM :
       \begin{itemize}
@@ -626,37 +551,12 @@ morekeywords={string,fstream,ofstream,ifstream}
         \item Global detector (efficiency, multiplicity, nHit 1-2-3, rate)
         \item Particle ID (counting, selection)
         \item Particle specific modules (pion, electron, muons)
-        \item Energy reconstruction
         \item Particle flow (performance)
       \end{itemize}
-      \item Performance tests : timing, statistics, compression (network, streaming)
-      \item Reimplementation of some interfaces (networking)
-      \item ILCSOFT ?
-      \item Combined ECAL test-beam : combined DQM ? 
+      \item Combined ECAL test-beam : combined DQM ?
     \end{itemize}
   \end{block}
   
-  \end{frame}
-  
-  %%%%%%%%%%%%%%%%
-  %% CONCLUSION %%
-  %%%%%%%%%%%%%%%%
-  
- 
-  \begin{frame}
-  
-  ~ \\
-  ~ \\
-  ~ \\
-  ~ \\
-  ~ \\
-  ~ \\
-    \centering \large Thanks for your attention
-  ~ \\
-  ~ \\
-  ~ \\
-  
-    
   \end{frame}
 
 \end{document}
