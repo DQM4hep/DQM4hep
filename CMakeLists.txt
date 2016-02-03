@@ -45,8 +45,11 @@ SET( streamlog_package_depends "" )
 SET( lcio_package_depends "" )
 
 # ----- additional cmake args -----
-SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF" )
+IF ( NOT APPLE )
+	SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF" )
+ENDIF ( NOT APPLE )
 SET( DQMCore_additional_cmake_args  "" )
+
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
 IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
