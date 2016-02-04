@@ -476,6 +476,7 @@ StatusCode DQMAnalysisModuleApplication::configureCycle(const TiXmlHandle xmlHan
 
 		m_pCycle->setCycleValue(m_settings.m_cycleValue);
 		m_pCycle->setTimeout(m_settings.m_cycleTimeout);
+		m_pCycle->addListener(this);
 
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: configuring ... OK" << std::endl;
 	}
@@ -599,6 +600,20 @@ StatusCode DQMAnalysisModuleApplication::stopServices()
 int DQMAnalysisModuleApplication::getCurrentRunNumber() const
 {
 	return m_runNumber;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMAnalysisModuleApplication::onCycleStarted(const DQMCycle *const /*pCycle*/)
+{
+	THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getModule()->startOfCycle());
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMAnalysisModuleApplication::onCycleStopped(const DQMCycle *const /*pCycle*/)
+{
+	THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getModule()->endOfCycle());
 }
 
 //-------------------------------------------------------------------------------------------------

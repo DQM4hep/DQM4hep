@@ -32,6 +32,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMModuleApplication.h"
+#include "dqm4hep/DQMCycle.h"
 
 namespace dqm4hep
 {
@@ -45,10 +46,8 @@ class TiXmlHandle;
 
 /** DQMAnalysisModuleApplication class
  */ 
-class DQMAnalysisModuleApplication : public DQMModuleApplication
+class DQMAnalysisModuleApplication : public DQMModuleApplication, public DQMCycleListener
 {
-	friend class DQMModuleApi;
-
 public:
 	/** Settings class
  	 */
@@ -75,7 +74,7 @@ public:
 		std::string         m_monitorElementCollector;
 		std::string         m_cycleType;
 		float               m_cycleValue;
-		unsigned int       m_cycleTimeout;
+		unsigned int        m_cycleTimeout;
 	};
 
 public:
@@ -133,6 +132,11 @@ private:
 	/** Get the current run number that was started (not from run control)
 	 */
 	int getCurrentRunNumber() const;
+
+	// from cycle listener
+	void onEventProcessed(const DQMCycle *const pCycle, const DQMEvent *const pEvent) { /* nop */ }
+	void onCycleStarted(const DQMCycle *const pCycle);
+	void onCycleStopped(const DQMCycle *const pCycle);
 
 private:
 	// members
