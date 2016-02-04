@@ -33,6 +33,8 @@
 #include "dqm4hep/DQMMonitorElementManager.h"
 #include "dqm4hep/DQMStandaloneModule.h"
 #include "dqm4hep/DQMMonitorElementSender.h"
+#include "dqm4hep/DQMTimerCycle.h"
+#include "dqm4hep/DQMArchiver.h"
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/tinyxml.h"
 
@@ -49,21 +51,22 @@ namespace dqm4hep
 
 DQMStandaloneModuleApplication::DQMStandaloneModuleApplication() :
 		DQMModuleApplication(),
+		m_pTimerCycle(NULL),
 		m_type("StandaloneModule"),
 		m_name("Unknown"),
-		m_sleepTimeBetweenTwoProcess(100),
-		m_publicationPeriod(10),
-		m_resetAtEndOfPeriod(true),
 		m_returnStatusCode(STATUS_CODE_SUCCESS)
 {
-	/* nop */
+	m_pArchiver = new DQMArchiver();
 }
 
 //-------------------------------------------------------------------------------------------------
 
 DQMStandaloneModuleApplication::~DQMStandaloneModuleApplication() 
 {
-	/* nop */
+	if(m_pTimerCycle)
+		delete m_pTimerCycle;
+
+	delete m_pArchiver;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -119,11 +122,10 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 		return statusCode;
 	}
 
-	std::string localSettingsFile = pFileHandler->getLocalFileName();
+	m_settings.m_settingsFileName = pFileHandler->getLocalFileName();
 	delete pFileHandler;
 
-
-    TiXmlDocument xmlDocument(localSettingsFile);
+    TiXmlDocument xmlDocument(m_settings.m_settingsFileName);
 
     if (!xmlDocument.LoadFile())
     {
@@ -134,6 +136,9 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
     const TiXmlHandle xmlDocumentHandle(&xmlDocument);
     const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
+
+
+    // monitor element sender
 	TiXmlElement *const pMeCollectorElement = xmlHandle.FirstChildElement("monitorelementcollector").Element();
 
 	if(NULL == pMeCollectorElement)
@@ -142,41 +147,42 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 		return STATUS_CODE_NOT_FOUND;
 	}
 
-	std::string monitorElementCollector;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pMeCollectorElement, "name", monitorElementCollector));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pMeCollectorElement, "name", m_settings.m_monitorElementCollector));
 
-	this->getMonitorElementSender()->setCollectorName(monitorElementCollector);
+	this->getMonitorElementSender()->setCollectorName(m_settings.m_monitorElementCollector);
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
 
-	m_sleepTimeBetweenTwoProcess = 100;
-	m_publicationPeriod = 2;
-	m_resetAtEndOfPeriod = true;
 
+	// cycle
 	TiXmlElement *const pCycleElement = xmlHandle.FirstChildElement("cycle").Element();
 
 	if(pCycleElement)
 	{
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pCycleElement, "sleep", m_sleepTimeBetweenTwoProcess));
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pCycleElement, "period", m_publicationPeriod));
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pCycleElement, "reset", m_resetAtEndOfPeriod));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pCycleElement, "sleep", m_settings.m_sleepTime));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pCycleElement, "period", m_settings.m_cyclePeriod));
 	}
 
-	// module settings
+	m_pTimerCycle = new DQMTimerCycle();
+	m_pTimerCycle->setCycleValue(m_settings.m_cyclePeriod);
+	m_pTimerCycle->setTimeout(0);
+	m_pTimerCycle->addListener(this);
+
+
+
+
+	// module
 	TiXmlElement *const pXmlElement = xmlHandle.FirstChildElement("module").Element();
 
-	std::string type;
-	std::string name;
-
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "type", type));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", name));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "type", m_settings.m_moduleType));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", m_settings.m_moduleName));
 
 	if(this->getModuleType().empty())
-		this->setModuleType(type);
+		this->setModuleType(m_settings.m_moduleType);
 
 	if(this->getModuleName().empty())
-		this->setModuleName(name);
+		this->setModuleName(m_settings.m_moduleName);
 
-	streamlog_out( MESSAGE ) << "Query analysis module to PluginManager ... " << std::endl;
+	streamlog_out( MESSAGE ) << "Query standalone module to PluginManager ... " << std::endl;
 
 	DQMStandaloneModule *pStandaloneModule = DQMPluginManager::instance()->createPluginClass<DQMStandaloneModule>(this->getModuleType());
 
@@ -185,7 +191,7 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 
 	this->setModule(pStandaloneModule);
 
-	streamlog_out( MESSAGE ) << "Query analysis module to PluginManager ... OK" << std::endl;
+	streamlog_out( MESSAGE ) << "Query standalone module to PluginManager ... OK" << std::endl;
 
 	TiXmlHandle moduleHandle(pXmlElement);
 
@@ -196,6 +202,26 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 	streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ..." << std::endl;
 	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getModule()->initModule() );
 	streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ... OK" << std::endl;
+
+
+
+	try
+	{
+		streamlog_out(MESSAGE) << "Configuring archiver ..." << std::endl;
+
+		const TiXmlElement *const pXmlElement = xmlHandle.FirstChildElement("archiver").Element();
+
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "open", m_settings.m_openArchive));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "directory", m_settings.m_archiveDirectory));
+
+		streamlog_out(MESSAGE) << "Configuring archiver ... OK" << std::endl;
+	}
+	catch(const StatusCodeException &exception)
+	{
+		return exception.getStatusCode();
+	}
+
+
 
 	m_name = this->getModule()->getName();
 
@@ -222,7 +248,11 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 
 	DimServer::start( moduleServerName.c_str() );
 
+	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService() );
+
 	this->setInitialized(true);
+
+	m_settings.print();
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -234,64 +264,116 @@ StatusCode DQMStandaloneModuleApplication::run()
 	if(!this->isInitialized())
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	time_t publicationTimer = time(0);
 	bool callStartOfCycle = true;
 
 	// get casted module for easier manipulation
 	DQMStandaloneModule *pStandaloneModule = dynamic_cast<DQMStandaloneModule *>(this->getModule());
 
+
+	// open an archive
+	if(m_settings.m_openArchive)
+	{
+		std::stringstream archiveFileName;
+		std::string directory =
+				m_settings.m_archiveDirectory.at(m_settings.m_archiveDirectory.size() - 1) == '/' ?
+						m_settings.m_archiveDirectory : m_settings.m_archiveDirectory + "/";
+
+		archiveFileName << directory
+				<< "DQMArchive"
+				<< "_M" << m_settings.m_moduleName;
+
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->open(archiveFileName.str(), "RECREATE"));
+		streamlog_out(MESSAGE) << "Archive '" << m_pArchiver->getFileName() << "' opened" << std::endl;
+	}
+
+
 	while(!this->shouldStopApplication())
 	{
-		if(callStartOfCycle)
+		// process a cycle
+		streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+		streamlog_out(MESSAGE) << "***                Start of cycle              ***" << std::endl;
+		streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+		m_pTimerCycle->startCycle();
+
+		while(1)
 		{
-			streamlog_out(MESSAGE) << "Start of cycle !!!" << std::endl;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pStandaloneModule->startOfCycle());
-			callStartOfCycle = false;
+			if( m_pTimerCycle->isEndOfCycleReached() )
+				break;
+
+			if( this->shouldStopApplication() )
+				break;
+
+			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pStandaloneModule->process());
+
+			usleep(m_settings.m_sleepTime);
 		}
 
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pStandaloneModule->process());
+		m_pTimerCycle->stopCycle();
 
-		if(difftime(time(0), publicationTimer) >= m_publicationPeriod)
-		{
-			streamlog_out(MESSAGE) << "End of of cycle !!!" << std::endl;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pStandaloneModule->endOfCycle());
+		streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+		streamlog_out(MESSAGE) << "***            End of cycle reached            ***" << std::endl;
+		streamlog_out(MESSAGE) << "**************************************************" << std::endl;
 
-			streamlog_out(MESSAGE) << "Sending monitor elements to collector" << std::endl;
+		streamlog_out(MESSAGE) << "Sending monitor elements to collector" << std::endl;
 
-//			DQMMonitorElementList monitorElementListToPublish;
-//			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
-//					->getMonitorElementListToPublish(monitorElementListToPublish));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->sendMonitorElements());
 
-//			streamlog_out(MESSAGE) << "Number of monitor elements sent : " << monitorElementListToPublish.size() << std::endl;
-
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->sendMonitorElements());
-
-			if(m_resetAtEndOfPeriod)
-			{
-				streamlog_out(MESSAGE) << "Reseting monitor elements" << std::endl;
-				RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
-						->resetMonitorElements());
-			}
-
-			publicationTimer = time(0);
-			callStartOfCycle = true;
-		}
-
-		timespec timesleep;
-	    timesleep.tv_sec = 0;
-	    timesleep.tv_nsec = m_sleepTimeBetweenTwoProcess*1000;
-		nanosleep(&timesleep, NULL);
+		// archive publication if user asked for
+		if(m_settings.m_openArchive)
+			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->archive(pStandaloneModule));
 	}
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pStandaloneModule->endModule());
 
+	// archive the monitor element if archive is opened
+	if(m_settings.m_openArchive)
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->close());
+
 	return STATUS_CODE_SUCCESS;
 }
 
-bool DQMStandaloneModuleApplication::shouldStopCycle() const
+//-------------------------------------------------------------------------------------------------
+
+void DQMStandaloneModuleApplication::onCycleStarted(const DQMCycle *const /*pCycle*/)
 {
-	// unused
-	return true;
+	THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getModule()->startOfCycle());
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMStandaloneModuleApplication::onCycleStopped(const DQMCycle *const /*pCycle*/)
+{
+	THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getModule()->endOfCycle());
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+DQMStandaloneModuleApplication::Settings::Settings() :
+		m_sleepTime(10),   // in ms
+		m_cyclePeriod(5.f),
+		m_monitorElementCollector("DEFAULT"),
+		m_archiveDirectory("/tmp"),
+		m_openArchive(false)
+{
+	/* nop */
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMStandaloneModuleApplication::Settings::print()
+{
+	std::string openArchive = m_openArchive ? "yes" : "no";
+	streamlog_out(MESSAGE) << "**************************************" << std::endl;
+	streamlog_out(MESSAGE) << "******* Application parameters *******" << std::endl;
+	streamlog_out(MESSAGE) << "*** Settings file name :             " << m_settingsFileName << std::endl;
+	streamlog_out(MESSAGE) << "*** Module type :                    " << m_moduleType << std::endl;
+	streamlog_out(MESSAGE) << "*** Module name :                    " << m_moduleName << std::endl;
+	streamlog_out(MESSAGE) << "*** Cycle period :                   " << m_cyclePeriod << std::endl;
+	streamlog_out(MESSAGE) << "*** Open archive ?                   " << openArchive << std::endl;
+	streamlog_out(MESSAGE) << "*** Archive directory :              " << m_archiveDirectory << std::endl;
+	streamlog_out(MESSAGE) << "*** Monitor element collector name : " << m_monitorElementCollector << std::endl;
+	streamlog_out(MESSAGE) << "**************************************" << std::endl;
 }
 
 } 

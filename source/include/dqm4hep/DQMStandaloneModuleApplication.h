@@ -32,15 +32,46 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMModuleApplication.h"
+#include "dqm4hep/DQMCycle.h"
 
 namespace dqm4hep
 {
 
+class DQMTimerCycle;
+class DQMArchiver;
+
 /** DQMStandaloneModuleApplication class
  */
-class DQMStandaloneModuleApplication : public DQMModuleApplication
+class DQMStandaloneModuleApplication : public DQMModuleApplication, public DQMCycleListener
 {
 public:
+	/** Settings class
+	 */
+	class Settings
+	{
+	public:
+		/** Constructor
+		 */
+		Settings();
+
+		/** Print settings
+		 */
+		void print();
+
+	public:
+		std::string        m_settingsFileName;
+
+		unsigned int       m_sleepTime;
+		float              m_cyclePeriod;
+
+		std::string        m_moduleType;
+		std::string        m_moduleName;
+		std::string        m_monitorElementCollector;
+
+		std::string        m_archiveDirectory;
+		bool               m_openArchive;
+
+	};
 	/** Constructor
 	 */
 	DQMStandaloneModuleApplication();
@@ -49,11 +80,11 @@ public:
 	 */
 	~DQMStandaloneModuleApplication();
 
-	/** Get the application type ("AnalysisModule")
+	/** Get the application type ("StandaloneModule")
 	 */
 	const std::string &getType() const;
 
-	/** Get the application name ("ModuleType/ModuleName")
+	/** Get the application name ( module name)
 	 */
 	const std::string &getName() const;
 
@@ -67,26 +98,27 @@ public:
 	 */
 	StatusCode run();
 
-	/** Whether the module application has to stop processing cycles
-	 */
-	bool shouldStopCycle() const;
+private:
+	// from cycle listener
+	void onEventProcessed(const DQMCycle *const pCycle, const DQMEvent *const pEvent) { /* nop */ }
+	void onCycleStarted(const DQMCycle *const pCycle);
+	void onCycleStopped(const DQMCycle *const pCycle);
 
 private:
-
 	bool                          m_stopFlag;
 	bool                          m_isInitialized;
+
+	// the cycle to process
+	DQMTimerCycle                *m_pTimerCycle;
+	DQMArchiver                  *m_pArchiver;
+
+	// user settings
+	Settings                      m_settings;
 
 	std::string                   m_name;
 	std::string                   m_type;
 
-	bool                          m_resetAtEndOfPeriod;
-	unsigned int                 m_sleepTimeBetweenTwoProcess;
-	unsigned int                 m_publicationPeriod;
-
 	StatusCode                     m_returnStatusCode;
-
-	std::string                    m_moduleType;
-	std::string                    m_moduleName;
 }; 
 
 } 
