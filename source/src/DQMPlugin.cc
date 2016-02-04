@@ -32,10 +32,11 @@
 namespace dqm4hep
 {
 
-DQMPlugin::DQMPlugin(const std::string &pluginName) :
+DQMPlugin::DQMPlugin(const std::string &pluginName, bool shouldRegister) :
 		m_pluginName( pluginName )
 {
-	THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->registerPlugin( this ) );
+	if(shouldRegister)
+		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->registerPlugin( this ) );
 }
 
 //-------------------------------------------------------------------------------------------------

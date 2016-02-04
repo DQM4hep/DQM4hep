@@ -108,12 +108,12 @@ inline T *DQMPluginManager::createPluginClass( const std::string &pluginName ) c
 	if(!pPlugin)
 		return 0;
 
-	void *pClass = pPlugin->create();
+	DQMPlugin *pClass = pPlugin->create();
 
 	if(NULL == pClass)
 		return 0;
 
-	return static_cast<T *>(pClass);
+	return dynamic_cast<T *>(pClass);
 }
 
 } 

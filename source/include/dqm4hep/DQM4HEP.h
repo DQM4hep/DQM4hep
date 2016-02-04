@@ -230,11 +230,11 @@ typedef std::vector<DQMStats> DQMStatsList;
 //-------------------------------------------------------------------------------------------------
 
 #define DQM_PLUGIN_DECL( ClassName , ClassStr ) \
-		class DQMPlugin_##ClassName : public dqm4hep::DQMPlugin \
+		class DQMPlugin_##ClassName : public dqm4hep::DQMPlugin, public ClassName \
 		{ \
 		public: \
-			DQMPlugin_##ClassName () : dqm4hep::DQMPlugin(ClassStr) {} \
-			void *create() const { return new ClassName () ; } \
+			DQMPlugin_##ClassName (bool shouldRegister = true) : dqm4hep::DQMPlugin(ClassStr, shouldRegister), ClassName() {} \
+			DQMPlugin *create() const { return new DQMPlugin_##ClassName (false) ; } \
 		}; \
 		DQMPlugin_##ClassName instance_DQMPlugin_##ClassName;
 

@@ -44,7 +44,7 @@ class DQMPlugin
 public:
 	/** Constructor
 	 */
-	DQMPlugin(const std::string &pluginName);
+	DQMPlugin(const std::string &pluginName, bool shouldRegister);
 
 	/** Destructor
 	 */
@@ -56,7 +56,7 @@ public:
 
 	/** Create a new instance of the wrapped class
 	 */
-	virtual void *create() const = 0;
+	virtual DQMPlugin *create() const = 0;
 
 private:
 	const std::string              m_pluginName;
