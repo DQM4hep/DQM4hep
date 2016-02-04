@@ -37,6 +37,27 @@ namespace dqm4hep
 
 class DQMRun;
 
+/** DQMRunListener class
+ */
+class DQMRunListener
+{
+public:
+	/** Destructor
+	 */
+	virtual ~DQMRunListener() {}
+
+	/** Called back when a run is started
+	 */
+	virtual void onStartOfRun(DQMRun *const pRun) = 0;
+
+	/** Called back when a run ends
+	 */
+	virtual void onEndOfRun(const DQMRun *const pRun) = 0;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 /** DQMRunControl class
  */ 
 class DQMRunControl
@@ -46,17 +67,29 @@ public:
 	 */
 	DQMRunControl();
 
+	/** Constructor with name
+	 */
+	DQMRunControl(const std::string &runControlName);
+
 	/** Destructor
 	 */
-	~DQMRunControl();
+	virtual ~DQMRunControl();
+
+	/** Set the run control name. This stops the current before
+	 */
+	void setRunControlName(const std::string &runControlName);
+
+	/** Get the run control name
+	 */
+	const std::string &getRunControlName() const;
 
 	/** Create a new run from a DQMRun
-	 *  The run control is the owner the object
+	 *  The run control is the owner the run
 	 */
 	StatusCode startNewRun(DQMRun *pRun);
 
 	/** Create a new run.
-	 *  End the current run if there is one.
+	 *  End the current run if running
 	 */
 	StatusCode startNewRun(int runNumber, const std::string &description = "", const std::string &detectorName = "");
 
@@ -80,10 +113,19 @@ public:
 	 */
 	bool isRunning() const;
 
-protected:
+	/** Add a listener to the run control
+	 */
+	void addListener(DQMRunListener *pListener);
 
-	DQMState                  m_runState;
-	DQMRun                   *m_pCurrentRun;
+	/** Remove a listener from the run control
+	 */
+	void removeListener(DQMRunListener *pListener);
+
+protected:
+	DQMState                         m_runState;
+	DQMRun                          *m_pCurrentRun;
+	std::string                      m_runControlName;
+	std::vector<DQMRunListener *>    m_listeners;
 }; 
 
 } 

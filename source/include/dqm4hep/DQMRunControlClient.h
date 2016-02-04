@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/DQMRunControl.h"
 
 // -- dim headers
 #include "dic.hxx"
@@ -38,68 +39,32 @@
 namespace dqm4hep
 {
 
-class DQMRunControl;
 class DQMRun;
 
-/** DQMRunControlClient class
+/** DQMRunControlClient interface
  */ 
-class DQMRunControlClient : public DimClient
+class DQMRunControlClient : public DQMRunControl
 {
 public:
 	/** Constructor
 	 */
-	DQMRunControlClient();
+	DQMRunControlClient() : DQMRunControl () {}
 
 	/** Destructor
 	 */
-	~DQMRunControlClient();
+	virtual ~DQMRunControlClient() {}
 
 	/** Connect to the service.
 	 */
-	StatusCode connectToService();
+	virtual StatusCode connectToService() = 0;
 
 	/** Disconnect from the service
 	 */
-	StatusCode disconnectFromService();
+	virtual StatusCode disconnectFromService() = 0;
 
 	/** Whether the client is connected to the service
 	 */
-	bool isConnectedToService() const;
-
-	/** Set the run control name
-	 */
-	StatusCode setRunControlName(const std::string &runControlName);
-
-	/** Get the current run number
-	 */
-	unsigned int getCurrentRunNumber() const;
-
-	/** Take the current run header. Pointer member is set to NULL.
-	 */
-	DQMRun *const getCurrentRun() const;
-
-	/** Get the run state (running or not)
-	 */
-	DQMState getRunState() const;
-
-	/** Whether a run has been started.
- 	 */
-	bool isRunning() const;
-
-protected:
-	/** Call-back function from dim client
-	 */
-	void infoHandler();
-
-
-	// runtime
-	bool             m_isConnected;
-
-	// run control
-	DQMRunControl    *m_pRunControl;
-	std::string       m_runControlName;
-	DimInfo          *m_pStartOfRunInfo;
-	DimInfo          *m_pEndOfRunInfo;
+	virtual bool isConnectedToService() const = 0;
 }; 
 
 } 

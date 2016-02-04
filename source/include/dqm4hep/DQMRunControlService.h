@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/DQMDataStream.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -39,7 +40,32 @@ namespace dqm4hep
 {
 
 class DQMRunControl;
+class DQMRunControlService;
 class DQMRun;
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+/** DQMCurrentRunRpc class
+ */
+class DQMCurrentRunRpc : public DimRpc
+{
+public:
+	/** Constructor
+	 */
+	DQMCurrentRunRpc(char *rpcName, DQMRunControlService *pService);
+
+private:
+	/** Dim rpc handler
+	 */
+	void rpcHandler();
+
+private:
+	DQMRunControlService         *m_pService;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 /** DQMRunControlService class
  */ 
@@ -115,18 +141,28 @@ public:
 	 */
 	DQMRun *getCurrentRun() const;
 
-protected:
+private:
+	/**
+	 */
+	void handleCurrentRunRpc(DimRpc *pRpc);
 
+private:
 	int                      m_currentRunNumber;
-	DQMState                  m_serviceState;
+	DQMState                 m_serviceState;
 	DQMRunControl            *m_pRunControl;
 
 	std::string               m_runControlName;
 
 	DimService               *m_pStartOfRunService;
 	DimService               *m_pEndOfRunService;
+	DimRpc                   *m_pCurrentRunRpc;
+
+	DQMDataStream             m_dataStream;
+
 	dqm_char                 *m_pRunBuffer;
 	dqm_uint                  m_runBufferSize;
+
+	friend class DQMCurrentRunRpc;
 }; 
 
 } 

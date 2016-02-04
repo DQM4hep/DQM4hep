@@ -28,6 +28,8 @@
 #include "dqm4hep/DQMRunControl.h"
 #include "dqm4hep/DQMRun.h"
 
+#include <algorithm>
+
 namespace dqm4hep
 {
 
@@ -35,9 +37,20 @@ namespace dqm4hep
 
 DQMRunControl::DQMRunControl() :
 		m_runState(STOPPED_STATE),
-		m_pCurrentRun(NULL)
+		m_pCurrentRun(NULL),
+		m_runControlName("DEFAULT")
 {
- /* nop */
+	/* nop */
+}
+
+//-------------------------------------------------------------------------------------------------
+
+DQMRunControl::DQMRunControl(const std::string &runControlName) :
+		m_runState(STOPPED_STATE),
+		m_pCurrentRun(NULL),
+		m_runControlName(runControlName)
+{
+	/* nop */
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -46,6 +59,23 @@ DQMRunControl::~DQMRunControl()
 {
 	if(isRunning())
 		endCurrentRun();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMRunControl::setRunControlName(const std::string &runControlName)
+{
+	if(this->isRunning())
+		endCurrentRun();
+
+	m_runControlName = runControlName;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const std::string &DQMRunControl::getRunControlName() const
+{
+	return m_runControlName;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -61,6 +91,10 @@ StatusCode DQMRunControl::startNewRun(DQMRun *pRun)
 	m_pCurrentRun = pRun;
 	m_runState = RUNNING_STATE;
 
+	for(std::vector<DQMRunListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onStartOfRun(m_pCurrentRun);
+
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -73,6 +107,10 @@ StatusCode DQMRunControl::startNewRun(int runNumber, const std::string &descript
 
 	m_pCurrentRun = new DQMRun(runNumber, description, detectorName);
 	m_runState = RUNNING_STATE;
+
+	for(std::vector<DQMRunListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onStartOfRun(m_pCurrentRun);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -87,7 +125,14 @@ StatusCode DQMRunControl::endCurrentRun()
 	m_runState = STOPPED_STATE;
 
 	if(NULL != m_pCurrentRun)
+	{
+		// notify before deletion
+		for(std::vector<DQMRunListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+				endIter != iter ; ++iter)
+			(*iter)->onEndOfRun(m_pCurrentRun);
+
 		delete m_pCurrentRun;
+	}
 
 	m_pCurrentRun = NULL;
 
@@ -126,6 +171,25 @@ bool DQMRunControl::isRunning() const
 }
 
 //-------------------------------------------------------------------------------------------------
+
+void DQMRunControl::addListener(DQMRunListener *pListener)
+{
+	if(NULL == pListener)
+		return;
+
+	if(std::find(m_listeners.begin(), m_listeners.end(), pListener) == m_listeners.end())
+		m_listeners.push_back(pListener);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMRunControl::removeListener(DQMRunListener *pListener)
+{
+	std::vector<DQMRunListener*>::iterator findIter = std::find(m_listeners.begin(), m_listeners.end(), pListener);
+
+	if(findIter != m_listeners.end())
+		m_listeners.erase(findIter);
+}
 
 } 
 

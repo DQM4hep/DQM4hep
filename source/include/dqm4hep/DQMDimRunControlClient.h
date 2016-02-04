@@ -40,6 +40,30 @@
 namespace dqm4hep
 {
 
+class DQMDimRunControlClient;
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+class DQMCurrentRunRpcInfo : public DimRpcInfo
+{
+public:
+	/** Constructor
+	 */
+	DQMCurrentRunRpcInfo(char *rpcName, DQMDimRunControlClient *pClient);
+
+private:
+	/** Dim rpc info handler
+	 */
+	void rpcInfoHandler();
+
+private:
+	DQMDimRunControlClient         *m_pClient;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 /** DQMRunControlClient class
  */ 
 class DQMDimRunControlClient : public DimClient, public DQMRunControlClient
@@ -65,19 +89,24 @@ public:
 	 */
 	bool isConnectedToService() const;
 
-protected:
-	/** Dim infod handler
+private:
+	/** Dim info handler
 	 */
 	void infoHandler();
 
-	/** Set the run control name only if the service hasn't been started yet
+private:
+	/** Handle the dim current run rpc info
 	 */
-	StatusCode setName(const std::string &name);
+	void handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo);
 
 	bool             m_isConnected;          ///< Whether the client is connected to the server instance
 	DQMDataStream    m_dataStream;           ///< The data stream to deserialize the run at start of run
+
 	DimInfo          *m_pStartOfRunInfo;     ///< The dim start of run info
 	DimInfo          *m_pEndOfRunInfo;       ///< The dim end of run info
+	DimRpcInfo       *m_pCurrentRunRpcInfo;  ///< The dim current run rpc info
+
+	friend class DQMCurrentRunRpcInfo;
 }; 
 
 } 

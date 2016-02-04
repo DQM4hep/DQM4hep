@@ -41,6 +41,7 @@
 #include "dqm4hep/DQMArchiver.h"
 #include "dqm4hep/DQMEventClient.h"
 #include "dqm4hep/DQMRunControlClient.h"
+#include "dqm4hep/DQMDimRunControlClient.h"
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/tinyxml.h"
 
@@ -50,7 +51,6 @@
 
 // -- dim headers
 #include "dis.hxx"
-#include "dic.hxx"
 
 namespace dqm4hep
 {
@@ -65,7 +65,6 @@ DQMAnalysisModuleApplication::DQMAnalysisModuleApplication() :
 		m_runNumber(-1)
 {
 	m_pEventClient = new DQMEventClient();
-	m_pRunControlClient = new DQMRunControlClient();
 	m_pArchiver = new DQMArchiver();
 }
 
@@ -74,8 +73,10 @@ DQMAnalysisModuleApplication::DQMAnalysisModuleApplication() :
 DQMAnalysisModuleApplication::~DQMAnalysisModuleApplication()
 {
 	delete m_pEventClient;
-	delete m_pRunControlClient;
 	delete m_pArchiver;
+
+	if(m_pRunControlClient)
+		delete m_pRunControlClient;
 
 	if(m_pCycle)
 		delete m_pCycle;
@@ -378,9 +379,12 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 			return STATUS_CODE_NOT_FOUND;
 		}
 
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pRunControlXmlElement, "name", m_settings.m_runControl));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pRunControlXmlElement, "name", m_settings.m_runControlName));
+		THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pRunControlXmlElement, "type", m_settings.m_runControlType));
+
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pEventCollectorXmlElement, "name", m_settings.m_eventCollector));
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pEventStreamerXmlElement, "name", m_settings.m_eventStreamer));
+
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pMonitorElementCollectorXmlElement, "name", m_settings.m_monitorElementCollector));
 
 		if(NULL != pSubEventIdentifierXmlElement)
@@ -395,7 +399,7 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		DQMEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMEventStreamer>(m_settings.m_eventStreamer);
 
 		if(!pEventStreamer)
-			throw StatusCodeException(STATUS_CODE_FAILURE);
+			throw StatusCodeException(STATUS_CODE_NOT_FOUND);
 
 		// configure data client
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->setEventStreamer(pEventStreamer));
@@ -403,7 +407,13 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		m_pEventClient->setSubEventIdentifier(m_settings.m_subEventIdentifier);
 
 		// configure run control
-		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, m_pRunControlClient->setRunControlName( m_settings.m_runControl ) );
+		DQMRunControlClient *pRunControlClient = DQMPluginManager::instance()->createPluginClass<DQMRunControlClient>(m_settings.m_runControlType);
+
+		if(NULL == pRunControlClient)
+			throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+
+		pRunControlClient->setRunControlName( m_settings.m_runControlName );
+		m_pRunControlClient = pRunControlClient;
 
 		// start services
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->connectToService());
@@ -554,7 +564,8 @@ int DQMAnalysisModuleApplication::getCurrentRunNumber() const
 
 DQMAnalysisModuleApplication::Settings::Settings() :
 	m_shouldOpenArchive(false),
-	m_runControl("DEFAULT"),
+	m_runControlType("DimRunControlClient"),
+	m_runControlName("DEFAULT"),
 	m_eventCollector("DEFAULT"),
 	m_subEventIdentifier(""),
 	m_monitorElementCollector("DEFAULT"),
@@ -575,7 +586,8 @@ void DQMAnalysisModuleApplication::Settings::print()
 	streamlog_out(MESSAGE) << "**************************************" << std::endl;
 	streamlog_out(MESSAGE) << "******* Application parameters *******" << std::endl;
 	streamlog_out(MESSAGE) << "*** Should open archive :            " << openArchive << std::endl;
-	streamlog_out(MESSAGE) << "*** Run control name :               " << m_runControl << std::endl;
+	streamlog_out(MESSAGE) << "*** Run control type :               " << m_runControlType << std::endl;
+	streamlog_out(MESSAGE) << "*** Run control name :               " << m_runControlName << std::endl;
 	streamlog_out(MESSAGE) << "*** Event collector name :           " << m_eventCollector << std::endl;
 	streamlog_out(MESSAGE) << "*** Sub event identifier :           " << m_subEventIdentifier << std::endl;
 	streamlog_out(MESSAGE) << "*** Event streamer :                 " << m_eventStreamer << std::endl;

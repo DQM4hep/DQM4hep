@@ -27,190 +27,190 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMRunControlClient.h"
-#include "dqm4hep/DQMRun.h"
-#include "dqm4hep/DQMLogging.h"
-#include "dqm4hep/DQMRunControl.h"
-#include "dqm4hep/DQMDataStream.h"
+//#include "dqm4hep/DQMRun.h"
+//#include "dqm4hep/DQMLogging.h"
+//#include "dqm4hep/DQMRunControl.h"
+//#include "dqm4hep/DQMDataStream.h"
 
 namespace dqm4hep
 {
 
-//-------------------------------------------------------------------------------------------------
-
-DQMRunControlClient::DQMRunControlClient() :
-		m_isConnected(false),
-		m_runControlName("DEFAULT"),
-		m_pStartOfRunInfo(NULL),
-		m_pEndOfRunInfo(NULL)
-{
-	m_pRunControl = new DQMRunControl();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMRunControlClient::~DQMRunControlClient() 
-{
-	delete m_pRunControl;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMRunControlClient::connectToService()
-{
-	if(isConnectedToService())
-		return STATUS_CODE_SUCCESS;
-
-	std::string sorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/START_OF_RUN";
-	std::string eorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/END_OF_RUN";
-	m_pStartOfRunInfo = new DimInfo(sorServiceName.c_str(), (void*) "", 0, this);
-	m_pEndOfRunInfo = new DimInfo(eorServiceName.c_str(), (void*) "", 0, this);
-
-	m_isConnected = true;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMRunControlClient::disconnectFromService()
-{
-	if(!isConnectedToService())
-		return STATUS_CODE_SUCCESS;
-
-	delete m_pStartOfRunInfo;
-	delete m_pEndOfRunInfo;
-	m_pStartOfRunInfo = NULL;
-	m_pEndOfRunInfo = NULL;
-
-	m_isConnected = false;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-bool DQMRunControlClient::isConnectedToService() const
-{
-	return m_isConnected;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMRunControlClient::infoHandler()
-{
-	DimInfo *pCurrentDimInfo = getInfo();
-
-	if(m_pStartOfRunInfo == pCurrentDimInfo)
-	{
-		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
-		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
-
-		if(pBuffer == NULL || bufferSize == 0)
-			return;
-
-		DQMDataStream dataStream(1024);
-		dataStream.setBuffer(pBuffer, bufferSize);
-		DQMRun *pRun = new DQMRun();
-
-		try
-		{
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pRun->deserialize(&dataStream));
-
-			if(pRun->getRunNumber() < 0)
-				throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->startNewRun(pRun));
-		}
-		catch(StatusCodeException &exception)
-		{
-			streamlog_out(WARNING) << "Couldn't deserialize the run (at start)" << exception.toString() << std::endl;
-
-			if(pRun)
-				delete pRun;
-		}
-	}
-	else if(m_pEndOfRunInfo == pCurrentDimInfo)
-	{
-		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
-		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
-
-		if(pBuffer == NULL || bufferSize == 0)
-			return;
-
-		DQMDataStream dataStream(1024);
-		dataStream.setBuffer(pBuffer, bufferSize);
-		DQMRun *pRun = new DQMRun();
-
-		try
-		{
-			StatusCode statusCode = pRun->deserialize(&dataStream);
-
-			if(STATUS_CODE_SUCCESS != statusCode)
-				throw StatusCodeException(statusCode);
-		}
-		catch(StatusCodeException &exception)
-		{
-			streamlog_out(WARNING) << "Couldn't deserialize the run (at stop)" << exception.toString() << std::endl;
-
-			if(pRun)
-				delete pRun;
-
-			return;
-		}
-
-		int runNumber = pRun->getRunNumber();
-		delete pRun;
-
-		if(runNumber < 0)
-			return;
-
-		m_pRunControl->endCurrentRun();
-	}
-	else
-	{
-		streamlog_out(WARNING) << "Unknown info handled by the run control client : " << pCurrentDimInfo->getName() << std::endl;
-	}
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMRunControlClient::setRunControlName(const std::string &runControlName)
-{
-	if(isConnectedToService())
-		return STATUS_CODE_NOT_ALLOWED;
-
-	m_runControlName = runControlName;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-unsigned int DQMRunControlClient::getCurrentRunNumber() const
-{
-	return m_pRunControl->getCurrentRunNumber();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMRun *const DQMRunControlClient::getCurrentRun() const
-{
-	return m_pRunControl->getCurrentRun();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMState DQMRunControlClient::getRunState() const
-{
-	return m_pRunControl->getRunState();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-bool DQMRunControlClient::isRunning() const
-{
-	return m_pRunControl->isRunning();
-}
+////-------------------------------------------------------------------------------------------------
+//
+//DQMRunControlClient::DQMRunControlClient() :
+//		m_isConnected(false),
+//		m_runControlName("DEFAULT"),
+//		m_pStartOfRunInfo(NULL),
+//		m_pEndOfRunInfo(NULL)
+//{
+//	m_pRunControl = new DQMRunControl();
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//DQMRunControlClient::~DQMRunControlClient()
+//{
+//	delete m_pRunControl;
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//StatusCode DQMRunControlClient::connectToService()
+//{
+//	if(isConnectedToService())
+//		return STATUS_CODE_SUCCESS;
+//
+//	std::string sorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/START_OF_RUN";
+//	std::string eorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/END_OF_RUN";
+//	m_pStartOfRunInfo = new DimInfo(sorServiceName.c_str(), (void*) "", 0, this);
+//	m_pEndOfRunInfo = new DimInfo(eorServiceName.c_str(), (void*) "", 0, this);
+//
+//	m_isConnected = true;
+//
+//	return STATUS_CODE_SUCCESS;
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//StatusCode DQMRunControlClient::disconnectFromService()
+//{
+//	if(!isConnectedToService())
+//		return STATUS_CODE_SUCCESS;
+//
+//	delete m_pStartOfRunInfo;
+//	delete m_pEndOfRunInfo;
+//	m_pStartOfRunInfo = NULL;
+//	m_pEndOfRunInfo = NULL;
+//
+//	m_isConnected = false;
+//
+//	return STATUS_CODE_SUCCESS;
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//bool DQMRunControlClient::isConnectedToService() const
+//{
+//	return m_isConnected;
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//void DQMRunControlClient::infoHandler()
+//{
+//	DimInfo *pCurrentDimInfo = getInfo();
+//
+//	if(m_pStartOfRunInfo == pCurrentDimInfo)
+//	{
+//		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
+//		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
+//
+//		if(pBuffer == NULL || bufferSize == 0)
+//			return;
+//
+//		DQMDataStream dataStream(1024);
+//		dataStream.setBuffer(pBuffer, bufferSize);
+//		DQMRun *pRun = new DQMRun();
+//
+//		try
+//		{
+//			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pRun->deserialize(&dataStream));
+//
+//			if(pRun->getRunNumber() < 0)
+//				throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+//
+//			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->startNewRun(pRun));
+//		}
+//		catch(StatusCodeException &exception)
+//		{
+//			streamlog_out(WARNING) << "Couldn't deserialize the run (at start)" << exception.toString() << std::endl;
+//
+//			if(pRun)
+//				delete pRun;
+//		}
+//	}
+//	else if(m_pEndOfRunInfo == pCurrentDimInfo)
+//	{
+//		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
+//		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
+//
+//		if(pBuffer == NULL || bufferSize == 0)
+//			return;
+//
+//		DQMDataStream dataStream(1024);
+//		dataStream.setBuffer(pBuffer, bufferSize);
+//		DQMRun *pRun = new DQMRun();
+//
+//		try
+//		{
+//			StatusCode statusCode = pRun->deserialize(&dataStream);
+//
+//			if(STATUS_CODE_SUCCESS != statusCode)
+//				throw StatusCodeException(statusCode);
+//		}
+//		catch(StatusCodeException &exception)
+//		{
+//			streamlog_out(WARNING) << "Couldn't deserialize the run (at stop)" << exception.toString() << std::endl;
+//
+//			if(pRun)
+//				delete pRun;
+//
+//			return;
+//		}
+//
+//		int runNumber = pRun->getRunNumber();
+//		delete pRun;
+//
+//		if(runNumber < 0)
+//			return;
+//
+//		m_pRunControl->endCurrentRun();
+//	}
+//	else
+//	{
+//		streamlog_out(WARNING) << "Unknown info handled by the run control client : " << pCurrentDimInfo->getName() << std::endl;
+//	}
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//StatusCode DQMRunControlClient::setRunControlName(const std::string &runControlName)
+//{
+//	if(isConnectedToService())
+//		return STATUS_CODE_NOT_ALLOWED;
+//
+//	m_runControlName = runControlName;
+//
+//	return STATUS_CODE_SUCCESS;
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//unsigned int DQMRunControlClient::getCurrentRunNumber() const
+//{
+//	return m_pRunControl->getCurrentRunNumber();
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//DQMRun *const DQMRunControlClient::getCurrentRun() const
+//{
+//	return m_pRunControl->getCurrentRun();
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//DQMState DQMRunControlClient::getRunState() const
+//{
+//	return m_pRunControl->getRunState();
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//bool DQMRunControlClient::isRunning() const
+//{
+//	return m_pRunControl->isRunning();
+//}
 
 } 
 

@@ -31,6 +31,7 @@
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMRunControl.h"
 #include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMPlugin.h"
 
 namespace dqm4hep
 {
@@ -38,7 +39,25 @@ namespace dqm4hep
 // run control client plugin declaration
 DQM_PLUGIN_DECL( DQMDimRunControlClient , "DimRunControlClient" )
 
+DQMCurrentRunRpcInfo::DQMCurrentRunRpcInfo(char *rpcName, DQMDimRunControlClient *pClient) :
+	DimRpcInfo(rpcName, (void *) NULL, 0),
+	m_pClient(pClient)
+{
+	/* nop */
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCurrentRunRpcInfo::rpcInfoHandler()
+{
+	m_pClient->handleCurrentRunRpcInfo(this);
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 DQMDimRunControlClient::DQMDimRunControlClient() :
+		DQMRunControlClient(),
 		m_isConnected(false),
 		m_pStartOfRunInfo(NULL),
 		m_pEndOfRunInfo(NULL),
@@ -62,13 +81,17 @@ StatusCode DQMDimRunControlClient::connectToService()
 	if(isConnectedToService())
 		return STATUS_CODE_SUCCESS;
 
-	std::string sorServiceName = "DQM4HEP/RunControl/" + this->getName() + "/START_OF_RUN";
-	std::string eorServiceName = "DQM4HEP/RunControl/" + this->getName() + "/END_OF_RUN";
+	std::string sorServiceName = "DQM4HEP/RunControl/" + this->getRunControlName() + "/START_OF_RUN";
+	std::string eorServiceName = "DQM4HEP/RunControl/" + this->getRunControlName() + "/END_OF_RUN";
+	std::string currentRunRpcName = "DQM4HEP/RunControl/" + this->getRunControlName() + "/CURRENT_RUN";
 
-	m_pStartOfRunInfo = new DimInfo(sorServiceName.c_str(), (void*) "", 0, this);
-	m_pEndOfRunInfo = new DimInfo(eorServiceName.c_str(), (void*) "", 0, this);
+	m_pStartOfRunInfo = new DimUpdatedInfo(sorServiceName.c_str(), (void*) NULL, 0, this);
+	m_pEndOfRunInfo = new DimUpdatedInfo(eorServiceName.c_str(), (void*) NULL, 0, this);
+	m_pCurrentRunRpcInfo = new DQMCurrentRunRpcInfo( (char *) currentRunRpcName.c_str() , this );
 
 	m_isConnected = true;
+
+	m_pCurrentRunRpcInfo->setData(0);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -103,6 +126,9 @@ void DQMDimRunControlClient::infoHandler()
 
 	if(m_pStartOfRunInfo == pCurrentDimInfo)
 	{
+		if(this->isRunning() || !this->isConnectedToService())
+			return;
+
 		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
 		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
 
@@ -110,7 +136,7 @@ void DQMDimRunControlClient::infoHandler()
 			return;
 
 		m_dataStream.reset();
-		m_dataStream.setBuffer(pBuffer, bufferSize);
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
 
 		DQMRun *pRun = new DQMRun();
 
@@ -122,7 +148,7 @@ void DQMDimRunControlClient::infoHandler()
 				throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
 			// run is adopted here by the run control. No need to delete
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->startNewRun(pRun));
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startNewRun(pRun));
 		}
 		catch(StatusCodeException &exception)
 		{
@@ -132,14 +158,16 @@ void DQMDimRunControlClient::infoHandler()
 	}
 	else if(m_pEndOfRunInfo == pCurrentDimInfo)
 	{
+		if(!this->isRunning() || !this->isConnectedToService())
+			return;
+
 		try
 		{
-			if(this->isRunning())
-				THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->endCurrentRun());
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->endCurrentRun());
 		}
 		catch(StatusCodeException &exception)
 		{
-			streamlog_out(WARNING) << "Couldn't stop the run (at stop)" << exception.toString() << std::endl;
+			streamlog_out(WARNING) << "Couldn't stop the run (at stop) : " << exception.toString() << std::endl;
 			return;
 		}
 	}
@@ -151,12 +179,39 @@ void DQMDimRunControlClient::infoHandler()
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDimRunControlClient::setName(const std::string &name)
+void DQMDimRunControlClient::handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo)
 {
-	if(isConnectedToService())
-		return STATUS_CODE_NOT_ALLOWED;
+	if( ! this->isConnectedToService() )
+		return;
 
-	return DQMRunControl::setName(name);
+	DQMRun *pRun = new DQMRun();
+
+	try
+	{
+		dqm_char *pBuffer = static_cast<dqm_char*>(pRpcInfo->getData());
+		dqm_uint  bufferSize = pRpcInfo->getSize();
+
+		m_dataStream.reset();
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pRun->deserialize(&m_dataStream));
+
+		// run number is invalid, meaning not running
+		if(pRun->getRunNumber() <= 0)
+			throw StatusCodeException(STATUS_CODE_SUCCESS);
+
+		// run is adopted here by the run control. No need to delete
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startNewRun(pRun));
+
+		// return avoids run deletion
+		return;
+	}
+	catch(StatusCodeException &exception)
+	{
+	}
+
+	if(pRun)
+		delete pRun;
 }
 
 } 

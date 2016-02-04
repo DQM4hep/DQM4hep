@@ -67,7 +67,8 @@ public:
 		std::string         m_settingsFileName;
 		std::string         m_archiveDirectory;
 		bool                m_shouldOpenArchive;
-		std::string         m_runControl;
+		std::string         m_runControlType;
+		std::string         m_runControlName;
 		std::string         m_eventCollector;
 		std::string         m_subEventIdentifier;
 		std::string         m_eventStreamer;
