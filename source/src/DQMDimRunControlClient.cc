@@ -91,7 +91,9 @@ StatusCode DQMDimRunControlClient::connectToService()
 
 	m_isConnected = true;
 
-	m_pCurrentRunRpcInfo->setData(0);
+	sleep(1);
+	int dummy = 0;
+	m_pCurrentRunRpcInfo->setData(dummy);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -105,6 +107,7 @@ StatusCode DQMDimRunControlClient::disconnectFromService()
 
 	delete m_pStartOfRunInfo; m_pStartOfRunInfo = NULL;
 	delete m_pEndOfRunInfo; m_pEndOfRunInfo = NULL;
+	delete m_pCurrentRunRpcInfo; m_pCurrentRunRpcInfo = NULL;
 
 	m_isConnected = false;
 
@@ -191,9 +194,11 @@ void DQMDimRunControlClient::handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo)
 		dqm_char *pBuffer = static_cast<dqm_char*>(pRpcInfo->getData());
 		dqm_uint  bufferSize = pRpcInfo->getSize();
 
+		if(NULL == pBuffer || 0 == bufferSize)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
 		m_dataStream.reset();
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
-
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pRun->deserialize(&m_dataStream));
 
 		// run number is invalid, meaning not running

@@ -90,7 +90,7 @@ StatusCode DQMRunControlService::start()
 
 	std::string sorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/START_OF_RUN";
 	std::string eorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/END_OF_RUN";
-	std::string currentRunRpcName = "DQM4HEP/RunControl/" + m_runControlName + "/CURRENT_RUN_RPC";
+	std::string currentRunRpcName = "DQM4HEP/RunControl/" + m_runControlName + "/CURRENT_RUN";
 
 	m_pStartOfRunService = new DimService(sorServiceName.c_str(), "C", (void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
 	m_pEndOfRunService   = new DimService(eorServiceName.c_str(), "C", (void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
@@ -273,6 +273,8 @@ void DQMRunControlService::handleCurrentRunRpc(DimRpc *pRpc)
 {
 	if(!this->isRunning())
 		return;
+
+	std::cout << "Handling current run rpc !" << std::endl;
 
 	try
 	{
