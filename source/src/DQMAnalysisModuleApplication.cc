@@ -250,17 +250,19 @@ StatusCode DQMAnalysisModuleApplication::run()
 			if(m_settings.m_shouldOpenArchive)
 				RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->archive(pAnalysisModule));
 
-			DQMMonitorElementList monitorElementListToPublish;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
-					->getMonitorElementListToPublish(monitorElementListToPublish));
 
-			// set monitor elements infos
-			for(DQMMonitorElementList::iterator iter = monitorElementListToPublish.begin(), endIter = monitorElementListToPublish.end() ;
-					endIter != iter ; ++iter)
-				(*iter)->setRunNumber(this->getCurrentRunNumber());
+//			DQMMonitorElementList monitorElementListToPublish;
+//			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
+//					->getMonitorElementListToPublish(monitorElementListToPublish));
+
+			// TODO find a way to update the run number in monitor elements
+//			// set monitor elements infos
+//			for(DQMMonitorElementList::iterator iter = monitorElementListToPublish.begin(), endIter = monitorElementListToPublish.end() ;
+//					endIter != iter ; ++iter)
+//				(*iter)->setRunNumber(this->getCurrentRunNumber());
 
 			// send monitor elements to collector
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->sendMonitorElements(pAnalysisModule->getName(), monitorElementListToPublish));
+			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->sendMonitorElements());
 
 			// reset the monitor elements with end of run reset policy
 			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
@@ -415,9 +417,10 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		pRunControlClient->setRunControlName( m_settings.m_runControlName );
 		m_pRunControlClient = pRunControlClient;
 
-		// start services
+		// start clients
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->connectToService());
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControlClient->connectToService());
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
 
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureNetwork: configuring ... OK" << std::endl;
 	}

@@ -144,7 +144,9 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 
 	std::string monitorElementCollector;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pMeCollectorElement, "name", monitorElementCollector));
+
 	this->getMonitorElementSender()->setCollectorName(monitorElementCollector);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
 
 	m_sleepTimeBetweenTwoProcess = 100;
 	m_publicationPeriod = 2;
@@ -256,13 +258,13 @@ StatusCode DQMStandaloneModuleApplication::run()
 
 			streamlog_out(MESSAGE) << "Sending monitor elements to collector" << std::endl;
 
-			DQMMonitorElementList monitorElementListToPublish;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
-					->getMonitorElementListToPublish(monitorElementListToPublish));
+//			DQMMonitorElementList monitorElementListToPublish;
+//			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
+//					->getMonitorElementListToPublish(monitorElementListToPublish));
 
-			streamlog_out(MESSAGE) << "Number of monitor elements sent : " << monitorElementListToPublish.size() << std::endl;
+//			streamlog_out(MESSAGE) << "Number of monitor elements sent : " << monitorElementListToPublish.size() << std::endl;
 
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->sendMonitorElements(pStandaloneModule->getName(), monitorElementListToPublish));
+			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->sendMonitorElements());
 
 			if(m_resetAtEndOfPeriod)
 			{

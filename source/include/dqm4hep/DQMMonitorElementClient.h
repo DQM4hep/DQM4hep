@@ -31,6 +31,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMMessaging.h"
+#include "dqm4hep/DQMDataStream.h"
 
 // -- dim headers
 #include "dic.hxx"
@@ -43,10 +44,10 @@ class DQMMonitorElementClient;
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-class DQMMonitorElementCollectorInfoRpcInfo : public DimRpcInfo
+class DQMMeCollectorInfoRpcInfo : public DimRpcInfo
 {
 public:
-	DQMMonitorElementCollectorInfoRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient);
+	DQMMeCollectorInfoRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient);
 	void rpcInfoHandler();
 
 private:
@@ -56,10 +57,10 @@ private:
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-class DQMMonitorElementListNameRpcInfo : public DimRpcInfo
+class DQMMeListNameRpcInfo : public DimRpcInfo
 {
 public:
-	DQMMonitorElementListNameRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient);
+	DQMMeListNameRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient);
 	void rpcInfoHandler();
 
 private:
@@ -69,14 +70,48 @@ private:
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-class DQMMonitorElementPacketRpcInfo : public DimRpcInfo
+/** DQMMonitorElementClientListener class.
+ *
+ *  Listeners receive notifications for each of the callback methods above
+ */
+class DQMMonitorElementClientListener
 {
 public:
-	DQMMonitorElementPacketRpcInfo(char *rpcInfoName, DQMMonitorElementClient *pClient);
-	void rpcInfoHandler();
+	/** Destructor
+	 */
+	virtual ~DQMMonitorElementClientListener() {}
 
-private:
-	DQMMonitorElementClient      *m_pClient;
+	/** Called back on client connection
+	 */
+	virtual void onMonitorElementClientConnect(DQMMonitorElementClient */*pClient*/) {}
+
+	/** Called back on client disconnection
+	 */
+	virtual void onMonitorElementClientDisconnect(DQMMonitorElementClient */*pClient*/) {};
+
+	/** Called back on server connection
+	 */
+	virtual void onServerStartup(DQMMonitorElementClient */*pClient*/) {}
+
+	/** Called back when the server is shutdown
+	 */
+	virtual void onServerShutdown(DQMMonitorElementClient */*pClient*/) {}
+
+	/** Called back when available me list is received
+	 */
+	virtual void availableMonitorElementListReceived(DQMMonitorElementClient */*pClient*/, const DQMMonitorElementInfoList &/*infoList*/) {}
+
+	/** Called back when me collector info is received
+	 */
+	virtual void monitorElementCollectorInfoReceived(DQMMonitorElementClient */*pClient*/, const DQMCollectorInfo &/*collectorInfo*/) {}
+
+	/** Called back when monitor elements are received.
+	 *  WARNING ! The client owns the publication passed in argument.
+	 *  After notifying the publication is cleared and monitor elements deleted.
+	 *  Since the publication is not constant, the listener can take elements and
+	 *  remove them from the publication.
+	 */
+	virtual void monitorElementsReceived(DQMMonitorElementClient */*pClient*/, DQMMonitorElementPublication &/*publication*/) {}
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -84,115 +119,130 @@ private:
 
 /** DQMMonitorElementClient class
  */ 
-class DQMMonitorElementClient
+class DQMMonitorElementClient : public DimClient
 {
 public:
-	/** Handler class
-	 */
-	class Handler
-	{
-	public:
-		/** Destructor
-		 */
-		virtual ~Handler();
-
-		/** Call back function to receive collector info.
-		 *  Warning !! This function is called from an other thread.
-		 *  Use locks to avoid data race conditions
-		 */
-		virtual StatusCode receiveCollectorInfo(DQMMonitorElementClient *pClient, const DQMCollectorInfo &collectorInfo) = 0;
-
-		/** Call back function to receive monitor element info list
-		 *  Warning !! This function is called from an other thread.
-		 *  Use locks to avoid data race conditions
-		 */
-		virtual StatusCode receiveMonitorElementNameList(DQMMonitorElementClient *pClient, const DQMMonitorElementInfoList &infoList) = 0;
-
-		/** Call back function to receive monitor element publication (real monitor element list)
-		 *  Warning !! This function is called from an other thread.
-		 *  Use locks to avoid data race conditions
-		 */
-		virtual StatusCode receiveMonitorElementPublication(DQMMonitorElementClient *pClient, const DQMMonitorElementPublication &publication) = 0;
-
-		/** Call back function called when the client is connected
-		 */
-		virtual StatusCode handleClientConnection(DQMMonitorElementClient *pClient) = 0;
-
-		/** Call back function called when the client is disconnected
-		 */
-		virtual StatusCode handleClientDisconnection(DQMMonitorElementClient *pClient) = 0;
-	};
-
 	/** Constructor
 	 */
 	DQMMonitorElementClient();
 
 	/** Destructor
 	 */
-	virtual ~DQMMonitorElementClient();
+	~DQMMonitorElementClient();
 
 	/** Set the collector name. Can be done only if the client is
 	 *  not yet connected to collector service
 	 */
-	virtual StatusCode setCollectorName(const std::string &collectorName);
+	StatusCode setCollectorName(const std::string &collectorName);
 
 	/** Get the collector name
 	 */
-	virtual const std::string &getCollectorName() const;
+	const std::string &getCollectorName() const;
 
 	/** Connect the client to the service
 	 */
-	virtual StatusCode connectToService();
+	StatusCode connectToService();
 
 	/** Disconnect the client from the service
 	 */
-	virtual StatusCode disconnectFromService();
+	StatusCode disconnectFromService();
 
 	/** Whether the client is connected to the service
 	 */
-	virtual bool isConnectedToService() const;
-
-	/** Set the client handler
-	 */
-	virtual StatusCode setHandler(Handler *pHandler);
+	bool isConnectedToService() const;
 
 	/** Sent a request to the collector to get back the collector informations
 	 */
-	virtual StatusCode sendCollectorInfoRequest();
+	StatusCode queryCollectorInfo();
 
 	/** Send a request to get back monitor element list name (small packet info)
 	 */
-	virtual StatusCode sendMonitorElementListNameRequest(const DQMMonitorElementListNameRequest &request);
+	StatusCode queryAvailableMonitorElements(const DQMMonitorElementListNameRequest &request);
 
-	/** Send a request to get back a monitor element publication (huge packet of elements)
+	/** Unsubscribe to monitor elements
 	 */
-	virtual StatusCode sendMonitorElementPublicationRequest(const DQMMonitorElementRequest &request);
+	StatusCode subscribe(const DQMMonitorElementRequest &request);
+
+	/** Subscribe to monitor elements
+	 */
+	StatusCode unsubscribe(const DQMMonitorElementRequest &request);
+
+	/** Unsubscribe to all monitor elements the client has already
+	 *  subscribed and subscribe to monitor elements
+	 */
+	StatusCode replaceSubscription(const DQMMonitorElementRequest &request);
+
+	/** Send a command to query the monitor element list.
+	 *  The element in the list are first subscribed.
+	 *  Then a query is sent to update only the element in the request
+	 */
+	StatusCode querySubscribedMonitorElements(const DQMMonitorElementRequest &request);
+
+	/** Send a command to query the monitor element list that the client subscribed
+	 */
+	StatusCode querySubscribedMonitorElements();
+
+	/** Set the update mode. If set to true, subscribed monitor elements will be received
+	 *  when an update is performed on the collector server side
+	 */
+	void setUpdateMode(bool updateMode);
+
+	/** Get the update mode
+	 */
+	bool getUpdateMode() const;
+
+	/** Whether the collector is running
+	 */
+	bool isCollectorRunning() const;
+
+	/** Add a listener to this client (observer pattern).
+	 */
+	bool addListener(DQMMonitorElementClientListener *pListener);
+
+	/** Remove a listener from this client
+	 */
+	void removeListener(DQMMonitorElementClientListener *pListener);
 
 public:
 	static const std::string         m_emptyBufferStr;
 
-protected:
-	DQMMonitorElementCollectorInfoRpcInfo *m_pMonitorElementCollectorInfoRpcInfo;
-	DQMMonitorElementListNameRpcInfo      *m_pMonitorElementListNameRpcInfo;
-	DQMMonitorElementPacketRpcInfo        *m_pMonitorElementPacketRpcInfo;
+private:
+	/** Handle the collector info rpc callback
+	 */
+	void handleMeCollectorInfoRpcInfo(DimRpcInfo *pRpcInfo);
 
-	// collector
-	std::string                        m_collectorName;
-	bool                              m_isConnected;
+	/** Handle the me name list rpc callback
+	 */
+	void handleMeListNameRpcInfo(DimRpcInfo *pRpcInfo);
 
-	// the user handler
-	Handler                           *m_pHandler;
+	/** Dim info handler
+	 */
+	void infoHandler();
 
-	friend class DQMMonitorElementCollectorInfoRpcInfo;
-	friend class DQMMonitorElementListNameRpcInfo;
-	friend class DQMMonitorElementPacketRpcInfo;
+	/** Deep clear of publication
+	 */
+	void clearPublication(DQMMonitorElementPublication &publication);
+
+private:
+	DimRpcInfo                            *m_pMeCollectorInfoRpcInfo;
+	DimRpcInfo                            *m_pMeListNameRpcInfo;
+	DimUpdatedInfo                        *m_pMeUpdateInfo;
+	DimInfo                               *m_pCollectorStateInfo;
+
+	DQMDataStream                          m_inDataStream;  // to receive data
+	DQMDataStream                          m_outDataStream; // to send data
+
+	std::string                            m_collectorName;
+	bool                                   m_isConnected;
+	bool                                   m_updateMode;
+	bool                                   m_isCollectorRunning;
+
+	// listeners
+	std::vector<DQMMonitorElementClientListener *>    m_listeners;
+
+	friend class DQMMeCollectorInfoRpcInfo;
+	friend class DQMMeListNameRpcInfo;
 };
-
-
-inline DQMMonitorElementClient::Handler::~Handler()
-{
-	/* nop */
-}
 
 } 
 

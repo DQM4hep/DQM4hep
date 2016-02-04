@@ -41,8 +41,10 @@ DQMModuleApplication::DQMModuleApplication() :
 		m_pMonitorElementSender(NULL)
 {
 	m_pMonitorElementManager = new DQMMonitorElementManager();
-	m_pMonitorElementSender = new DQMMonitorElementSender();
+	m_pMonitorElementSender = new DQMMonitorElementSender(this);
 }
+
+//-------------------------------------------------------------------------------------------------
 
 DQMModuleApplication::~DQMModuleApplication() 
 {
@@ -52,6 +54,8 @@ DQMModuleApplication::~DQMModuleApplication()
 	if(m_pModule)
 		delete m_pModule;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApplication::exit( int returnCode )
 {
@@ -72,20 +76,28 @@ StatusCode DQMModuleApplication::exit( int returnCode )
 	return m_returnCode;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 DQMModule *DQMModuleApplication::getModule() const
 {
 	return m_pModule;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 bool DQMModuleApplication::shouldStopApplication() const
 {
 	return m_shouldStop;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 void DQMModuleApplication::setStopApplication(bool stopApplication)
 {
 	m_shouldStop = stopApplication;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApplication::setModuleName(const std::string &name)
 {
@@ -100,6 +112,8 @@ StatusCode DQMModuleApplication::setModuleName(const std::string &name)
 	return STATUS_CODE_SUCCESS;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 StatusCode DQMModuleApplication::setModuleType(const std::string &type)
 {
 	if(this->isInitialized())
@@ -110,6 +124,8 @@ StatusCode DQMModuleApplication::setModuleType(const std::string &type)
 	return STATUS_CODE_SUCCESS;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 const std::string &DQMModuleApplication::getModuleName() const
 {
 	if(m_pModule)
@@ -118,35 +134,49 @@ const std::string &DQMModuleApplication::getModuleName() const
 	return m_moduleName;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 const std::string &DQMModuleApplication::getModuleType() const
 {
 	return m_moduleType;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 bool DQMModuleApplication::isInitialized() const
 {
 	return m_isInitialized;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 StatusCode DQMModuleApplication::getReturnCode() const
 {
 	return m_returnCode;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 void DQMModuleApplication::setInitialized(bool initialized)
 {
 	m_isInitialized = initialized;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 DQMMonitorElementManager *DQMModuleApplication::getMonitorElementManager() const
 {
 	return m_pMonitorElementManager;
 }
 
+//-------------------------------------------------------------------------------------------------
+
 DQMMonitorElementSender *DQMModuleApplication::getMonitorElementSender() const
 {
 	return m_pMonitorElementSender;
 }
+
+//-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApplication::setModule(DQMModule *pModule)
 {

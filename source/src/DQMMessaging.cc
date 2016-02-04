@@ -35,10 +35,10 @@ namespace dqm4hep
 
 StatusCode DQMMonitorElementPublication::serialize(DQMDataStream *const pDataStream) const
 {
-	dqm_uint mapSize = m_publication.size();
+	dqm_uint mapSize = this->size();
 	RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write(mapSize));
 
-	for(std::map<std::string, std::vector<DQMMonitorElement *> >::const_iterator iter = m_publication.begin(), endIter = m_publication.end() ;
+	for(std::map<std::string, std::vector<DQMMonitorElement *> >::const_iterator iter = this->begin(), endIter = this->end() ;
 		endIter != iter ; ++iter)
 	{
 		std::string moduleName(iter->first);
@@ -85,7 +85,7 @@ StatusCode DQMMonitorElementPublication::deserialize(DQMDataStream *const pDataS
 			meList.push_back(pMonitorElement);
 		}
 
-		m_publication[moduleName] = meList;
+		(*this)[moduleName] = meList;
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -228,15 +228,15 @@ StatusCode DQMMonitorElementListNameRequest::deserialize(DQMDataStream *const pD
 
 StatusCode DQMMonitorElementRequest::serialize(DQMDataStream *const pDataStream) const
 {
-	RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write((dqm_uint)m_requestList.size()));
+	RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write((dqm_uint)this->size()));
 
-	for(unsigned int i=0 ; i<m_requestList.size() ; i++)
+	for(unsigned int i=0 ; i<this->size() ; i++)
 	{
-		RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write(m_requestList.at(i).first));
-		RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write(m_requestList.at(i).second));
+		RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write(this->at(i).first));
+		RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->write(this->at(i).second));
 	}
 
-		return STATUS_CODE_SUCCESS;
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -248,15 +248,15 @@ StatusCode DQMMonitorElementRequest::deserialize(DQMDataStream *const pDataStrea
 
 	for(unsigned int i=0 ; i<requestListSize ; i++)
 	{
-		DQMMonitorElementRequest::ModuleMonitorElementPair requestedPair;
+		value_type requestedPair;
 
 		RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->read(requestedPair.first));
 		RETURN_RESULT_IF(dqm4hep::STATUS_CODE_SUCCESS, !=, pDataStream->read(requestedPair.second));
 
-		m_requestList.push_back(requestedPair);
+		this->push_back(requestedPair);
 	}
 
-		return STATUS_CODE_SUCCESS;
+	return STATUS_CODE_SUCCESS;
 }
 
 

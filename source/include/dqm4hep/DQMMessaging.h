@@ -38,12 +38,9 @@ namespace dqm4hep
 
 /** DQMMonitorElementPublication class
  */
-class DQMMonitorElementPublication : public DQMStreamable
+class DQMMonitorElementPublication : public std::map<std::string, DQMMonitorElementList>, public DQMStreamable
 {
 public:
-	typedef std::map<std::string, std::vector<DQMMonitorElement *> > PublicationMap;
-	PublicationMap     m_publication;
-
 	/** Serialize a monitor element publication and store it in the data stream
 	 */
 	StatusCode serialize(DQMDataStream *const pDataStream) const;
@@ -160,7 +157,7 @@ public:
 
 /** DQMMonitorElementRequest class
  */
-class DQMMonitorElementRequest : public DQMStreamable
+class DQMMonitorElementRequest : public std::vector< std::pair<std::string, std::string> >, public DQMStreamable
 {
 public:
 	/** Serialize a monitor element request and store it in the data stream
@@ -170,10 +167,6 @@ public:
 	/** De-serialize a monitor element request from the data stream
 	 */
 	StatusCode deserialize(DQMDataStream *const pDataStream);
-
-public:
-	typedef std::pair<std::string, std::string> ModuleMonitorElementPair;
-	std::vector<ModuleMonitorElementPair>         m_requestList;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -186,7 +179,7 @@ struct ME_REQUEST_COMPARE
 public:
 	ME_REQUEST_COMPARE(const std::string &s) : m_str(s) {}
 
-	bool operator ()(const DQMMonitorElementRequest::ModuleMonitorElementPair &p)
+	bool operator ()(const DQMMonitorElementRequest::value_type &p)
 	{
 		if(p.first == m_str)
 			return true;
