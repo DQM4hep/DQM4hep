@@ -28,14 +28,16 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMCycle.h"
 
+#include "TSystem.h"
+
 namespace dqm4hep
 {
 
 DQMCycle::DQMCycle() :
-		m_pApplication(NULL),
 		m_processingRate(0.f),
 		m_cycleValue(0.f),
-		m_cycleTimeout(10) // 10 seconds is the default value
+		m_cycleTimeout(10), // 10 seconds is the default value
+		m_nProcessedEvents(0)
 {
 	/* nop */
 }
@@ -77,23 +79,136 @@ void DQMCycle::setTimeout(unsigned int timeout)
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMCycle::setModuleApplication(DQMModuleApplication *pApplication)
-{
-	m_pApplication = pApplication;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMModuleApplication *DQMCycle::getModuleApplication() const
-{
-	return m_pApplication;
-}
-
-//-------------------------------------------------------------------------------------------------
-
 float DQMCycle::getProcessingRate() const
 {
 	return m_processingRate;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+unsigned int DQMCycle::getNProcessedEvents() const
+{
+	return m_nProcessedEvents;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+TTime DQMCycle::getTotalCycleTime() const
+{
+	return (m_endTime - m_startTime);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCycle::eventProcessed(const DQMEvent *const pEvent)
+{
+	if(this->getState() != RUNNING_STATE)
+		return;
+
+	if(NULL == pEvent)
+		return;
+
+	m_nProcessedEvents++;
+	m_lastEventProcessedTime = gSystem->Now();
+
+	// call back for daughter class
+	this->onEventProcessed(pEvent);
+
+	// call back from listeners
+	for(std::set<DQMCycleListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onEventProcessed(this, pEvent);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const TTime &DQMCycle::getStartTime() const
+{
+	return m_startTime;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+const TTime &DQMCycle::getEndTime() const
+{
+	return m_endTime;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCycle::startCycle()
+{
+	m_startTime = gSystem->Now();
+	m_lastEventProcessedTime = m_startTime;
+	m_endTime = TTime(0);
+
+	m_nProcessedEvents = 0;
+	m_processingRate = 0.f;
+	m_state = RUNNING_STATE;
+
+	// call back for daughter class
+	this->onCycleStarted();
+
+	// call back from listeners
+	for(std::set<DQMCycleListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onCycleStarted(this);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCycle::stopCycle()
+{
+	m_endTime = gSystem->Now();
+	m_state = STOPPED_STATE;
+
+	TTime timeDifference = this->getTotalCycleTime();
+
+	if(timeDifference != TTime(0))
+		m_processingRate = (static_cast<float>(m_nProcessedEvents) / timeDifference.operator long long());
+
+	// call back for daughter class
+	this->onCycleStopped();
+
+	// call back from listeners
+	for(std::set<DQMCycleListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onCycleStopped(this);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+DQMState DQMCycle::getState() const
+{
+	return m_state;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool DQMCycle::isTimeoutReached() const
+{
+	if(m_lastEventProcessedTime == TTime(0))
+		return false;
+
+	if( gSystem->Now() > m_lastEventProcessedTime + TTime(this->getTimeout()*1000) )
+		return true;
+
+	return false;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCycle::addListener(DQMCycleListener *pListener)
+{
+	if(NULL != pListener)
+		m_listeners.insert(pListener);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCycle::removeListener(DQMCycleListener *pListener)
+{
+	m_listeners.erase(pListener);
 }
 
 } 

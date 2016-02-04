@@ -39,6 +39,7 @@
 #include "dqm4hep/DQMAnalysisModule.h"
 #include "dqm4hep/DQMCycle.h"
 #include "dqm4hep/DQMArchiver.h"
+#include "dqm4hep/DQMEvent.h"
 #include "dqm4hep/DQMEventClient.h"
 #include "dqm4hep/DQMRunControlClient.h"
 #include "dqm4hep/DQMDimRunControlClient.h"
@@ -246,9 +247,56 @@ StatusCode DQMAnalysisModuleApplication::run()
 		while(m_pRunControlClient->isRunning() && !this->shouldStopApplication())
 		{
 			// process a cycle
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAnalysisModule->startOfCycle());
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCycle->processCycle());
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAnalysisModule->endOfCycle());
+			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+			streamlog_out(MESSAGE) << "***                Start of cycle              ***" << std::endl;
+			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+			m_pCycle->startCycle();
+
+			while(1)
+			{
+				if( m_pCycle->isEndOfCycleReached() )
+					break;
+
+				if( m_pCycle->isTimeoutReached() )
+					break;
+
+				if( this->shouldStopApplication() )
+					break;
+
+				DQMEvent *pEvent = NULL;
+				RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, m_pEventClient->takeEvent(pEvent));
+
+				if(NULL == pEvent)
+					continue;
+
+				try
+				{
+					StatusCode statusCode = pAnalysisModule->processEvent(pEvent);
+					m_pCycle->eventProcessed(pEvent);
+				}
+				catch(StatusCodeException &exception)
+				{
+					streamlog_out(ERROR) << "Module::processEvent(evt) returned " << exception.toString() << " !" << std::endl;
+				}
+				catch(...)
+				{
+					streamlog_out(ERROR) << "Module::processEvent(evt) : caught unknown exception !" << std::endl;
+				}
+
+				if(pEvent)
+					delete pEvent;
+			}
+
+			m_pCycle->stopCycle();
+
+			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+			streamlog_out(MESSAGE) << "***            End of cycle reached            ***" << std::endl;
+			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+			streamlog_out(MESSAGE) << "***                STATISTICS                  ***" << std::endl;
+			streamlog_out(MESSAGE) << "*** N processed events : " << m_pCycle->getNProcessedEvents() << std::endl;
+			streamlog_out(MESSAGE) << "*** Event rate :         " << m_pCycle->getProcessingRate()*1000.f << " evts/s" << std::endl;
+			streamlog_out(MESSAGE) << "*** Processing time :    " << m_pCycle->getTotalCycleTime().operator long long()/1000.f << " s" << std::endl;
+			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
 
 			// archive publication if user asked for
 			if(m_settings.m_shouldOpenArchive)
@@ -295,11 +343,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->close());
 	}
 
-	if(m_pEventClient->isConnectedToService())
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->disconnectFromService());
-
-	if(m_pRunControlClient->isConnectedToService())
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControlClient->disconnectFromService());
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, stopServices());
 
 	streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication: Exiting application ..." << std::endl;
 
@@ -318,38 +362,6 @@ const std::string &DQMAnalysisModuleApplication::getType() const
 const std::string &DQMAnalysisModuleApplication::getName() const
 {
 	return m_applicationName;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMEventClient *DQMAnalysisModuleApplication::getEventClient() const
-{
-	return m_pEventClient;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMRunControlClient *DQMAnalysisModuleApplication::getRunControlClient() const
-{
-	return m_pRunControlClient;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-bool DQMAnalysisModuleApplication::shouldStopCycle() const
-{
-	if(this->shouldStopApplication())
-		return true;
-
-	int runNumberFromRunControl = m_pRunControlClient->getCurrentRunNumber();
-
-	if(runNumberFromRunControl != m_runNumber)
-		return true;
-
-	if(!m_pRunControlClient->isRunning() || runNumberFromRunControl < 0)
-		return true;
-
-	return false;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -464,7 +476,6 @@ StatusCode DQMAnalysisModuleApplication::configureCycle(const TiXmlHandle xmlHan
 
 		m_pCycle->setCycleValue(m_settings.m_cycleValue);
 		m_pCycle->setTimeout(m_settings.m_cycleTimeout);
-		m_pCycle->setModuleApplication(this);
 
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: configuring ... OK" << std::endl;
 	}
@@ -562,6 +573,23 @@ StatusCode DQMAnalysisModuleApplication::startServices()
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->connectToService());
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControlClient->connectToService());
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMAnalysisModuleApplication::stopServices()
+{
+	// start clients
+	if(m_pEventClient && m_pEventClient->isConnectedToService())
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->connectToService());
+
+	if(m_pRunControlClient && m_pRunControlClient->isConnectedToService())
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControlClient->connectToService());
+
+	if(this->getMonitorElementSender() && this->getMonitorElementSender()->isConnectedToService())
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
 
 	return STATUS_CODE_SUCCESS;
 }

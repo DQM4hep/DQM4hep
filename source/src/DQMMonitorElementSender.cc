@@ -62,7 +62,7 @@ StatusCode DQMMonitorElementSender::setCollectorName(const std::string &collecto
 	if(collectorName.empty())
 		return STATUS_CODE_INVALID_PARAMETER;
 
-	if(this->isConnected())
+	if(this->isConnectedToService())
 		return STATUS_CODE_NOT_ALLOWED;
 
 	m_collectorName = collectorName;
@@ -165,7 +165,7 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 
 StatusCode DQMMonitorElementSender::connectToService()
 {
-	if(this->isConnected())
+	if(this->isConnectedToService())
 		return STATUS_CODE_SUCCESS;
 
 	std::string serviceName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/NOTIFY_WATCHED_ME_SVC";
@@ -183,7 +183,7 @@ StatusCode DQMMonitorElementSender::connectToService()
 
 StatusCode DQMMonitorElementSender::disconnectFromService()
 {
-	if( ! this->isConnected() )
+	if( ! this->isConnectedToService() )
 		return STATUS_CODE_SUCCESS;
 
 	delete m_pSubscribedListInfo;
@@ -196,7 +196,7 @@ StatusCode DQMMonitorElementSender::disconnectFromService()
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMMonitorElementSender::isConnected() const
+bool DQMMonitorElementSender::isConnectedToService() const
 {
 	return m_isConnected;
 }

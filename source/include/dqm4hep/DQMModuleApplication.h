@@ -77,10 +77,6 @@ public:
 	 */
 	virtual const std::string &getName() const = 0;
 
-	/** Whether the module application has to stop processing cycles
-	 */
-	virtual bool shouldStopCycle() const = 0;
-
 	/** Get the module for this application
 	 */
 	DQMModule *getModule() const;

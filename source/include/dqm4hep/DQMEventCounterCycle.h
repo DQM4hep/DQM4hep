@@ -48,9 +48,10 @@ public:
 	 */
 	~DQMEventCounterCycle();
 
-	/** Process a cycle
-	 */
-	StatusCode processCycle();
+	void onCycleStarted() { /* nop */ }
+	void onCycleStopped() { /* nop */ }
+	void onEventProcessed(const DQMEvent *const /*pEvent*/) { /* nop */ }
+	bool isEndOfCycleReached() const;
 }; 
 
 } 

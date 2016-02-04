@@ -27,16 +27,10 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMTimerCycle.h"
-#include "dqm4hep/DQMLogging.h"
-#include "dqm4hep/DQMEvent.h"
-#include "dqm4hep/DQMEventClient.h"
-#include "dqm4hep/DQMRunControlClient.h"
-#include "dqm4hep/DQMAnalysisModuleApplication.h"
-#include "dqm4hep/DQMAnalysisModule.h"
+#include "dqm4hep/DQMPlugin.h"
 
-// -- root headers
-#include "TSystem.h"
 #include "TTime.h"
+#include "TSystem.h"
 
 namespace dqm4hep
 {
@@ -49,7 +43,7 @@ DQM_PLUGIN_DECL( DQMTimerCycle , "TimerCycle" )
 DQMTimerCycle::DQMTimerCycle() :
 		DQMCycle()
 {
-	setCycleValue(30.f);
+	setCycleValue(30.f); // default set to 30 seconds
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -61,89 +55,12 @@ DQMTimerCycle::~DQMTimerCycle()
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMTimerCycle::processCycle()
+bool DQMTimerCycle::isEndOfCycleReached() const
 {
-	if(NULL == this->getModuleApplication())
-		return STATUS_CODE_NOT_INITIALIZED;
+	if( gSystem->Now() > this->getStartTime() + TTime(this->getCycleValue()*1000) )
+		return true;
 
-	if(this->getModuleApplication()->shouldStopCycle())
-		return STATUS_CODE_SUCCESS;
-
-	DQMAnalysisModuleApplication *pApplication = dynamic_cast<DQMAnalysisModuleApplication *>(this->getModuleApplication());
-
-	if(!pApplication)
-		return STATUS_CODE_INVALID_PARAMETER;
-
-	DQMAnalysisModule *pModule = dynamic_cast<DQMAnalysisModule *>(pApplication->getModule());
-
-	if(!pModule)
-		return STATUS_CODE_INVALID_PARAMETER;
-
-	streamlog_out(MESSAGE) << "DQMTimerCycle: Start of cycle !!" << std::endl;
-
-	TTime startTime = gSystem->Now();
-	TTime startTimeout = startTime;
-	TTime endTime = startTime + TTime(getCycleValue() * 1000);
-	unsigned int nProcessedEvents = 0;
-
-	timespec timesleep;
-    timesleep.tv_sec = 0;
-    timesleep.tv_nsec = 100000L;
-
-	while(1)
-	{
-		// if end of cycle, exit the cycle
-		if(gSystem->Now() > endTime)
-			break;
-
-		if(pApplication->shouldStopCycle())
-			break;
-
-		DQMEvent *pEvent = NULL;
-
-		bool exitCycle = false;
-
-		while(NULL == pEvent)
-		{
-			if(startTimeout + TTime(getTimeout() * 1000) < gSystem->Now() // cycle timeout
-			|| pApplication->shouldStopCycle() // signal from application
-			|| gSystem->Now() > endTime) // end of cycle loop
-			{
-				exitCycle = true;
-				break;
-			}
-
-			pApplication->getEventClient()->takeEvent(pEvent);
-
-			if(!pEvent)
-			    nanosleep(&timesleep, NULL);
-		}
-
-		if(exitCycle)
-			break;
-
-		if(NULL != pEvent)
-		{
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->processEvent(pEvent));
-			delete pEvent;
-			nProcessedEvents ++;
-			startTimeout = gSystem->Now();
-		}
-
-	    nanosleep(&timesleep, NULL);
-	}
-
-	Long64_t period = gSystem->Now() - startTime;
-	DQMCycle::m_processingRate = (period != 0) ? float(nProcessedEvents)/(period/1000.0) : 0.f;
-
-	streamlog_out(MESSAGE) << "*******************************************" << std::endl;
-	streamlog_out(MESSAGE) << "*** DQMTimerCycle: End of cycle reached ***" << std::endl;
-	streamlog_out(MESSAGE) << "*** N processed events : " << nProcessedEvents << std::endl;
-	streamlog_out(MESSAGE) << "*** Event rate :         " << getProcessingRate() << " evts/s" << std::endl;
-	streamlog_out(MESSAGE) << "*** Processing time :    " << period/(double) 1000.0 << " s" << std::endl;
-	streamlog_out(MESSAGE) << "*******************************************" << std::endl;
-
-	return STATUS_CODE_SUCCESS;
+	return false;
 }
 
 } 

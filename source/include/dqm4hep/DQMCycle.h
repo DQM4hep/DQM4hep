@@ -32,12 +32,37 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
+#include "TTime.h"
+
 namespace dqm4hep
 {
 
-class DQMDataClient;
-class DQMModuleApplication;
-class DQMModule;
+class DQMCycle;
+
+/** DQMCycleListener class
+ */
+class DQMCycleListener
+{
+public:
+	/** Destructor
+	 */
+	virtual ~DQMCycleListener() {};
+
+	/** Call back function when an event is processed by the framework
+	 */
+	virtual void onEventProcessed(const DQMCycle *const pCycle, const DQMEvent *const pEvent) = 0;
+
+	/** Call back function when the cycle is started by the framework
+	 */
+	virtual void onCycleStarted(const DQMCycle *const pCycle) = 0;
+
+	/** Call back function when the cycle is stopped by the framework
+	 */
+	virtual void onCycleStopped(const DQMCycle *const pCycle) = 0;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 /** DQMCycle class.
  *
@@ -75,32 +100,87 @@ public:
 	 */
 	unsigned int getTimeout() const;
 
-	/** Get the timeout
+	/** Set the timeout
 	 */
-	void setTimeout(unsigned int);
+	void setTimeout(unsigned int timeout);
 
-	/** Set the application in which the cycle is running
-	 */
-	void setModuleApplication(DQMModuleApplication *pApplication);
-
-	/** Get the application in which the cycle is registered
-	 */
-	DQMModuleApplication *getModuleApplication() const;
-
-	/** Get the processing rate. May be called after a processCycle()
+	/** Get the processing rate. May be called after stopCycle()
 	 *  to get the correct value
 	 */
 	float getProcessingRate() const;
 
-	/** Process a cycle
+	/** Get the number of processed events at the end of cycle
 	 */
-	virtual StatusCode processCycle() = 0;
+	unsigned int getNProcessedEvents() const;
 
-protected:
-	DQMModuleApplication            *m_pApplication;
+	/** Get the total time spent to process the last cycle
+	 */
+	TTime getTotalCycleTime() const;
+
+	/** Called back when the application has processed an event
+	 */
+	void eventProcessed(const DQMEvent *const pEvent);
+
+	/** Get the start time of the current cycle
+	 */
+	const TTime &getStartTime() const;
+
+	/** Get the end time of the last cycle.
+	 *  Valid only between two cycle after stopCycle() call
+	 */
+	const TTime &getEndTime() const;
+
+	/** Start the cycle
+	 */
+	void startCycle();
+
+	/** Stop the cycle
+	 */
+	void stopCycle();
+
+	/** Get the cycle state (running, stopped)
+	 */
+	DQMState getState() const;
+
+	/** Whether the timeout is reached
+	 */
+	bool isTimeoutReached() const;
+
+	/** Add a cycle listener
+	 */
+	void addListener(DQMCycleListener *pListener);
+
+	/** Remove a cycle listener
+	 */
+	void removeListener(DQMCycleListener *pListener);
+
+	/** Specific call back function when a cycle is stopped
+	 */
+	virtual void onCycleStarted() = 0;
+
+	/** Specific call back function when a cycle is stopped
+	 */
+	virtual void onCycleStopped() = 0;
+
+	/** Specific call back function when an event is processed, depends on cycle type
+	 */
+	virtual void onEventProcessed(const DQMEvent *const pEvent) = 0;
+
+	/** Specific function to tell the application to know
+	 *  whether the cycle has reached the end
+	 */
+	virtual bool isEndOfCycleReached() const = 0;
+
+private:
 	float                            m_processingRate;
 	float                            m_cycleValue;
 	unsigned int                     m_cycleTimeout;
+	unsigned int                     m_nProcessedEvents;
+	TTime                            m_startTime;
+	TTime                            m_endTime;
+	TTime                            m_lastEventProcessedTime;
+	std::set<DQMCycleListener*>      m_listeners;
+	DQMState                         m_state;
 };
 
 } 

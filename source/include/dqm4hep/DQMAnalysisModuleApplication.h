@@ -105,19 +105,6 @@ public:
 	 */
 	StatusCode run();
 
-	/** Whether the module application has to stop processing cycles
-	 */
-	bool shouldStopCycle() const;
-
-public:
-	/** Get the event client
-	 */
-	DQMEventClient *getEventClient() const;
-
-	/** Get the run control client
-	 */
-	DQMRunControlClient *getRunControlClient() const;
-
 private:
 	/** Configure the module
 	 */
@@ -135,9 +122,13 @@ private:
 	 */
 	StatusCode configureArchiver(const TiXmlHandle xmlHandle);
 
-	/** Start all services. Should be called after init
+	/** Start all services. Called just at beginning of run()
 	 */
 	StatusCode startServices();
+
+	/** Stop all services. Called at the end of run() before exit
+	 */
+	StatusCode stopServices();
 
 	/** Get the current run number that was started (not from run control)
 	 */

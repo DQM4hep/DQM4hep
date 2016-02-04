@@ -73,7 +73,7 @@ public:
 
 	/** Whether the sender is connected to the collector
 	 */
-	bool isConnected() const;
+	bool isConnectedToService() const;
 
 private:
 	/**
