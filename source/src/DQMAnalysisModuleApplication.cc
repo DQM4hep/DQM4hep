@@ -171,8 +171,6 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 
 	setInitialized(true);
 
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startServices());
-
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -182,6 +180,8 @@ StatusCode DQMAnalysisModuleApplication::run()
 {
 	if(!this->isInitialized())
 		return STATUS_CODE_NOT_INITIALIZED;
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startServices());
 
 	// get casted module for easier manipulation
 	DQMAnalysisModule *pAnalysisModule = dynamic_cast<DQMAnalysisModule *>(this->getModule());
