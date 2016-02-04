@@ -135,6 +135,10 @@ private:
 	 */
 	StatusCode configureArchiver(const TiXmlHandle xmlHandle);
 
+	/** Start all services. Should be called after init
+	 */
+	StatusCode startServices();
+
 	/** Get the current run number that was started (not from run control)
 	 */
 	int getCurrentRunNumber() const;

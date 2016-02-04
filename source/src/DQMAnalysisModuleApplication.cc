@@ -135,14 +135,8 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
     const TiXmlHandle xmlDocumentHandle(&xmlDocument);
     const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
-	// configure the application
+	// configure module
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, configureModule(xmlHandle));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, configureCycle(xmlHandle));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, configureArchiver(xmlHandle));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, configureNetwork(xmlHandle));
-
-	m_settings.m_settingsFileName = settingsFileName;
-	m_settings.print();
 
 	DimBrowser browser;
 	int nServers = browser.getServers();
@@ -167,7 +161,17 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 
 	DimServer::start( moduleServerName.c_str() );
 
+	// configure remaining part of the application
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureCycle(xmlHandle));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureArchiver(xmlHandle));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureNetwork(xmlHandle));
+
+	m_settings.m_settingsFileName = settingsFileName;
+	m_settings.print();
+
 	setInitialized(true);
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startServices());
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -417,11 +421,6 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		pRunControlClient->setRunControlName( m_settings.m_runControlName );
 		m_pRunControlClient = pRunControlClient;
 
-		// start clients
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->connectToService());
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControlClient->connectToService());
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
-
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureNetwork: configuring ... OK" << std::endl;
 	}
 	catch(const StatusCodeException &exception)
@@ -551,6 +550,18 @@ StatusCode DQMAnalysisModuleApplication::configureArchiver(const TiXmlHandle xml
 	{
 		return exception.getStatusCode();
 	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMAnalysisModuleApplication::startServices()
+{
+	// start clients
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->connectToService());
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControlClient->connectToService());
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->connectToService());
 
 	return STATUS_CODE_SUCCESS;
 }
