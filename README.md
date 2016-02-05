@@ -1,27 +1,20 @@
-########################################
-# README file for DQM4HEP package
-# @author Eté Rémi
-# @version 1.0.0 17/02/2014
-# @copyright IPNL, CNRS
-########################################
+# DQM4HEP ( Data Quality Monitoring for High Energy Physics )
+IPNL/CNRS
 
+## INSTALL:
 
-//DQM4HEP ( Data Quality Monitoring for High Energy Physics )
+Can be built standalonly or using ilcsoft (http://ilcsoft.desy.de/portal)
 
+### Standalone install
 
-INSTALL:
-=========
+In the root directory :
 
-Needs ilcsoft installed (http://ilcsoft.desy.de/portal). Tested with the following version :
- * v01-17-03
- * v01-17-08
-
-To install the package : 
-
-  $ mkdir build
-  $ cd build
-  $ cmake -C $ILCSOFT/ILCSoft.cmake ..
-  $ make
+```bash
+  mkdir build
+  cd build
+  cmake -C $ILCSOFT/ILCSoft.cmake ..
+  make
+```
 
 On MAC-OSX
 if you encounter this error when compiling did: 
