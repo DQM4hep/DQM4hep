@@ -5,7 +5,8 @@ Copyright IPNL/CNRS/IN2P3
 ## INSTALL:
 
 Can be built standalonly or using [ilcsoft](http://ilcsoft.desy.de/portal).
-The install procedure is manage by [CMake](http://cmake.org)
+
+The install procedure is managed by [CMake](http://cmake.org)
 
 ### Dependencies
 
@@ -44,20 +45,20 @@ cmake -DDQM4HEP_ELOG=OFF -DDQM4HEP_VIZ=OFF ..
 ```bash
 mkdir build
 cd build
-cmake [-DOPTIONS=ON] -C $ILCSOFT/ILCSoft.cmake ..
+cmake [-DOPTIONS=..] -C $ILCSOFT/ILCSoft.cmake ..
 make
 ```
 
 ### Known bugs
 
-On MAC-OSX
-if you encounter this error when compiling did (dim sub-package) :
-	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"
-Check if OpenMotif is installed in /usr/OpenMotif
-If it’s not change MOTIFINC and MOTIFLIB variables in makefile_did accordingly
-Eg if using macport:
-	MOTIFINC = /opt/local/include
-	MOTIFLIB = /opt/local/lib
+#### On MAC-OSX:
+if you encounter this error when compiling did (dim sub-package) :  
+	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"  
+Check if OpenMotif is installed in /usr/OpenMotif  
+If it’s not change MOTIFINC and MOTIFLIB variables in makefile_did accordingly  
+Eg if using macport:  
+	MOTIFINC = /opt/local/include  
+	MOTIFLIB = /opt/local/lib  
 
 ### Bug report
 
