@@ -246,18 +246,20 @@ StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, const std
 		return STATUS_CODE_FAILURE;
 
 	const std::vector<std::string> *pAvailableCollections = pLCEvent->getCollectionNames();
+	StringVector serializeCollectionNames;
 
 	for(StringVector::iterator iter = collectionNames.begin(), endIter = collectionNames.end() ;
 			endIter != iter ; ++iter)
 	{
 		const std::string &collectionName(*iter);
 
-		if(std::find(pAvailableCollections->begin(), pAvailableCollections->end(), collectionName) == pAvailableCollections->end())
+		if(std::find(pAvailableCollections->begin(), pAvailableCollections->end(), collectionName) != pAvailableCollections->end())
 		{
-			collectionNames.erase(iter);
-			iter--;
+			serializeCollectionNames.push_back(collectionName);
 		}
 	}
+
+	collectionNames = serializeCollectionNames;
 
 	if(collectionNames.empty())
 	{
@@ -295,9 +297,9 @@ StatusCode DQMLCEventStreamer::serialize(const DQMEvent *const pEvent, const std
 		if(m_lcCollectionStreamerMap.end() == findIter)
 		{
 			streamlog_out(WARNING) << "Couldn't serialize collection of type '" << pCollection->getTypeName() << "'. " << std::endl
-					  << "The serializer for this collection type is not yet implemented!" << std::endl
-					  << "Will skip this collection" << std::endl;;
-			continue;
+					  << "The serializer for this collection type is not yet implemented!" << std::endl;
+
+			return STATUS_CODE_FAILURE;
 		}
 
 		std::string collectionName = (*iter);

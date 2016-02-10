@@ -31,7 +31,7 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMPluginManager.h"
-#include "dqm4hep/DQMEventClient.h"
+#include "dqm4hep/DQMDimEventClient.h"
 #include "dqm4hep/lcio/DQMLcioReaderListener.h"
 #include "dqm4hep/lcio/DQMLCEventStreamer.h"
 
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	IO::LCReader *pLCReader = IOIMPL::LCFactory::getInstance()->createLCReader(1);
 
 	// event collector client
-	DQMEventClient *pEventClient = new DQMEventClient();
+	DQMEventClient *pEventClient = new DQMDimEventClient();
 
 	DQMLCEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMLCEventStreamer>("LCIOStreamer");
 
