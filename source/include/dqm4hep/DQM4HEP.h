@@ -46,6 +46,7 @@
 #include <unistd.h>
 #include <exception>
 #include <limits>
+#include <pthread.h>
 
 // apple stuff for stdint.h
 #ifdef __APPLE__
@@ -568,9 +569,10 @@ enum UpdateMode
 struct DQMStats
 {
 	time_t          m_timeStamp;
-	unsigned int  m_statistics;
+	unsigned int    m_statistics;
 };
 
+//-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
 template <typename T>
@@ -580,6 +582,8 @@ public:
 	static bool validate(const T &t) { return t >= static_cast<T>(0); }
 };
 
+//-------------------------------------------------------------------------------------------------
+
 template <typename T>
 class NegativeValidator
 {
@@ -587,12 +591,16 @@ public:
 	static bool validate(const T &t) { return t<0; }
 };
 
+//-------------------------------------------------------------------------------------------------
+
 template <typename T>
 class NonNullValidator
 {
 public:
 	static bool validate(const T &t) { return fabs(static_cast<float>(t) - 0.f) < std::numeric_limits<T>::epsilon(); }
 };
+
+//-------------------------------------------------------------------------------------------------
 
 template <typename T>
 class IntervalValidator
@@ -606,6 +614,8 @@ private:
 	T     m_max;
 };
 
+//-------------------------------------------------------------------------------------------------
+
 template <typename T>
 class BiggerThanValidator
 {
@@ -617,6 +627,8 @@ private:
 	T     m_compare;
 };
 
+//-------------------------------------------------------------------------------------------------
+
 template <typename T>
 class LessThanValidator
 {
@@ -626,6 +638,25 @@ public:
 	bool operator ()(const T &t) const { return t<m_compare; }
 private:
 	T     m_compare;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+/** scoped_mutex class
+ */
+class scoped_lock
+{
+public:
+	/** Constructor that locks the mutex
+	 */
+	scoped_lock(pthread_mutex_t *pMutex);
+
+	/** Destructor that unlocks the mutex
+	 */
+	~scoped_lock();
+private:
+	pthread_mutex_t      *m_pMutex;
 };
 
 //-------------------------------------------------------------------------------------------------
