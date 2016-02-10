@@ -44,7 +44,6 @@ DimEventRequestRpc::DimEventRequestRpc(DQMDimEventCollector *pCollector) :
 
 void DimEventRequestRpc::rpcHandler()
 {
-	std::cout << "Event request rpc !" << std::endl;
 	m_pCollector->handleEventRequest(this);
 }
 
@@ -59,8 +58,6 @@ DQMDimEventCollector::DQMDimEventCollector() :
 		m_pUpdateModeCommand(NULL),
 		m_pEventUpdateService(NULL),
 		m_pEventStreamer(NULL),
-//		m_pCurrentBuffer(NULL),
-//		m_currentBufferSize(0),
 		m_pCurrentEvent(NULL),
 		m_state(0),
 		m_clientRegisteredId(0),
@@ -406,11 +403,15 @@ void DQMDimEventCollector::updateEventService()
 		{
 			// try to serialize the sub event
 			m_subEventDataStream.reset();
+
 			if(STATUS_CODE_SUCCESS != m_pEventStreamer->serialize(m_pCurrentEvent, iter->second.m_subEventIdentifier, &m_subEventDataStream))
 				continue;
 
 			dqm_char *pEventBuffer = m_subEventDataStream.getBuffer();
 			int bufferSize = m_subEventDataStream.getBufferSize();
+
+			if(NULL == pEventBuffer || 0 == bufferSize)
+				continue;
 
 			int clientIdArray[2];
 			clientIdArray[0] = iter->first;

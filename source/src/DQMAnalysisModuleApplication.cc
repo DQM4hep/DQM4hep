@@ -65,7 +65,6 @@ DQMAnalysisModuleApplication::DQMAnalysisModuleApplication() :
 		m_applicationName("UNKNOWN"),
 		m_runNumber(-1)
 {
-	m_pEventClient = new DQMEventClient();
 	m_pArchiver = new DQMArchiver();
 }
 
@@ -73,8 +72,10 @@ DQMAnalysisModuleApplication::DQMAnalysisModuleApplication() :
 
 DQMAnalysisModuleApplication::~DQMAnalysisModuleApplication()
 {
-	delete m_pEventClient;
 	delete m_pArchiver;
+
+	if(m_pEventClient)
+		delete m_pEventClient;
 
 	if(m_pRunControlClient)
 		delete m_pRunControlClient;
@@ -244,7 +245,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 		m_pEventClient->setUpdateMode(true);
 
 		// while run has not ended, process cycles
-		while(m_pRunControlClient->isRunning() && !this->shouldStopApplication())
+		while( m_pRunControlClient->isRunning() && !this->shouldStopApplication() )
 		{
 			// process a cycle
 			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
@@ -264,7 +265,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 					break;
 
 				DQMEvent *pEvent = NULL;
-				RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_UNCHANGED, !=, m_pEventClient->takeEvent(pEvent));
+				m_pEventClient->takeEvent(pEvent);
 
 				if(NULL == pEvent)
 					continue;
@@ -325,8 +326,9 @@ StatusCode DQMAnalysisModuleApplication::run()
 				break;
 		}
 
-		// stop receive data
+		// stop receive data and clear contents
 		m_pEventClient->setUpdateMode(false);
+		m_pEventClient->clearQueue();
 
 		// fill the run end time
 		pRun->setEndTime(time(NULL));
@@ -372,6 +374,10 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 	{
 		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureNetwork: configuring ..." << std::endl;
 
+		//
+		// Get all xml attributes needed to configure network options !
+		//
+
 		TiXmlElement *const pXmlElement = xmlHandle.FirstChildElement("network").Element();
 
 		if(NULL == pXmlElement)
@@ -382,15 +388,12 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 
 		const TiXmlHandle networkHandle(pXmlElement);
 
-		const TiXmlElement *const pRunControlXmlElement = networkHandle.FirstChildElement("runcontrol").Element();
-		const TiXmlElement *const pEventCollectorXmlElement = networkHandle.FirstChildElement("eventcollector").Element();
-		const TiXmlElement *const pSubEventIdentifierXmlElement = networkHandle.FirstChildElement("subeventidentifier").Element();
-		const TiXmlElement *const pEventStreamerXmlElement = networkHandle.FirstChildElement("eventstreamer").Element();
-		const TiXmlElement *const pMonitorElementCollectorXmlElement = networkHandle.FirstChildElement("monitorelementcollector").Element();
+		TiXmlElement *const pRunControlXmlElement = networkHandle.FirstChildElement("runcontrol").Element();
+		TiXmlElement *const pEventCollectorXmlElement = networkHandle.FirstChildElement("eventcollector").Element();
+		TiXmlElement *const pMonitorElementCollectorXmlElement = networkHandle.FirstChildElement("monitorelementcollector").Element();
 
 		if(NULL == pRunControlXmlElement
 		|| NULL == pEventCollectorXmlElement
-		|| NULL == pEventStreamerXmlElement
 		|| NULL == pMonitorElementCollectorXmlElement)
 		{
 			streamlog_out(ERROR) << "Incomplete network xml element" << std::endl;
@@ -399,30 +402,26 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pRunControlXmlElement, "name", m_settings.m_runControlName));
 		THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pRunControlXmlElement, "type", m_settings.m_runControlType));
-
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pEventCollectorXmlElement, "name", m_settings.m_eventCollector));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pEventStreamerXmlElement, "name", m_settings.m_eventStreamer));
-
+		THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::getAttribute(pEventCollectorXmlElement, "type", m_settings.m_eventClientType));
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pMonitorElementCollectorXmlElement, "name", m_settings.m_monitorElementCollector));
 
-		if(NULL != pSubEventIdentifierXmlElement)
-		{
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pSubEventIdentifierXmlElement, "name", m_settings.m_subEventIdentifier));
-		}
+		//
+		// Configure network form the extracted xml values
+		//
 
 		// monitor element collector name
 		this->getMonitorElementSender()->setCollectorName(m_settings.m_monitorElementCollector);
 
-		// configure streamer
-		DQMEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMEventStreamer>(m_settings.m_eventStreamer);
+		// event client
+		DQMEventClient *pEventClient = DQMPluginManager::instance()->createPluginClass<DQMEventClient>(m_settings.m_eventClientType);
 
-		if(!pEventStreamer)
-			throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+		if( ! pEventClient )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
-		// configure data client
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->setEventStreamer(pEventStreamer));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->setCollectorName(m_settings.m_eventCollector));
-		m_pEventClient->setSubEventIdentifier(m_settings.m_subEventIdentifier);
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pEventClient->readSettings( TiXmlHandle(pEventCollectorXmlElement) ));
+		// force update mode to false for the moment
+		pEventClient->setUpdateMode(false);
+		m_pEventClient = pEventClient;
 
 		// configure run control
 		DQMRunControlClient *pRunControlClient = DQMPluginManager::instance()->createPluginClass<DQMRunControlClient>(m_settings.m_runControlType);
@@ -623,10 +622,8 @@ DQMAnalysisModuleApplication::Settings::Settings() :
 	m_shouldOpenArchive(false),
 	m_runControlType("DimRunControlClient"),
 	m_runControlName("DEFAULT"),
-	m_eventCollector("DEFAULT"),
-	m_subEventIdentifier(""),
+	m_eventClientType("DimEventClient"),
 	m_monitorElementCollector("DEFAULT"),
-	m_eventStreamer(""),
 	m_cycleType("TimeCycle"),
 	m_cycleValue(30.f),
 	m_cycleTimeout(5),
@@ -645,9 +642,7 @@ void DQMAnalysisModuleApplication::Settings::print()
 	streamlog_out(MESSAGE) << "*** Should open archive :            " << openArchive << std::endl;
 	streamlog_out(MESSAGE) << "*** Run control type :               " << m_runControlType << std::endl;
 	streamlog_out(MESSAGE) << "*** Run control name :               " << m_runControlName << std::endl;
-	streamlog_out(MESSAGE) << "*** Event collector name :           " << m_eventCollector << std::endl;
-	streamlog_out(MESSAGE) << "*** Sub event identifier :           " << m_subEventIdentifier << std::endl;
-	streamlog_out(MESSAGE) << "*** Event streamer :                 " << m_eventStreamer << std::endl;
+	streamlog_out(MESSAGE) << "*** Event client type :              " << m_eventClientType << std::endl;
 	streamlog_out(MESSAGE) << "*** Cycle type :                     " << m_cycleType << std::endl;
 	streamlog_out(MESSAGE) << "*** Cycle value :                    " << m_cycleValue << std::endl;
 	streamlog_out(MESSAGE) << "*** Cycle timeout :                  " << m_cycleTimeout << std::endl;

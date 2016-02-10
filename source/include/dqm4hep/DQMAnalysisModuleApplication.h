@@ -68,9 +68,7 @@ public:
 		bool                m_shouldOpenArchive;
 		std::string         m_runControlType;
 		std::string         m_runControlName;
-		std::string         m_eventCollector;
-		std::string         m_subEventIdentifier;
-		std::string         m_eventStreamer;
+		std::string         m_eventClientType;
 		std::string         m_monitorElementCollector;
 		std::string         m_cycleType;
 		float               m_cycleValue;

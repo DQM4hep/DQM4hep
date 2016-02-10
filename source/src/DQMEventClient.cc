@@ -27,171 +27,207 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMEventClient.h"
-#include "dqm4hep/DQMDimEventClient.h"
+#include "dqm4hep/DQMEventStreamer.h"
+#include "dqm4hep/DQMEvent.h"
 
 namespace dqm4hep
 {
 
-DQMEventClient::DQMEventClient()
+DQMEventClient::DQMEventClient() :
+		m_pEventStreamer(NULL),
+		m_maximumQueueSize(100),
+		m_eventStreamerOwner(true)
 {
-	// default is dim implementation
-	m_pClientImp = new DQMDimEventClient();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMEventClient::DQMEventClient(DQMEventClientImp *pClientImp) :
-		m_pClientImp(pClientImp)
-{
-	/* nop */
+	pthread_mutex_init(&m_mutex, NULL);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 DQMEventClient::~DQMEventClient()
 {
-	delete m_pClientImp;
+	this->clearQueue();
+
+	if( m_eventStreamerOwner && NULL != m_pEventStreamer )
+		delete m_pEventStreamer;
+
+	pthread_mutex_destroy(&m_mutex);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::setEventClientImp(DQMEventClientImp *pClientImp)
+void DQMEventClient::setCollectorName(const std::string &collectorName)
 {
-	if(NULL == pClientImp)
-		return STATUS_CODE_INVALID_PTR;
+	// if connected to service, can't change collector name
+	if( this->isConnectedToService() )
+		return;
 
-	if(NULL != m_pClientImp)
-		delete m_pClientImp;
-
-	m_pClientImp = pClientImp;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMEventClientImp *DQMEventClient::getEventClientImp() const
-{
-	return m_pClientImp;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMEventClient::setCollectorName(const std::string &collectorName)
-{
-	return m_pClientImp->setCollectorName(collectorName);
+	m_collectorName = collectorName;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const std::string &DQMEventClient::getCollectorName() const
 {
-	return m_pClientImp->getCollectorName();
+	return m_collectorName;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::connectToService()
+void DQMEventClient::setEventStreamer(DQMEventStreamer *pEventStreamer, bool owner)
 {
-	return m_pClientImp->connectToService();
-}
+	if( m_eventStreamerOwner && NULL != m_pEventStreamer )
+		delete m_pEventStreamer;
 
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMEventClient::disconnectFromService()
-{
-	return m_pClientImp->disconnectFromService();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-bool DQMEventClient::isConnectedToService() const
-{
-	return m_pClientImp->isConnectedToService();
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMEventClient::sendEvent(const DQMEvent *const pEvent)
-{
-	return m_pClientImp->sendEvent(pEvent);
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMEventClient::setEventStreamer(DQMEventStreamer *pEventStreamer)
-{
-	return m_pClientImp->setEventStreamer(pEventStreamer);
+	m_pEventStreamer = pEventStreamer;
+	m_eventStreamerOwner = owner;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 DQMEventStreamer *DQMEventClient::getEventStreamer() const
 {
-	return m_pClientImp->getEventStreamer();
+	return m_pEventStreamer;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::setMaximumQueueSize(unsigned int queueSize)
+void DQMEventClient::setMaximumQueueSize(unsigned int maxQueueSize)
 {
-	return m_pClientImp->setMaximumQueueSize(queueSize);
+	if( 0 == maxQueueSize )
+		return;
+
+	m_maximumQueueSize = maxQueueSize;
+
+	scoped_lock( & this->m_mutex);
+
+	// shrink the queue to fit the new max queue size
+	while( m_eventQueue.size() >  m_maximumQueueSize )
+	{
+		delete m_eventQueue.front();
+		m_eventQueue.pop();
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::clearQueue()
+unsigned int DQMEventClient::getMaximumQueueSize() const
 {
-	return m_pClientImp->clearQueue();
+	return m_maximumQueueSize;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMEventClient::clearQueue()
+{
+	scoped_lock( & this->m_mutex);
+
+	while( ! m_eventQueue.empty() )
+	{
+		delete m_eventQueue.front();
+		m_eventQueue.pop();
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
 
 void DQMEventClient::setSubEventIdentifier(const std::string &identifier)
 {
-	m_pClientImp->setSubEventIdentifier(identifier);
+	m_subEventIdentifier = identifier;
 }
 
 //-------------------------------------------------------------------------------------------------
 
 const std::string &DQMEventClient::getSubEventIdentifier() const
 {
-	return 	m_pClientImp->getSubEventIdentifier();
+	return m_subEventIdentifier;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::queryEvent(DQMEvent *&pEvent, int timeout)
+void DQMEventClient::takeEvent(DQMEvent *&pEvent)
 {
-	return m_pClientImp->queryEvent(pEvent, timeout);
+	scoped_lock( & this->m_mutex);
+
+	if( ! m_eventQueue.empty() )
+	{
+		pEvent = m_eventQueue.front();
+		m_eventQueue.pop();
+	}
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::queryEvent()
+void DQMEventClient::addListener(DQMEventClientListener *pListener)
 {
-	return m_pClientImp->queryEvent();
+	scoped_lock( & this->m_mutex);
+
+	if(NULL == pListener)
+		return;
+
+	m_listeners.insert(pListener);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMEventClient::takeEvent(DQMEvent *&pEvent)
+void DQMEventClient::removeListener(DQMEventClientListener *pListener)
 {
-	return m_pClientImp->takeEvent(pEvent);
+	scoped_lock( & this->m_mutex);
+
+	if(NULL == pListener)
+		return;
+
+	m_listeners.erase(pListener);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMEventClient::setUpdateMode(bool updateMode)
+void DQMEventClient::pushEvent(DQMEvent *pEvent)
 {
-	return m_pClientImp->setUpdateMode(updateMode);
+	if(NULL == pEvent)
+		return;
+
+	pthread_mutex_lock(& this->m_mutex);
+
+	if( m_eventQueue.size() == m_maximumQueueSize )
+	{
+		delete m_eventQueue.front();
+		m_eventQueue.pop();
+	}
+
+	m_eventQueue.push(pEvent);
+
+	// need unlock before notifying
+	pthread_mutex_unlock(& this->m_mutex );
+
+	for(std::set<DQMEventClientListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->eventPushed(this);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMEventClient::updateMode() const
+StatusCode DQMEventClient::connectToService()
 {
-	return m_pClientImp->updateMode();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->performServiceConnection());
+
+	for(std::set<DQMEventClientListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onEventClientConnnect(this);
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMEventClient::disconnectFromService()
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->performServiceDisconnection());
+
+	for(std::set<DQMEventClientListener*>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
+			endIter != iter ; ++iter)
+		(*iter)->onEventClientDisconnnect(this);
+
+	return STATUS_CODE_SUCCESS;
 }
 
 }

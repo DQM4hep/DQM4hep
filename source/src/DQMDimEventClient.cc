@@ -29,6 +29,9 @@
 #include "dqm4hep/DQMDimEventClient.h"
 #include "dqm4hep/DQMDataStream.h"
 #include "dqm4hep/DQMEventStreamer.h"
+#include "dqm4hep/DQMXmlHelper.h"
+#include "dqm4hep/DQMPluginManager.h"
+#include "dqm4hep/DQMPlugin.h"
 
 namespace dqm4hep
 {
@@ -44,52 +47,18 @@ DimEventRpcInfo::DimEventRpcInfo(DQMDimEventClient *pEventClient) :
 
 void DimEventRpcInfo::rpcInfoHandler()
 {
-	char *pBuffer = (char*) getData();
-	unsigned int bufferSize = getSize();
-
-	if(NULL == pBuffer || 0 == bufferSize)
-		return;
-
-	DQMEvent *pEvent = NULL;
-
-	try
-	{
-		// lock/unlock on de-serialization if the interface
-		// uses the sendEvent(evt) and queryEvent(...)
-		// functionalities at the same time
-		pthread_mutex_lock(&m_pEventClient->m_mutex);
-		m_pEventClient->m_dataStream.setBuffer(pBuffer, bufferSize);
-		StatusCode statusCode = m_pEventClient->getEventStreamer()->deserialize(pEvent, &m_pEventClient->m_dataStream);
-		pthread_mutex_unlock(&m_pEventClient->m_mutex);
-
-		if(statusCode != STATUS_CODE_SUCCESS)
-			throw StatusCodeException(statusCode);
-	}
-	catch(const StatusCodeException &exception)
-	{
-		if(NULL != pEvent)
-			delete pEvent;
-
-		return;
-	}
-
-	StatusCode statusCode = m_pEventClient->addEvent(pEvent);
-
-	if(statusCode != STATUS_CODE_SUCCESS)
-		delete pEvent;
-
-	return;
+	m_pEventClient->eventReception( (dqm_char *) getData(), (dqm_uint) getSize() );
 }
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
+// plug the client class in the framework
+DQM_PLUGIN_DECL( DQMDimEventClient , "DimEventClient" )
+
 DQMDimEventClient::DQMDimEventClient() :
 	m_isConnected(false),
-	m_collectorName("EventCollector"),
 	m_pDimEventRpcInfo(NULL),
-	m_maximumQueueSize(100),
-	m_pEventStreamer(NULL),
 	m_updateMode(false),
 	m_serverClientId(0),
 	m_dataStream(5*1024*1024) // 5 Mo should be enough to start ...
@@ -101,52 +70,30 @@ DQMDimEventClient::DQMDimEventClient() :
 
 DQMDimEventClient::~DQMDimEventClient() 
 {
-	if(isConnectedToService())
-		disconnectFromService();
-
-	if(m_pEventStreamer)
-		delete m_pEventStreamer;
+	if( this->isConnectedToService() )
+		this->disconnectFromService();
 
 	pthread_mutex_destroy(&m_mutex);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDimEventClient::setCollectorName(const std::string &collectorName)
-{
-	if(isConnectedToService())
-		return STATUS_CODE_ALREADY_INITIALIZED;
-
-	m_collectorName = collectorName;
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const std::string &DQMDimEventClient::getCollectorName() const
-{
-	return m_collectorName;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMDimEventClient::connectToService()
+StatusCode DQMDimEventClient::performServiceConnection()
 {
 	if(isConnectedToService())
 		return STATUS_CODE_SUCCESS;
 
-	DimClient::setExitHandler( ("DQM4HEP/EventCollector/" + getCollectorName() ).c_str() );
+	DimClient::setExitHandler( ("DQM4HEP/EventCollector/" + this->getCollectorName() ).c_str() );
 
 	m_pDimEventRpcInfo = new DimEventRpcInfo(this);
 
-	m_pClientIdInfo = new DimUpdatedInfo(("DQM4HEP/EventCollector/" + getCollectorName() + "/CLIENT_REGISTERED").c_str(), static_cast<int>(0), this);
-	m_pServerStateInfo = new DimUpdatedInfo(("DQM4HEP/EventCollector/" + getCollectorName() + "/SERVER_STATE").c_str(), static_cast<int>(0), this);
-	m_pEventUpdateInfo = new DimUpdatedInfo(("DQM4HEP/EventCollector/" + getCollectorName() + "/EVENT_RAW_UPDATE").c_str(), (void*) NULL, 0, this);
+	m_pClientIdInfo    = new DimUpdatedInfo(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/CLIENT_REGISTERED").c_str(), static_cast<int>(0), this);
+	m_pServerStateInfo = new DimUpdatedInfo(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/SERVER_STATE").c_str(), static_cast<int>(0), this);
+	m_pEventUpdateInfo = new DimUpdatedInfo(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/EVENT_RAW_UPDATE").c_str(), (void*) NULL, 0, this);
 
 	m_isConnected = true;
 
-	DimCurrentInfo serverStateInfo(("DQM4HEP/EventCollector/" + getCollectorName() + "/SERVER_STATE").c_str(), static_cast<int>(0));
+	DimCurrentInfo serverStateInfo(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/SERVER_STATE").c_str(), static_cast<int>(0));
 	int serverRunning = serverStateInfo.getInt();
 
 	if(!serverRunning)
@@ -158,14 +105,14 @@ StatusCode DQMDimEventClient::connectToService()
 	// send command to register the client on the server
 	// the server is expected to update m_pClientIdInfo info with the client id
 	streamlog_out(MESSAGE) << "Registering client into server collector application !" << std::endl;
-	DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 1);
+	DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 1);
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDimEventClient::disconnectFromService()
+StatusCode DQMDimEventClient::performServiceDisconnection()
 {
 	if(!isConnectedToService())
 		return STATUS_CODE_SUCCESS;
@@ -180,7 +127,7 @@ StatusCode DQMDimEventClient::disconnectFromService()
 	// un-register client on the server
 	if(m_serverClientId > 0)
 	{
-		DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 0);
+		DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 0);
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -197,112 +144,25 @@ bool DQMDimEventClient::isConnectedToService() const
 
 StatusCode DQMDimEventClient::sendEvent(const DQMEvent *const pEvent)
 {
-	pthread_mutex_lock(&m_mutex);
+	scoped_lock( & this->m_mutex);
 
-	if(NULL == m_pEventStreamer)
-	{
-		pthread_mutex_unlock(&m_mutex);
+	if( NULL == this->getEventStreamer() )
 		return STATUS_CODE_NOT_INITIALIZED;
-	}
-
-	pthread_mutex_unlock(&m_mutex);
 
 	if(NULL == pEvent)
 		return STATUS_CODE_INVALID_PARAMETER;
 
-	// lock/unlock on de-serialization if the interface
-	// uses the sendEvent(evt) and queryEvent(...)
-	// functionalities at the same time
-	pthread_mutex_lock(&m_mutex);
-
 	m_dataStream.reset();
-	StatusCode statusCode = m_pEventStreamer->serialize(pEvent, &m_dataStream);
-
-	if(statusCode != STATUS_CODE_SUCCESS)
-	{
-		pthread_mutex_unlock(&m_mutex);
-		return statusCode;
-	}
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->serialize(pEvent, &m_dataStream));
 
 	char *pBuffer = m_dataStream.getBuffer();
 	unsigned int bufferSize = m_dataStream.getBufferSize();
 
 	if(NULL == pBuffer || 0 == bufferSize)
-	{
-		pthread_mutex_unlock(&m_mutex);
 		return STATUS_CODE_FAILURE;
-	}
 
 	std::string commandName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/COLLECT_RAW_EVENT";
 	DimClient::sendCommandNB((char*) commandName.c_str(), (void *) pBuffer, bufferSize);
-
-	pthread_mutex_unlock(&m_mutex);
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMDimEventClient::setEventStreamer(DQMEventStreamer *pEventStreamer)
-{
-	if(isConnectedToService())
-		return STATUS_CODE_NOT_ALLOWED;
-
-	pthread_mutex_lock(&m_mutex);
-
-	if(NULL != m_pEventStreamer)
-		delete m_pEventStreamer;
-
-	m_pEventStreamer = pEventStreamer;
-
-	pthread_mutex_unlock(&m_mutex);
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMEventStreamer *DQMDimEventClient::getEventStreamer() const
-{
-	return m_pEventStreamer;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMDimEventClient::setMaximumQueueSize(unsigned int queueSize)
-{
-	if(isConnectedToService())
-		return STATUS_CODE_NOT_ALLOWED;
-
-	pthread_mutex_lock(&m_mutex);
-
-	if(queueSize == 0)
-	{
-		pthread_mutex_unlock(&m_mutex);
-		return STATUS_CODE_INVALID_PARAMETER;
-	}
-
-	m_maximumQueueSize = queueSize;
-
-	pthread_mutex_unlock(&m_mutex);
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMDimEventClient::clearQueue()
-{
-	pthread_mutex_lock(&m_mutex);
-
-	while(!m_eventQueue.empty())
-	{
-		DQMEvent *pEvent = m_eventQueue.front();
-		delete pEvent;
-		m_eventQueue.pop();
-	}
-
-	pthread_mutex_unlock(&m_mutex);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -311,51 +171,30 @@ StatusCode DQMDimEventClient::clearQueue()
 
 void DQMDimEventClient::setSubEventIdentifier(const std::string &identifier)
 {
-	pthread_mutex_lock(&m_mutex);
+	DQMEventClient::setSubEventIdentifier(identifier);
 
-	m_subEventIdentifier = identifier;
-
-	if(!isConnectedToService())
-	{
-		pthread_mutex_unlock(&m_mutex);
+	if( ! this->isConnectedToService() )
 		return;
-	}
 
-	std::string subEventIdentifierCommandName = "DQM4HEP/EventCollector/" + m_collectorName + "/SUB_EVENT_IDENTIFIER";
-	DimClient::sendCommandNB((char*) subEventIdentifierCommandName.c_str(), (char *) m_subEventIdentifier.c_str());
-
-	pthread_mutex_unlock(&m_mutex);
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const std::string &DQMDimEventClient::getSubEventIdentifier() const
-{
-	return m_subEventIdentifier;
+	std::string subEventIdentifierCommandName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/SUB_EVENT_IDENTIFIER";
+	DimClient::sendCommandNB((char*) subEventIdentifierCommandName.c_str(), (char *) identifier.c_str());
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout)
 {
-	// check for initialization
-	if(!isConnectedToService())
+	scoped_lock( & this->m_mutex);
+
+	if( ! this->isConnectedToService() )
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	pthread_mutex_lock(&m_mutex);
-
-	if(NULL == m_pEventStreamer)
-	{
-		pthread_mutex_unlock(&m_mutex);
+	if( NULL == this->getEventStreamer() )
 		return STATUS_CODE_NOT_INITIALIZED;
-	}
 
 	// check for valid parameters
-	if(timeout < 0)
-	{
-		pthread_mutex_unlock(&m_mutex);
+	if(timeout <= 0)
 		return STATUS_CODE_INVALID_PARAMETER;
-	}
 
 	// rpc service name
 	std::string serviceName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/EVENT_RAW_REQUEST";
@@ -365,85 +204,35 @@ StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout)
 	DimRpcInfo eventDimRpcInfo((char*) serviceName.c_str(), timeout, (void*) NULL, 0);
 
 	// send the query
-	eventDimRpcInfo.setData((char*) m_subEventIdentifier.c_str());
+	eventDimRpcInfo.setData((char*) this->getSubEventIdentifier().c_str());
+
 	// receive the query result
 	char *pEventRawBuffer = static_cast<char*>(eventDimRpcInfo.getData());
 	int bufferSize = eventDimRpcInfo.getSize();
 
 	// check for message validity
 	if(NULL == pEventRawBuffer || 0 == bufferSize)
-	{
-		pthread_mutex_unlock(&m_mutex);
 		return STATUS_CODE_FAILURE;
-	}
 
 	// deserialize the event raw buffer
 	m_dataStream.setBuffer(pEventRawBuffer, bufferSize);
-	StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &m_dataStream);
-	pthread_mutex_unlock(&m_mutex);
-
-	return statusCode;
+	return this->getEventStreamer()->deserialize(pEvent, &m_dataStream);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMDimEventClient::queryEvent()
 {
-	// check for initialization
-	if(!isConnectedToService())
+	scoped_lock( & this->m_mutex);
+
+	if( ! this->isConnectedToService() )
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	pthread_mutex_lock(&m_mutex);
-
-	if(NULL == m_pEventStreamer)
-	{
-		pthread_mutex_unlock(&m_mutex);
+	if( NULL == this->getEventStreamer() )
 		return STATUS_CODE_NOT_INITIALIZED;
-	}
-
-	pthread_mutex_unlock(&m_mutex);
 
 	// send the query
-	m_pDimEventRpcInfo->setData((char*) m_subEventIdentifier.c_str());
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-//StatusCode DQMDimEventClient::querySubEvent(const std::string &subEventIdentifier)
-//{
-//	// check for initialization
-//	if(!isConnectedToService() || NULL == m_pEventStreamer)
-//		return STATUS_CODE_NOT_INITIALIZED;
-//
-//	// send the query
-//	std::string identifier = subEventIdentifier;
-//	m_pDimEventRpcInfo->setData((char*) identifier.c_str());
-//
-//	return STATUS_CODE_SUCCESS;
-//}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMDimEventClient::takeEvent(DQMEvent *&pEvent)
-{
-	pthread_mutex_lock(&m_mutex);
-
-	pEvent = NULL;
-
-	if(m_eventQueue.empty())
-	{
-		pthread_mutex_unlock(&m_mutex);
-		return STATUS_CODE_UNCHANGED;
-	}
-
-	// get oldest element
-	pEvent = m_eventQueue.front();
-	// and reduce the queue
-	m_eventQueue.pop();
-
-	pthread_mutex_unlock(&m_mutex);
+	m_pDimEventRpcInfo->setData((char*) this->getSubEventIdentifier().c_str());
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -452,48 +241,20 @@ StatusCode DQMDimEventClient::takeEvent(DQMEvent *&pEvent)
 
 void DQMDimEventClient::setUpdateMode(bool updateMode)
 {
-	pthread_mutex_lock(&m_mutex);
-
 	m_updateMode = updateMode;
 
-	if(!isConnectedToService())
-	{
-		pthread_mutex_unlock(&m_mutex);
+	if( ! this->isConnectedToService() )
 		return;
-	}
 
 	// send command to server
-	DimClient::sendCommandNB((char*) (std::string("DQM4HEP/EventCollector/") + m_collectorName + "/UPDATE_MODE" ).c_str(), static_cast<int>(m_updateMode));
-
-	pthread_mutex_unlock(&m_mutex);
+	DimClient::sendCommandNB((char*) (std::string("DQM4HEP/EventCollector/") + this->getCollectorName() + "/UPDATE_MODE" ).c_str(), static_cast<int>(m_updateMode));
 }
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMDimEventClient::updateMode() const
+bool DQMDimEventClient::getUpdateMode() const
 {
 	return m_updateMode;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMDimEventClient::addEvent(DQMEvent *pEvent)
-{
-	pthread_mutex_lock(&m_mutex);
-
-	// reduce the event queue if fulfilled
-	if(m_eventQueue.size() == m_maximumQueueSize)
-	{
-		DQMEvent *pOldestEvent = m_eventQueue.front();
-		m_eventQueue.pop();
-		delete pOldestEvent;
-	}
-
-	m_eventQueue.push(pEvent);
-
-	pthread_mutex_unlock(&m_mutex);
-
-	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -516,12 +277,12 @@ void DQMDimEventClient::infoHandler()
 			return;
 
 		m_serverClientId = clientId;
-		std::string subEventIdentifierCommandName = "DQM4HEP/EventCollector/" + m_collectorName + "/SUB_EVENT_IDENTIFIER";
-		std::string updateModeCommandName = "DQM4HEP/EventCollector/" + m_collectorName + "/UPDATE_MODE";
+		std::string subEventIdentifierCommandName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/SUB_EVENT_IDENTIFIER";
+		std::string updateModeCommandName = "DQM4HEP/EventCollector/" + this->getCollectorName() + "/UPDATE_MODE";
 
 		// send to server the client parameters
 		DimClient::sendCommandNB((char*) updateModeCommandName.c_str(), static_cast<int>(m_updateMode));
-		DimClient::sendCommandNB((char*) subEventIdentifierCommandName.c_str(), (char *) m_subEventIdentifier.c_str());
+		DimClient::sendCommandNB((char*) subEventIdentifierCommandName.c_str(), (char *) this->getSubEventIdentifier().c_str());
 
 		return;
 	}
@@ -536,11 +297,12 @@ void DQMDimEventClient::infoHandler()
 			// client is already registered, so nothing to do ...
 			if(m_serverClientId > 0)
 				return;
+
 			// client is not registered yet, we need to do it !
 			else
 			{
 				streamlog_out(MESSAGE) << "Registering client into event collector server application !" << std::endl;
-				DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 1);
+				DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 1);
 				return;
 			}
 		}
@@ -565,36 +327,86 @@ void DQMDimEventClient::infoHandler()
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		DQMEvent *pEvent = NULL;
-
-		try
-		{
-			// lock/unlock on de-serialization if the interface
-			// uses the sendEvent(evt) and queryEvent(...)
-			// functionalities at the same time
-			pthread_mutex_lock(&m_mutex);
-			m_dataStream.setBuffer(pBuffer, bufferSize);
-			StatusCode statusCode = m_pEventStreamer->deserialize(pEvent, &m_dataStream);
-			pthread_mutex_unlock(&m_mutex);
-
-			if(statusCode != STATUS_CODE_SUCCESS)
-				throw StatusCodeException(statusCode);
-		}
-		catch(const StatusCodeException &exception)
-		{
-			if(NULL != pEvent)
-				delete pEvent;
-
-			return;
-		}
-
-		StatusCode statusCode = this->addEvent(pEvent);
-
-		if(statusCode != STATUS_CODE_SUCCESS)
-			delete pEvent;
+		this->eventReception(pBuffer, bufferSize);
 
 		return;
 	}
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDimEventClient::eventReception(dqm_char *pBuffer, dqm_uint bufferSize)
+{
+	if(NULL == pBuffer || 0 == bufferSize)
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	// set buffer
+	scoped_lock( & this->m_mutex);
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+
+	// read event
+	DQMEvent *pEvent = NULL;
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->deserialize(pEvent, &m_dataStream));
+
+	// add it to event queue
+	this->pushEvent(pEvent);
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDimEventClient::readSettings(const TiXmlHandle &xmlHandle)
+{
+	bool reconnect = this->isConnectedToService();
+
+	// first disconnect
+	if( reconnect )
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->disconnectFromService());
+
+	// read all xml values first
+	std::string collectorName = this->getCollectorName();
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
+			"collectorName", collectorName));
+
+	std::string subEventIdentifier = this->getSubEventIdentifier();
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
+			"subEventIdentifier", subEventIdentifier));
+
+	unsigned int maxEventQueueSize = this->getMaximumQueueSize();
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
+			"maxQueueSize", maxEventQueueSize));
+
+	bool updateMode = this->getUpdateMode();
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
+			"updateMode", updateMode));
+
+	std::string eventStreamerName;
+	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
+			"streamerName", eventStreamerName));
+
+	// configure the client
+	// connection to service will come afterward
+	this->setCollectorName(collectorName);
+	this->setSubEventIdentifier(subEventIdentifier);
+	this->setMaximumQueueSize(maxEventQueueSize);
+	this->setUpdateMode(updateMode);
+
+	if( ! eventStreamerName.empty() )
+	{
+		DQMEventStreamer *pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMEventStreamer>(eventStreamerName);
+
+		if( ! pEventStreamer )
+			return STATUS_CODE_FAILURE;
+
+		this->setEventStreamer(pEventStreamer, true);
+	}
+
+	// reconnect only if connected before configuration
+	if( reconnect )
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->connectToService());
+
+	return STATUS_CODE_SUCCESS;
 }
 
 } 

@@ -32,47 +32,120 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
+// -- pthread headers
+#include <pthread.h>
+
 namespace dqm4hep
 {
 
-class DQMEventClientImp;
+class DQMEventClient;
+class DQMEvent;
+class TiXmlHandle;
+
+/** DQMEventClientListener class.
+ */
+class DQMEventClientListener
+{
+public:
+	/** Destructor
+	 */
+	virtual ~DQMEventClientListener() {}
+
+	/** Called back when an event client connects to the service
+	 */
+	virtual void onEventClientConnnect(DQMEventClient *const pClient) = 0;
+
+	/** Called back when an event client disconnects from the service
+	 */
+	virtual void onEventClientDisconnnect(DQMEventClient *const pClient) = 0;
+
+	/** Called back when an event has been pushed in the queue of the event client.
+	 *
+	 *  Listeners can accessed to the oldest event pushed in the queue of the client
+	 *  using DQMEventClient::takeEvent(DQMEvent *&pEvent)
+	 */
+	virtual void eventPushed(DQMEventClient *const pClient) = 0;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 /** DQMEventClient class.
  *
  *  Main interface for sending events to a collector (server part)
  *  and for event queries.
+ *
+ *  Note that pushing/taking events in the event queue is thread-safe.
  */ 
-class DQMEventClient 
+class DQMEventClient
 {
 public:
 	/** Constructor
 	 */
 	DQMEventClient();
 
-	/** Constructor with implementation
-	 */
-	DQMEventClient(DQMEventClientImp *pClientImp);
-
 	/** Destructor
 	 */
-	~DQMEventClient();
-
-	/** Set the event client implementation
-	 */
-	StatusCode setEventClientImp(DQMEventClientImp *pClientImp);
-
-	/** Set the event client implementation
-	 */
-	DQMEventClientImp *getEventClientImp() const;
+	virtual ~DQMEventClient();
 
 	/** Set the collector to connect to.
 	 *  Can set the name only if client not yet connected
 	 */
-	StatusCode setCollectorName(const std::string &collectorName);
+	virtual void setCollectorName(const std::string &collectorName);
 
 	/** Get the collector name
 	 */
 	const std::string &getCollectorName() const;
+
+	/** Set the streamer that will stream in/out the sent/received event(s).
+	 *  No default streamer is provided. User must provide one before querying/sending
+	 *  events from/to collector (server).
+	 *  Note that the client does not own the streamer !
+	 */
+	virtual void setEventStreamer(DQMEventStreamer *pEventStreamer, bool owner = true);
+
+	/** Get the event streamer
+	 */
+	DQMEventStreamer *getEventStreamer() const;
+
+	/** Set the queue size that stores the received events
+	 */
+	virtual void setMaximumQueueSize(unsigned int queueSize);
+
+	/** Get the maximum number of events that the client can store
+	 *  in its event queue
+	 */
+	virtual unsigned int getMaximumQueueSize() const;
+
+	/** Clear the event queue
+	 */
+	virtual void clearQueue();
+
+	/** Set the sub event identifier.
+	 *  This string is sent while querying events.
+	 *  The received event will be a sub event matching this identifier
+	 */
+	virtual void setSubEventIdentifier(const std::string &identifier);
+
+	/** Get the sub event identifier.
+	 */
+	const std::string &getSubEventIdentifier() const;
+
+	/** Take an event from the event queue (pop front) and return the
+	 *  pointer to the caller. The event is removed from the queue,
+	 *  meaning that the caller is responsible for the event deletion.
+	 *  If no event is available, the queue remains unchanged and the
+	 *  pointer is not set
+	 */
+	void takeEvent(DQMEvent *&pEvent);
+
+	/** Add a listener to this event client
+	 */
+	void addListener(DQMEventClientListener *pListener);
+
+	/** Remove a listener from this event client
+	 */
+	void removeListener(DQMEventClientListener *pListener);
 
 	/** Connect to the collector service (server)
 	 */
@@ -82,48 +155,21 @@ public:
 	 */
 	StatusCode disconnectFromService();
 
+public:
 	/** Whether the client is connected to the collector (server)
 	 */
-	bool isConnectedToService() const;
+	virtual bool isConnectedToService() const = 0;
 
 	/** Send an event to the collector (server).
 	 *  Possible only if a connection has been created (connectToService())
 	 *  and an event streamer set.
 	 */
-	StatusCode sendEvent(const DQMEvent *const pEvent);
-
-	/** Set the streamer that will stream in/out the sent/received event(s).
-	 *  No default streamer is provided. User must provide one before querying/sending
-	 *  events from/to collector (server)
-	 */
-	StatusCode setEventStreamer(DQMEventStreamer *pEventStreamer);
-
-	/** Get the event streamer
-	 */
-	DQMEventStreamer *getEventStreamer() const;
-
-	/** Set the queue size that stores the received events
-	 */
-	StatusCode setMaximumQueueSize(unsigned int queueSize);
-
-	/** Clear the event queue
-	 */
-	StatusCode clearQueue();
-
-	/** Set the sub event identifier.
-	 *  This string is sent while querying events.
-	 *  The received event will be a sub event matching this identifier
-	 */
-	void setSubEventIdentifier(const std::string &identifier);
-
-	/** Get the sub event identifier.
-	 */
-	const std::string &getSubEventIdentifier() const;
+	virtual StatusCode sendEvent(const DQMEvent *const pEvent) = 0;
 
 	/** Query an event to the collector (server) with a timeout
 	 *  and handle it without pushing it into the internal queue
 	 */
-	StatusCode queryEvent(DQMEvent *&pEvent, int timeout);
+	virtual StatusCode queryEvent(DQMEvent *&pEvent, int timeout) = 0;
 
 	/** Query an event to the collector.
 	 *
@@ -135,28 +181,50 @@ public:
 	 *
 	 *  The received event is push in an internal event queue.
 	 */
-	StatusCode queryEvent();
-
-	/** Take an event from the event queue (pop front) and return the
-	 *  pointer to the caller. The event is removed from the queue,
-	 *  meaning that the caller is responsible for the event deletion.
-	 */
-	StatusCode takeEvent(DQMEvent *&pEvent);
+	virtual StatusCode queryEvent() = 0;
 
 	/** Set the update mode.
 	 *  If the update mode is set to true, a command
 	 *  is sent to the server in order to update the client
 	 *  as soon as an event is received in the collector server.
 	 */
-	void setUpdateMode(bool updateMode);
+	virtual void setUpdateMode(bool updateMode) = 0;
 
 	/** Whether the update mode is set
 	 */
-	bool updateMode() const;
+	virtual bool getUpdateMode() const = 0;
+
+	/** Read settings from the xml handle
+	 */
+	virtual StatusCode readSettings(const TiXmlHandle &xmlHandle) = 0;
 
 protected:
+	/** Workhorse of the service connection
+	 */
+	virtual StatusCode performServiceConnection() = 0;
 
-	DQMEventClientImp          *m_pClientImp;
+	/** Workhorse of the service connection
+	 */
+	virtual StatusCode performServiceDisconnection() = 0;
+
+	/** Push a new event in the event queue.
+	 *
+	 *  If the event queue has reaches its maximum size
+	 *  the front element of the queue is first deleted and popped.
+	 *
+	 *  Listeners are notified of a 'push event'
+	 */
+	void pushEvent(DQMEvent *pEvent);
+
+private:
+	bool                                 m_eventStreamerOwner;
+	DQMEventStreamer                    *m_pEventStreamer;
+	std::string                          m_collectorName;
+	std::string                          m_subEventIdentifier;
+	DQMEventQueue                        m_eventQueue;
+	unsigned int                         m_maximumQueueSize;
+	std::set<DQMEventClientListener*>    m_listeners;
+	mutable pthread_mutex_t              m_mutex;   // to prevent data race on access
 }; 
 
 } 

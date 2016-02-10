@@ -32,7 +32,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMEvent.h"
-#include "dqm4hep/DQMEventClientImp.h"
+#include "dqm4hep/DQMEventClient.h"
 #include "dqm4hep/DQMStreamer.h"
 #include "dqm4hep/DQMDataStream.h"
 
@@ -66,7 +66,7 @@ private:
 
 /** DQMDimEventClient class
  */ 
-class DQMDimEventClient : public DQMEventClientImp, public DimClient
+class DQMDimEventClient : public DQMEventClient, public DimClient
 {
 	friend class DimEventRpcInfo;
 
@@ -79,22 +79,13 @@ public:
 	 */
 	~DQMDimEventClient();
 
-	/** Set the collector to connect to.
-	 *  Can set the name only if client not yet connected
+	/** Workhorse of the service connection
 	 */
-	StatusCode setCollectorName(const std::string &collectorName);
+	StatusCode performServiceConnection();
 
-	/** Get the collector name
+	/** Workhorse of the service connection
 	 */
-	const std::string &getCollectorName() const;
-
-	/** Connect to the collector service (server)
-	 */
-	StatusCode connectToService();
-
-	/** Disconnect the client from the collector (server)
-	 */
-	StatusCode disconnectFromService();
+	StatusCode performServiceDisconnection();
 
 	/** Whether the client is connected to the collector (server)
 	 */
@@ -105,34 +96,6 @@ public:
 	 *  and an event streamer set.
 	 */
 	StatusCode sendEvent(const DQMEvent *pEvent);
-
-	/** Set the streamer that will stream in/out the sent/received event(s).
-	 *  No default streamer provided. User must provide one before querying/sending
-	 *  events from/to collector (server)
-	 */
-	StatusCode setEventStreamer(DQMEventStreamer *pEventStreamer);
-
-	/** Get the event streamer
-	 */
-	DQMEventStreamer *getEventStreamer() const;
-
-	/** Set the maximum queue size that stores the received events
-	 */
-	StatusCode setMaximumQueueSize(unsigned int queueSize);
-
-	/** Clear the event queue
-	 */
-	StatusCode clearQueue();
-
-	/** Set the sub event identifier.
-	 *  This string is sent while querying events.
-	 *  The received event will be a sub event matching this identifier
-	 */
-	void setSubEventIdentifier(const std::string &identifier);
-
-	/** Get the sub event identifier.
-	 */
-	const std::string &getSubEventIdentifier() const;
 
 	/** Query an event to the collector (server) with a timeout
 	 *  and handle it without pushing it into the internal queue
@@ -145,17 +108,11 @@ public:
 	 *  This method does not wait for the event reception.
 	 *
 	 *  To query a single event that is directly handled by the caller,
-	 *  use querySingleEvent().
+	 *  use queryEvent(evt, timeout).
 	 *
 	 *  The received event is pushed in an internal event queue.
 	 */
 	StatusCode queryEvent();
-
-	/** Take an event from the event queue (pop front) and return the
-	 *  pointer to the caller. The event is removed from the queue,
-	 *  meaning that the caller is responsible for the event deletion.
-	 */
-	StatusCode takeEvent(DQMEvent *&pEvent);
 
 	/** Set the update mode.
 	 *  If the update mode is set to true, a command
@@ -166,44 +123,42 @@ public:
 
 	/** Whether the update mode is set
 	 */
-	bool updateMode() const;
+	bool getUpdateMode() const;
 
 private:
-
-	/** Add an event to the queue.
-	 *  Call back method of the event dim rpc info handler
-	 */
-	StatusCode addEvent(DQMEvent *pEvent);
-
 	/** Dim info handler
 	 */
 	void infoHandler();
 
+	/** Handle the event reception as a buffer an its buffer size
+	 */
+	StatusCode eventReception(dqm_char *pBuffer, dqm_uint bufferSize);
 
-	// collector info
+	/** Set the sub event identifier.
+	 *  This string is sent while querying events.
+	 *  The received event will be a sub event matching this identifier
+	 *
+	 *  The event sub identifier is sent the the collector is the
+	 *  client is connected to the service
+	 */
+	void setSubEventIdentifier(const std::string &identifier);
+
+	/** Read settings from the xml handle
+	 */
+	StatusCode readSettings(const TiXmlHandle &xmlHandle);
+
+private:
 	bool                         m_isConnected;
-	std::string                   m_collectorName;
-
 	DimEventRpcInfo              *m_pDimEventRpcInfo;
-
-	// dim infos
 	DimUpdatedInfo               *m_pClientIdInfo;       ///< to receive the client id stored on server
 	DimUpdatedInfo               *m_pServerStateInfo;   ///< Server state. 0 for stopped : 1 for running
 	DimUpdatedInfo               *m_pEventUpdateInfo;   ///< For event reception
 
-	// internal
-	DQMEventQueue                 m_eventQueue;
-	unsigned int                m_maximumQueueSize;
-	DQMEventStreamer             *m_pEventStreamer;
+	int                           m_serverClientId;
+	bool                          m_updateMode;
+
 	DQMDataStream                 m_dataStream;
-
-	// client information on server
-	int                          m_serverClientId;
-	bool                         m_updateMode;
-	std::string                   m_subEventIdentifier;
-
-	// thread mutex
-	mutable pthread_mutex_t      m_mutex;
+	mutable pthread_mutex_t       m_mutex;  // prevent data race during de/serialization
 }; 
 
 } 
