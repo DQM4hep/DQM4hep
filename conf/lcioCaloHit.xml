@@ -3,9 +3,16 @@
     <archiver open="true" directory="/tmp" />
     
     <network>
-        <runcontrol name="SDHCALRunControl" />
-        <eventcollector name="sdhcal_event_collector" />
-        <eventstreamer name="LCIOStreamer" />
+        <runcontrol type="DimRunControlClient" name="SDHCALRunControl" />
+        
+        <eventcollector type="DimEventClient">
+        	<parameter name="collectorName"> sdhcal_event_collector </parameter>
+        	<parameter name="subEventIdentifier"> HCALEndcap </parameter>
+        	<parameter name="updateMode"> true </parameter>
+        	<parameter name="maxQueueSize"> 100 </parameter>
+        	<parameter name="streamerName"> LCIOStreamer </parameter>
+        </eventcollector>
+        
         <monitorelementcollector name="sdhcal_me_collector"/>
     </network>
     
