@@ -16,10 +16,10 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # versions of DQM4HEP subpackages
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
-SET( DQMCore_version              "v01-01-00" )
-SET( DQMViz_version               "v01-02-00" )
+SET( DQMCore_version              "master" )
+SET( DQMViz_version               "master" )
 SET( JsonCpp_version              "0.10.5" )
-SET( DIMJC_version                "v01-01-00" )
+SET( DIMJC_version                "master" )
 SET( LCIO_version                 "v02-06")
 
 # ----- download settings -----
