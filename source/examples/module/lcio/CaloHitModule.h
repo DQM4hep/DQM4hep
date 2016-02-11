@@ -35,7 +35,7 @@ namespace dqm4hep
 
 class DQMMonitorElement;
 
-/** RandomModule class
+/** CaloHitModule class
  */ 
 class CaloHitModule : public DQMAnalysisModule
 {

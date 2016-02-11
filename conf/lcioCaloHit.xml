@@ -22,15 +22,15 @@
         
         <parameter name="DumpEvent"> false </parameter>
         
-        <monitorElement ID="HitsEnergy"
-        	name="HitsEnergy" path="/" type="TH1F" title="The hits energy distribution" 
-        	nBins="100" min="0" max="5" 
-        	resetPolicy="EndOfCycle"/>
-        
-	    <monitorElement ID="NHit"
-        	name="NHit" path="/" type="TH1I" title="The number of hits distribution" 
-        	nBins="1300" min="0" max="1300" 
-        	resetPolicy="EndOfCycle" drawOption="E"/>
+		<monitorElement ID="HitsEnergy"
+			name="HitsEnergy" path="/" type="TH1F" title="The hits energy distribution" 
+			nBins="100" min="0" max="5" 
+			resetPolicy="EndOfCycle"/>
+		
+		<monitorElement ID="NHit"
+			name="NHit" path="/" type="TH1I" title="The number of hits distribution" 
+			nBins="1300" min="0" max="1300" 
+			resetPolicy="EndOfCycle" drawOption="E"/>
         	
         <monitorElement ID="XZProfile"
         	name="XZProfile" path="/Profiles" type="TH2I" title="The K-I cell id hits profile" 
