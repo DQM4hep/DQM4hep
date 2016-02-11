@@ -46,7 +46,9 @@
 #include <unistd.h>
 #include <exception>
 #include <limits>
+#include <bits/pthreadtypes.h>
 #include <pthread.h>
+
 
 // apple stuff for stdint.h
 #ifdef __APPLE__
