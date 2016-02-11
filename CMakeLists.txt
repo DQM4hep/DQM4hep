@@ -46,8 +46,11 @@ SET( lcio_package_depends "" )
 
 # ----- additional cmake args -----
 IF ( NOT APPLE )
-	SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=OFF" )
+	SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON" )
 ENDIF ( NOT APPLE )
+
+SET( JsonCpp_additional_cmake_args "${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF"
+
 SET( DQMCore_additional_cmake_args  "" )
 
 # ----- CLANG 7.0+ gives an error for #define private public -----
@@ -104,19 +107,28 @@ SET( common_cmake_args
 
 # ----- package options -----------------------------------------------------------------------
 
-OPTION( DQM4HEP_VIZ "Build DQM4HEPViz library and binaries (requires ROOT and Qt)" OFF )
+OPTION( DQM4HEP_VIZ "Build DQM4HEPViz library and binaries (requires Qt and ROOT built with Qt support (--enable-qt))" OFF )
 MESSAGE( STATUS "DQM4HEP_VIZ: ${DQM4HEP_VIZ}" )
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 
-OPTION( DQM4HEP_LCIO "Build DQMCore with LCIO (requires LCIO installed)" ON )
+OPTION( DQM4HEP_LCIO "Build DQMCore with LCIO (requires LCIO installed)" OFF )
 MESSAGE( STATUS "DQM4HEP_LCIO: ${DQM4HEP_LCIO}" )
 
 OPTION( DQM4HEP_ELOG "Build DQMCore with ELog (requires ELog binary installed)" OFF )
 MESSAGE( STATUS "DQM4HEP_ELOG: ${DQM4HEP_ELOG}" )
 
-OPTION( DQM4HEP_EXAMPLES "Build DQMCore with examples" ON )
+OPTION( DQM4HEP_EXAMPLES "Build DQMCore with examples" OFF )
 MESSAGE( STATUS "DQM4HEP_EXAMPLES: ${DQM4HEP_EXAMPLES}" )
+
+OPTION( DIM_GUI "Whether to build dim gui part (did, webDid)" OFF )
+MESSAGE( STATUS "DIM_GUI: ${DIM_GUI}" )
+
+IF( DIM_GUI )
+	SET( DIM_GUI_FLAG "GUI=yes" )
+ELSE()
+	SET( DIM_GUI_FLAG "GUI=no" )
+ENDIF()
 
 SET( DQMCore_additional_cmake_args 
 	${DQMCore_additional_cmake_args} 
@@ -168,13 +180,6 @@ FIND_PACKAGE( DIM )
 IF ( NOT DIM_FOUND )
 	SET ( DIMDIR ${CMAKE_CURRENT_SOURCE_DIR}/dim )
 
-	IF ( APPLE ) # Apply patches included in the dim4mac directory
-	    SET ( DIM4MACDIR ${DIMDIR}/dim4mac )
-	    SET ( PATCHCOMMAND patch src/tcpip.c < ${DIM4MACDIR}/tcpip.c.patch COMMAND patch < ${DIM4MACDIR}/makefile_common.patch COMMAND patch < ${DIM4MACDIR}/makefile_dim.patch )
-	ELSE ()
-		SET ( PATCHCOMMAND "")
-	ENDIF ()
-
 	ExternalProject_Add( dim
 	    GIT_REPOSITORY ${DIM_repository}
 	    GIT_TAG ${DIM_version}
@@ -183,9 +188,9 @@ IF ( NOT DIM_FOUND )
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${DIMDIR}
 	    BINARY_DIR ${DIMDIR}
-		PATCH_COMMAND ${PATCHCOMMAND}
+		PATCH_COMMAND ${DIMDIR}/external-project/patch-command ${DIM_OS}
 	    CONFIGURE_COMMAND ""
-	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS}
+	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS} ${DIM_GUI_FLAG}
 	    INSTALL_COMMAND ""
 	)
 	
