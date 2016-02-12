@@ -49,7 +49,7 @@ IF ( NOT APPLE )
 	SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON" )
 ENDIF ( NOT APPLE )
 
-SET( JsonCpp_additional_cmake_args "${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF"
+SET( JsonCpp_additional_cmake_args "${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF" )
 
 SET( DQMCore_additional_cmake_args  "" )
 
