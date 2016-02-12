@@ -46,19 +46,18 @@ SET( lcio_package_depends "" )
 
 # ----- additional cmake args -----
 IF ( NOT APPLE )
-	SET( JsonCpp_additional_cmake_args  "-DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON" )
+	SET( JsonCpp_additional_cmake_args  -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON )
 ENDIF ( NOT APPLE )
 
-SET( JsonCpp_additional_cmake_args "${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_WARNING_AS_ERROR=OFF" )
+SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_WARNING_AS_ERROR=OFF )
 
-SET( DQMCore_additional_cmake_args  "" )
 
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
 IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 	SET( DQMCore_additional_cmake_args 
 		${DQMCore_additional_cmake_args}
-		"-DCMAKE_CXX_FLAGS=-Wno-keyword-macro"
+		-DCMAKE_CXX_FLAGS=-Wno-keyword-macro
 	)
 ENDIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
@@ -132,9 +131,9 @@ ENDIF()
 
 SET( DQMCore_additional_cmake_args 
 	${DQMCore_additional_cmake_args} 
-	"-DDQM4HEP_LCIO=${DQM4HEP_LCIO}"
-	"-DDQM4HEP_ELOG=${DQM4HEP_ELOG}"
-	"-DDQM4HEP_EXAMPLES=${DQM4HEP_EXAMPLES}"
+	-DDQM4HEP_LCIO=${DQM4HEP_LCIO}
+	-DDQM4HEP_ELOG=${DQM4HEP_ELOG}
+	-DDQM4HEP_EXAMPLES=${DQM4HEP_EXAMPLES}
 )
 
 # fixme : problems on lyoserv to install DQMCore. 
@@ -142,7 +141,7 @@ SET( DQMCore_additional_cmake_args
 IF( MySQL_DIR )
 	SET( DQMCore_additional_cmake_args 
 		${DQMCore_additional_cmake_args} 
-		"-DMySQL_DIR=${MySQL_DIR}"
+		-DMySQL_DIR=${MySQL_DIR}
 	)
 ENDIF()
 
@@ -166,7 +165,7 @@ IF( NOT ILCUTIL_FOUND )
 		)
 		
 		SET( lcio_package_depends "LCIO" )
-		LIST( APPEND DQMCore_additional_cmake_args "-DDQM4HEP_LCIO=ON" )
+		LIST( APPEND DQMCore_additional_cmake_args -DDQM4HEP_LCIO=ON )
 		
 	ENDIF()
 	
@@ -200,7 +199,7 @@ IF ( NOT DIM_FOUND )
 		PATCH_COMMAND ${DIMDIR}/external-project/patch-command ${DIM_OS}
 	    CONFIGURE_COMMAND ""
 	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS} ${DIM_GUI_FLAG}
-	    INSTALL_COMMAND ""
+	    INSTALL_COMMAND ${DIMDIR}/external-project/install-command ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/include 
 	)
 	
 	SET( dim_package_depends "dim" )
@@ -208,17 +207,17 @@ ENDIF ()
 
 SET( DQMCore_additional_cmake_args 
 	${DQMCore_additional_cmake_args} 
-	"-DDIMDIR=${DIMDIR}"
+	-DDIMDIR=${DIMDIR}
 )
 
 SET( DIMJC_additional_cmake_args 
 	${DIMJC_additional_cmake_args} 
-	"-DDIMDIR=${DIMDIR}"
+	-DDIMDIR=${DIMDIR}
 )
 
 SET( DQMVis_additional_cmake_args 
 	${DQMVis_additional_cmake_args} 
-	"-DDIMDIR=${DIMDIR}"
+	-DDIMDIR=${DIMDIR}
 )
 
 # ----- DQMCore package -----
@@ -273,7 +272,7 @@ ENDIF ()
 
 SET( DQMVis_additional_cmake_args 
 	${DQMVis_additional_cmake_args} 
-	"-DDIMJC_DIR=${DIMJC_DIR}"
+	-DDIMJC_DIR=${DIMJC_DIR}
 )
 
 IF( DQM4HEP_VIZ )
