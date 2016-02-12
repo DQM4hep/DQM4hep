@@ -161,6 +161,7 @@ IF( NOT ILCUTIL_FOUND )
 		    CMAKE_ARGS ${common_cmake_args}
 		    PREFIX lcio
 		    LIST_SEPARATOR %
+		    PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/external-project/lcio-patch-command ${CMAKE_CURRENT_SOURCE_DIR}/lcio/doc/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/external-project/CMakeLists.txt.patch
 		    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lcio
 		)
 		
