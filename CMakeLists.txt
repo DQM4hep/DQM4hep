@@ -137,6 +137,15 @@ SET( DQMCore_additional_cmake_args
 	"-DDQM4HEP_EXAMPLES=${DQM4HEP_EXAMPLES}"
 )
 
+# fixme : problems on lyoserv to install DQMCore. 
+# Couldn't find mysql because mysql install path is not standard 
+IF( MySQL_DIR )
+	SET( DQMCore_additional_cmake_args 
+		${DQMCore_additional_cmake_args} 
+		"-DMySQL_DIR=${MySQL_DIR}"
+	)
+ENDIF()
+
 # ----------------------------------------------------------------------------
 
 # if ilcsoft is not installed, download the needed
