@@ -16,6 +16,7 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # versions of DQM4HEP subpackages
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
+SET( xdrstream_version            "master" )
 SET( DQMCore_version              "master" )
 SET( DQMViz_version               "master" )
 SET( JsonCpp_version              "0.10.5" )
@@ -23,6 +24,7 @@ SET( DIMJC_version                "master" )
 SET( LCIO_version                 "v02-06")
 
 # ----- download settings -----
+SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
 SET( DQMCore_repository             "https://github.com/DQM4HEP/DQMCore.git" )
 SET( DQMViz_repository              "https://github.com/DQM4HEP/DQMViz.git" )
 SET( JsonCpp_repository             "https://github.com/open-source-parsers/jsoncpp.git" )
@@ -36,6 +38,7 @@ SET( LCIO_repository                "svn://svn.freehep.org/lcio/tags" ) # public
 # When a project is added with ExternalProject_Add(...)
 # these variables are set to the package name
 # Mandatory packages are directly set
+SET( xdrstream_package_depends "xdrstream" )
 SET( DQMCore_package_depends "DQMCore" )
 SET( DQMViz_package_depends "" )
 SET( jsoncpp_package_depends "" )
@@ -183,6 +186,17 @@ IF( NOT ILCUTIL_FOUND )
 	
 ENDIF()
 
+
+# ----- xdrstream package -----
+ExternalProject_Add( xdrstream
+    GIT_REPOSITORY ${xdrstream_repository}
+    GIT_TAG ${xdrstream_version}
+    CMAKE_ARGS ${common_cmake_args}
+    PREFIX xdrstream
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
+    LIST_SEPARATOR %
+)
+
 # ----- DIM package -----
 FIND_PACKAGE( DIM )
 
@@ -207,7 +221,8 @@ IF ( NOT DIM_FOUND )
 ENDIF ()
 
 SET( DQMCore_additional_cmake_args 
-	${DQMCore_additional_cmake_args} 
+	${DQMCore_additional_cmake_args}
+	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-DDIMDIR=${DIMDIR}
 )
 
@@ -218,12 +233,13 @@ SET( DIMJC_additional_cmake_args
 
 SET( DQMVis_additional_cmake_args 
 	${DQMVis_additional_cmake_args} 
+	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-DDIMDIR=${DIMDIR}
 )
 
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS ${dim_package_depends} ${streamlog_package_depends} ${lcio_package_depends}
+    DEPENDS ${dim_package_depends} ${streamlog_package_depends} ${lcio_package_depends} ${xdrstream_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
@@ -280,7 +296,7 @@ IF( DQM4HEP_VIZ )
 
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
-        DEPENDS ${DQMCore_package_depends} ${dim_package_depends} ${jsoncpp_package_depends} ${dimjc_package_depends} ${streamlog_package_depends} 
+        DEPENDS ${DQMCore_package_depends} ${dim_package_depends} ${jsoncpp_package_depends} ${dimjc_package_depends} ${streamlog_package_depends} ${xdrstream_package_depends}
         GIT_REPOSITORY ${DQMViz_repository}
         GIT_TAG ${DQMViz_version}
         CMAKE_ARGS ${common_cmake_args} ${DQMVis_additional_cmake_args}
