@@ -94,8 +94,11 @@ FIND_PACKAGE( DIM REQUIRED SHARED )
 # ----- Find streamlog package -----
 FIND_PACKAGE( streamlog REQUIRED )
 
+# ----- Find xdrstream package -----
+FIND_PACKAGE( xdrstream REQUIRED )
+
 # ----- Include package properties -----
-FOREACH( pkg streamlog ROOT DIM MySQL )
+FOREACH( pkg streamlog ROOT DIM MySQL xdrstream )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )

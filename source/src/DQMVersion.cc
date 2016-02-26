@@ -169,36 +169,26 @@ bool operator != ( const DQMVersion &lhs, const DQMVersion &rhs )
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMVersion::serialize( DQMDataStream *const pDataStream ) const
+xdrstream::Status DQMVersion::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+		xdrstream::xdr_version_t version)
 {
-	dqm_uint major = getMajor();
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, pDataStream->write( major ) );
+	if( xdrstream::XDR_READ_STREAM == mode )
+	{
+		uint32_t major, minor, patch;
+		XDR_STREAM( pDevice->read( & major ) );
+		XDR_STREAM( pDevice->read( & minor ) );
+		XDR_STREAM( pDevice->read( & patch ) );
 
-	dqm_uint minor = getMinor();
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, pDataStream->write( minor ) );
+		this->set( major, minor, patch );
+	}
+	else
+	{
+		XDR_STREAM( pDevice->write<uint32_t>( & m_major ) );
+		XDR_STREAM( pDevice->write<uint32_t>( & m_minor ) );
+		XDR_STREAM( pDevice->write<uint32_t>( & m_patch ) );
+	}
 
-	dqm_uint patch = getPatch();
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, pDataStream->write( patch ) );
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMVersion::deserialize( DQMDataStream *const pDataStream )
-{
-	dqm_uint major = 0;
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, pDataStream->read( major ) );
-
-	dqm_uint minor = 0;
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, pDataStream->read( major ) );
-
-	dqm_uint patch = 0;
-	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, pDataStream->read( major ) );
-
-	set( major, minor, patch );
-
-	return STATUS_CODE_SUCCESS;
+	return xdrstream::XDR_SUCCESS;
 }
 
 

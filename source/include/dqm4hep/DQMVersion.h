@@ -31,14 +31,16 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMStreamable.h"
+
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
 
 namespace dqm4hep
 {
 
 /** DQMVersion class
  */
-class DQMVersion : public DQMStreamable
+class DQMVersion : public xdrstream::Streamable
 {
 public:
 	/** Constructor
@@ -77,15 +79,15 @@ public:
 	 */
 	DQMVersion &operator =( const DQMVersion &version );
 
-	// from DQMStreamable
-	StatusCode serialize( DQMDataStream *const pDataStream ) const;
-	StatusCode deserialize( DQMDataStream *const pDataStream );
+	// from xdrstreamm::Streamable
+	xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+			xdrstream::xdr_version_t version = 0);
 
 private:
 	unsigned int    m_major;
 	unsigned int    m_minor;
 	unsigned int    m_patch;
-	std::string      m_versionString;
+	std::string     m_versionString;
 };
 
 // compare operators
