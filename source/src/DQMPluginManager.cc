@@ -62,11 +62,11 @@ StatusCode DQMPluginManager::loadLibraries()
 
 	if( pPluginDllEnv == 0 )
 	{
-		streamlog_out( ERROR ) << "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
+		streamlog_out( WARNING ) << "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
 				"Set it before loading shared libraries. \n"
 				"Example : export DQM4HEP_PLUGIN_DLL=libPlugin1.so:libPlugin2.so" << std::endl;
 
-		return STATUS_CODE_NOT_INITIALIZED;
+		return STATUS_CODE_SUCCESS;
 	}
 
 	// split the string into a list
