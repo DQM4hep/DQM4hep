@@ -5,8 +5,9 @@
 	"rete-hp":[	    
 	    {
 		"NAME":"EVENT_COLLECTOR",
-		"ARGS" : ["-c", "sdhcal_event_collector"],
+		"ARGS" : ["-c", "sdhcal_event_collector", "-s", "LCIOStreamer"],
 		"ENV" : [
+			"DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4ILC/lib/libDQM4ILC.so",
 		    "DIM_DNS_NODE=localhost"
 		],
 		"PROGRAM" : "/home/rete/soft/DQMCore/bin/dqm4hep_start_event_collector"
@@ -25,17 +26,21 @@
 		"ENV" : [
 		    "DIM_DNS_NODE=localhost"
 		],
-		"PROGRAM" : "/home/rete/soft/DQMCore/bin/dqm4hep_start_lcio_file_service"
+		"PROGRAM" : "/home/rete/soft/DQM4ILC/bin/dqm4hep_start_lcio_file_service"
 	    },
 	    {
 		"NAME":"CaloHitModule",
 		"ARGS" : ["-f", "/home/rete/soft/DQMCore/conf/lcioCaloHit.xml", "-l"],
 		"ENV" : [
 		    "DIM_DNS_NODE=localhost",
-		    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQMCore/lib/libCaloHitModuleExample.so"
+		    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4ILC/lib/libCaloHitModule.so"
 		],
 		"PROGRAM" : "/home/rete/soft/DQMCore/bin/dqm4hep_start_analysis_module"	
 	    }
+	    
+	    
+	    
+	    
 	    /*
 	    {
 		"NAME":"RANDOM_ANALYSIS_MODULE",
@@ -55,6 +60,10 @@
 		],
 		"PROGRAM" : "/home/rete/soft/DQMCore/bin/dqm4hep_start_standalone_module"
 	    }*/
+	    
+	    
+	    
+	    
 	]
     }
 }
