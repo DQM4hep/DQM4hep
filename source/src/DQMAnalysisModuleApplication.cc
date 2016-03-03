@@ -63,6 +63,7 @@ DQMAnalysisModuleApplication::DQMAnalysisModuleApplication() :
 		m_pCycle(NULL),
 		m_applicationType("AnalysisModule"),
 		m_applicationName("UNKNOWN"),
+		m_moduleLogStr("[Analysis Module]"),
 		m_runNumber(-1)
 {
 	m_pArchiver = new DQMArchiver();
@@ -107,7 +108,7 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 		filePattern = settingsFileName;
 	}
 
-	streamlog_out(DEBUG) << "File handler type : " << fileHandlerType << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Starting analysis module application with file handler type " << fileHandlerType );
 
 	DQMFileHandlerFactory fileHandlerFactory;
 	DQMFileHandler *pFileHandler = fileHandlerFactory.createFileHandler(fileHandlerType);
@@ -130,7 +131,7 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 
     if (!xmlDocument.LoadFile())
     {
-        std::cout << "DQMAnalysisModuleApplication::readSettings - Invalid xml file." << std::endl;
+    	LOG4CXX_FATAL( dqmMainLogger , "DQMAnalysisModuleApplication::readSettings - Invalid xml file." );
         return STATUS_CODE_FAILURE;
     }
 
@@ -144,6 +145,7 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 	int nServers = browser.getServers();
 
 	std::string moduleServerName = "DQM4HEP/Module/" + this->getModule()->getName();
+	m_moduleLogStr = "[" + this->getModule()->getName() + "]";
 
 	if(nServers)
 	{
@@ -154,8 +156,8 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 		{
 			if(moduleServerName == serverName)
 			{
-				streamlog_out(ERROR) << "Module '" << this->getModule()->getName() << "' already registered over the network.\n"
-						<< "Please, change the module name or stop the other module application with the same name !" << std::endl;
+				LOG4CXX_FATAL( dqmMainLogger , m_moduleLogStr << " already registered over the network.\n"
+						<< "Please, change the module name or stop the other module application with the same name !" );
 				return STATUS_CODE_ALREADY_PRESENT;
 			}
 		}
@@ -169,7 +171,7 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureNetwork(xmlHandle));
 
 	m_settings.m_settingsFileName = settingsFileName;
-	m_settings.print();
+	m_settings.print(m_moduleLogStr);
 
 	setInitialized(true);
 
@@ -199,7 +201,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 		{
 			if(firstMessage)
 			{
-				streamlog_out(MESSAGE) << "... Waiting for next run ..." << std::endl;
+				LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , waiting for next run ..." );
 				firstMessage = false;
 			}
 
@@ -218,8 +220,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 			continue;
 
 		m_runNumber = pRun->getRunNumber();
-
-		streamlog_out(MESSAGE) << "Starting new run no " << pRun->getRunNumber() << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Starting new run no " << m_runNumber );
 
 		// open an archive
 		if(m_settings.m_shouldOpenArchive)
@@ -235,7 +236,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 					<<  "_I" << pRun->getRunNumber();
 
 			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->open(archiveFileName.str(), "RECREATE"));
-			streamlog_out(MESSAGE) << "Archive '" << m_pArchiver->getFileName() << "' opened" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Archive '" << m_pArchiver->getFileName() << "' opened" );
 		}
 
 		// start of run !
@@ -248,9 +249,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 		while( m_pRunControlClient->isRunning() && !this->shouldStopApplication() )
 		{
 			// process a cycle
-			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
-			streamlog_out(MESSAGE) << "***                Start of cycle              ***" << std::endl;
-			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Start of cycle");
 			m_pCycle->startCycle();
 
 			while(1)
@@ -277,11 +276,11 @@ StatusCode DQMAnalysisModuleApplication::run()
 				}
 				catch(StatusCodeException &exception)
 				{
-					streamlog_out(ERROR) << "Module::processEvent(evt) returned " << exception.toString() << " !" << std::endl;
+					LOG4CXX_ERROR( dqmMainLogger , m_moduleLogStr << " , Module::processEvent(evt) returned " << exception.toString() << " !");
 				}
 				catch(...)
 				{
-					streamlog_out(ERROR) << "Module::processEvent(evt) : caught unknown exception !" << std::endl;
+					LOG4CXX_ERROR( dqmMainLogger , m_moduleLogStr << " , Module::processEvent(evt) caught unknown exception !");
 				}
 
 				if(pEvent)
@@ -290,19 +289,15 @@ StatusCode DQMAnalysisModuleApplication::run()
 
 			m_pCycle->stopCycle();
 
-			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
-			streamlog_out(MESSAGE) << "***            End of cycle reached            ***" << std::endl;
-			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
-			streamlog_out(MESSAGE) << "***                STATISTICS                  ***" << std::endl;
-			streamlog_out(MESSAGE) << "*** N processed events : " << m_pCycle->getNProcessedEvents() << std::endl;
-			streamlog_out(MESSAGE) << "*** Event rate :         " << m_pCycle->getProcessingRate()*1000.f << " evts/s" << std::endl;
-			streamlog_out(MESSAGE) << "*** Processing time :    " << m_pCycle->getTotalCycleTime().operator long long()/1000.f << " s" << std::endl;
-			streamlog_out(MESSAGE) << "**************************************************" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , End of cycle reached !");
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Printing statistics :");
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , *** N processed events : " << m_pCycle->getNProcessedEvents());
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , *** Event rate         : " << m_pCycle->getProcessingRate()*1000.f << " evts/s");
+			LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , *** Processing time    : " << m_pCycle->getTotalCycleTime().operator long long()/1000.f << " s");
 
 			// archive publication if user asked for
 			if(m_settings.m_shouldOpenArchive)
 				RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pArchiver->archive(pAnalysisModule));
-
 
 //			DQMMonitorElementList monitorElementListToPublish;
 //			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementManager()
@@ -347,7 +342,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, stopServices());
 
-	streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication: Exiting application ..." << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Exiting application !");
 
 	return this->getReturnCode();
 }
@@ -372,7 +367,7 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 {
 	try
 	{
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureNetwork: configuring ..." << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring network ...");
 
 		//
 		// Get all xml attributes needed to configure network options !
@@ -382,7 +377,7 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 
 		if(NULL == pXmlElement)
 		{
-			streamlog_out(ERROR) << "<network> element not found !" << std::endl;
+			LOG4CXX_FATAL( dqmMainLogger , m_moduleLogStr << " , <network> element not found !");
 			return STATUS_CODE_NOT_FOUND;
 		}
 
@@ -396,7 +391,7 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		|| NULL == pEventCollectorXmlElement
 		|| NULL == pMonitorElementCollectorXmlElement)
 		{
-			streamlog_out(ERROR) << "Incomplete network xml element" << std::endl;
+			LOG4CXX_FATAL( dqmMainLogger , m_moduleLogStr << " , incomplete network xml element !");
 			return STATUS_CODE_NOT_FOUND;
 		}
 
@@ -432,7 +427,7 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		pRunControlClient->setRunControlName( m_settings.m_runControlName );
 		m_pRunControlClient = pRunControlClient;
 
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureNetwork: configuring ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring network ... OK");
 	}
 	catch(const StatusCodeException &exception)
 	{
@@ -448,7 +443,7 @@ StatusCode DQMAnalysisModuleApplication::configureCycle(const TiXmlHandle xmlHan
 {
 	try
 	{
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: configuring ..." << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring cycle ...");
 
 		const TiXmlElement *const pXmlElement = xmlHandle.FirstChildElement("cycle").Element();
 
@@ -465,22 +460,26 @@ StatusCode DQMAnalysisModuleApplication::configureCycle(const TiXmlHandle xmlHan
 		}
 
 		// find the cycle plug-in
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: querying cycle to PluginManager ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Creating cycle of type " << m_settings.m_cycleType <<  "...");
 		m_pCycle = DQMPluginManager::instance()->createPluginClass<DQMCycle>(m_settings.m_cycleType);
 
-		if(!m_pCycle)
+		if( ! m_pCycle )
+		{
+			LOG4CXX_FATAL( dqmMainLogger , m_moduleLogStr << " , Cycle of type " << m_settings.m_cycleType << " not found !");
 			throw StatusCodeException(STATUS_CODE_FAILURE);
+		}
 
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: querying cycle to PluginManager ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Creating cycle of type " << m_settings.m_cycleType <<  "... OK");
 
 		m_pCycle->setCycleValue(m_settings.m_cycleValue);
 		m_pCycle->setTimeout(m_settings.m_cycleTimeout);
 		m_pCycle->addListener(this);
 
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureCycle: configuring ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring cycle ... OK");
 	}
 	catch(const StatusCodeException &exception)
 	{
+		LOG4CXX_FATAL( dqmMainLogger , m_moduleLogStr << " , Couldn't configure cycle !");
 		return exception.getStatusCode();
 	}
 
@@ -493,7 +492,7 @@ StatusCode DQMAnalysisModuleApplication::configureModule(const TiXmlHandle xmlHa
 {
 	try
 	{
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureModule: configuring ..." << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring module ...");
 
 		TiXmlElement *const pXmlElement = xmlHandle.FirstChildElement("module").Element();
 
@@ -509,7 +508,7 @@ StatusCode DQMAnalysisModuleApplication::configureModule(const TiXmlHandle xmlHa
 		if(this->getModuleName().empty())
 			this->setModuleName(name);
 
-		streamlog_out( MESSAGE ) << "Query analysis module to PluginManager ... " << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Querying analysis module to plugin manager ...");
 
 		DQMAnalysisModule *pAnalysisModule = DQMPluginManager::instance()->createPluginClass<DQMAnalysisModule>(this->getModuleType());
 
@@ -518,21 +517,21 @@ StatusCode DQMAnalysisModuleApplication::configureModule(const TiXmlHandle xmlHa
 
 		this->setModule(pAnalysisModule);
 
-		streamlog_out( MESSAGE ) << "Query analysis module to PluginManager ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Querying analysis module to plugin manager ... OK");
 
 		TiXmlHandle moduleHandle(pXmlElement);
 
-		streamlog_out( MESSAGE ) << "Reading settings of active module '" << this->getModule()->getName() << "' ..." << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Reading settings of active module '" << this->getModule()->getName() << "' ...");
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getModule()->readSettings(moduleHandle));
-		streamlog_out( MESSAGE ) << "Reading settings of active module '" << this->getModule()->getName() << "' ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Reading settings of active module '" << this->getModule()->getName() << "' ... OK");
 
-		streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ..." << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Initializing active module '" << this->getModule()->getName() << "' ...");
 		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getModule()->initModule() );
-		streamlog_out( MESSAGE ) << "Initializing active module '" << this->getModule()->getName() << "' ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Initializing active module '" << this->getModule()->getName() << "' ... OK");
 
 		m_applicationName = this->getModule()->getName();
 
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureModule: configuring ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring module ... OK");
 	}
 	catch(const StatusCodeException &exception)
 	{
@@ -548,14 +547,14 @@ StatusCode DQMAnalysisModuleApplication::configureArchiver(const TiXmlHandle xml
 {
 	try
 	{
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureArchiver: configuring ..." << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring archiver ...");
 
 		const TiXmlElement *const pXmlElement = xmlHandle.FirstChildElement("archiver").Element();
 
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "open", m_settings.m_shouldOpenArchive));
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "directory", m_settings.m_archiveDirectory));
 
-		streamlog_out(MESSAGE) << "DQMAnalysisModuleApplication::configureArchiver: configuring ... OK" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Configuring archiver ... OK");
 	}
 	catch(const StatusCodeException &exception)
 	{
@@ -634,21 +633,18 @@ DQMAnalysisModuleApplication::Settings::Settings() :
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMAnalysisModuleApplication::Settings::print()
+void DQMAnalysisModuleApplication::Settings::print(const std::string &moduleLogStr)
 {
 	std::string openArchive = m_shouldOpenArchive ? "yes" : "no";
-	streamlog_out(MESSAGE) << "**************************************" << std::endl;
-	streamlog_out(MESSAGE) << "******* Application parameters *******" << std::endl;
-	streamlog_out(MESSAGE) << "*** Should open archive :            " << openArchive << std::endl;
-	streamlog_out(MESSAGE) << "*** Run control type :               " << m_runControlType << std::endl;
-	streamlog_out(MESSAGE) << "*** Run control name :               " << m_runControlName << std::endl;
-	streamlog_out(MESSAGE) << "*** Event client type :              " << m_eventClientType << std::endl;
-	streamlog_out(MESSAGE) << "*** Cycle type :                     " << m_cycleType << std::endl;
-	streamlog_out(MESSAGE) << "*** Cycle value :                    " << m_cycleValue << std::endl;
-	streamlog_out(MESSAGE) << "*** Cycle timeout :                  " << m_cycleTimeout << std::endl;
-	streamlog_out(MESSAGE) << "*** Archive directory :              " << m_archiveDirectory << std::endl;
-	streamlog_out(MESSAGE) << "*** Monitor element collector name : " << m_monitorElementCollector << std::endl;
-	streamlog_out(MESSAGE) << "**************************************" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Should open archive : " << openArchive);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Run control type : " << m_runControlType);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Run control name : " << m_runControlName);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Event client type : " << m_eventClientType);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Cycle type : " << m_cycleType);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Cycle value : " << m_cycleValue);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Cycle timeout : " << m_cycleTimeout);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Archive directory : " << m_archiveDirectory);
+	LOG4CXX_INFO( dqmMainLogger , moduleLogStr << " Monitor element collector name : " << m_monitorElementCollector);
 }
 
 } 

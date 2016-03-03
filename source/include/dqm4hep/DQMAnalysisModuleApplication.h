@@ -60,7 +60,7 @@ public:
 
 		/** Print the parameters
 		 */
-		void print();
+		void print(const std::string &moduleLogStr);
 
 	public:
 		std::string         m_settingsFileName;
@@ -147,6 +147,7 @@ private:
 
 	std::string                   m_applicationType;
 	std::string                   m_applicationName;
+	std::string                   m_moduleLogStr;
 
 	int                           m_runNumber;
 }; 
