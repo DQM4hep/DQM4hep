@@ -101,7 +101,6 @@ StatusCode DQMArchiver::open(const std::string &archiveFileName, const std::stri
 
 	while(!gSystem->AccessPathName(fullArchiveName.c_str()))
 	{
-		streamlog_out(WARNING) << fullArchiveName << " file already exists ..." << std::endl;
 		fileId ++;
 		std::stringstream ss;
 		ss << baseArchiveName << "_" << fileId << ".root";
@@ -111,10 +110,15 @@ StatusCode DQMArchiver::open(const std::string &archiveFileName, const std::stri
 	m_fileName = fullArchiveName;
 	m_openingMode = openingMode;
 
+	LOG4CXX_INFO( dqmMainLogger , "Opening archive " << m_fileName )
+
 	m_pArchiveFile = new TFile(m_fileName.c_str(), openingMode.c_str());
 
 	if(NULL == m_pArchiveFile)
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't open archive " << m_fileName << " !" )
 		return STATUS_CODE_FAILURE;
+	}
 
 	m_isOpened = true;
 	m_firstArchive = true;
@@ -148,7 +152,7 @@ StatusCode DQMArchiver::archive(DQMModule *pModule, bool archiveAll)
 	if(!isOpened())
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	streamlog_out(MESSAGE) << "Archiving monitor elements of module : " << pModule->getName() << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Archiving monitor elements of module : " << pModule->getName() )
 
 	// archive directory
 	m_pArchiveFile->cd();
