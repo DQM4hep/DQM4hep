@@ -28,6 +28,9 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMCoreTool.h"
 
+#include <sys/utsname.h>
+#include <unistd.h>
+
 namespace dqm4hep
 {
 
@@ -101,6 +104,26 @@ bool DQMCoreTool::containsSpecialCharacters(const std::string &str)
 	}
 
 	return false;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCoreTool::fillHostInfo(DQMHostInfo &info)
+{
+	// uname
+	struct utsname unameStruct;
+	uname(&unameStruct);
+
+	// host name
+	char host[256];
+	gethostname(host, 256);
+
+	info[DQMKey::SYSTEM_NAME] = unameStruct.sysname;
+	info[DQMKey::NODE_NAME] = unameStruct.nodename;
+	info[DQMKey::RELEASE] = unameStruct.release;
+	info[DQMKey::VERSION] = unameStruct.version;
+	info[DQMKey::MACHINE] = unameStruct.machine;
+	info[DQMKey::HOST_NAME] = host;
 }
 
 } 

@@ -55,6 +55,10 @@ public:
 	/** Whether the string contains a special character
 	 */
 	static bool containsSpecialCharacters(const std::string &str);
+
+	/** Fill host info (uname result + host name). See DQMKey for available keys
+	 */
+	static void fillHostInfo( DQMHostInfo &info );
 }; 
 
 } 
