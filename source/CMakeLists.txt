@@ -38,19 +38,7 @@ ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT
 )
 
 AUX_SOURCE_DIRECTORY( src SRC_FILES )
-FILE( GLOB CONFIG_HDRS_FILES include/*.h )
-FILE( GLOB DQM4HEP_HDRS_FILES include/dqm4hep/*.h )
-FILE( GLOB TCLAP_HDRS_FILES include/tclap/*.h )
-
-IF( DQM4HEP_LCIO )
-    AUX_SOURCE_DIRECTORY( src/lcio SRC_FILES )
-    FILE( GLOB LCIO_HDRS_FILES include/dqm4hep/lcio/*.h )
-ENDIF()
-
-IF( DQM4HEP_ELOG )
-    AUX_SOURCE_DIRECTORY( src/elog SRC_FILES )
-    FILE( GLOB ELOG_HDRS_FILES include/dqm4hep/elog/*.h )
-ENDIF()
+AUX_SOURCE_DIRECTORY( src/elog SRC_FILES )
 
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
 
@@ -165,48 +153,9 @@ IF( DQM4HEP_EXAMPLES )
         TARGETS StandaloneRandomModuleExample
         LIBRARY DESTINATION lib
     )
-    
-    IF( DQM4HEP_LCIO )
-    
-	    ADD_SHARED_LIBRARY( CaloHitModuleExample examples/module/lcio/CaloHitModule.cc )
-	    TARGET_LINK_LIBRARIES( CaloHitModuleExample ${PROJECT_NAME} )
-	
-	    INSTALL(
-	        TARGETS CaloHitModuleExample
-	        LIBRARY DESTINATION lib
-	    )
-	    
-	ENDIF()
-    
+  
 ENDIF()
 
-# Build lcio file service
-IF( DQM4HEP_LCIO )
-
-    ADD_EXECUTABLE( dqm4hep_start_lcio_file_service main/dqm4hep_start_lcio_file_service.cc )
-
-    TARGET_LINK_LIBRARIES( dqm4hep_start_lcio_file_service ${PROJECT_NAME} )
-
-    INSTALL (
-        TARGETS dqm4hep_start_lcio_file_service
-        RUNTIME DESTINATION bin
-    )
-
-ENDIF()
-
-
-INSTALL( FILES ${CONFIG_HDRS_FILES} DESTINATION ./include/ )
-INSTALL( FILES ${DQM4HEP_HDRS_FILES} DESTINATION ./include/dqm4hep )
-INSTALL( FILES ${TCLAP_HDRS_FILES} DESTINATION ./include/tclap )
-
-IF( DQM4HEP_LCIO )
-	INSTALL( FILES ${LCIO_HDRS_FILES} DESTINATION ./include/dqm4hep/lcio )
-ENDIF()
-
-IF( DQM4HEP_ELOG )
-	INSTALL( FILES ${ELOG_HDRS_FILES} DESTINATION ./include/dqm4hep/elog )
-ENDIF()
-
-#INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" ${LCIO_EXCLUDE_INSTALL} ${ELOG_EXCLUDE_INSTALL} )
+INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" )
 
 
