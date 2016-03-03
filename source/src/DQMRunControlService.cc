@@ -33,6 +33,8 @@
 namespace dqm4hep
 {
 
+static const char DQMRunControlService_emptyBuffer [] = "EMPTY";
+
 DQMCurrentRunRpc::DQMCurrentRunRpc(char *rpcName, DQMRunControlService *pService) :
 		DimRpc(rpcName, "I", "C"),
 		m_pService(pService)
@@ -58,27 +60,26 @@ DQMRunControlService::DQMRunControlService() :
 		m_pRunControl(NULL),
 		m_pCurrentRunRpc(NULL),
 		m_runControlName("DEFAULT"),
-		m_dataStream(1024)
+		m_pOutBuffer(0)
 {
 	m_pRunControl = new DQMRunControl();
+	m_pOutBuffer = new xdrstream::BufferDevice(1024);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 DQMRunControlService::~DQMRunControlService()
 {
-	if(isRunning())
+	if(this->isRunning())
 	{
 		if(RUNNING_STATE == m_pRunControl->getRunState())
-			endCurrentRun();
+			this->endCurrentRun();
 
-		stop();
+		this->stop();
 	}
 
 	delete m_pRunControl;
-
-	if(m_pRunBuffer)
-		delete [] m_pRunBuffer;
+	delete m_pOutBuffer;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -92,8 +93,8 @@ StatusCode DQMRunControlService::start()
 	std::string eorServiceName = "DQM4HEP/RunControl/" + m_runControlName + "/END_OF_RUN";
 	std::string currentRunRpcName = "DQM4HEP/RunControl/" + m_runControlName + "/CURRENT_RUN";
 
-	m_pStartOfRunService = new DimService(sorServiceName.c_str(), "C", (void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
-	m_pEndOfRunService   = new DimService(eorServiceName.c_str(), "C", (void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+	m_pStartOfRunService = new DimService(sorServiceName.c_str(), "C", (void*) DQMRunControlService_emptyBuffer, 5);
+	m_pEndOfRunService   = new DimService(eorServiceName.c_str(), "C", (void*) DQMRunControlService_emptyBuffer, 5);
 	m_pCurrentRunRpc = new DQMCurrentRunRpc( (char *) currentRunRpcName.c_str(), this);
 
 	m_serviceState = RUNNING_STATE;
@@ -158,11 +159,12 @@ StatusCode DQMRunControlService::startNewRun(unsigned int runNumber, const std::
 	m_currentRunNumber = runNumber;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->startNewRun(m_currentRunNumber, description, detectorName));
 
-	m_dataStream.reset();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->getCurrentRun()->serialize(&m_dataStream));
+	m_pOutBuffer->reset();
 
-	m_pStartOfRunService->updateService(m_dataStream.getBuffer(), m_dataStream.getBufferSize());
-	m_dataStream.reset();
+	if( xdrstream::XDR_SUCCESS != m_pRunControl->getCurrentRun()->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+		return STATUS_CODE_FAILURE;
+
+	m_pStartOfRunService->updateService( (void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition());
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -180,11 +182,11 @@ StatusCode DQMRunControlService::startNewRun(DQMRun *pRun)
 	m_currentRunNumber = pRun->getRunNumber();
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->startNewRun(pRun));
 
-	m_dataStream.reset();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->getCurrentRun()->serialize(&m_dataStream));
+	m_pOutBuffer->reset();
+	if( xdrstream::XDR_SUCCESS != m_pRunControl->getCurrentRun()->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+		return STATUS_CODE_FAILURE;
 
-	m_pStartOfRunService->updateService(m_dataStream.getBuffer(), m_dataStream.getBufferSize());
-	m_dataStream.reset();
+	m_pStartOfRunService->updateService( (void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition());
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -200,15 +202,15 @@ StatusCode DQMRunControlService::endCurrentRun()
 		return STATUS_CODE_SUCCESS;
 
 	m_currentRunNumber = -1;
-
 	m_pRunControl->getCurrentRun()->setEndTime(time(0));
+	m_pOutBuffer->reset();
 
-	m_dataStream.reset();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->getCurrentRun()->serialize(&m_dataStream));
+	if( xdrstream::XDR_SUCCESS != m_pRunControl->getCurrentRun()->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+		return STATUS_CODE_FAILURE;
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->endCurrentRun());
 
-	m_pEndOfRunService->updateService(m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+	m_pEndOfRunService->updateService((void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition());
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -283,28 +285,26 @@ void DQMRunControlService::handleCurrentRunRpc(DimRpc *pRpc)
 		if(m_pRunControl->isRunning())
 		{
 			// stream
-			m_dataStream.reset();
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRunControl->getCurrentRun()->serialize(&m_dataStream));
+			m_pOutBuffer->reset();
+
+			if( xdrstream::XDR_SUCCESS != m_pRunControl->getCurrentRun()->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+				throw StatusCodeException(STATUS_CODE_FAILURE);
 
 			// send back current run
-			pRpc->setData( (void *) m_dataStream.getBuffer() , m_dataStream.getBufferSize() );
-
-			// reset
-			m_dataStream.reset();
+			pRpc->setData( (void *) m_pOutBuffer->getBuffer() , m_pOutBuffer->getPosition() );
 		}
 		else
 		{
 			DQMRun emptyRun;
 
 			// stream
-			m_dataStream.reset();
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, emptyRun.serialize(&m_dataStream));
+			m_pOutBuffer->reset();
 
-			// send back empty run
-			pRpc->setData( (void *) m_dataStream.getBuffer() , m_dataStream.getBufferSize() );
+			if( xdrstream::XDR_SUCCESS != emptyRun.stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+				throw StatusCodeException(STATUS_CODE_FAILURE);
 
-			// reset
-			m_dataStream.reset();
+			// send back current run
+			pRpc->setData( (void *) m_pOutBuffer->getBuffer() , m_pOutBuffer->getPosition() );
 		}
 	}
 	catch(StatusCodeException &exception)

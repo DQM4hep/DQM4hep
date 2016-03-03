@@ -30,8 +30,7 @@
 #include "dqm4hep/DQMMonitorElement.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMStatisticsService.h"
-#include "dqm4hep/DQMMessaging.h"
-#include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 /// -- std headers
 #include <sys/utsname.h>
@@ -40,6 +39,8 @@
 
 namespace dqm4hep
 {
+
+static const char pMeCollectormptyBuffer [] = "EMPTY";
 
 ModuleMeInfo::ModuleMeInfo()
 {
@@ -227,7 +228,7 @@ std::pair<size_t, bool> ModuleMeInfo::subscribe(int clientID, const std::string 
 		for(DQMMonitorElementInfoList::iterator iter = m_availableMeList.begin(), endIter = m_availableMeList.end() ;
 				endIter != iter ; ++iter)
 		{
-			std::string fullName = (DQMPath(iter->m_monitorElementFullPath) + iter->m_monitorElementName).getPath();
+			std::string fullName = (DQMPath( (*iter)[DQMKey::ME_PATH]) + (*iter)[DQMKey::ME_NAME]).getPath();
 
 			if(fullName.at(0) != '/')
 				fullName = "/" + fullName;
@@ -391,18 +392,22 @@ DQMMonitorElementCollector::DQMMonitorElementCollector() :
 		m_collectorName("DEFAULT"),
 		m_collectorState(STOPPED_STATE),
 		m_pMonitorElementNameListRpc(NULL),
-		m_pMonitorElementCollectorInfoRpc(NULL),
-		m_dataStream(5*1024*1024)
+		m_pMonitorElementCollectorInfoRpc(NULL)
 {
-	m_dataStream.write(m_emptyBufferStr);
+	m_pOutBuffer = new xdrstream::BufferDevice(5*1024*1024);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 DQMMonitorElementCollector::~DQMMonitorElementCollector() 
 {
-	if(isRunning())
-		stop();
+	if(this->isRunning())
+		this->stop();
+
+	delete m_pOutBuffer;
+
+	if(m_pInBuffer)
+		delete m_pInBuffer;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -449,7 +454,7 @@ StatusCode DQMMonitorElementCollector::start()
 	ss.str("");
 	ss << baseName << "NOTIFY_WATCHED_ME_SVC";
 	m_pNotifyWatchedMeService = new DimService((char *)ss.str().c_str(), "C",
-			(void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+			(void*) pMeCollectormptyBuffer, 5);
 
 
 
@@ -485,7 +490,7 @@ StatusCode DQMMonitorElementCollector::start()
 	ss.str("");
 	ss << baseName << "ME_UPDATE_SVC";
 	m_pMeUpdateService = new DimService((char *)ss.str().c_str(), "C",
-			(void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+			(void*) pMeCollectormptyBuffer, 5);
 
 
 	m_collectorState = RUNNING_STATE;
@@ -635,11 +640,15 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 			throw StatusCodeException(STATUS_CODE_SUCCESS);
 		}
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+		this->configureInBuffer( pBuffer , bufferSize );
 
-		DQMMonitorElementPublication publication;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.deserialize(&m_dataStream));
+		DQMPublication publication;
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , publication ) )
+		{
+			streamlog_out(DEBUG) << "Couldn't read publication" << std::endl;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+		}
 
 		if(publication.empty())
 		{
@@ -652,8 +661,8 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 
 		// update the monitor element with ones received !
 		// build the monitor element list to update for each client
-		for(DQMMonitorElementPublication::iterator iter = publication.begin(),
-				endIter = publication.end() ; endIter != iter ; ++iter)
+		for(DQMPublication::iterator iter = publication.begin(), endIter = publication.end() ;
+				endIter != iter ; ++iter)
 		{
 			ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(iter->first);
 
@@ -724,18 +733,24 @@ void DQMMonitorElementCollector::handleAvailableListUpdate(DimCommand *pCommand)
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+		this->configureInBuffer( pBuffer , bufferSize );
+
+		printRawBuffer( pBuffer , bufferSize );
 
 		// read the buffer
 		std::string moduleName;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.read(moduleName));
+		if( xdrstream::XDR_SUCCESS != m_pInBuffer->read( & moduleName ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		streamlog_out(DEBUG) << "handleAvailableListUpdate, module name : " << moduleName << std::endl;
 
 		if(moduleName.empty())
 			return;
 
 		DQMMonitorElementInfoList availableMeList;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, availableMeList.deserialize(&m_dataStream));
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , availableMeList ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// register client, even if maybe already registered
 		bool newClient = this->registerClient(getClientId(), moduleName);
@@ -799,12 +814,12 @@ void DQMMonitorElementCollector::handleClientRequestList(int clientId, DimComman
 			return;
 
 		this->registerClient(clientId);
-
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+		this->configureInBuffer( pBuffer , bufferSize );
 
 		DQMMonitorElementRequest request;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , request ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		for(DQMMonitorElementRequest::iterator iter = request.begin(), endIter = request.end() ;
 				endIter != iter ; ++iter)
@@ -845,11 +860,11 @@ void DQMMonitorElementCollector::handleMeQuery(int clientId, DimCommand *pComman
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
-
+		this->configureInBuffer( pBuffer , bufferSize );
 		DQMMonitorElementRequest request;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , request ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// if nothing specified in the request, just send updates
 		if(request.empty())
@@ -862,7 +877,7 @@ void DQMMonitorElementCollector::handleMeQuery(int clientId, DimCommand *pComman
 		this->registerClient(clientId);
 
 		StringSet updateModuleList;
-		DQMMonitorElementPublication monitorElementPublication;
+		DQMPublication monitorElementPublication;
 
 		streamlog_out(DEBUG) << "Request size : " << request.size() << std::endl;
 
@@ -907,21 +922,17 @@ void DQMMonitorElementCollector::handleMeQuery(int clientId, DimCommand *pComman
 		if(monitorElementPublication.empty())
 			return;
 
-		m_dataStream.reset();
-		StatusCode statusCode = monitorElementPublication.serialize(&m_dataStream);
+		m_pOutBuffer->reset();
 
-		if(statusCode != STATUS_CODE_SUCCESS)
-		{
-			m_dataStream.reset();
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , monitorElementPublication ) )
 			return;
-		}
 
 		int clientIds[2];
 		clientIds[0] = clientId;
 		clientIds[1] = 0;
 
 		streamlog_out(DEBUG) << "Me update service called (on query) !" << std::endl;
-		m_pMeUpdateService->selectiveUpdateService((void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize() , &clientIds[0]);
+		m_pMeUpdateService->selectiveUpdateService((void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition() , &clientIds[0]);
 	}
 	catch(const StatusCodeException &exception)
 	{
@@ -944,11 +955,11 @@ void DQMMonitorElementCollector::handleClientSubscription(int clientId, DimComma
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
-
+		this->configureInBuffer( pBuffer , bufferSize );
 		DQMMonitorElementRequest request;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , request ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// if nothing specified in the request, return
 		if(request.empty())
@@ -1004,11 +1015,11 @@ void DQMMonitorElementCollector::handleClientUnsubscription(int clientId, DimCom
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
-
+		this->configureInBuffer( pBuffer , bufferSize );
 		DQMMonitorElementRequest request;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , request ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// if nothing specified in the request, return
 		if(request.empty())
@@ -1058,7 +1069,7 @@ void DQMMonitorElementCollector::sendMeUpdate(int clientId)
 
 	this->registerClient(clientId);
 
-	DQMMonitorElementPublication monitorElementPublication;
+	DQMPublication monitorElementPublication;
 	streamlog_out(DEBUG) << "Building publication to send to client" << std::endl;
 
 	for(ModuleMeInfoMap::const_iterator iter = m_moduleMeInfoMap.begin(), endIter = m_moduleMeInfoMap.end() ;
@@ -1073,7 +1084,7 @@ void DQMMonitorElementCollector::sendMeUpdate(int clientId)
 
 		streamlog_out(DEBUG) << "Module " << moduleName << ", total me list = " << subscribedMeList.size() << std::endl;
 
-		monitorElementPublication.insert(DQMMonitorElementPublication::value_type(moduleName, subscribedMeList));
+		monitorElementPublication.insert(DQMPublication::value_type(moduleName, subscribedMeList));
 	}
 
 	if(monitorElementPublication.empty())
@@ -1082,21 +1093,17 @@ void DQMMonitorElementCollector::sendMeUpdate(int clientId)
 		return;
 	}
 
-	m_dataStream.reset();
-	StatusCode statusCode = monitorElementPublication.serialize(&m_dataStream);
+	m_pOutBuffer->reset();
 
-	if(statusCode != STATUS_CODE_SUCCESS)
-	{
-		m_dataStream.reset();
+	if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , monitorElementPublication ) )
 		return;
-	}
 
 	int clientIds[2];
 	clientIds[0] = clientId;
 	clientIds[1] = 0;
 
 	streamlog_out(DEBUG) << "Me update service called (on update)!" << std::endl;
-	m_pMeUpdateService->selectiveUpdateService((void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize() , &clientIds[0]);
+	m_pMeUpdateService->selectiveUpdateService((void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition() , &clientIds[0]);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1108,36 +1115,31 @@ void DQMMonitorElementCollector::notifyWatchedMe(const std::string &moduleName)
 	if(0 == clientId)
 		return;
 
+	streamlog_out(DEBUG) << "notify watch me begin" << std::endl;
+
 	ModuleMeInfoMap::iterator moduleFindIter = m_moduleMeInfoMap.find(moduleName);
 
 	if(moduleFindIter == m_moduleMeInfoMap.end())
 		return;
 
 	StringSet watchedMeList = moduleFindIter->second->getSubscribedList();
+	m_pOutBuffer->reset();
 
-	m_dataStream.reset();
-
-	if(STATUS_CODE_SUCCESS != m_dataStream.write(static_cast<dqm_uint>(watchedMeList.size())))
+	if( ! XDR_TESTBIT( DQMStreamingHelper::write( m_pOutBuffer , watchedMeList ) , xdrstream::XDR_SUCCESS ) )
 	{
-		m_dataStream.reset();
+		streamlog_out(DEBUG) << "notify watch me. Couldn't write watched list" << std::endl;
 		return;
 	}
 
-	for(StringSet::iterator iter = watchedMeList.begin(), endIter = watchedMeList.end() ;
-			endIter != iter ; ++iter)
-	{
-		if(STATUS_CODE_SUCCESS != m_dataStream.write(*iter))
-		{
-			m_dataStream.reset();
-			return;
-		}
-	}
+	streamlog_out(DEBUG) << "notify watch me. OK Write" << std::endl;
 
 	int clientIds[2];
 	clientIds[0] = clientId;
 	clientIds[1] = 0;
 
-	m_pNotifyWatchedMeService->selectiveUpdateService( (void *) m_dataStream.getBuffer(), m_dataStream.getBufferSize(), &clientIds[0] );
+	streamlog_out(DEBUG) << "notify watch me. Client id " << clientId << std::endl;
+
+	m_pNotifyWatchedMeService->selectiveUpdateService( (void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition(), &clientIds[0] );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -1248,12 +1250,23 @@ int DQMMonitorElementCollector::getModuleClientID(const std::string &moduleName)
 }
 
 //-------------------------------------------------------------------------------------------------
+
+void DQMMonitorElementCollector::configureInBuffer( char *pBuffer , uint32_t bufferSize )
+{
+	if( ! m_pInBuffer )
+		m_pInBuffer = new xdrstream::BufferDevice( pBuffer , bufferSize , false );
+	else
+		m_pInBuffer->setBuffer( pBuffer , bufferSize , false );
+
+	m_pInBuffer->setOwner( false );
+}
+
+//-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
 DQMMonitorElementNameListRpc::DQMMonitorElementNameListRpc(char *rpcName, DQMMonitorElementCollector *pCollector) :
 		DimRpc(rpcName, "C", "C"),
-		m_pCollector(pCollector),
-		m_dataStream(1024*1024)
+		m_pCollector(pCollector)
 {
 	/* nop */
 }
@@ -1273,15 +1286,19 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 		if(NULL == pBuffer || 0 == bufferSize)
 			return;
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
-
+		m_pCollector->configureInBuffer( pBuffer , bufferSize );
 		DQMMonitorElementListNameRequest request;
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, request.deserialize(&m_dataStream));
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pCollector->m_pInBuffer , request ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// transform module name to lower for easier comparison
-		std::transform(request.m_moduleName.begin(), request.m_moduleName.end(), request.m_moduleName.begin(), ::tolower);
-		std::transform(request.m_monitorElementName.begin(), request.m_monitorElementName.end(), request.m_monitorElementName.begin(), ::tolower);
+		std::string requestModuleName = request[ DQMKey::MODULE_NAME ];
+		std::string requestMonitorElementName = request[ DQMKey::ME_NAME ];
+		std::string requestMonitorElementType = request[ DQMKey::ME_TYPE ];
+
+		std::transform(requestModuleName.begin(), requestModuleName.end(), requestModuleName.begin(), ::tolower);
+		std::transform(requestMonitorElementName.begin(), requestMonitorElementName.end(), requestMonitorElementName.begin(), ::tolower);
 
 		DQMMonitorElementInfoList infoList;
 
@@ -1293,30 +1310,32 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 			std::transform(moduleName.begin(), moduleName.end(), moduleName.begin(), ::tolower);
 
 			// partial and lower case compare of module name
-			if(moduleName.find(request.m_moduleName) == std::string::npos && !request.m_moduleName.empty())
+			if(moduleName.find(requestModuleName) == std::string::npos && !requestModuleName.empty())
 				continue;
 
-			const std::vector<DQMMonitorElementInfo> &availableMeList = iter->second->getAvailableMeList();
+			std::vector<DQMMonitorElementInfo> availableMeList = iter->second->getAvailableMeList();
 
-			for(std::vector<DQMMonitorElementInfo>::const_iterator meIter = availableMeList.begin(), meEndIter = availableMeList.end() ;
+			for(std::vector<DQMMonitorElementInfo>::iterator meIter = availableMeList.begin(), meEndIter = availableMeList.end() ;
 					meEndIter != meIter ; ++meIter)
 			{
-				std::string meName = meIter->m_monitorElementName;
+				std::string meName = (*meIter)[ DQMKey::ME_NAME ];
 				std::transform(meName.begin(), meName.end(), meName.begin(), ::tolower);
 
-				std::string path = meIter->m_monitorElementFullPath;
+				std::string path = (*meIter)[ DQMKey::ME_PATH ];
 				std::transform(path.begin(), path.end(), path.begin(), ::tolower);
 
+				std::string type = (*meIter)[ DQMKey::ME_TYPE ];
+
 				// partial and lower case compare of me name
-				if(meName.find(request.m_monitorElementName) == std::string::npos && !request.m_monitorElementName.empty())
+				if(meName.find(requestMonitorElementName) == std::string::npos && !requestMonitorElementName.empty())
 					continue;
 
 				// partial and lower case compare of path using me name
-				if(path.find(request.m_monitorElementName) == std::string::npos && !request.m_monitorElementName.empty())
+				if(path.find(requestMonitorElementName) == std::string::npos && !requestMonitorElementName.empty())
 					continue;
 
 				// compare me type
-				if(meIter->m_monitorElementType != monitorElementTypeToString(request.m_monitorElementType) && NO_ELEMENT_TYPE != request.m_monitorElementType)
+				if(type != requestMonitorElementType && monitorElementTypeToString(NO_ELEMENT_TYPE) != requestMonitorElementType)
 					continue;
 
 				infoList.push_back(*meIter);
@@ -1324,11 +1343,13 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 		}
 
 		// serialize the packet
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, infoList.serialize(&m_dataStream));
+		m_pCollector->m_pOutBuffer->reset();
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pCollector->m_pOutBuffer , infoList ) )
+			return;
 
 		// and set it as data to send back
-		setData((void*) m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+		setData((void*) m_pCollector->m_pOutBuffer->getBuffer(), m_pCollector->m_pOutBuffer->getPosition());
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -1343,8 +1364,7 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 
 DQMMonitorElementCollectorInfoRpc::DQMMonitorElementCollectorInfoRpc(char *rpcName, DQMMonitorElementCollector *pCollector) :
 		DimRpc(rpcName, "C", "C"),
-		m_pCollector(pCollector),
-		m_dataStream(128*1024)
+		m_pCollector(pCollector)
 {
 	/* nop */
 }
@@ -1355,37 +1375,16 @@ void DQMMonitorElementCollectorInfoRpc::rpcHandler()
 {
 	try
 	{
-		DQMCollectorInfo collectorInfo;
-
-		// uname
-		struct utsname unameStruct;
-		uname(&unameStruct);
-		collectorInfo.m_systemName = unameStruct.sysname;
-		collectorInfo.m_nodeName = unameStruct.nodename;
-		collectorInfo.m_release = unameStruct.release;
-		collectorInfo.m_version = unameStruct.version;
-		collectorInfo.m_machine = unameStruct.machine;
-
-		// hostname
-		char host[256];
-		gethostname(host, 256);
-		collectorInfo.m_hostName = host;
-
-		// module name list
-		for(DQMMonitorElementCollector::ModuleMeInfoMap::iterator iter = m_pCollector->m_moduleMeInfoMap.begin(),
-				endIter = m_pCollector->m_moduleMeInfoMap.end() ; endIter != iter ; ++iter)
-			collectorInfo.m_moduleListName.push_back(iter->first);
+		DQMHostInfo collectorInfo;
+		DQMCoreTool::fillHostInfo(collectorInfo);
 
 		// serialize the packet
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, collectorInfo.serialize(&m_dataStream));
-
-		// get the buffer
-		dqm_char *pBuffer = m_dataStream.getBuffer();
-		dqm_uint bufferSize = m_dataStream.getBufferSize();
+		m_pCollector->m_pOutBuffer->reset();
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pCollector->m_pOutBuffer , collectorInfo ) )
+			return;
 
 		// and set it as data to send back
-		setData((void*) pBuffer, bufferSize);
+		setData((void*) m_pCollector->m_pOutBuffer->getBuffer(), m_pCollector->m_pOutBuffer->getPosition());
 	}
 	catch(StatusCodeException &exception)
 	{

@@ -27,7 +27,7 @@
 
 
 #include "dqm4hep/DQMRun.h"
-#include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMStreamingHelper.h"
 
 namespace dqm4hep
 {
@@ -53,59 +53,37 @@ DQMRun::~DQMRun()
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMRun::serialize(DQMDataStream *const pDataStream) const
+xdrstream::Status DQMRun::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+		xdrstream::xdr_version_t version)
 {
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(static_cast<dqm_int>(m_runNumber)));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(static_cast<dqm_uint>(m_startTime)));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(static_cast<dqm_uint>(m_endTime)));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(m_detectorName));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(m_description));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(static_cast<dqm_uint>(this->getNParameters())));
-
-	for(std::map<std::string, std::string>::const_iterator iter = m_parametersMap.begin(), endIter = m_parametersMap.end() ;
-			endIter != iter ; ++iter)
+	if( xdrstream::XDR_READ_STREAM == mode )
 	{
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(iter->first));
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(iter->second));
+		XDR_STREAM( pDevice->read<int32_t>( & m_runNumber ) )
+
+		int64_t startTime = m_startTime, endTime = m_endTime;
+		XDR_STREAM( pDevice->read<int64_t>( & startTime ) )
+		XDR_STREAM( pDevice->read<int64_t>( & endTime ) )
+		m_startTime = startTime;
+		m_endTime = endTime;
+
+		XDR_STREAM( pDevice->read( & m_detectorName ) )
+		XDR_STREAM( pDevice->read( & m_description ) )
+		XDR_STREAM( DQMStreamingHelper::read( pDevice , m_parametersMap ))
+	}
+	else
+	{
+		XDR_STREAM( pDevice->write<int32_t>( & m_runNumber ) )
+
+		int64_t startTime = m_startTime, endTime = m_endTime;
+		XDR_STREAM( pDevice->write<int64_t>( & startTime ) )
+		XDR_STREAM( pDevice->write<int64_t>( & endTime ) )
+
+		XDR_STREAM( pDevice->write( & m_detectorName ) )
+		XDR_STREAM( pDevice->write( & m_description ) )
+		XDR_STREAM( DQMStreamingHelper::write( pDevice , m_parametersMap ))
 	}
 
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMRun::deserialize(DQMDataStream *const pDataStream)
-{
-	dqm_int runNumber = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(runNumber));
-	m_runNumber = runNumber;
-
-	dqm_uint startTime = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(startTime));
-	m_startTime = startTime;
-
-	dqm_uint endTime = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(endTime));
-	m_endTime = endTime;
-
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(m_detectorName));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(m_description));
-
-	dqm_uint nParameters = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(nParameters));
-
-	for(unsigned int i=0 ; i<nParameters ; i++)
-	{
-		std::string key;
-		std::string value;
-
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(key));
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(value));
-
-		m_parametersMap[key] = value;
-	}
-
-	return STATUS_CODE_SUCCESS;
+	return xdrstream::XDR_SUCCESS;
 }
 
 } 

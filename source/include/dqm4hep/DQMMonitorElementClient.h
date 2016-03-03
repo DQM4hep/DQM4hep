@@ -30,8 +30,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMMessaging.h"
-#include "dqm4hep/DQMDataStream.h"
+#include "dqm4hep/DQMStreamingHelper.h"
 
 // -- dim headers
 #include "dic.hxx"
@@ -103,7 +102,7 @@ public:
 
 	/** Called back when me collector info is received
 	 */
-	virtual void monitorElementCollectorInfoReceived(DQMMonitorElementClient */*pClient*/, const DQMCollectorInfo &/*collectorInfo*/) {}
+	virtual void monitorElementCollectorInfoReceived(DQMMonitorElementClient */*pClient*/, const DQMHostInfo &/*collectorInfo*/) {}
 
 	/** Called back when monitor elements are received.
 	 *  WARNING ! The client owns the publication passed in argument.
@@ -111,7 +110,7 @@ public:
 	 *  Since the publication is not constant, the listener can take elements and
 	 *  remove them from the publication.
 	 */
-	virtual void monitorElementsReceived(DQMMonitorElementClient */*pClient*/, DQMMonitorElementPublication &/*publication*/) {}
+	virtual void monitorElementsReceived(DQMMonitorElementClient */*pClient*/, DQMPublication &/*publication*/) {}
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -221,7 +220,11 @@ private:
 
 	/** Deep clear of publication
 	 */
-	void clearPublication(DQMMonitorElementPublication &publication);
+	void clearPublication(DQMPublication &publication);
+
+	/**
+	 */
+	void configureInBuffer( char *pBuffer, uint32_t size );
 
 private:
 	DimRpcInfo                            *m_pMeCollectorInfoRpcInfo;
@@ -229,8 +232,8 @@ private:
 	DimUpdatedInfo                        *m_pMeUpdateInfo;
 	DimInfo                               *m_pCollectorStateInfo;
 
-	DQMDataStream                          m_inDataStream;  // to receive data
-	DQMDataStream                          m_outDataStream; // to send data
+	xdrstream::BufferDevice               *m_pInBuffer;
+	xdrstream::BufferDevice               *m_pOutBuffer;
 
 	std::string                            m_collectorName;
 	bool                                   m_isConnected;

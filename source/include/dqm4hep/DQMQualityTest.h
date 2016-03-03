@@ -31,7 +31,9 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMStreamable.h"
+
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
 
 namespace dqm4hep
 {
@@ -44,7 +46,7 @@ class TiXmlHandle;
 /** DQMQualityTestResult class
  *  Hanlde the result of a quality test
  */
-class DQMQualityTestResult : public DQMStreamable
+class DQMQualityTestResult : public xdrstream::Streamable
 {
 public:
 	/** Constructor
@@ -59,15 +61,15 @@ public:
 	 */
 	DQMQualityTestResult &operator=(const DQMQualityTestResult &qualityTestResult);
 
-	StatusCode serialize(DQMDataStream *const pDataStream) const;
-	StatusCode deserialize(DQMDataStream *const pDataStream);
+	xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+			xdrstream::xdr_version_t version = 0);
 
 public:
 	std::string           m_qualityTestName;
 	std::string           m_qualityTestType;
 	std::string           m_message;
 	DQMQuality            m_quality;
-	bool                 m_isSuccessful;
+	bool                  m_isSuccessful;
 };
 
 //-------------------------------------------------------------------------------------------------

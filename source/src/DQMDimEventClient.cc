@@ -27,7 +27,6 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMDimEventClient.h"
-#include "dqm4hep/DQMDataStream.h"
 #include "dqm4hep/DQMEventStreamer.h"
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/DQMPluginManager.h"
@@ -61,9 +60,12 @@ DQMDimEventClient::DQMDimEventClient() :
 	m_pDimEventRpcInfo(NULL),
 	m_updateMode(false),
 	m_serverClientId(0),
-	m_dataStream(5*1024*1024) // 5 Mo should be enough to start ...
+	m_pReadBuffer(0),
+	m_pWriteBuffer(0)
 {
 	pthread_mutex_init(&m_mutex, NULL);
+
+	m_pWriteBuffer = new xdrstream::BufferDevice(5*1024*1024);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -74,6 +76,12 @@ DQMDimEventClient::~DQMDimEventClient()
 		this->disconnectFromService();
 
 	pthread_mutex_destroy(&m_mutex);
+
+	if(m_pReadBuffer)
+		delete m_pReadBuffer;
+
+	if(m_pWriteBuffer)
+		delete m_pWriteBuffer;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -152,11 +160,11 @@ StatusCode DQMDimEventClient::sendEvent(const DQMEvent *const pEvent)
 	if(NULL == pEvent)
 		return STATUS_CODE_INVALID_PARAMETER;
 
-	m_dataStream.reset();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->serialize(pEvent, &m_dataStream));
+	m_pWriteBuffer->reset();
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->write(pEvent, m_pWriteBuffer));
 
-	char *pBuffer = m_dataStream.getBuffer();
-	unsigned int bufferSize = m_dataStream.getBufferSize();
+	char *pBuffer = m_pWriteBuffer->getBuffer();
+	unsigned int bufferSize = m_pWriteBuffer->getPosition();
 
 	if(NULL == pBuffer || 0 == bufferSize)
 		return STATUS_CODE_FAILURE;
@@ -214,9 +222,15 @@ StatusCode DQMDimEventClient::queryEvent(DQMEvent *&pEvent, int timeout)
 	if(NULL == pEventRawBuffer || 0 == bufferSize)
 		return STATUS_CODE_FAILURE;
 
+	if( ! m_pReadBuffer )
+		m_pReadBuffer = new xdrstream::BufferDevice(pEventRawBuffer, bufferSize, false);
+	else
+		m_pReadBuffer->setBuffer(pEventRawBuffer, bufferSize, false);
+
+	m_pReadBuffer->setOwner(false);
+
 	// deserialize the event raw buffer
-	m_dataStream.setBuffer(pEventRawBuffer, bufferSize);
-	return this->getEventStreamer()->deserialize(pEvent, &m_dataStream);
+	return this->getEventStreamer()->read(pEvent, m_pReadBuffer);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -340,13 +354,26 @@ StatusCode DQMDimEventClient::eventReception(dqm_char *pBuffer, dqm_uint bufferS
 	if(NULL == pBuffer || 0 == bufferSize)
 		return STATUS_CODE_INVALID_PARAMETER;
 
+	if(strcmp(pBuffer, "EMPTY") == 0)
+		return STATUS_CODE_SUCCESS;
+
 	// set buffer
 	scoped_lock( & this->m_mutex);
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+
+	if( ! m_pReadBuffer )
+		m_pReadBuffer = new xdrstream::BufferDevice(pBuffer, bufferSize, false);
+	else
+		m_pReadBuffer->setBuffer(pBuffer, bufferSize, false);
+
+	m_pReadBuffer->setOwner(false);
+
+	streamlog_out(DEBUG) << "Receiving buffer of size " << bufferSize << std::endl;
 
 	// read event
 	DQMEvent *pEvent = NULL;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->deserialize(pEvent, &m_dataStream));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->read(pEvent, m_pReadBuffer));
+
+	streamlog_out(DEBUG) << "Pushing event in queue !" << std::endl;
 
 	// add it to event queue
 	this->pushEvent(pEvent);

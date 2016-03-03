@@ -27,7 +27,6 @@
 
 
 #include "dqm4hep/DQMVersion.h"
-#include "dqm4hep/DQMDataStream.h"
 
 namespace dqm4hep
 {

@@ -27,7 +27,6 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMMonitorElement.h"
-#include "dqm4hep/DQMDataStream.h"
 
 // -- root headers
 #include "TObject.h"
@@ -310,232 +309,234 @@ const DQMQualityTestResultMap &DQMMonitorElement::getQualityTestResults() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElement::serialize(DQMDataStream *const pDataStream) const
+xdrstream::Status DQMMonitorElement::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+		xdrstream::xdr_version_t version)
 {
-	dqm_int elementType = static_cast<dqm_int>(getType());
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(elementType));
-
-	std::string elementName = getName();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(elementName));
-
-	std::string elementTitle = getTitle();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(elementTitle));
-
-	TObject *pObject = getObject();
-
-	dqm_bool hasTObject = (NULL != pObject);
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(hasTObject));
-
-	if(hasTObject)
+	if( xdrstream::XDR_READ_STREAM == mode )
 	{
-		if(elementType == INT_ELEMENT_TYPE)
-		{
-			dqm_int value = get<TScalarInt>()->Get();
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(value));
-		}
-		else if(elementType == REAL_ELEMENT_TYPE)
-		{
-			dqm_float value = get<TScalarReal>()->Get();
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(value));
-		}
-		else if(elementType == SHORT_ELEMENT_TYPE)
-		{
-			dqm_short value = get<TScalarShort>()->Get();
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(value));
-		}
-		else if(elementType == STRING_ELEMENT_TYPE)
-		{
-			std::string value = get<TScalarString>()->Get();
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(value));
-		}
-		else
-		{
-			// serialize
-			TBufferFile bufferFile(TBuffer::kWrite);
-			bufferFile.WriteObject(pObject);
+		int32_t elementType = 0;
+		XDR_STREAM( pDevice->read( & elementType ) )
 
-			// get the buffer and length
-			const dqm_char *pRawBuffer = bufferFile.Buffer();
-			dqm_int bufferSize = bufferFile.BufferSize();
+		std::string elementName;
+		XDR_STREAM( pDevice->read( & elementName ) )
 
-			// and write it
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(pRawBuffer, bufferSize));
+		std::string elementTitle;
+		XDR_STREAM( pDevice->read( & elementTitle ) )
+
+		bool hasTObject;
+		XDR_STREAM( pDevice->read( & hasTObject ) )
+
+		TObject *pObject = NULL;
+
+		if(hasTObject)
+		{
+			if(elementType == INT_ELEMENT_TYPE)
+			{
+				int32_t value;
+				XDR_STREAM( pDevice->read( & value ) )
+				pObject = new TScalarInt(value);
+			}
+			else if(elementType == REAL_ELEMENT_TYPE)
+			{
+				float value;
+				XDR_STREAM( pDevice->read( & value ) )
+				pObject = new TScalarReal(value);
+			}
+			else if(elementType == SHORT_ELEMENT_TYPE)
+			{
+				int16_t value;
+				XDR_STREAM( pDevice->read( & value ) )
+				pObject = new TScalarShort(value);
+			}
+			else if(elementType == STRING_ELEMENT_TYPE)
+			{
+				std::string value;
+				XDR_STREAM( pDevice->read( & value ) )
+				pObject = new TScalarString(value);
+			}
+			else
+			{
+				char *pBuffer = NULL;
+				xdrstream::xdr_size_t bufferSize = 0;
+				XDR_STREAM( pDevice->readDynamicArray( pBuffer, bufferSize) )
+
+				// buffer is adopted by TBufferFile
+				TBufferFile bufferFile(TBuffer::kRead, bufferSize, pBuffer);
+				pObject = bufferFile.ReadObject(0);
+			}
+
+			if(NULL == pObject)
+				return STATUS_CODE_FAILURE;
+		}
+
+		int32_t elementQuality = static_cast<int32_t>(NO_QUALITY);
+		XDR_STREAM( pDevice->read( & elementQuality ) )
+
+		std::string drawOption;
+		XDR_STREAM( pDevice->read( & drawOption ) )
+
+		std::string path;
+		XDR_STREAM( pDevice->read( & path ) )
+
+		std::string collectorName;
+		XDR_STREAM( pDevice->read( & collectorName ) )
+
+		std::string moduleName;
+		XDR_STREAM( pDevice->read( & moduleName ) )
+
+		std::string elementDescription;
+		XDR_STREAM( pDevice->read( & elementDescription ) )
+
+		int32_t resetPolicy = static_cast<int32_t>(NO_RESET_POLICY);
+		XDR_STREAM( pDevice->read( & resetPolicy ) )
+
+		int32_t runNumber = 0;
+		XDR_STREAM( pDevice->read( & runNumber ) )
+
+		bool isToPublish = true;
+		XDR_STREAM( pDevice->read( & isToPublish ) )
+
+		uint32_t nQTestResults = 0;
+		XDR_STREAM( pDevice->read( & nQTestResults ) )
+
+		for(unsigned int q=0 ; q<nQTestResults ; q++)
+		{
+			std::string qTestName;
+			XDR_STREAM( pDevice->read( & qTestName ) )
+
+			DQMQualityTestResult qTestResult;
+			XDR_STREAM( qTestResult.stream( mode , pDevice , version ) )
+
+			m_qualityTestResultMap[qTestName] = qTestResult;
+		}
+
+		if(0 != m_pObject)
+		{
+			delete m_pObject;
+			m_pObject = 0;
+		}
+
+		m_pObject = pObject;
+
+		if(m_pObject)
+		{
+			TNamed *pNamed = dynamic_cast<TNamed*>(m_pObject);
+
+			if(pNamed)
+				pNamed->SetName((DQMPath(path) + elementName).getPath().c_str());
+		}
+
+		m_name = elementName;
+		m_type = static_cast<DQMMonitorElementType>(elementType);
+		m_moduleName = moduleName;
+
+		this->setTitle(elementTitle);
+		this->setQuality(static_cast<DQMQuality>(elementQuality));
+		this->setDrawOption(drawOption);
+		this->setPath(DQMPath(path));
+		this->setCollectorName(collectorName);
+		this->setDescription(elementDescription);
+		this->setResetPolicy(static_cast<DQMResetPolicy>(resetPolicy));
+		this->setRunNumber(runNumber);
+		this->setToPublish(isToPublish);
+
+		return xdrstream::XDR_SUCCESS;
+	}
+	else
+	{
+		int32_t elementType = static_cast<int32_t>(this->getType());
+		XDR_STREAM( pDevice->write( & elementType ) )
+
+		std::string elementName = this->getName();
+		XDR_STREAM( pDevice->write( & elementName ) )
+
+		std::string elementTitle = getTitle();
+		XDR_STREAM( pDevice->write( & elementTitle ) )
+
+		TObject *pObject = this->getObject();
+
+		bool hasTObject = (NULL != pObject);
+		XDR_STREAM( pDevice->write( & hasTObject ) )
+
+		if(hasTObject)
+		{
+			if(elementType == INT_ELEMENT_TYPE)
+			{
+				int32_t value = this->get<TScalarInt>()->Get();
+				XDR_STREAM( pDevice->write( & value ) )
+			}
+			else if(elementType == REAL_ELEMENT_TYPE)
+			{
+				float value = this->get<TScalarReal>()->Get();
+				XDR_STREAM( pDevice->write( & value ) )
+			}
+			else if(elementType == SHORT_ELEMENT_TYPE)
+			{
+				int16_t value = this->get<TScalarShort>()->Get();
+				XDR_STREAM( pDevice->write( & value ) )
+			}
+			else if(elementType == STRING_ELEMENT_TYPE)
+			{
+				std::string value = this->get<TScalarString>()->Get();
+				XDR_STREAM( pDevice->write( & value ) )
+			}
+			else
+			{
+				// serialize
+				TBufferFile bufferFile(TBuffer::kWrite);
+				bufferFile.WriteObject(pObject);
+
+				// get the buffer and length
+				const char *pRawBuffer = bufferFile.Buffer();
+				xdrstream::xdr_size_t bufferSize = bufferFile.BufferSize();
+
+				// and write it
+				XDR_STREAM( pDevice->writeArray( pRawBuffer , bufferSize ) )
+			}
+		}
+
+		int32_t elementQuality = static_cast<int32_t>(this->getQuality());
+		XDR_STREAM( pDevice->write( & elementQuality ) )
+
+		std::string drawOption = this->getDrawOption();
+		XDR_STREAM( pDevice->write( & drawOption ) )
+
+		std::string path = this->getPath().getPath();
+		XDR_STREAM( pDevice->write( & path ) )
+
+		std::string collectorName = this->getCollectorName();
+		XDR_STREAM( pDevice->write( & collectorName ) )
+
+		std::string moduleName = this->getModuleName();
+		XDR_STREAM( pDevice->write( & moduleName ) )
+
+		std::string elementDescription = this->getDescription();
+		XDR_STREAM( pDevice->write( & elementDescription ) )
+
+		int32_t resetPolicy = static_cast<int32_t>(this->getResetPolicy());
+		XDR_STREAM( pDevice->write( & resetPolicy ) )
+
+		int32_t runNumber = static_cast<int32_t>(this->getRunNumber());
+		XDR_STREAM( pDevice->write( & runNumber ) )
+
+		bool isToPublish = this->isToPublish();
+		XDR_STREAM( pDevice->write( & isToPublish ) )
+
+		uint32_t nQTestResults = m_qualityTestResultMap.size();
+		XDR_STREAM( pDevice->write( & nQTestResults ) )
+
+		for(std::map<std::string, DQMQualityTestResult>::iterator iter = m_qualityTestResultMap.begin(),
+				endIter = m_qualityTestResultMap.end() ; endIter != iter ; ++iter)
+		{
+			// write qtest name
+			XDR_STREAM( pDevice->write( & iter->first ) )
+
+			// write qtest result
+			XDR_STREAM( iter->second.stream( mode , pDevice , version ) )
 		}
 	}
 
-	dqm_int elementQuality = static_cast<dqm_int>(getQuality());
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(elementQuality));
-
-	std::string drawOption = getDrawOption();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(drawOption));
-
-	std::string path = getPath().getPath();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(path));
-
-	std::string collectorName = getCollectorName();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(collectorName));
-
-	std::string moduleName = getModuleName();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(moduleName));
-
-	std::string elementDescription = getDescription();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(elementDescription));
-
-	dqm_int resetPolicy = static_cast<dqm_int>(getResetPolicy());
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(resetPolicy));
-
-	dqm_uint runNumber = static_cast<dqm_uint>(getRunNumber());
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(runNumber));
-
-	dqm_bool isToPublish = this->isToPublish();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(isToPublish));
-
-	dqm_uint nQTestResults = m_qualityTestResultMap.size();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(nQTestResults));
-
-	for(std::map<std::string, DQMQualityTestResult>::const_iterator iter = m_qualityTestResultMap.begin(),
-			endIter = m_qualityTestResultMap.end() ; endIter != iter ; ++iter)
-	{
-		// write qtest name
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(iter->first));
-
-		// write qtest result
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second.serialize(pDataStream));
-	}
-
-	return STATUS_CODE_SUCCESS;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMMonitorElement::deserialize(DQMDataStream *const pDataStream)
-{
-	dqm_int elementType = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(elementType));
-
-	std::string elementName;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(elementName));
-
-	std::string elementTitle;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(elementTitle));
-
-	dqm_bool hasTObject;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(hasTObject));
-
-	TObject *pObject = NULL;
-
-	if(hasTObject)
-	{
-		if(elementType == INT_ELEMENT_TYPE)
-		{
-			dqm_int value;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(value));
-			pObject = new TScalarInt(value);
-		}
-		else if(elementType == REAL_ELEMENT_TYPE)
-		{
-			dqm_float value;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(value));
-			pObject = new TScalarReal(value);
-		}
-		else if(elementType == SHORT_ELEMENT_TYPE)
-		{
-			dqm_short value;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(value));
-			pObject = new TScalarShort(value);
-		}
-		else if(elementType == STRING_ELEMENT_TYPE)
-		{
-			std::string value;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(value));
-			pObject = new TScalarString(value);
-		}
-		else
-		{
-			dqm_char *pBuffer = NULL;
-			dqm_uint bufferSize = 0;
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(pBuffer, bufferSize));
-
-			TBufferFile bufferFile(TBuffer::kRead, bufferSize, pBuffer);
-			pObject = bufferFile.ReadObject(0);
-		}
-
-		if(NULL == pObject)
-			return STATUS_CODE_FAILURE;
-	}
-
-	dqm_int elementQuality = static_cast<dqm_int>(NO_QUALITY);
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(elementQuality));
-
-	std::string drawOption;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(drawOption));
-
-	std::string path;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(path));
-
-	std::string collectorName;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(collectorName));
-
-	std::string moduleName;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(moduleName));
-
-	std::string elementDescription;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(elementDescription));
-
-	dqm_int resetPolicy = static_cast<dqm_int>(NO_RESET_POLICY);
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(resetPolicy));
-
-	dqm_uint runNumber = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(runNumber));
-
-	dqm_bool isToPublish = true;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(isToPublish));
-
-	dqm_uint nQTestResults = 0;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(nQTestResults));
-
-	for(unsigned int q=0 ; q<nQTestResults ; q++)
-	{
-		std::string qTestName;
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(qTestName));
-
-		DQMQualityTestResult qTestResult;
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qTestResult.deserialize(pDataStream));
-
-		m_qualityTestResultMap[qTestName] = qTestResult;
-	}
-
-	if(0 != m_pObject)
-	{
-		delete m_pObject;
-		m_pObject = 0;
-	}
-
-	m_pObject = pObject;
-
-	if(m_pObject)
-	{
-		TNamed *pNamed = dynamic_cast<TNamed*>(m_pObject);
-
-		if(pNamed)
-			pNamed->SetName((DQMPath(path) + elementName).getPath().c_str());
-	}
-
-	m_name = elementName;
-	m_type = static_cast<DQMMonitorElementType>(elementType);
-	m_moduleName = moduleName;
-
-	this->setTitle(elementTitle);
-	this->setQuality(static_cast<DQMQuality>(elementQuality));
-	this->setDrawOption(drawOption);
-	this->setPath(DQMPath(path));
-	this->setCollectorName(collectorName);
-	this->setDescription(elementDescription);
-	this->setResetPolicy(static_cast<DQMResetPolicy>(resetPolicy));
-	this->setRunNumber(runNumber);
-	this->setToPublish(isToPublish);
-
-	return STATUS_CODE_SUCCESS;
+	return xdrstream::XDR_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------

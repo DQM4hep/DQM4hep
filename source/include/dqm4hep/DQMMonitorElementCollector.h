@@ -31,8 +31,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMPath.h"
-#include "dqm4hep/DQMDataStream.h"
-#include "dqm4hep/DQMMessaging.h"
+#include "dqm4hep/DQMStreamingHelper.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -194,7 +193,6 @@ public:
 
 private:
 	DQMMonitorElementCollector   *m_pCollector;
-	DQMDataStream                 m_dataStream;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -208,7 +206,6 @@ public:
 
 private:
 	DQMMonitorElementCollector   *m_pCollector;
-	DQMDataStream                 m_dataStream;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -330,6 +327,10 @@ private:
 	 */
 	int getModuleClientID(const std::string &moduleName) const;
 
+	/**
+	 */
+	void configureInBuffer( char *pBuffer , uint32_t bufferSize );
+
 private:
 	// collector name
 	std::string                        m_collectorName;
@@ -354,7 +355,8 @@ private:
 
 	// runtime
 	int                                m_collectorState;
-	DQMDataStream                      m_dataStream;    ///< To deserialize incoming monitor elements from modules
+	xdrstream::BufferDevice           *m_pInBuffer;
+	xdrstream::BufferDevice           *m_pOutBuffer;
 
 	// clients and storage
 	ModuleMeInfoMap                    m_moduleMeInfoMap;

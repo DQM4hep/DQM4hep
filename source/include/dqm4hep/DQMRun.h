@@ -31,7 +31,9 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMStreamable.h"
+
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
 
 // -- std headers
 #include <ctime>
@@ -42,7 +44,7 @@ namespace dqm4hep
 
 /** DQMRun class
  */ 
-class DQMRun : public DQMStreamable
+class DQMRun : public xdrstream::Streamable
 {
 public:
 	/** Constructor with run number (optional)
@@ -110,8 +112,8 @@ public:
 	 */
 	unsigned int getNParameters() const;
 
-	StatusCode serialize(DQMDataStream *const pDataStream) const;
-	StatusCode deserialize(DQMDataStream *const pDataStream);
+	xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+			xdrstream::xdr_version_t version = 0);
 
 protected:
 

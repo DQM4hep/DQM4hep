@@ -29,7 +29,6 @@
 #include "dqm4hep/DQMQualityTest.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMXmlHelper.h"
-#include "dqm4hep/DQMDataStream.h"
 #include "dqm4hep/DQMMonitorElement.h"
 #include "dqm4hep/DQMXmlHelper.h"
 
@@ -70,32 +69,34 @@ DQMQualityTestResult &DQMQualityTestResult::operator=(const DQMQualityTestResult
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMQualityTestResult::serialize(DQMDataStream *const pDataStream) const
+xdrstream::Status DQMQualityTestResult::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+		xdrstream::xdr_version_t version)
 {
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(m_qualityTestType));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(m_qualityTestName));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(m_message));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(static_cast<dqm_int>(m_quality)));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->write(m_isSuccessful));
+	if( xdrstream::XDR_READ_STREAM == mode )
+	{
+		XDR_STREAM( pDevice->read( & m_qualityTestType ) )
+		XDR_STREAM( pDevice->read( & m_qualityTestName ) )
+		XDR_STREAM( pDevice->read( & m_message ) )
 
-	return STATUS_CODE_SUCCESS;
-}
+		int32_t quality;
+		XDR_STREAM( pDevice->read<int32_t>( & quality ) )
+		m_quality = static_cast<DQMQuality>(quality);
 
-//-------------------------------------------------------------------------------------------------
+		XDR_STREAM( pDevice->read( & m_isSuccessful ) )
+	}
+	else
+	{
+		XDR_STREAM( pDevice->write( & m_qualityTestType ) )
+		XDR_STREAM( pDevice->write( & m_qualityTestName ) )
+		XDR_STREAM( pDevice->write( & m_message ) )
 
-StatusCode DQMQualityTestResult::deserialize(DQMDataStream *const pDataStream)
-{
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(m_qualityTestType));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(m_qualityTestName));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(m_message));
+		int32_t quality = static_cast<DQMQuality>(m_quality);
+		XDR_STREAM( pDevice->write<int32_t>( & quality ) )
 
-	dqm_int quality = static_cast<dqm_int>(m_quality);
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(quality));
-	m_quality = static_cast<DQMQuality>(quality);
+		XDR_STREAM( pDevice->write( & m_isSuccessful ) )
+	}
 
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDataStream->read(m_isSuccessful));
-
-	return STATUS_CODE_SUCCESS;
+	return xdrstream::XDR_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------

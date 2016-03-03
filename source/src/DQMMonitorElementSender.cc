@@ -27,8 +27,6 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMMonitorElementSender.h"
 #include "dqm4hep/DQMMonitorElement.h"
-#include "dqm4hep/DQMMessaging.h"
-#include "dqm4hep/DQMDataStream.h"
 #include "dqm4hep/DQMModuleApplication.h"
 #include "dqm4hep/DQMModuleApi.h"
 
@@ -41,11 +39,13 @@ namespace dqm4hep
 DQMMonitorElementSender::DQMMonitorElementSender(DQMModuleApplication *pApplication) :
 		m_pApplication(pApplication),
 		m_collectorName("DEFAULT"),
-		m_dataStream(4*1024*1024),    // 4 Mo to start
-		m_inDataStream(1024*1024),
+		m_pOutBuffer(0),
+		m_pInBuffer(0),
 		m_sendAvailableMeList(true)
 {
 	pthread_mutex_init(&m_mutex, NULL);
+
+	m_pOutBuffer = new xdrstream::BufferDevice(5*1024*1024);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -53,6 +53,11 @@ DQMMonitorElementSender::DQMMonitorElementSender(DQMModuleApplication *pApplicat
 DQMMonitorElementSender::~DQMMonitorElementSender()
 {
 	pthread_mutex_destroy(&m_mutex);
+
+	delete m_pOutBuffer;
+
+	if(m_pInBuffer)
+		delete m_pInBuffer;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -97,11 +102,11 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 		return STATUS_CODE_SUCCESS;
 	}
 
-	DQMMonitorElementPublication publication;
+	DQMPublication publication;
 
-	DQMMonitorElementPublication::iterator publicationIter =
+	DQMPublication::iterator publicationIter =
 			publication.insert(
-					DQMMonitorElementPublication::value_type(moduleName, DQMMonitorElementList() ) ).first;
+					DQMPublication::value_type(moduleName, DQMMonitorElementList() ) ).first;
 
 	// build the publication to send
 	streamlog_out(DEBUG) << "N subscribed me : " << subscribedMeList.size() << std::endl;
@@ -149,14 +154,17 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 	streamlog_out(MESSAGE) << "Number of monitor element sent : " << publicationIter->second.size() << std::endl;
 
 	// write module name
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.write(moduleName));
+	if( xdrstream::XDR_SUCCESS != m_pOutBuffer->write( & moduleName ) )
+		return STATUS_CODE_FAILURE;
 
 	// stream the whole publication
-	m_dataStream.reset();
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, publication.serialize(&m_dataStream));
+	m_pOutBuffer->reset();
+
+	if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , publication ) )
+		return STATUS_CODE_FAILURE;
 
 	std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/COLLECT_ME_CMD";
-	DimClient::sendCommandNB(commandName.c_str(), (void *)m_dataStream.getBuffer(), m_dataStream.getBufferSize());
+	DimClient::sendCommandNB(commandName.c_str(), (void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition());
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -169,7 +177,7 @@ StatusCode DQMMonitorElementSender::connectToService()
 		return STATUS_CODE_SUCCESS;
 
 	std::string serviceName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/NOTIFY_WATCHED_ME_SVC";
-	m_pSubscribedListInfo = new DimUpdatedInfo( (char *) serviceName.c_str() , (void *) m_inDataStream.getBuffer() , m_inDataStream.getBufferSize() ,  this );
+	m_pSubscribedListInfo = new DimUpdatedInfo( (char *) serviceName.c_str() , (void *) 0 , 0 ,  this );
 
 	serviceName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/COLLECTOR_STATE_SVC";
 	m_pCollectorStateInfo = new DimUpdatedInfo( (char *) serviceName.c_str(), STOPPED_STATE , this );
@@ -217,27 +225,19 @@ void DQMMonitorElementSender::infoHandler()
 		if(!pBuffer || bufferSize == 0)
 			return;
 
-		m_inDataStream.reset();
-		m_inDataStream.setBuffer(pBuffer, bufferSize);
+		if( ! m_pInBuffer )
+			m_pInBuffer = new xdrstream::BufferDevice(pBuffer, bufferSize, false);
+		else
+			m_pInBuffer->setBuffer(pBuffer, bufferSize, false);
+
+		m_pInBuffer->setOwner(false);
 
 		StringVector subscribedMeList;
-		dqm_uint size;
 
-		if(STATUS_CODE_SUCCESS != m_inDataStream.read(size))
+		if( ! XDR_TESTBIT( DQMStreamingHelper::read( m_pInBuffer , subscribedMeList ) , xdrstream::XDR_SUCCESS ) )
 		{
-			m_inDataStream.reset();
+			streamlog_out(DEBUG) << "Couldn't read subscribed list" << std::endl;
 			return;
-		}
-
-		subscribedMeList.resize(size);
-
-		for(dqm_uint i=0 ; i<size ; i++)
-		{
-			if(STATUS_CODE_SUCCESS != m_inDataStream.read(subscribedMeList[i]))
-			{
-				m_inDataStream.reset();
-				return;
-			}
 		}
 
 		// update the list
@@ -288,11 +288,11 @@ void DQMMonitorElementSender::addAvailableMonitorElement(DQMMonitorElement *pMon
 		return;
 
 	// fill info
-	ret.first->second.m_moduleName = m_pApplication->getModule()->getName();
-	ret.first->second.m_monitorElementFullPath = pMonitorElement->getPath().getPath();
-	ret.first->second.m_monitorElementType = monitorElementTypeToString(pMonitorElement->getType());
-	ret.first->second.m_monitorElementName = pMonitorElement->getName();
-	ret.first->second.m_monitorElementDescription = pMonitorElement->getDescription();
+	ret.first->second[DQMKey::MODULE_NAME] = m_pApplication->getModule()->getName();
+	ret.first->second[DQMKey::ME_PATH] = pMonitorElement->getPath().getPath();
+	ret.first->second[DQMKey::ME_TYPE] = monitorElementTypeToString(pMonitorElement->getType());
+	ret.first->second[DQMKey::ME_NAME] = pMonitorElement->getName();
+	ret.first->second[DQMKey::ME_DESCRIPTION] = pMonitorElement->getDescription();
 
 	std::cout << "me : " << pMonitorElement->getName() << " added in sender" << std::endl;
 
@@ -331,21 +331,25 @@ void DQMMonitorElementSender::sendAvailableMonitorElementList()
 
 	try
 	{
-		m_dataStream.reset();
+		m_pOutBuffer->reset();
 
 		// first write the module name
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.write(m_pApplication->getModule()->getName()));
+		std::string moduleName = m_pApplication->getModule()->getName();
+
+		if( ! XDR_TESTBIT( xdrstream::XDR_SUCCESS , m_pOutBuffer->write( & moduleName ) ) )
+			throw StatusCodeException( STATUS_CODE_FAILURE );
 
 		// write the monitor element info list
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementInfoList.serialize(&m_dataStream));
+		if( ! XDR_TESTBIT( xdrstream::XDR_SUCCESS , DQMStreamingHelper::write( m_pOutBuffer , monitorElementInfoList ) ) )
+			throw StatusCodeException( STATUS_CODE_FAILURE );
 
 		// send the packet !
 		std::string commandName = "DQM4HEP/MonitorElementCollector/" + m_collectorName + "/AVAILABLE_ME_CMD";
-		DimClient::sendCommandNB( commandName.c_str() , (void *) m_dataStream.getBuffer() , m_dataStream.getBufferSize() );
+		DimClient::sendCommandNB( commandName.c_str() , (void *) m_pOutBuffer->getBuffer() , m_pOutBuffer->getPosition() );
 	}
 	catch(const StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't send available monitor element info list : " << exception.getStatusCode() << std::endl;
+		streamlog_out(ERROR) << "Couldn't send available monitor element info list : " << exception.toString() << std::endl;
 	}
 }
 

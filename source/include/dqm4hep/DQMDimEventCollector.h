@@ -31,7 +31,9 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMEventCollectorImp.h"
 #include "dqm4hep/DQMStatisticsService.h"
-#include "dqm4hep/DQMDataStream.h"
+
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -148,6 +150,12 @@ private:
 	 */
 	void removeClient(int clientId);
 
+	/** Configure the buffer. Allocate the ptr is needed and set
+	 *  the buffer to read only and owner of the buffer. The buffer
+	 *  is copied since event updates need to keep track of the buffer
+	 */
+	xdrstream::BufferDevice *configureBuffer(char *pBuffer, xdrstream::xdr_size_t bufferSize);
+
 private:
 
 	typedef std::map<int, Client> ClientMap;
@@ -172,12 +180,10 @@ private:
 	// remote procedure call
 	DimEventRequestRpc      *m_pEventRequestRpc;
 
-	DQMDataStream            m_dataStream;
-	DQMDataStream            m_subEventDataStream;
-	DQMEventStreamer        *m_pEventStreamer;
+	xdrstream::BufferDevice *m_pBuffer;
+	xdrstream::BufferDevice *m_pSubEventBuffer;
 
-//	dqm_char                *m_pCurrentBuffer;
-//	dqm_uint                 m_currentBufferSize;
+	DQMEventStreamer        *m_pEventStreamer;
 	DQMEvent                *m_pCurrentEvent;
 
 	ClientMap                m_clientMap;

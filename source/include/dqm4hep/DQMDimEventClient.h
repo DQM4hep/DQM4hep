@@ -34,8 +34,11 @@
 #include "dqm4hep/DQMEvent.h"
 #include "dqm4hep/DQMEventClient.h"
 #include "dqm4hep/DQMStreamer.h"
-#include "dqm4hep/DQMDataStream.h"
 
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
+
+// -- dim headers
 #include "dic.hxx"
 
 namespace dqm4hep
@@ -157,7 +160,8 @@ private:
 	int                           m_serverClientId;
 	bool                          m_updateMode;
 
-	DQMDataStream                 m_dataStream;
+	xdrstream::BufferDevice      *m_pWriteBuffer;
+	xdrstream::BufferDevice      *m_pReadBuffer;
 	mutable pthread_mutex_t       m_mutex;  // prevent data race during de/serialization
 }; 
 

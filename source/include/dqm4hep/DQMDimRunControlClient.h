@@ -32,7 +32,9 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMRunControlClient.h"
-#include "dqm4hep/DQMDataStream.h"
+
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
 
 // -- dim headers
 #include "dic.hxx"
@@ -99,12 +101,17 @@ private:
 	 */
 	void handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo);
 
-	bool             m_isConnected;          ///< Whether the client is connected to the server instance
-	DQMDataStream    m_dataStream;           ///< The data stream to deserialize the run at start of run
+	/**
+	 */
+	void configureInBuffer( char *pBuffer , uint32_t bufferSize );
 
-	DimInfo          *m_pStartOfRunInfo;     ///< The dim start of run info
-	DimInfo          *m_pEndOfRunInfo;       ///< The dim end of run info
-	DimRpcInfo       *m_pCurrentRunRpcInfo;  ///< The dim current run rpc info
+private:
+	bool                     m_isConnected;          ///< Whether the client is connected to the server instance
+	xdrstream::BufferDevice *m_pInBuffer;            ///< The xdr buffer to deserialize the run at start of run
+
+	DimInfo                 *m_pStartOfRunInfo;      ///< The dim start of run info
+	DimInfo                 *m_pEndOfRunInfo;        ///< The dim end of run info
+	DimRpcInfo              *m_pCurrentRunRpcInfo;   ///< The dim current run rpc info
 
 	friend class DQMCurrentRunRpcInfo;
 }; 

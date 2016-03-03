@@ -98,7 +98,6 @@ template <typename T>
 class DQMStreamer;
 class DQMEvent;
 class DQMEventStreamer;
-class DQMDataStream;
 class DQMQualityTest;
 class DQMQualityTestResult;
 class DQMStatisticsService;
@@ -131,7 +130,7 @@ typedef std::vector<std::string>    StringVector;
 typedef std::set<std::string>       StringSet;
 
 // specifics typedefs
-typedef std::map<std::string, std::vector<std::string> > SubscriptionMap;
+//typedef std::map<std::string, std::vector<std::string> > SubscriptionMap;
 
 typedef std::vector<DQMMonitorElement*> DQMMonitorElementList;
 typedef std::map<const std::string, DQMMonitorElement*> DQMMonitorElementMap;
@@ -142,6 +141,14 @@ typedef std::map<std::string, DQMQualityTestResult> DQMQualityTestResultMap;
 typedef std::map<std::string, DQMQualityTest*>      DQMQualityTestMap;
 
 typedef std::vector<DQMStats> DQMStatsList;
+
+// typedef for messaging
+typedef std::map<std::string, DQMMonitorElementList> DQMPublication;
+typedef std::map<std::string, std::string> DQMMonitorElementInfo;
+typedef std::vector<DQMMonitorElementInfo> DQMMonitorElementInfoList;
+typedef std::map<std::string, std::string> DQMHostInfo;
+typedef std::map<std::string, std::string> DQMMonitorElementListNameRequest;
+typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
 
 }
 
@@ -345,6 +352,28 @@ inline std::string qualityToString(const DQMQuality quality)
 		default : throw dqm4hep::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 	}
 }
+
+//-------------------------------------------------------------------------------------------------
+
+/** DQMKey class
+ */
+class DQMKey
+{
+public:
+	static const std::string    MODULE_NAME;
+	static const std::string    DETECTOR_NAME;
+	static const std::string    ME_NAME;
+	static const std::string    ME_PATH;
+	static const std::string    ME_TYPE;
+	static const std::string    ME_DESCRIPTION;
+
+	static const std::string    SYSTEM_NAME;
+	static const std::string    NODE_NAME;
+	static const std::string    RELEASE;
+	static const std::string    VERSION;
+	static const std::string    MACHINE;
+	static const std::string    HOST_NAME;
+};
 
 //-------------------------------------------------------------------------------------------------
 

@@ -30,8 +30,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMDataStream.h"
-#include "dqm4hep/DQMMessaging.h"
+#include "dqm4hep/DQMStreamingHelper.h"
 
 #include "dic.hxx"
 
@@ -96,11 +95,11 @@ private:
 	typedef std::map<std::string, DQMMonitorElementInfo> DQMMonitorElementInfoMap;
 
 	// from ui
-	DQMModuleApplication          *m_pApplication;           ///< The module application that sends elements to the collector
-	std::string                    m_collectorName;          ///<  The collector name to which the monitor elements will be sent
+	DQMModuleApplication          *m_pApplication;          ///< The module application that sends elements to the collector
+	std::string                    m_collectorName;         ///<  The collector name to which the monitor elements will be sent
 
-	DQMDataStream                  m_dataStream;             ///< The data stream used to serialize the monitor elements
-	DQMDataStream                  m_inDataStream;           ///< The data stream used to serialize dim info
+	xdrstream::BufferDevice        *m_pOutBuffer;           ///< The xdr buffer used to serialize dim info
+	xdrstream::BufferDevice        *m_pInBuffer;            ///< The xdr buffer used to serialize the monitor elements
 
 	// internal
 	StringSet                      m_subscribedMeList;      ///< The subscribed monitor element list

@@ -30,7 +30,6 @@
 #include "dqm4hep/DQMRun.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMRunControl.h"
-#include "dqm4hep/DQMDataStream.h"
 #include "dqm4hep/DQMPlugin.h"
 
 namespace dqm4hep
@@ -61,7 +60,7 @@ DQMDimRunControlClient::DQMDimRunControlClient() :
 		m_isConnected(false),
 		m_pStartOfRunInfo(NULL),
 		m_pEndOfRunInfo(NULL),
-		m_dataStream(1024) // 1 ko to start
+		m_pInBuffer(0)
 {
 	/* nop */
 }
@@ -70,8 +69,11 @@ DQMDimRunControlClient::DQMDimRunControlClient() :
 
 DQMDimRunControlClient::~DQMDimRunControlClient()
 {
-	if(isConnectedToService())
-		disconnectFromService();
+	if( this->isConnectedToService() )
+		this->disconnectFromService();
+
+	if( m_pInBuffer )
+		delete m_pInBuffer;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -138,14 +140,14 @@ void DQMDimRunControlClient::infoHandler()
 		if(pBuffer == NULL || bufferSize == 0)
 			return;
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
+		this->configureInBuffer( pBuffer, bufferSize );
 
 		DQMRun *pRun = new DQMRun();
 
 		try
 		{
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pRun->deserialize(&m_dataStream));
+			if( xdrstream::XDR_SUCCESS != pRun->stream( xdrstream::XDR_READ_STREAM , m_pInBuffer ) )
+				throw StatusCodeException(STATUS_CODE_FAILURE);
 
 			if(pRun->getRunNumber() < 0)
 				throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -197,9 +199,10 @@ void DQMDimRunControlClient::handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo)
 		if(NULL == pBuffer || 0 == bufferSize)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
-		m_dataStream.reset();
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_dataStream.setBuffer(pBuffer, bufferSize));
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pRun->deserialize(&m_dataStream));
+		this->configureInBuffer( pBuffer, bufferSize );
+
+		if( xdrstream::XDR_SUCCESS != pRun->stream( xdrstream::XDR_READ_STREAM , m_pInBuffer ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// run number is invalid, meaning not running
 		if(pRun->getRunNumber() <= 0)
@@ -217,6 +220,18 @@ void DQMDimRunControlClient::handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo)
 
 	if(pRun)
 		delete pRun;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMDimRunControlClient::configureInBuffer( char *pBuffer , uint32_t bufferSize )
+{
+	if( ! m_pInBuffer )
+		m_pInBuffer = new xdrstream::BufferDevice( pBuffer , bufferSize , false );
+	else
+		m_pInBuffer->setBuffer( pBuffer , bufferSize , false );
+
+	m_pInBuffer->setOwner( false );
 }
 
 } 

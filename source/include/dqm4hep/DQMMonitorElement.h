@@ -39,6 +39,9 @@
 #include <TPaveText.h>
 #include <Rtypes.h>
 
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
+
 namespace dqm4hep
 {
 
@@ -55,7 +58,7 @@ class DQMMonitorElementManager;
  *
  *  @author R.Ete
  */ 
-class DQMMonitorElement
+class DQMMonitorElement : public xdrstream::Streamable
 {
 	friend class DQMModuleApi;
 	friend class DQMStorage;
@@ -192,8 +195,8 @@ public:
 	 */
 	void reset();
 
-	StatusCode serialize(DQMDataStream *const pDataStream) const;
-	StatusCode deserialize(DQMDataStream *const pDataStream);
+	xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
+			xdrstream::xdr_version_t version = 0);
 
 private:
 	/** Run the given quality test

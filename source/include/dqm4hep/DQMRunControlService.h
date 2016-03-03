@@ -31,7 +31,9 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMDataStream.h"
+
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -157,10 +159,7 @@ private:
 	DimService               *m_pEndOfRunService;
 	DimRpc                   *m_pCurrentRunRpc;
 
-	DQMDataStream             m_dataStream;
-
-	dqm_char                 *m_pRunBuffer;
-	dqm_uint                  m_runBufferSize;
+	xdrstream::BufferDevice  *m_pOutBuffer;
 
 	friend class DQMCurrentRunRpc;
 }; 

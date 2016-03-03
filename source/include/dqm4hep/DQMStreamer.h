@@ -32,16 +32,14 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
+
 namespace dqm4hep
 {
 
-class DQMDataStream;
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
 /** DQMStreamer interface.
- *  Helper interface to stream a particular object in a data stream
+ *  Helper interface to stream a particular object in a xdr device
  */
 template <typename T>
 class DQMStreamer
@@ -49,25 +47,16 @@ class DQMStreamer
 public:
 	/** Destructor
 	 */
-	virtual ~DQMStreamer();
+	virtual ~DQMStreamer() { /* nop */ }
 
-	/** Serialize a given object and store it in the data stream
+	/** Serialize a given object and store it in the xdr device
 	 */
-	virtual StatusCode serialize(const T *const pObject, DQMDataStream *const pDataStream) = 0;
+	virtual StatusCode write(const T *const pObject, xdrstream::IODevice *pDevice) = 0;
 
-	/** De-serialize a given from the data stream
+	/** De-serialize a given from the xdr device
 	 */
-	virtual StatusCode deserialize(T *&pObject, DQMDataStream *const pDataStream) = 0;
+	virtual StatusCode read(T *&pObject, xdrstream::IODevice *pDevice) = 0;
 };
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
-template <typename T>
-inline DQMStreamer<T>::~DQMStreamer()
-{
-	/* nop */
-}
 
 }
 
