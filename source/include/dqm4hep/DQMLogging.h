@@ -31,8 +31,14 @@
 
 #include "streamlog/streamlog.h"
 
+// -- log4cxx headers
+#include <log4cxx/logger.h>
+#include <log4cxx/xml/domconfigurator.h>
+
 namespace dqm4hep
 {
+
+static log4cxx::LoggerPtr dqmMainLogger(log4cxx::Logger::getLogger("main"));
 
 #define streamlog_init( head , verbosity ) \
     streamlog::out.init(std::cout, head ); \
