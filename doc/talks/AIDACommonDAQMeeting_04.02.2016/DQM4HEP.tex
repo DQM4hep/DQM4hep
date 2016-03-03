@@ -84,7 +84,7 @@ morekeywords={string,fstream,ofstream,ifstream}
         \item Set of interfaces for data analysis, adapted to DQM purpose
         \item Histogram distributed system
         \item Visualization interface (Qt GUI)
-        \item Large scale process management
+        \item Large scale remote process management
         \item IO support for any data type (opt. LCIO)
         \item Full size detector (ILD) to single prototype (CALICE) design
         \item ELog interface
@@ -424,23 +424,36 @@ morekeywords={string,fstream,ofstream,ifstream}
       For example, the streamer for LCIO is implemented and provided as a plug-in in the software. The type of data that is transferred over the network can be user defined. \\
       Users have to implements the \verb|DQMEventStreamer| interface : \\
 
-  \begin{lstlisting}
-  class DQMEventStreamer : public DQMStreamer<DQMEvent>
-  {
-  public:
-    // ...
-    virtual StatusCode serialize(const DQMEvent *const pEvent, DQMDataStream *const pDataStream) = 0;
-    virtual StatusCode deserialize(DQMEvent *&pEvent, DQMDataStream *const pDataStream) = 0;
-    virtual StatusCode serialize(const DQMEvent *const pEvent, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) = 0;
-  };
-  \end{lstlisting}
-  
-  and plug the streamer class using the plugin mechanism. The \verb|DQMDataStream| class provides functions to read and write raw buffers. \\
-  ~ \\
-  For an experiment with a simple event structure, it can be useful to define a raw event streamer and propagate the event through the DQM system without taking care about the network interface. \\
+      \begin{lstlisting}
+      class DQMEventStreamer : public DQMStreamer<DQMEvent>
+      {
+      public:
+        // ...
+        virtual StatusCode serialize(const DQMEvent *const pEvent, DQMDataStream *const pDataStream) = 0;
+        virtual StatusCode deserialize(DQMEvent *&pEvent, DQMDataStream *const pDataStream) = 0;
+        virtual StatusCode serialize(const DQMEvent *const pEvent, const std::string &subEventIdentifier, DQMDataStream *const pDataStream) = 0;
+      };
+      \end{lstlisting}
+      
+      and plug the streamer class using the plugin mechanism. The \verb|DQMDataStream| class provides functions to read and write raw buffers. \\
+      ~ \\
+      For an experiment with a simple event structure, it can be useful to define a raw event streamer and propagate the event through the DQM system without taking care about the network interface. \\
     \end{frame}
     
     
+    
+    %% SDHCAL DAQ %%
+    \begin{frame}
+      \frametitle{\secname}
+      \framesubtitle{Example : SDHCAL DAQ interface}
+      \begin{center}
+        \includegraphics[width=0.9\textwidth]{figs/sdhcal_dqm_daq.pdf}        
+      \end{center}
+    \end{frame}
+    
+    
+    
+    %% MODULE API %%
     \begin{frame}[containsverbatim]
       \frametitle{\secname}
       \framesubtitle{Module API}
@@ -462,6 +475,75 @@ morekeywords={string,fstream,ofstream,ifstream}
       ~ \\
       Note that \textbf{QTest results are sent to the collector together with the monitor element} ! 
     \end{frame}
+  
+  
+    %% MODULE EXAMPLE %%
+    \begin{frame}[containsverbatim]
+      \frametitle{\secname}
+      \framesubtitle{Analysis module - Example }
+
+      \begin{minipage}{0.49\textwidth}
+        \begin{lstlisting}
+// ExampleModule.h
+class ExampleModule : public DQMAnalysisModule
+{
+public:
+  ExampleModule();  // requiered by plugin system
+  ~ExampleModule();
+  
+  StatusCode initModule();
+  StatusCode readSettings(const TiXmlHandle &xmlHandle);
+  StatusCode startOfRun(DQMRun *const pRun);
+  StatusCode startOfCycle();
+  StatusCode processEvent(DQMEvent *const pEvent);
+  StatusCode endOfCycle();
+  StatusCode endOfRun(DQMRun *const pRun);
+  StatusCode endModule();
+
+private:
+  DQMMonitorElement   *m_pNHitElement;
+};
+        \end{lstlisting}         
+      \end{minipage}
+      \begin{minipage}{0.49\textwidth}
+        \begin{lstlisting}
+// ExampleModule.cc
+#include "ExampleModule.h"
+// declare plugin in the system
+DQM_PLUGIN_DECL( ExampleModule, "ExampleModule" )
+// create and enter dir. Book histogram
+StatusCode ExampleModule::initModule()
+{
+  DQMModuleApi::mkdir(this, "/Histograms");
+  DQMModuleApi::cd(this, "/Histograms");
+  DQMModuleApi::bookIntHistogram1D(this, m_pNHitElement, "NHit",
+    "Number of hits", 1200, 0, 1199);
+  return STATUS_CODE_SUCCESS;
+}
+// get lcio event and fill your histogram !
+StatusCode ExampleModule::processEvent(DQMEvent *const pEvent)
+{
+  EVENT::LCEvent *pLCEvent = 
+    pEvent->getEvent<EVENT::LCEvent>();
+  if(!pLCEvent)
+    return STATUS_CODE_FAILURE;    
+  m_pNHitElement->get<TH1I>()->Fill(NHit);
+  return STATUS_CODE_SUCCESS;
+}
+        \end{lstlisting}  
+      \end{minipage}
+
+
+    \end{frame}
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   \begin{frame}
