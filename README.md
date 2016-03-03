@@ -28,17 +28,19 @@ make
 ```
 
 where OPTIONS can be :
-* DQM4HEP_VIZ [ON/OFF] to install visualization package
-* DQM4HEP_LCIO [ON/OFF] to install [lcio](lcio.desy.de) and streamer support
-* DQM4HEP_EXAMPLES [ON/OFF] to build example implementations
-* DQM4HEP_ELOG [ON/OFF] to install [elog](https://midas.psi.ch/elog/) interface (requieres elog installed)
+* BUILD_DQMVIZ [ON/OFF] to install visualization package
+* BUILD_DQM4ILC [ON/OFF] to install ilcsoft related support (lcio streamer, marlin interface , etc ...)
+* BUILD_EXAMPLES [ON/OFF] to build example implementations
 * INSTALL_DOC [ON/OFF] to install [doxygen](www.doxygen.org) code documentation
+* DIM_GUI [ON/OFF] to build dim gui support (may not work on all operating systems)
 
 Example :
 
 ```bash
-cmake -DDQM4HEP_ELOG=OFF -DDQM4HEP_VIZ=OFF ..
+cmake -DBUILD_EXAMPLES=ON -DBUILD_DQMVIZ=ON ..
 ```
+
+All options area by default set to OFF
 
 ### Install with ilcsoft
 

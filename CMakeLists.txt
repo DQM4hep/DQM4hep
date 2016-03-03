@@ -17,21 +17,23 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
 SET( xdrstream_version            "master" )
+SET( xdrlcio_version              "master" )
 SET( DQMCore_version              "master" )
 SET( DQMViz_version               "master" )
+SET( DQM4ILC_version              "master" )
 SET( JsonCpp_version              "0.10.5" )
 SET( DIMJC_version                "master" )
-SET( LCIO_version                 "v02-06")
 
 # ----- download settings -----
 SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
+SET( xdrlcio_repository             "https://github.com/DQM4HEP/xdrlcio.git" )
 SET( DQMCore_repository             "https://github.com/DQM4HEP/DQMCore.git" )
 SET( DQMViz_repository              "https://github.com/DQM4HEP/DQMViz.git" )
+SET( DQM4ILC_repository             "https://github.com/DQM4HEP/DQM4ILC.git" )
 SET( JsonCpp_repository             "https://github.com/open-source-parsers/jsoncpp.git" )
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/mirabitl/dimjc.git" )
 SET( streamlog_repository           "https://github.com/DQM4HEP/streamlog" )
-SET( LCIO_repository                "svn://svn.freehep.org/lcio/tags" ) # public (no authentication)
 
 # the external project in used are 
 # set gradually along the CMakeLists.txt
@@ -44,8 +46,7 @@ SET( DQMViz_package_depends "" )
 SET( jsoncpp_package_depends "" )
 SET( dim_package_depends "" )
 SET( dimjc_package_depends "" )
-SET( streamlog_package_depends "" )
-SET( lcio_package_depends "" )
+SET( streamlog_package_depends "streamlog" )
 
 # ----- additional cmake args -----
 IF ( NOT APPLE )
@@ -76,12 +77,7 @@ ENDIF()
 FIND_PACKAGE( ILCUTIL COMPONENTS ILCSOFT_CMAKE_MODULES QUIET )
 
 LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
-
-IF( ILCUTIL_FOUND )
-	INCLUDE( ilcsoft_default_settings )
-ELSE()	
-	INCLUDE( default_settings )
-ENDIF()
+INCLUDE( default_settings )
 
 # ----------------------------------------------------------------------------
 
@@ -109,22 +105,22 @@ SET( common_cmake_args
 
 # ----- package options -----------------------------------------------------------------------
 
-OPTION( DQM4HEP_VIZ "Build DQM4HEPViz library and binaries (requires Qt and ROOT built with Qt support (--enable-qt))" OFF )
-MESSAGE( STATUS "DQM4HEP_VIZ: ${DQM4HEP_VIZ}" )
+OPTION( BUILD_DQMVIZ "Build DQMViz library and binaries (requires Qt and ROOT built with Qt support (--enable-qt))" OFF )
+MESSAGE( STATUS "BUILD_DQMVIZ: ${BUILD_DQMVIZ}" )
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
+MESSAGE( STATUS "INSTALL_DOC: ${INSTALL_DOC}" )
 
-OPTION( DQM4HEP_LCIO "Build DQMCore with LCIO (requires LCIO installed)" OFF )
-MESSAGE( STATUS "DQM4HEP_LCIO: ${DQM4HEP_LCIO}" )
+OPTION( BUILD_DQM4ILC "Build DQM4ILC package (requires ilcsoft installed)" OFF )
+MESSAGE( STATUS "BUILD_DQM4ILC: ${BUILD_DQM4ILC}" )
 
-OPTION( DQM4HEP_ELOG "Build DQMCore with ELog (requires ELog binary installed)" OFF )
-MESSAGE( STATUS "DQM4HEP_ELOG: ${DQM4HEP_ELOG}" )
-
-OPTION( DQM4HEP_EXAMPLES "Build DQMCore with examples" OFF )
-MESSAGE( STATUS "DQM4HEP_EXAMPLES: ${DQM4HEP_EXAMPLES}" )
+OPTION( BUILD_EXAMPLES "Build DQMCore (resp DQM4ILC) with examples" OFF )
+MESSAGE( STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLES}" )
 
 OPTION( DIM_GUI "Whether to build dim gui part (did, webDid)" OFF )
 MESSAGE( STATUS "DIM_GUI: ${DIM_GUI}" )
+
+# ----------------------------------------------------------------------------
 
 IF( DIM_GUI )
 	SET( DIM_GUI_FLAG "GUI=yes" )
@@ -134,9 +130,7 @@ ENDIF()
 
 SET( DQMCore_additional_cmake_args 
 	${DQMCore_additional_cmake_args} 
-	-DDQM4HEP_LCIO=${DQM4HEP_LCIO}
-	-DDQM4HEP_ELOG=${DQM4HEP_ELOG}
-	-DDQM4HEP_EXAMPLES=${DQM4HEP_EXAMPLES}
+	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 )
 
 # fixme : problems on lyoserv to install DQMCore. 
@@ -148,44 +142,16 @@ IF( MySQL_DIR )
 	)
 ENDIF()
 
-# ----------------------------------------------------------------------------
 
-# if ilcsoft is not installed, download the needed
-# packages normally provided by ilcsoft (except ROOT and Qt)
-IF( NOT ILCUTIL_FOUND )
-	
-	MESSAGE( STATUS "ILCSOFT not found" )
-	
-	IF( DQM4HEP_LCIO )
-	
-		# ----- LCIO package -----
-		ExternalProject_Add( LCIO
-		    SVN_REPOSITORY "${LCIO_repository}/${LCIO_version}"
-		    CMAKE_ARGS ${common_cmake_args}
-		    PREFIX lcio
-		    LIST_SEPARATOR %
-		    PATCH_COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/external-project/lcio-patch-command ${CMAKE_CURRENT_SOURCE_DIR}/lcio/doc/CMakeLists.txt ${CMAKE_CURRENT_SOURCE_DIR}/external-project/CMakeLists.txt.patch
-		    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/lcio
-		)
-		
-		SET( lcio_package_depends "LCIO" )
-		LIST( APPEND DQMCore_additional_cmake_args -DDQM4HEP_LCIO=ON )
-		
-	ENDIF()
-	
-	# ----- streamlog package -----
-	ExternalProject_Add( streamlog
-	    GIT_REPOSITORY "${streamlog_repository}"
-	    CMAKE_ARGS ${common_cmake_args}
-	    PREFIX streamlog
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/streamlog
-	)
-	
-	SET( streamlog_package_depends "streamlog" )
-	
-ENDIF()
 
+# ----- streamlog package -----
+ExternalProject_Add( streamlog
+    GIT_REPOSITORY "${streamlog_repository}"
+    CMAKE_ARGS ${common_cmake_args}
+    PREFIX streamlog
+    LIST_SEPARATOR %
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/streamlog
+)
 
 # ----- xdrstream package -----
 ExternalProject_Add( xdrstream
@@ -198,7 +164,7 @@ ExternalProject_Add( xdrstream
 )
 
 # ----- DIM package -----
-FIND_PACKAGE( DIM )
+FIND_PACKAGE( DIM QUIET )
 
 IF ( NOT DIM_FOUND )
 	SET ( DIMDIR ${CMAKE_CURRENT_SOURCE_DIR}/dim )
@@ -220,10 +186,17 @@ IF ( NOT DIM_FOUND )
 	SET( dim_package_depends "dim" )
 ENDIF ()
 
+
 SET( DQMCore_additional_cmake_args 
 	${DQMCore_additional_cmake_args}
 	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
+	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 	-DDIMDIR=${DIMDIR}
+)
+
+SET( xdrlcio_additional_cmake_args 
+	${xdrlcio_additional_cmake_args}
+	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 )
 
 SET( DIMJC_additional_cmake_args 
@@ -231,15 +204,23 @@ SET( DIMJC_additional_cmake_args
 	-DDIMDIR=${DIMDIR}
 )
 
-SET( DQMVis_additional_cmake_args 
-	${DQMVis_additional_cmake_args} 
+SET( DQMVis_additional_cmake_args
+	${DQMVis_additional_cmake_args}
 	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-DDIMDIR=${DIMDIR}
 )
 
+SET( DQM4ILC_additional_cmake_args 
+	${DQM4ILC_additional_cmake_args} 
+	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
+	-Dxdrlcio_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
+	-DDQMCore_DIR=${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
+	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
+)
+
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS ${dim_package_depends} ${streamlog_package_depends} ${lcio_package_depends} ${xdrstream_package_depends}
+    DEPENDS ${dim_package_depends} ${streamlog_package_depends} ${xdrstream_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
@@ -249,7 +230,7 @@ ExternalProject_Add( DQMCore
 )
 
 # ----- JsonCpp package -----
-FIND_PACKAGE( JSONCPP )
+FIND_PACKAGE( JSONCPP QUIET )
 
 IF ( NOT JSONCPP_FOUND )
 	SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
@@ -268,7 +249,7 @@ IF ( NOT JSONCPP_FOUND )
 ENDIF()
 
 # ----- DIMJC package -----
-FIND_PACKAGE( DIMJC )
+FIND_PACKAGE( DIMJC QUIET )
 
 IF ( NOT DIMJC_FOUND )
 	SET ( DIMJC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc )
@@ -292,11 +273,53 @@ SET( DQMVis_additional_cmake_args
 	-DDIMJC_DIR=${DIMJC_DIR}
 )
 
-IF( DQM4HEP_VIZ )
+
+
+IF( BUILD_DQM4ILC )
+	
+	# ----- xdrlcio package -----
+    ExternalProject_Add( xdrlcio
+        DEPENDS ${xdrstream_package_depends}
+        GIT_REPOSITORY ${xdrlcio_repository}
+        GIT_TAG ${xdrlcio_version}
+        CMAKE_ARGS ${common_cmake_args} ${xdrlcio_additional_cmake_args}
+	    PREFIX xdrlcio
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
+    )
+    
+    SET( xdrlcio_package_depends "xdrlcio" )
+    
+	# ----- DQM4ILC package -----
+    ExternalProject_Add( DQM4ILC
+        DEPENDS 
+        	${xdrstream_package_depends}
+        	${xdrlcio_package_depends} 
+        	${DQMCore_package_depends} 
+        	${streamlog_package_depends}
+        GIT_REPOSITORY ${DQM4ILC_repository}
+        GIT_TAG ${DQM4ILC_version}
+        CMAKE_ARGS ${common_cmake_args} ${DQM4ILC_additional_cmake_args}
+	    PREFIX DQM4ILC
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQM4ILC
+    )
+	
+ENDIF()
+
+
+
+IF( BUILD_DQMVIZ )
 
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
-        DEPENDS ${DQMCore_package_depends} ${dim_package_depends} ${jsoncpp_package_depends} ${dimjc_package_depends} ${streamlog_package_depends} ${xdrstream_package_depends}
+        DEPENDS 
+        	${DQMCore_package_depends} 
+        	${dim_package_depends} 
+        	${jsoncpp_package_depends} 
+        	${dimjc_package_depends}
+        	${streamlog_package_depends} 
+        	${xdrstream_package_depends}
         GIT_REPOSITORY ${DQMViz_repository}
         GIT_TAG ${DQMViz_version}
         CMAKE_ARGS ${common_cmake_args} ${DQMVis_additional_cmake_args}
@@ -306,6 +329,8 @@ IF( DQM4HEP_VIZ )
     )
 
 ENDIF()
+
+
 
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
