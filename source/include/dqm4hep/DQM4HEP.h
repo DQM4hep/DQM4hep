@@ -46,7 +46,6 @@
 #include <unistd.h>
 #include <exception>
 #include <limits>
-#include <bits/pthreadtypes.h>
 #include <pthread.h>
 
 
@@ -59,7 +58,10 @@
 #include <_types/_uint64_t.h>
 #include <sys/_types/_int16_t.h>
 #include <sys/_types/_int64_t.h>
+#include <sys/_pthread/_pthread_types.h>
+#include <sys/_pthread/_pthread_mutex_t.h>
 #else
+#include <bits/pthreadtypes.h>
 #include <stdint.h>
 #endif
 
