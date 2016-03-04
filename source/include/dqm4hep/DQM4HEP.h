@@ -237,7 +237,7 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
 //-------------------------------------------------------------------------------------------------
 
 #define NOTIFY_METHOD_CALLED \
-		LOG4CXX_ERROR( dqmMainLogger ,  "Method called : " << __FUNCTION__ );
+		LOG4CXX_DEBUG( dqmMainLogger ,  "Method called : " << __FUNCTION__ );
 
 //-------------------------------------------------------------------------------------------------
 
