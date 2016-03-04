@@ -405,7 +405,7 @@ StatusCode DQMAnalysisModuleApplication::configureNetwork(const TiXmlHandle xmlH
 		//
 
 		// monitor element collector name
-		this->getMonitorElementSender()->setCollectorName(m_settings.m_monitorElementCollector);
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElementSender()->setCollectorName(m_settings.m_monitorElementCollector));
 
 		// event client
 		DQMEventClient *pEventClient = DQMPluginManager::instance()->createPluginClass<DQMEventClient>(m_settings.m_eventClientType);
