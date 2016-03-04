@@ -142,7 +142,7 @@ int main(int argc, char* argv[])
 	// install signal handlers
 	LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
 	signal(SIGINT,  int_key_signal_handler);
-	signal(SIGSEGV, seg_viol_signal_handling);
+//	signal(SIGSEGV, seg_viol_signal_handling);
 
 	LOG4CXX_INFO( dqmMainLogger , "Creating monitor element collector application ..." );
 
