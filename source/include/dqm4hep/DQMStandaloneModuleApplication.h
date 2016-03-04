@@ -56,7 +56,7 @@ public:
 
 		/** Print settings
 		 */
-		void print();
+		void print(const std::string &moduleLogStr);
 
 	public:
 		std::string        m_settingsFileName;
@@ -117,6 +117,7 @@ private:
 
 	std::string                   m_name;
 	std::string                   m_type;
+	std::string                   m_moduleLogStr;
 
 	StatusCode                     m_returnStatusCode;
 }; 

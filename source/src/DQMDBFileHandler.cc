@@ -59,7 +59,7 @@ const std::string &DQMDBFileHandler::type() const
 
 StatusCode DQMDBFileHandler::download(const std::string &pattern)
 {
-	streamlog_out(ERROR) << "DQMDBFileHandler: Performing download step ... " << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "DQMDBFileHandler: Performing download step ... " )
 
 	m_localFileName = "";
 
@@ -89,8 +89,8 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 
 	if(invalidPattern)
 	{
-		streamlog_out(ERROR) << "DQMDBFileHandler: Invalid pattern => " << pattern << std::endl;
-		streamlog_out(ERROR) << "Expected pattern : 'HOST=hostname:USER=username:PWD=password:FILE=filename'" << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "DQMDBFileHandler: Invalid pattern => " << pattern )
+		LOG4CXX_ERROR( dqmMainLogger , "Expected pattern : 'HOST=hostname:USER=username:PWD=password:FILE=filename'" )
 
 		return STATUS_CODE_INVALID_PARAMETER;
 	}
@@ -100,10 +100,10 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 	const std::string password = pattern.substr(pwdStart+4, fileStart-1-pwdStart-4);
 	const std::string fileName = pattern.substr(fileStart+5);
 
-	streamlog_out(DEBUG) << "host : " << host << std::endl;
-	streamlog_out(DEBUG) << "user : " << user << std::endl;
-	streamlog_out(DEBUG) << "password : " << password << std::endl;
-	streamlog_out(DEBUG) << "fileName : " << fileName << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "Host : " << host )
+	LOG4CXX_DEBUG( dqmMainLogger , "User : " << user )
+	LOG4CXX_DEBUG( dqmMainLogger , "Password : " << password )
+	LOG4CXX_DEBUG( dqmMainLogger , "FileName : " << fileName )
 
 	if(m_pDBInterface->isConnected())
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pDBInterface->disconnect());
@@ -118,7 +118,7 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 
 	if(ret < 0)
 	{
-		streamlog_out(ERROR) << "Counldn't create tmp file for db download !" << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Counldn't create tmp file for db download !" )
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -129,7 +129,7 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 
 	if(!file.is_open())
 	{
-		streamlog_out(ERROR) << "Counldn't open tmp file for db download !" << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Counldn't open tmp file for db download !" )
 		m_localFileName = "";
 
 		return STATUS_CODE_FAILURE;

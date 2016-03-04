@@ -106,13 +106,13 @@ StatusCode DQMDimEventClient::performServiceConnection()
 
 	if(!serverRunning)
 	{
-		streamlog_out(WARNING) << "Server collector application not running yet" << std::endl;
+		LOG4CXX_WARN( dqmMainLogger , "Server collector application not running yet" );
 		return STATUS_CODE_SUCCESS;
 	}
 
 	// send command to register the client on the server
 	// the server is expected to update m_pClientIdInfo info with the client id
-	streamlog_out(MESSAGE) << "Registering client into server collector application !" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Registering client into server collector application !" );
 	DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 1);
 
 	return STATUS_CODE_SUCCESS;
@@ -285,7 +285,7 @@ void DQMDimEventClient::infoHandler()
 	{
 		int clientId = pInfo->getInt();
 
-		streamlog_out(MESSAGE) << "Client id on server : " << clientId << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , "Client id on server : " << clientId );
 
 		if(clientId <= 0)
 			return;
@@ -315,7 +315,7 @@ void DQMDimEventClient::infoHandler()
 			// client is not registered yet, we need to do it !
 			else
 			{
-				streamlog_out(MESSAGE) << "Registering client into event collector server application !" << std::endl;
+				LOG4CXX_INFO( dqmMainLogger , "Registering client into event collector server application !" );
 				DimClient::sendCommandNB(("DQM4HEP/EventCollector/" + this->getCollectorName() + "/CLIENT_REGISTRATION").c_str(), 1);
 				return;
 			}
@@ -325,7 +325,7 @@ void DQMDimEventClient::infoHandler()
 		else if(m_serverClientId > 0)
 		{
 			m_serverClientId = 0;
-			streamlog_out(MESSAGE) << "Unregistered from event collector server application !" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , "Unregistered from event collector server application !" );
 			return;
 		}
 	}
@@ -367,13 +367,13 @@ StatusCode DQMDimEventClient::eventReception(dqm_char *pBuffer, dqm_uint bufferS
 
 	m_pReadBuffer->setOwner(false);
 
-	streamlog_out(DEBUG) << "Receiving buffer of size " << bufferSize << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "Receiving buffer of size " << bufferSize );
 
 	// read event
 	DQMEvent *pEvent = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->read(pEvent, m_pReadBuffer));
 
-	streamlog_out(DEBUG) << "Pushing event in queue !" << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "Pushing event in queue !" );
 
 	// add it to event queue
 	this->pushEvent(pEvent);

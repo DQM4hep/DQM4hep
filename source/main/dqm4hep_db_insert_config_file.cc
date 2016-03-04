@@ -47,6 +47,7 @@ int main(int argc, char* argv[])
 {
 	std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
 	TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
+	std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
 
 	TCLAP::ValueArg<std::string> userArg(
 				  "u"
@@ -109,20 +110,42 @@ int main(int argc, char* argv[])
 				 , false);
 	pCommandLine->add(forceReplaceArg);
 
+	TCLAP::ValueArg<std::string> loggerConfigArg(
+				  "l"
+				 , "logger-config"
+				 , "The xml logger file to configure log4cxx"
+				 , false
+				 , log4cxx_file
+				 , "string");
+	pCommandLine->add(loggerConfigArg);
+
+	std::vector<std::string> allowedLevels;
+	allowedLevels.push_back("INFO");
+	allowedLevels.push_back("WARN");
+	allowedLevels.push_back("DEBUG");
+	allowedLevels.push_back("TRACE");
+	allowedLevels.push_back("ERROR");
+	allowedLevels.push_back("FATAL");
+	allowedLevels.push_back("OFF");
+	allowedLevels.push_back("ALL");
+	TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
+
 	TCLAP::ValueArg<std::string> verbosityArg(
 				  "v"
 				 , "verbosity"
-				 , "The verbosity used for this application"
+				 , "The verbosity level used for this application"
 				 , false
-				 , "MESSAGE"
-				 , "string");
+				 , "INFO"
+				 , &allowedLevelsContraint);
 	pCommandLine->add(verbosityArg);
 
 	// parse command line
 	pCommandLine->parse(argc, argv);
 
-	std::string verbosity = verbosityArg.getValue();
-	streamlog_init( "DB INSERT" , verbosity );
+	log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
+
+	if( verbosityArg.isSet() )
+		dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
 
 	DQMDBInterface *pDBInterface = NULL;
 
@@ -156,8 +179,6 @@ int main(int argc, char* argv[])
 			else
 				configFilePrimaryKey = fileArg.getValue();
 		}
-
-		streamlog_out(DEBUG) << "Config file key : " << configFilePrimaryKey << std::endl;
 
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDBInterface->insertConfigFile(fileArg.getValue(), configFilePrimaryKey,
 				fileDescriptionArg.getValue(), forceReplaceArg.getValue()));

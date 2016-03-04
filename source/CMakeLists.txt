@@ -133,7 +133,7 @@ INSTALL (
 # -------------------------------------------------
 # build examples
 
-IF( DQM4HEP_EXAMPLES )
+IF( BUILD_EXAMPLES )
 
     INCLUDE_DIRECTORIES( examples/module )
 

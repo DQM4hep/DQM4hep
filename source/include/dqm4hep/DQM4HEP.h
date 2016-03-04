@@ -161,9 +161,9 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if (statusCode Operator StatusCode1)				\
       {									\
-		  streamlog_out(WARNING) << #Command << " return " << dqm4hep::statusCodeToString(statusCode) << std::endl; \
-		  streamlog_out(WARNING) << "    in function: " << __FUNCTION__ << std::endl; \
-		  streamlog_out(WARNING) << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl; \
+		  LOG4CXX_ERROR( dqmMainLogger , #Command << " return " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
 		  return statusCode;						\
       }									\
   }
@@ -175,9 +175,9 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
       {									\
-    	streamlog_out(WARNING) << #Command << " return " << dqm4hep::statusCodeToString(statusCode) << std::endl; \
-    	streamlog_out(WARNING) << "    in function: " << __FUNCTION__ << std::endl; \
-    	streamlog_out(WARNING) << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl; \
+		  LOG4CXX_ERROR( dqmMainLogger , #Command << " return " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
 	    return statusCode;						\
       }									\
   }
@@ -189,9 +189,9 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if (statusCode Operator StatusCode1)				\
       {									\
-    	streamlog_out(WARNING) << #Command << " throw " << dqm4hep::statusCodeToString(statusCode) << std::endl; \
-    	streamlog_out(WARNING) << "    in function: " << __FUNCTION__ << std::endl; \
-    	streamlog_out(WARNING) << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl; \
+		  LOG4CXX_ERROR( dqmMainLogger , #Command << " throw " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
 	    throw dqm4hep::StatusCodeException(statusCode);			\
       }									\
   }
@@ -203,9 +203,9 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
       {									\
-    	streamlog_out(WARNING) << #Command << " throw " << dqm4hep::statusCodeToString(statusCode) << std::endl; \
-    	streamlog_out(WARNING) << "    in function: " << __FUNCTION__ << std::endl; \
-    	streamlog_out(WARNING) << "    in file:     " << __FILE__ << " line#: " << __LINE__ << std::endl; \
+		  LOG4CXX_ERROR( dqmMainLogger , #Command << " throw " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
 	    throw dqm4hep::StatusCodeException(statusCode);			\
       }									\
   }
@@ -237,7 +237,7 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
 //-------------------------------------------------------------------------------------------------
 
 #define NOTIFY_METHOD_CALLED \
-		streamlog_out(DEBUG) << "Method called : " << __FUNCTION__ << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger ,  "Method called : " << __FUNCTION__ );
 
 //-------------------------------------------------------------------------------------------------
 

@@ -139,7 +139,7 @@ StatusCode DQMDimEventCollector::startCollector()
 	m_pServerStateService = new DimService(("DQM4HEP/EventCollector/" + getCollectorName() + "/SERVER_STATE").c_str(), m_state);
 
 	// inform clients that the server is available for registrations
-	streamlog_out(MESSAGE) << "Changing server application to running !" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Changing server application to running !" );
 
 	DimServer::start( ("DQM4HEP/EventCollector/" + getCollectorName()).c_str() );
 
@@ -238,12 +238,11 @@ void DQMDimEventCollector::handleEventReception(DimCommand *pDimCommand)
 		if(NULL != pEvent)
 			delete pEvent;
 
-		streamlog_out(ERROR) << "Couldn't deserialize the buffer : " << exception.getStatusCode() << std::endl;
-
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't deserialize the buffer : " << exception.getStatusCode() );
 		return;
 	}
 
-	streamlog_out(DEBUG) << "Event received !" << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "Event received" );
 
 	this->updateEventService();
 }
@@ -356,7 +355,7 @@ void DQMDimEventCollector::commandHandler()
 		if(registerClient)
 		{
 			Client &client = getClient(clientId);
-			streamlog_out(DEBUG) << "Client " << clientId << " added to server !" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , "Client " << clientId << " added to server !" );
 
 			int clientIds[2];
 			clientIds[0] = clientId;
@@ -391,19 +390,19 @@ void DQMDimEventCollector::updateEventService()
 	// event available ?
 	if(NULL == m_pBuffer)
 	{
-		streamlog_out(DEBUG) << "Buffer device is null" << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Buffer device is null" );
 		return;
 	}
 
 	if(NULL == m_pBuffer->getBuffer())
 	{
-		streamlog_out(DEBUG) << "Buffer is null" << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Buffer is null" );
 		return;
 	}
 
 	if( 0 == m_pBuffer->getBufferSize() )
 	{
-		streamlog_out(DEBUG) << "Buffer position is 0" << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Buffer position is 0" );
 		return;
 	}
 
@@ -416,10 +415,7 @@ void DQMDimEventCollector::updateEventService()
 	{
 		// check for update mode
 		if(!iter->second.m_updateMode)
-		{
-			streamlog_out(DEBUG) << "Client id " << iter->first << " not in update mode" << std::endl;
 			continue;
-		}
 
 		// specific case where the client has queried a sub part of the event
 		if(!iter->second.m_subEventIdentifier.empty()
@@ -430,7 +426,7 @@ void DQMDimEventCollector::updateEventService()
 
 			if(STATUS_CODE_SUCCESS != m_pEventStreamer->write(m_pCurrentEvent, iter->second.m_subEventIdentifier, m_pSubEventBuffer))
 			{
-				streamlog_out(DEBUG) << "Couldn't write event" << std::endl;
+				LOG4CXX_WARN( dqmMainLogger , "Couldn't write event (sub event serialization)" );
 				continue;
 			}
 
@@ -444,7 +440,6 @@ void DQMDimEventCollector::updateEventService()
 			clientIdArray[0] = iter->first;
 			clientIdArray[1] = 0;
 
-			streamlog_out(DEBUG) << "Sending sub event '" << iter->second.m_subEventIdentifier <<  "' update to client id " << iter->first << " !" << std::endl;
 			m_pEventUpdateService->selectiveUpdateService((void *) pEventBuffer, bufferSize, &clientIdArray[0]);
 
 			continue;
@@ -456,7 +451,7 @@ void DQMDimEventCollector::updateEventService()
 
 	if(currentId != 0)
 	{
-		streamlog_out(DEBUG) << "Sending updates to " << currentId << " clients !" << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Sending updates to " << currentId << " clients !" );
 		m_pEventUpdateService->selectiveUpdateService((void *) m_pBuffer->getBuffer(), m_pBuffer->getBufferSize(), clientIds);
 	}
 
@@ -479,7 +474,7 @@ void DQMDimEventCollector::removeClient(int clientId)
 
 	m_clientMap.erase(findIter);
 
-	streamlog_out(MESSAGE) << "Client " << clientId << " removed from server !" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Client " << clientId << " removed from server !" );
 }
 
 //-------------------------------------------------------------------------------------------------

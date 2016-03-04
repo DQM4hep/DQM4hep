@@ -72,7 +72,7 @@ StatusCode DQMDBInterface::connect()
 
 		if(!m_pMySQL)
 		{
-			streamlog_out(ERROR) << "Couldn't create mysql instance : " << mysql_error(m_pMySQL) << std::endl;
+			LOG4CXX_ERROR( dqmMainLogger , "Couldn't create mysql instance : " << mysql_error(m_pMySQL) );
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 		}
 
@@ -80,7 +80,7 @@ StatusCode DQMDBInterface::connect()
 		if(NULL == mysql_real_connect(m_pMySQL, m_host.c_str(), m_user.c_str(), m_password.c_str(),
 		                         NULL, 0, NULL, 0))
 		{
-			streamlog_out(ERROR) << "Couldn't initialize mysql connection : " << mysql_error(m_pMySQL) << std::endl;
+			LOG4CXX_ERROR( dqmMainLogger , "Couldn't initialize mysql connection : " << mysql_error(m_pMySQL) );
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 		}
 
@@ -184,7 +184,7 @@ StatusCode DQMDBInterface::queryRaw(const std::string &query, void *&pResult)
 
 	if(mysql_query(m_pMySQL, query.c_str()))
 	{
-		streamlog_out(ERROR) << "MySQL query failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -192,7 +192,7 @@ StatusCode DQMDBInterface::queryRaw(const std::string &query, void *&pResult)
 
 	if(!pMySQLResult)
 	{
-		streamlog_out(ERROR) << "MySQL store result failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -217,7 +217,7 @@ StatusCode DQMDBInterface::execute(const std::string &query)
 
 	if(mysql_query(m_pMySQL, query.c_str()))
 	{
-		streamlog_out(ERROR) << "MySQL query failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -323,7 +323,7 @@ StatusCode DQMDBInterface::insertConfigFile(const std::string &localFileName, co
 
 	if(!ifile.is_open())
 	{
-		streamlog_out(ERROR) << "Couln't open file '" << localFileName << "' !" << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couln't open file '" << localFileName << "' !" );
 		return STATUS_CODE_FAILURE;
 	}
 

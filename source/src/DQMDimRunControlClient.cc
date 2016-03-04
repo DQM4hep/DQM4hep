@@ -172,13 +172,13 @@ void DQMDimRunControlClient::infoHandler()
 		}
 		catch(StatusCodeException &exception)
 		{
-			streamlog_out(WARNING) << "Couldn't stop the run (at stop) : " << exception.toString() << std::endl;
+			LOG4CXX_WARN( dqmMainLogger , "Couldn't stop the run (at stop) : " << exception.toString() );
 			return;
 		}
 	}
 	else
 	{
-		streamlog_out(WARNING) << "Unknown info handled by the run control client : " << pCurrentDimInfo->getName() << std::endl;
+		LOG4CXX_WARN( dqmMainLogger , "Unknown info handled by the run control client : " << pCurrentDimInfo->getName() );
 	}
 }
 

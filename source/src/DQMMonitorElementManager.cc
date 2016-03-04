@@ -188,7 +188,7 @@ StatusCode DQMMonitorElementManager::bookRealHistogram1D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -235,7 +235,7 @@ StatusCode DQMMonitorElementManager::bookIntHistogram1D(DQMMonitorElement *&pMon
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -282,7 +282,7 @@ StatusCode DQMMonitorElementManager::bookCharHistogram1D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -329,7 +329,7 @@ StatusCode DQMMonitorElementManager::bookShortHistogram1D(DQMMonitorElement *&pM
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -376,7 +376,7 @@ StatusCode DQMMonitorElementManager::bookRealHistogram2D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -423,7 +423,7 @@ StatusCode DQMMonitorElementManager::bookIntHistogram2D(DQMMonitorElement *&pMon
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -470,7 +470,7 @@ StatusCode DQMMonitorElementManager::bookCharHistogram2D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -517,7 +517,7 @@ StatusCode DQMMonitorElementManager::bookShortHistogram2D(DQMMonitorElement *&pM
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -564,7 +564,7 @@ StatusCode DQMMonitorElementManager::bookProfile1D(DQMMonitorElement *&pMonitorE
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pProfile)
 			delete pProfile;
@@ -611,7 +611,7 @@ StatusCode DQMMonitorElementManager::bookProfile2D(DQMMonitorElement *&pMonitorE
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pProfile)
 			delete pProfile;
@@ -655,7 +655,7 @@ StatusCode DQMMonitorElementManager::bookInt(DQMMonitorElement *&pMonitorElement
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -699,7 +699,7 @@ StatusCode DQMMonitorElementManager::bookFloat(DQMMonitorElement *&pMonitorEleme
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -743,7 +743,7 @@ StatusCode DQMMonitorElementManager::bookShort(DQMMonitorElement *&pMonitorEleme
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -787,7 +787,7 @@ StatusCode DQMMonitorElementManager::bookString(DQMMonitorElement *&pMonitorElem
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -825,7 +825,7 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pMonitorElement)
 			delete pMonitorElement;
@@ -871,7 +871,7 @@ StatusCode DQMMonitorElementManager::bookRealHistogram1D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -919,7 +919,7 @@ StatusCode DQMMonitorElementManager::bookIntHistogram1D(DQMMonitorElement *&pMon
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -967,7 +967,7 @@ StatusCode DQMMonitorElementManager::bookCharHistogram1D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -1015,7 +1015,7 @@ StatusCode DQMMonitorElementManager::bookShortHistogram1D(DQMMonitorElement *&pM
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -1063,7 +1063,7 @@ StatusCode DQMMonitorElementManager::bookRealHistogram2D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -1111,7 +1111,7 @@ StatusCode DQMMonitorElementManager::bookIntHistogram2D(DQMMonitorElement *&pMon
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -1159,7 +1159,7 @@ StatusCode DQMMonitorElementManager::bookCharHistogram2D(DQMMonitorElement *&pMo
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -1207,7 +1207,7 @@ StatusCode DQMMonitorElementManager::bookShortHistogram2D(DQMMonitorElement *&pM
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pHistogram)
 			delete pHistogram;
@@ -1255,7 +1255,7 @@ StatusCode DQMMonitorElementManager::bookProfile1D(DQMMonitorElement *&pMonitorE
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pProfile)
 			delete pProfile;
@@ -1303,7 +1303,7 @@ StatusCode DQMMonitorElementManager::bookProfile2D(DQMMonitorElement *&pMonitorE
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pProfile)
 			delete pProfile;
@@ -1347,7 +1347,7 @@ StatusCode DQMMonitorElementManager::bookInt(DQMMonitorElement *&pMonitorElement
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -1391,7 +1391,7 @@ StatusCode DQMMonitorElementManager::bookFloat(DQMMonitorElement *&pMonitorEleme
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -1435,7 +1435,7 @@ StatusCode DQMMonitorElementManager::bookShort(DQMMonitorElement *&pMonitorEleme
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -1479,7 +1479,7 @@ StatusCode DQMMonitorElementManager::bookString(DQMMonitorElement *&pMonitorElem
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pScalarObject)
 			delete pScalarObject;
@@ -1516,7 +1516,7 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
 
 		if(NULL != pMonitorElement)
 			delete pMonitorElement;
@@ -1978,7 +1978,6 @@ StatusCode DQMMonitorElementManager::registerQualityTestFactory(const std::strin
 	}
 
 	m_qualityTestFactoryMap[qualityTestFactoryName] = pQualityTestFactory;
-	streamlog_out(DEBUG) << "Quality test " << qualityTestFactoryName << " registered !" << std::endl;
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -2019,8 +2018,6 @@ StatusCode DQMMonitorElementManager::createQualityTest(TiXmlElement *const pXmlE
 		delete pQualityTest;
 		return exception.getStatusCode();
 	}
-
-	streamlog_out(DEBUG) << "Quality test: type '" << type << "' , name '" << name << "' created" << std::endl;
 
 	return STATUS_CODE_SUCCESS;
 }

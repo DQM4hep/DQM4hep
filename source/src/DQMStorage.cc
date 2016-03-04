@@ -62,14 +62,7 @@ StatusCode DQMStorage::mkdir(const std::string &dirName)
 	if(!path.isValid())
 		return STATUS_CODE_INVALID_PARAMETER;
 
-//	bool startFromRoot = dirName[0] == '/';
-//	DQMDirectory *pDirectory = startFromRoot ? m_pRootDir : m_pCurrentDir;
-
 	DQMDirectory *pDirectory = !path.isRelative() ? m_pRootDir : m_pCurrentDir;
-
-//	StringVector directoryList;
-//	DQM4HEP::tokenize(dirName, directoryList, "/");
-
 	StringVector directoryList = path.getSplitPath();
 
 	for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
@@ -111,14 +104,7 @@ StatusCode DQMStorage::cd(const std::string &dirName)
 	if(!path.isValid())
 		return STATUS_CODE_INVALID_PARAMETER;
 
-//	bool startFromRoot = dirName[0] == '/';
-//	DQMDirectory *pDirectory = startFromRoot ? m_pRootDir : m_pCurrentDir;
-
 	DQMDirectory *pDirectory = !path.isRelative() ? m_pRootDir : m_pCurrentDir;
-
-//	StringVector directoryList;
-//	DQM4HEP::tokenize(dirName, directoryList, "/");
-
 	StringVector directoryList = path.getSplitPath();
 
 	for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
@@ -217,14 +203,7 @@ StatusCode DQMStorage::findDir(const std::string &dirName, DQMDirectory *&pDirec
 	if(!path.isValid())
 		return STATUS_CODE_INVALID_PARAMETER;
 
-//	bool startFromRoot = dirName[0] == '/';
-//	DQMDirectory *pDirectory = startFromRoot ? m_pRootDir : m_pCurrentDir;
-
 	pDirectory = !path.isRelative() ? m_pRootDir : m_pCurrentDir;
-
-//	StringVector directoryList;
-//	DQM4HEP::tokenize(dirName, directoryList, "/");
-
 	StringVector directoryList = path.getSplitPath();
 
 	for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;

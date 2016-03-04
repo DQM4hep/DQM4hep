@@ -97,7 +97,7 @@ void DQM4HEP::screenSplash()
 	std::cout << "#   (Data Quality Monitoring For High Energy Physics)" << std::endl;
 	std::cout << "#" << std::endl;
 	std::cout << "#      Version    : " << DQM4HEP_VERSION_STR << std::endl;
-	std::cout << "#      Started at : " << pTimeStr << std::endl;
+	std::cout << "#      Started at : " << pTimeStr ;
 	std::cout << "#      Author     : R. Ete" << std::endl;
 	std::cout << "#      Mail       : <rete@ipnl.in2p3.fr> " << std::endl;
 	std::cout << "#" << std::endl;
@@ -159,7 +159,7 @@ scoped_lock::~scoped_lock()
 
 void printRawBuffer(char *pBuffer, int bufferSize)
 {
-	std::cout << "taille : " << bufferSize << " address : " << (void *)pBuffer << std::endl;
+	std::cout << "Size : " << bufferSize << " address : " << (void *)pBuffer << std::endl;
 
 	for(int i=0 ; i<bufferSize ; i++)
 	{

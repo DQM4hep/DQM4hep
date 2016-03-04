@@ -158,7 +158,7 @@ inline StatusCode DQMDBInterface::query(const std::string &query, T &result)
 
 	if(mysql_query(m_pMySQL, query.c_str()))
 	{
-		streamlog_out(ERROR) << "MySQL query failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -166,21 +166,17 @@ inline StatusCode DQMDBInterface::query(const std::string &query, T &result)
 
 	if(!pMySQLResult)
 	{
-		streamlog_out(ERROR) << "MySQL store result failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 
 	MYSQL_ROW row = mysql_fetch_row(pMySQLResult);
-
-	std::cout << "DQMDBInterface::query : MySQL row[0] = " << row[0] << std::endl;
 
 	if(!DQM4HEP::stringToType(row[0], result))
 	{
 		mysql_free_result(pMySQLResult);
 		return STATUS_CODE_FAILURE;
 	}
-
-	std::cout << "DQMDBInterface::query : MySQL result = " << result << std::endl;
 
 	mysql_free_result(pMySQLResult);
 
@@ -197,7 +193,7 @@ inline StatusCode DQMDBInterface::queryVector(const std::string &query, std::vec
 
 	if(mysql_query(m_pMySQL, query.c_str()))
 	{
-		streamlog_out(ERROR) << "MySQL query failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -205,7 +201,7 @@ inline StatusCode DQMDBInterface::queryVector(const std::string &query, std::vec
 
 	if(!pMySQLResult)
 	{
-		streamlog_out(ERROR) << "MySQL store result failed : " << mysql_error(m_pMySQL) << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
 		return STATUS_CODE_FAILURE;
 	}
 

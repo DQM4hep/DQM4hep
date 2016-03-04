@@ -47,7 +47,7 @@ DQMMonitorElementCollectorApplication *pApplication = NULL;
 // simple function to exit the program
 void exit_application(int returnCode)
 {
-	streamlog_out(MESSAGE) << "Exiting application !" << std::endl;
+	LOG4CXX_WARN( dqmMainLogger , "Exiting event collector application !" );
 
 	if(NULL != pApplication)
 		pApplication->exit( returnCode );
@@ -55,17 +55,20 @@ void exit_application(int returnCode)
 		exit(0);
 }
 
+//-------------------------------------------------------------------------------------------------
+
 // key interrupt signal handling
 void int_key_signal_handler(int signal)
 {
 	if(NULL == pApplication)
 		exit(0);
 
-	streamlog_out(WARNING) << "*** SIGN INT ***" << std::endl;
-
-	streamlog_out(MESSAGE) << "Caught signal " << signal << ". Stopping the application." << std::endl;
+	LOG4CXX_WARN( dqmMainLogger , "*** SIGN INT ***" );
+	LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
 	exit_application( static_cast<int>(STATUS_CODE_SUCCESS) );
 }
+
+//-------------------------------------------------------------------------------------------------
 
 // segmentation violation signal handling
 void seg_viol_signal_handling(int signal)
@@ -73,11 +76,13 @@ void seg_viol_signal_handling(int signal)
 	if(NULL == pApplication)
 		exit(1);
 
-	streamlog_out(MESSAGE) << "*** SEG VIOL ***" << std::endl;
-	streamlog_out(MESSAGE) << "Caught signal : " << signal << std::endl;
+	LOG4CXX_WARN( dqmMainLogger , "*** SIGN VIOL ***" );
+	LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
 	exit_application( static_cast<int>(STATUS_CODE_INVALID_PTR) );
 }
 
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
@@ -85,6 +90,7 @@ int main(int argc, char* argv[])
 
 	std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
 	TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4HEP_VERSION_STR);
+	std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
 
 	TCLAP::ValueArg<std::string> collectorNameArg(
 				  "c"
@@ -95,67 +101,74 @@ int main(int argc, char* argv[])
 				 , "string");
 	pCommandLine->add(collectorNameArg);
 
-	TCLAP::SwitchArg loadLibrariesArg(
+	TCLAP::ValueArg<std::string> loggerConfigArg(
 				  "l"
-				 , "load-libraries"
-				 , "Whether external libraries have to be loaded (DQM4HEP_PLUGIN_DLL env var)"
-				 , false);
-	pCommandLine->add(loadLibrariesArg);
+				 , "logger-config"
+				 , "The xml logger file to configure log4cxx"
+				 , false
+				 , log4cxx_file
+				 , "string");
+	pCommandLine->add(loggerConfigArg);
+
+	std::vector<std::string> allowedLevels;
+	allowedLevels.push_back("INFO");
+	allowedLevels.push_back("WARN");
+	allowedLevels.push_back("DEBUG");
+	allowedLevels.push_back("TRACE");
+	allowedLevels.push_back("ERROR");
+	allowedLevels.push_back("FATAL");
+	allowedLevels.push_back("OFF");
+	allowedLevels.push_back("ALL");
+	TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
 
 	TCLAP::ValueArg<std::string> verbosityArg(
 				  "v"
 				 , "verbosity"
-				 , "The verbosity used for this application"
+				 , "The verbosity level used for this application"
 				 , false
-				 , "MESSAGE"
-				 , "string");
+				 , "INFO"
+				 , &allowedLevelsContraint);
 	pCommandLine->add(verbosityArg);
 
 	// parse command line
 	std::cout << "dqm4hep_start_monitor_element_collector: Parsing command line ..." << std::endl;
 	pCommandLine->parse(argc, argv);
 
-	std::string collectorNameToUpper(collectorNameArg.getValue());
-	std::string verbosity = verbosityArg.getValue();
+	log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
 
-	std::transform(collectorNameToUpper.begin(), collectorNameToUpper.end(), collectorNameToUpper.begin(), ::toupper);
-	std::string applicationNameToUpper = "DQM4HEP MONITOR ELEMENT COLLECTOR " + collectorNameToUpper;
-	streamlog_init( applicationNameToUpper , verbosity );
+	if( verbosityArg.isSet() )
+		dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
 
 	// install signal handlers
-	streamlog_out(MESSAGE) << "Installing signal handlers ... " << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
 	signal(SIGINT,  int_key_signal_handler);
 	signal(SIGSEGV, seg_viol_signal_handling);
 
-	streamlog_out(MESSAGE) << "Creating application ... " << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Creating monitor element collector application ..." );
 
 	try
 	{
-		if(loadLibrariesArg.getValue())
-		{
-			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->loadLibraries());
-		}
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->loadLibraries());
 
 		pApplication = new DQMMonitorElementCollectorApplication();
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->setCollectorName(collectorNameArg.getValue()));
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "StatusCodeException caught : " << exception.toString() << std::endl;
+		LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
 		exit_application( exception.getStatusCode() );
 	}
 
-	streamlog_out(MESSAGE) << "Creating application ... OK" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Creating application ... OK" );
+	LOG4CXX_INFO( dqmMainLogger , "Running application ... " );
 
-
-	streamlog_out(MESSAGE) << "Running application ... " << std::endl;
 	try
 	{
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->run());
 	}
 	catch(StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "StatusCodeException caught : " << exception.toString() << std::endl;
+		LOG4CXX_FATAL( dqmMainLogger ,  "StatusCodeException caught : " << exception.toString() );
 		exit_application( exception.getStatusCode() );
 	}
 

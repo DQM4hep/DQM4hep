@@ -29,8 +29,6 @@
 #ifndef DQMLOGGING_H
 #define DQMLOGGING_H
 
-#include "streamlog/streamlog.h"
-
 // -- log4cxx headers
 #include <log4cxx/logger.h>
 #include <log4cxx/xml/domconfigurator.h>
@@ -39,57 +37,6 @@ namespace dqm4hep
 {
 
 static log4cxx::LoggerPtr dqmMainLogger(log4cxx::Logger::getLogger("main"));
-
-#define streamlog_init( head , verbosity ) \
-    streamlog::out.init(std::cout, head ); \
-    streamlog::out.addLevelName<streamlog::DEBUG>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG0>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG1>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG2>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG3>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG4>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG5>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG6>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG7>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG8>() ; \
-    streamlog::out.addLevelName<streamlog::DEBUG9>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE0>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE1>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE2>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE3>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE4>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE5>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE6>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE7>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE8>() ; \
-    streamlog::out.addLevelName<streamlog::MESSAGE9>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING0>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING1>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING2>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING3>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING4>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING5>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING6>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING7>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING8>() ; \
-    streamlog::out.addLevelName<streamlog::WARNING9>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR0>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR1>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR2>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR3>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR4>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR5>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR6>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR7>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR8>() ; \
-    streamlog::out.addLevelName<streamlog::ERROR9>() ; \
-    streamlog::out.addLevelName<streamlog::SILENT>() ; \
-	streamlog::logscope scope(streamlog::out);\
-	scope.setLevel(verbosity);
-
 
 }
 

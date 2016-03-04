@@ -276,8 +276,6 @@ void DQMRunControlService::handleCurrentRunRpc(DimRpc *pRpc)
 	if(!this->isRunning())
 		return;
 
-	std::cout << "Handling current run rpc !" << std::endl;
-
 	try
 	{
 		// if running send the current run
@@ -309,7 +307,7 @@ void DQMRunControlService::handleCurrentRunRpc(DimRpc *pRpc)
 	}
 	catch(StatusCodeException &exception)
 	{
-		std::cout << "Couldn't send back current run : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't send back current run : " << exception.toString() );
 	}
 }
 

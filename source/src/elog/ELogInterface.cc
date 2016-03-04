@@ -275,7 +275,7 @@ int ELog::processELogCommand() const
 
 	command << " \"" << m_message << "\"";
 
-	streamlog_out(MESSAGE) << "Processing logbook command : '" << command.str() << "'" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Processing logbook command : '" << command.str() << "'" );
 	return system(command.str().c_str());
 }
 

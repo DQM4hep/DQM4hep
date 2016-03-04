@@ -209,7 +209,7 @@ StatusCode DQMMonitorElementClient::queryAvailableMonitorElements(const DQMMonit
 
 	if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , request ) )
 	{
-		streamlog_out(DEBUG) << "Couldn't write available list request" << std::endl;
+		LOG4CXX_WARN( dqmMainLogger , "Couldn't write available list request" );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -231,7 +231,7 @@ StatusCode DQMMonitorElementClient::querySubscribedMonitorElements(const DQMMoni
 
 	if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , request ) )
 	{
-		streamlog_out(DEBUG) << "Couldn't write subscribed list request" << std::endl;
+		LOG4CXX_WARN( dqmMainLogger , "Couldn't write subscribed list request" );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -258,18 +258,12 @@ StatusCode DQMMonitorElementClient::subscribe(const DQMMonitorElementRequest &re
 	if(!isConnectedToService())
 		return STATUS_CODE_NOT_ALLOWED;
 
-	for(DQMMonitorElementRequest::const_iterator iter = request.begin(), endIter = request.end() ;
-			endIter != iter ; ++iter)
-	{
-		std::cout << "Sending subscription : " << iter->first << " , " << iter->second << std::endl;
-	}
-
 	// serialize the request
 	m_pOutBuffer->reset();
 
 	if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , request ) )
 	{
-		streamlog_out(DEBUG) << "Couldn't write me subscription request" << std::endl;
+		LOG4CXX_WARN( dqmMainLogger , "Couldn't write me subscription request" );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -292,7 +286,7 @@ StatusCode DQMMonitorElementClient::unsubscribe(const DQMMonitorElementRequest &
 
 	if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , request ) )
 	{
-		streamlog_out(DEBUG) << "Couldn't write me un-subscription request" << std::endl;
+		LOG4CXX_WARN( dqmMainLogger , "Couldn't write me un-subscription request" );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -452,7 +446,7 @@ void DQMMonitorElementClient::infoHandler()
 {
 	DimInfo *pInfo = getInfo();
 
-	std::cout << "Received info : " << pInfo->getName() << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "Received info : " << pInfo->getName() );
 
 	if(pInfo == m_pMeUpdateInfo)
 	{
@@ -481,19 +475,19 @@ void DQMMonitorElementClient::infoHandler()
 		}
 		catch(StatusCodeException &exception)
 		{
-			streamlog_out(WARNING) << "Couldn't receive monitor element publication: " << exception.toString() << std::endl;
+			LOG4CXX_WARN( dqmMainLogger , "Couldn't receive monitor element publication: " << exception.toString() );
 		}
 		catch(...)
 		{
 		}
 
-		std::cout << "Clearing publication !" << std::endl;
 		this->clearPublication(monitorElementPublication);
 	}
 	else if(pInfo == m_pCollectorStateInfo)
 	{
 		bool isCollectorRunning = static_cast<bool>(m_pCollectorStateInfo->getInt());
-		std::cout << "Received collector state : " << isCollectorRunning << std::endl;
+
+		LOG4CXX_INFO( dqmMainLogger , "Received collector state : " << isCollectorRunning );
 
 		if(isCollectorRunning == m_isCollectorRunning)
 			return;

@@ -59,7 +59,7 @@ DQMModuleApplication::~DQMModuleApplication()
 
 StatusCode DQMModuleApplication::exit( int returnCode )
 {
-	streamlog_out(MESSAGE) << "Exiting application ..." << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Exiting module application ..." );
 
 	if(!this->isInitialized())
 		return STATUS_CODE_NOT_INITIALIZED;
@@ -71,7 +71,7 @@ StatusCode DQMModuleApplication::exit( int returnCode )
 
 	this->setStopApplication(true);
 
-	streamlog_out(MESSAGE) << "Exiting application ... OK" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Exiting module application ... OK" );
 
 	return m_returnCode;
 }

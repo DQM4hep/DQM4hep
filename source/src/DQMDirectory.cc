@@ -64,14 +64,14 @@ void DQMDirectory::ls(bool recursive) const
 	int depth = 0;
 	std::string parentDirName = m_pParentDir == NULL ? "\"\"" : m_pParentDir->m_name;
 
-	streamlog_out(MESSAGE) << "Directory " << m_name << " (parent = " << parentDirName << ") :" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Directory " << m_name << " (parent = " << parentDirName << ") :" );
 
 	// print contents first
 	for(std::vector<DQMMonitorElement*>::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
 			endIter != iter ; ++iter)
 	{
 		DQMMonitorElement *pMonitorElement = *iter;
-		streamlog_out(MESSAGE) << " [ME]  " << pMonitorElement->getName() << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , " [ME]  " << pMonitorElement->getName() );
 	}
 
 	// print sub-directories
@@ -86,11 +86,11 @@ void DQMDirectory::ls(bool recursive) const
 		}
 		else
 		{
-			streamlog_out(MESSAGE) << " [DIR] " << pDirectory->m_name << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , " [DIR] " << pDirectory->m_name );
 		}
 	}
 
-	streamlog_out(MESSAGE) << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "" );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -293,8 +293,6 @@ StatusCode DQMDirectory::clear(bool deepClean)
 
 	m_contentsList.clear();
 
-
-
 	for(std::vector<DQMDirectory*>::iterator iter = m_directoryList.begin(), endIter = m_directoryList.end() ;
 			endIter != iter ; ++iter)
 	{
@@ -339,14 +337,14 @@ void DQMDirectory::ls(int depth) const
 {
 	std::string parentDirName = m_pParentDir == NULL ? "\"\"" : m_pParentDir->m_name;
 
-	streamlog_out(MESSAGE) << std::string(depth*3, ' ') << "Directory " << m_name << " (parent = " << parentDirName << ") :" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , std::string(depth*3, ' ') << "Directory " << m_name << " (parent = " << parentDirName << ") :" );
 
 	// print contents first
 	for(std::vector<DQMMonitorElement*>::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
 			endIter != iter ; ++iter)
 	{
 		DQMMonitorElement *pMonitorElement = *iter;
-		streamlog_out(MESSAGE) << std::string(depth*3, ' ') << " [ME]  " << pMonitorElement->getName() << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , std::string(depth*3, ' ') << " [ME]  " << pMonitorElement->getName() );
 	}
 
 	// print sub dirs

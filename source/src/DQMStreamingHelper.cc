@@ -52,8 +52,6 @@ xdrstream::Status DQMStreamingHelper::read( xdrstream::IODevice *pDevice, DQMPub
 	uint32_t mapSize = 0;
 	XDR_STREAM( pDevice->read( & mapSize ) );
 
-	streamlog_out(DEBUG) << "Read publication size : " << mapSize << std::endl;
-
 	for(uint32_t i=0 ; i<mapSize ; i++)
 	{
 		std::string moduleName;
@@ -64,8 +62,6 @@ xdrstream::Status DQMStreamingHelper::read( xdrstream::IODevice *pDevice, DQMPub
 
 		DQMPublication::value_type value(moduleName, DQMMonitorElementList());
 		DQMPublication::iterator iter = publication.insert(value).first;
-
-		streamlog_out(DEBUG) << "Module => " << moduleName << " " << meListSize << " MEs" << std::endl;
 
 		for(unsigned int i=0 ; i<meListSize ; i++)
 		{
@@ -79,8 +75,6 @@ xdrstream::Status DQMStreamingHelper::read( xdrstream::IODevice *pDevice, DQMPub
 
 			iter->second.push_back(pMonitorElement);
 		}
-
-		streamlog_out(DEBUG) << "Final read size is " << iter->second.size() << std::endl;
 	}
 
 	return xdrstream::XDR_SUCCESS;

@@ -98,7 +98,7 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 	// if nothing to send, log and return
 	if(subscribedMeList.empty())
 	{
-		streamlog_out(MESSAGE) << "No monitor element sent !" << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , "No monitor element sent !" );
 		return STATUS_CODE_SUCCESS;
 	}
 
@@ -109,15 +109,15 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 					DQMPublication::value_type(moduleName, DQMMonitorElementList() ) ).first;
 
 	// build the publication to send
-	streamlog_out(DEBUG) << "N subscribed me : " << subscribedMeList.size() << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "N subscribed me : " << subscribedMeList.size() );
 
 	for(StringSet::iterator iter = subscribedMeList.begin(), endIter = subscribedMeList.end() ;
 			endIter != iter ; ++iter)
 	{
 		size_t pos = iter->find_last_of('/');
 
-		streamlog_out(DEBUG) << "Full me name : " << *iter << std::endl;
-		streamlog_out(DEBUG) << "Last of / pos : " << pos << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger , "Full me name : " << *iter );
+		LOG4CXX_DEBUG( dqmMainLogger , "Last of / pos : " << pos );
 
 		std::string path;
 		std::string meName;
@@ -133,7 +133,7 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 			meName = iter->substr(pos+1);
 		}
 
-		streamlog_out(DEBUG) << "Me path : " << path << " , name : " << meName << std::endl;
+		LOG4CXX_DEBUG( dqmMainLogger ,"Me path : " << path << " , name : " << meName );
 
 		if(path.empty() || meName.empty())
 			continue;
@@ -143,15 +143,13 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 		if(STATUS_CODE_SUCCESS !=  DQMModuleApi::getMonitorElement(m_pApplication->getModule(), path, meName, pMonitorElement))
 			continue;
 
-		streamlog_out(DEBUG) << "Found !!" << std::endl;
-
 		publicationIter->second.push_back(pMonitorElement);
 	}
 
 	if(publication.empty())
 		return STATUS_CODE_SUCCESS;
 
-	streamlog_out(MESSAGE) << "Number of monitor element sent : " << publicationIter->second.size() << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Number of monitor element sent : " << publicationIter->second.size() );
 
 	// write module name
 	if( xdrstream::XDR_SUCCESS != m_pOutBuffer->write( & moduleName ) )
@@ -215,7 +213,7 @@ void DQMMonitorElementSender::infoHandler()
 {
 	DimInfo *pInfo = getInfo();
 
-	streamlog_out(DEBUG) << "Received info : " << pInfo->getName() << std::endl;
+	LOG4CXX_DEBUG( dqmMainLogger , "Received info : " << pInfo->getName() );
 
 	if(pInfo == m_pSubscribedListInfo)
 	{
@@ -236,13 +234,13 @@ void DQMMonitorElementSender::infoHandler()
 
 		if( ! XDR_TESTBIT( DQMStreamingHelper::read( m_pInBuffer , subscribedMeList ) , xdrstream::XDR_SUCCESS ) )
 		{
-			streamlog_out(DEBUG) << "Couldn't read subscribed list" << std::endl;
+			LOG4CXX_ERROR( dqmMainLogger , "Couldn't read subscribed list" );
 			return;
 		}
 
 		// update the list
 		pthread_mutex_lock(&m_mutex);
-		std::cout << "Received subscribed list size : " << subscribedMeList.size() << std::endl;
+		LOG4CXX_INFO( dqmMainLogger , "Received subscribed list size : " << subscribedMeList.size() );
 		m_subscribedMeList.clear();
 		m_subscribedMeList.insert( subscribedMeList.begin(), subscribedMeList.end() );
 		pthread_mutex_unlock(&m_mutex);
@@ -251,7 +249,7 @@ void DQMMonitorElementSender::infoHandler()
 	{
 		if(m_pCollectorStateInfo->getInt() == RUNNING_STATE)
 		{
-			streamlog_out(DEBUG) << "Force update available list on next EOC !" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , "Force update available list on next EOC !" );
 
 			pthread_mutex_lock(&m_mutex);
 			m_sendAvailableMeList = true;
@@ -259,7 +257,7 @@ void DQMMonitorElementSender::infoHandler()
 		}
 		else if(m_pCollectorStateInfo->getInt() == STOPPED_STATE)
 		{
-			streamlog_out(DEBUG) << "Server is down -> Clearing subscribed me list !" << std::endl;
+			LOG4CXX_WARN( dqmMainLogger , "Server is down -> Clearing subscribed me list !" );
 
 			pthread_mutex_lock(&m_mutex);
 			m_subscribedMeList.clear();
@@ -293,8 +291,6 @@ void DQMMonitorElementSender::addAvailableMonitorElement(DQMMonitorElement *pMon
 	ret.first->second[DQMKey::ME_TYPE] = monitorElementTypeToString(pMonitorElement->getType());
 	ret.first->second[DQMKey::ME_NAME] = pMonitorElement->getName();
 	ret.first->second[DQMKey::ME_DESCRIPTION] = pMonitorElement->getDescription();
-
-	std::cout << "me : " << pMonitorElement->getName() << " added in sender" << std::endl;
 
 	// for future update on the collector side
 	m_sendAvailableMeList = true;
@@ -349,7 +345,7 @@ void DQMMonitorElementSender::sendAvailableMonitorElementList()
 	}
 	catch(const StatusCodeException &exception)
 	{
-		streamlog_out(ERROR) << "Couldn't send available monitor element info list : " << exception.toString() << std::endl;
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't send available monitor element info list : " << exception.toString() );
 	}
 }
 
