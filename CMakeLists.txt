@@ -33,7 +33,6 @@ SET( DQM4ILC_repository             "https://github.com/DQM4HEP/DQM4ILC.git" )
 SET( JsonCpp_repository             "https://github.com/open-source-parsers/jsoncpp.git" )
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/mirabitl/dimjc.git" )
-SET( streamlog_repository           "https://github.com/DQM4HEP/streamlog" )
 
 # the external project in used are 
 # set gradually along the CMakeLists.txt
@@ -46,7 +45,6 @@ SET( DQMViz_package_depends "" )
 SET( jsoncpp_package_depends "" )
 SET( dim_package_depends "" )
 SET( dimjc_package_depends "" )
-SET( streamlog_package_depends "streamlog" )
 
 # ----- additional cmake args -----
 IF ( NOT APPLE )
@@ -144,15 +142,6 @@ ENDIF()
 
 
 
-# ----- streamlog package -----
-ExternalProject_Add( streamlog
-    GIT_REPOSITORY "${streamlog_repository}"
-    CMAKE_ARGS ${common_cmake_args}
-    PREFIX streamlog
-    LIST_SEPARATOR %
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/streamlog
-)
-
 # ----- xdrstream package -----
 ExternalProject_Add( xdrstream
     GIT_REPOSITORY ${xdrstream_repository}
@@ -185,6 +174,15 @@ IF ( NOT DIM_FOUND )
 	
 	SET( dim_package_depends "dim" )
 ENDIF ()
+
+
+# ----- LOG4CXX package -----
+FIND_PACKAGE( LOG4CXX REQUIRED )
+
+IF( NOT LOG4CXX_FOUND )
+	MESSAGE( SEND_ERROR "LOG4CXX not found and required !" )
+	MESSAGE( "Please install it (sudo apt-get install liblog4cxx10-dev)" )
+ENDIF()
 
 
 SET( DQMCore_additional_cmake_args 
@@ -220,7 +218,7 @@ SET( DQM4ILC_additional_cmake_args
 
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS ${dim_package_depends} ${streamlog_package_depends} ${xdrstream_package_depends}
+    DEPENDS ${dim_package_depends} ${xdrstream_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
@@ -295,8 +293,7 @@ IF( BUILD_DQM4ILC )
         DEPENDS 
         	${xdrstream_package_depends}
         	${xdrlcio_package_depends} 
-        	${DQMCore_package_depends} 
-        	${streamlog_package_depends}
+        	${DQMCore_package_depends}
         GIT_REPOSITORY ${DQM4ILC_repository}
         GIT_TAG ${DQM4ILC_version}
         CMAKE_ARGS ${common_cmake_args} ${DQM4ILC_additional_cmake_args}
@@ -318,7 +315,6 @@ IF( BUILD_DQMVIZ )
         	${dim_package_depends} 
         	${jsoncpp_package_depends} 
         	${dimjc_package_depends}
-        	${streamlog_package_depends} 
         	${xdrstream_package_depends}
         GIT_REPOSITORY ${DQMViz_repository}
         GIT_TAG ${DQMViz_version}
