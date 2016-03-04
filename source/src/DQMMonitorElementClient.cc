@@ -426,7 +426,7 @@ void DQMMonitorElementClient::handleMeListNameRpcInfo(DimRpcInfo *pRpcInfo)
 		DQMMonitorElementInfoList monitorElementInfoList;
 
 		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , monitorElementInfoList ) )
-			return;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
 				endIter != iter ; ++iter)
@@ -434,6 +434,7 @@ void DQMMonitorElementClient::handleMeListNameRpcInfo(DimRpcInfo *pRpcInfo)
 	}
 	catch(StatusCodeException &exception)
 	{
+		LOG4CXX_ERROR( dqmMainLogger , "handleMeListNameRpcInfo(): Exception caught : " << exception.toString() );
 	}
 	catch(...)
 	{
@@ -467,7 +468,7 @@ void DQMMonitorElementClient::infoHandler()
 
 			// deserialize and call the user call back function
 			if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , monitorElementPublication ) )
-				return;
+				throw StatusCodeException(STATUS_CODE_FAILURE);
 
 			for(std::vector<DQMMonitorElementClientListener *>::iterator iter = m_listeners.begin(), endIter = m_listeners.end() ;
 					endIter != iter ; ++iter)

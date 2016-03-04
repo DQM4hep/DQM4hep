@@ -731,11 +731,12 @@ void DQMMonitorElementCollector::handleAvailableListUpdate(DimCommand *pCommand)
 		dqm_uint bufferSize = pCommand->getSize();
 
 		if(NULL == pBuffer || 0 == bufferSize)
+		{
+			LOG4CXX_WARN( dqmMainLogger , "handleAvailableListUpdate(): invalid buffer");
 			return;
+		}
 
 		this->configureInBuffer( pBuffer , bufferSize );
-
-		printRawBuffer( pBuffer , bufferSize );
 
 		// read the buffer
 		std::string moduleName;
@@ -745,7 +746,7 @@ void DQMMonitorElementCollector::handleAvailableListUpdate(DimCommand *pCommand)
 		LOG4CXX_DEBUG( dqmMainLogger , "handleAvailableListUpdate(): module name = " << moduleName );
 
 		if(moduleName.empty())
-			return;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		DQMMonitorElementInfoList availableMeList;
 
@@ -764,6 +765,7 @@ void DQMMonitorElementCollector::handleAvailableListUpdate(DimCommand *pCommand)
 
 		// update the entry
 		findIter->second->setAvailableMeList(availableMeList);
+
 		LOG4CXX_DEBUG( dqmMainLogger , "Received " << availableMeList.size() << " available element from module " << moduleName );
 
 		if(newClient)
@@ -1276,13 +1278,13 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 	try
 	{
 		if(!m_pCollector->isRunning())
-			return;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		dqm_char *pBuffer = static_cast<dqm_char *>(getData());
 		dqm_uint bufferSize = getSize();
 
 		if(NULL == pBuffer || 0 == bufferSize)
-			return;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		m_pCollector->configureInBuffer( pBuffer , bufferSize );
 		DQMMonitorElementListNameRequest request;
@@ -1344,13 +1346,16 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 		m_pCollector->m_pOutBuffer->reset();
 
 		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pCollector->m_pOutBuffer , infoList ) )
-			return;
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Sending back request !" )
 
 		// and set it as data to send back
 		setData((void*) m_pCollector->m_pOutBuffer->getBuffer(), m_pCollector->m_pOutBuffer->getPosition());
 	}
 	catch(StatusCodeException &exception)
 	{
+		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Exception caught : " << exception.toString() )
 	}
 	catch(...)
 	{
