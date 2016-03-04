@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+  <!-- Output the log message to system console.
+    -->
+  <appender name="appxConsoleAppender" class="org.apache.log4j.ConsoleAppender">    
+    <param name="Target" value="System.out"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d [%-5p] - %m%n"/>
+        </layout>
+  </appender>
+
+
+  <appender name="ChainsawAppenderXML" class="org.apache.log4j.XMLSocketAppender">
+        <param name="RemoteHost" value="127.0.0.1"/>
+        <param name="Port" value="4448" />
+        <layout class="org.apache.log4j.xml.XMLLayout">
+           <param name="properties" value="true" />
+           <param name="locationinfo" value="true" />
+        </layout>
+  </appender>
+
+  <root>
+        <priority value="all" />
+        <appender-ref ref="ChainsawAppenderXML"/>
+        <appender-ref ref="appxConsoleAppender"/>
+  </root>
+
+ </log4j:configuration>
