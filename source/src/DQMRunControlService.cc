@@ -29,6 +29,7 @@
 #include "dqm4hep/DQMRunControlService.h"
 #include "dqm4hep/DQMRunControl.h"
 #include "dqm4hep/DQMRun.h"
+#include "dqm4hep/DQMLogging.h"
 
 namespace dqm4hep
 {

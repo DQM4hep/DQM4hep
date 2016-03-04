@@ -28,6 +28,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMMonitorElementCollectorApplication.h"
 #include "dqm4hep/DQMMonitorElementCollector.h"
+#include "dqm4hep/DQMLogging.h"
 
 // -- dim headers
 #include "dis.hxx"

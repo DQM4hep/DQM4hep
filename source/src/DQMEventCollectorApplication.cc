@@ -29,6 +29,7 @@
 #include "dqm4hep/DQMEventCollectorApplication.h"
 #include "dqm4hep/DQMEventCollector.h"
 #include "dqm4hep/DQMEventCollectorImp.h"
+#include "dqm4hep/DQMLogging.h"
 
 namespace dqm4hep
 {

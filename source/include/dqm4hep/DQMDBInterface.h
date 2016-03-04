@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/DQMLogging.h"
 
 // -- mysql headers
 #include <mysql.h>

@@ -32,6 +32,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/tinyxml.h"
+#include "dqm4hep/DQMLogging.h"
 
 namespace dqm4hep
 {

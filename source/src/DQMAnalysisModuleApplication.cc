@@ -45,6 +45,7 @@
 #include "dqm4hep/DQMDimRunControlClient.h"
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/tinyxml.h"
+#include "dqm4hep/DQMLogging.h"
 
 // -- std headers
 #include <fstream>

@@ -28,6 +28,7 @@
 #include "dqm4hep/DQMPlugin.h"
 #include "dqm4hep/DQMPluginManager.h"
 #include "dqm4hep/DQMVersion.h"
+#include "dqm4hep/DQMLogging.h"
 
 namespace dqm4hep
 {

@@ -67,7 +67,6 @@
 
 // -- dqm4hep headers
 #include "DQMCoreConfig.h"
-#include "dqm4hep/DQMLogging.h"
 
 //-------------------------------------------------------------------------------------------------
 

@@ -27,6 +27,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMMonitorElement.h"
+#include "dqm4hep/DQMLogging.h"
 
 // -- root headers
 #include "TObject.h"
