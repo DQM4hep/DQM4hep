@@ -132,7 +132,7 @@ StatusCode RandomModule::readSettings(const TiXmlHandle xmlHandle)
 	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMModuleApi::registerQualityTestFactory(this,
 			"RandomQualityTest", new RandomQualityTest::Factory()));
 
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- readSettings()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- readSettings()" );
 
 	m_histoXMin = -400;
 	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
@@ -162,7 +162,7 @@ StatusCode RandomModule::readSettings(const TiXmlHandle xmlHandle)
 
 StatusCode RandomModule::initModule()
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- init()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- init()" );
 
 	srand(time(NULL));
 
@@ -285,7 +285,7 @@ StatusCode RandomModule::initModule()
 
 StatusCode RandomModule::endModule()
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- end()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- end()" );
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -315,7 +315,7 @@ StatusCode RandomModule::processEvent(DQMEvent */*pEvent*/)
 
 StatusCode RandomModule::startOfCycle()
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- startOfCycle()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- startOfCycle()" );
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -323,7 +323,7 @@ StatusCode RandomModule::startOfCycle()
 
 StatusCode RandomModule::endOfCycle()
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- endOfCycle()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- endOfCycle()" );
 
 	std::vector<std::string> randomStringValues;
 
@@ -364,15 +364,15 @@ StatusCode RandomModule::endOfCycle()
 
 StatusCode RandomModule::startOfRun(DQMRun *pRun)
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- startOfRun()" << std::endl;
-	streamlog_out(MESSAGE) << "Run no " << pRun->getRunNumber() << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- startOfRun()" );
+	LOG4CXX_INFO( dqmMainLogger , "Run no " << pRun->getRunNumber() );
 	time_t startTime = pRun->getStartTime();
 
 	std::string timeStr;
 	DQMCoreTool::timeToHMS(startTime, timeStr);
-	streamlog_out(MESSAGE) << "Start time " << timeStr << std::endl;
-	streamlog_out(MESSAGE) << "Detector is " << pRun->getDetectorName() << std::endl;
-	streamlog_out(MESSAGE) << "Description " << pRun->getDescription() << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Start time " << timeStr );
+	LOG4CXX_INFO( dqmMainLogger , "Detector is " << pRun->getDetectorName() );
+	LOG4CXX_INFO( dqmMainLogger , "Description " << pRun->getDescription() );
 
 #ifdef DQM4HEP_USE_ELOG
 	m_eLog.addEntry("Module", getName());
@@ -389,14 +389,14 @@ StatusCode RandomModule::startOfRun(DQMRun *pRun)
 
 StatusCode RandomModule::endOfRun(DQMRun *pRun)
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- endOfRun()" << std::endl;
-	streamlog_out(MESSAGE) << "Run no " << pRun->getRunNumber() << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- endOfRun()" );
+	LOG4CXX_INFO( dqmMainLogger , "Run no " << pRun->getRunNumber() );
 
 	time_t endTime = pRun->getEndTime();
 	std::string timeStr;
 	DQMCoreTool::timeToHMS(endTime, timeStr);
 
-	streamlog_out(MESSAGE) << "End time " << timeStr << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "End time " << timeStr );
 
 	return STATUS_CODE_SUCCESS;
 }

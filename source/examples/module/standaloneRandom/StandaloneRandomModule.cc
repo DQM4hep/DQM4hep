@@ -66,7 +66,7 @@ StandaloneRandomModule::~StandaloneRandomModule()
 
 StatusCode StandaloneRandomModule::readSettings(const TiXmlHandle xmlHandle)
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- readSettings()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- readSettings()" );
 
 	m_min = -400;
 	RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, DQMXmlHelper::readParameterValue(xmlHandle,
@@ -103,7 +103,7 @@ StatusCode StandaloneRandomModule::endOfCycle()
 
 StatusCode StandaloneRandomModule::initModule()
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- init()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- init()" );
 	srand(time(NULL));
 
 	DQMModuleApi::cd(this);
@@ -123,7 +123,7 @@ StatusCode StandaloneRandomModule::initModule()
 
 StatusCode StandaloneRandomModule::endModule()
 {
-	streamlog_out(MESSAGE) << "Module : " << getName() << " -- end()" << std::endl;
+	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- end()" );
 	return STATUS_CODE_SUCCESS;
 }
 
@@ -135,10 +135,6 @@ StatusCode StandaloneRandomModule::process()
 
 	unsigned int randReentrant = time(0);
 	int randomValue = round( (rand_r(&randReentrant)/(float)RAND_MAX )*(m_max-m_min) + m_min );
-
-//	streamlog_out(MESSAGE) << "min = " << m_min << std::endl;
-//	streamlog_out(MESSAGE) << "max = " << m_max << std::endl;
-//	streamlog_out(MESSAGE) << "rand value = " << randomValue << std::endl;
 
 	m_pTestElement->get<TH1F>()->Fill(randomValue);
 
