@@ -41,7 +41,8 @@ DQMMonitorElementSender::DQMMonitorElementSender(DQMModuleApplication *pApplicat
 		m_collectorName("DEFAULT"),
 		m_pOutBuffer(0),
 		m_pInBuffer(0),
-		m_sendAvailableMeList(true)
+		m_sendAvailableMeList(true),
+		m_isConnected(false)
 {
 	pthread_mutex_init(&m_mutex, NULL);
 
