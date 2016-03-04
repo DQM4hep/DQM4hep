@@ -367,13 +367,9 @@ StatusCode DQMDimEventClient::eventReception(dqm_char *pBuffer, dqm_uint bufferS
 
 	m_pReadBuffer->setOwner(false);
 
-	LOG4CXX_DEBUG( dqmMainLogger , "Receiving buffer of size " << bufferSize );
-
 	// read event
 	DQMEvent *pEvent = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->read(pEvent, m_pReadBuffer));
-
-	LOG4CXX_DEBUG( dqmMainLogger , "Pushing event in queue !" );
 
 	// add it to event queue
 	this->pushEvent(pEvent);
