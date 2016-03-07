@@ -124,9 +124,10 @@ typedef int64_t               dqm_int;
 typedef uint64_t              dqm_uint;
 
 // basic typedefs
-typedef std::vector<int>           IntVector;
-typedef std::vector<unsigned int> UIntVector;
-typedef std::vector<float>         FloatVector;
+typedef std::vector<int>            IntVector;
+typedef std::vector<unsigned int>   UIntVector;
+typedef std::vector<float>          FloatVector;
+typedef std::vector<double>         DoubleVector;
 typedef std::vector<std::string>    StringVector;
 typedef std::set<std::string>       StringSet;
 
