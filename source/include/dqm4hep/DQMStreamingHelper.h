@@ -63,6 +63,16 @@ public:
 
 	/**
 	 */
+	template <typename KeyType, typename VectorType>
+	static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, std::vector<VectorType> > &stlMap );
+
+	/**
+	 */
+	template <typename KeyType, typename VectorType>
+	static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, std::vector<VectorType> > &stlMap );
+
+	/**
+	 */
 	template <typename KeyType, typename ValueType>
 	static xdrstream::Status read( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlMap );
 
@@ -187,6 +197,46 @@ inline xdrstream::Status DQMStreamingHelper::write( xdrstream::IODevice *pDevice
 	{
 		XDR_STREAM( pDevice->write( & ( iter->first ) ) )
 		XDR_STREAM( pDevice->write( & ( iter->second ) ) )
+	}
+
+	return xdrstream::XDR_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename KeyType, typename VectorType>
+inline xdrstream::Status DQMStreamingHelper::read( xdrstream::IODevice *pDevice, std::map<KeyType, std::vector<VectorType> > &stlContainer )
+{
+	uint32_t nRead = 0;
+	XDR_STREAM( pDevice->read( & nRead ) )
+
+	for( uint32_t i=0 ; i<nRead ; i++ )
+	{
+		KeyType key;
+		std::vector<VectorType> value;
+
+		XDR_STREAM( pDevice->read( & key ) )
+		XDR_STREAM( DQMStreamingHelper::read( pDevice , value ) )
+
+		stlContainer.insert( stlContainer.end() , typename std::map<KeyType, std::vector<VectorType> >::value_type(key, value) );
+	}
+
+	return xdrstream::XDR_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename KeyType, typename VectorType>
+inline xdrstream::Status DQMStreamingHelper::write( xdrstream::IODevice *pDevice, const std::map<KeyType, std::vector<VectorType> > &stlContainer )
+{
+	uint32_t nWrite = stlContainer.size();
+	XDR_STREAM( pDevice->write( & nWrite ) )
+
+	for( typename std::map<KeyType, std::vector<VectorType> >::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
+			endIter != iter ; ++iter)
+	{
+		XDR_STREAM( pDevice->write( & ( iter->first ) ) )
+		XDR_STREAM( DQMStreamingHelper::write( pDevice , iter->second ) )
 	}
 
 	return xdrstream::XDR_SUCCESS;
