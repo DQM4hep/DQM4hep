@@ -48,7 +48,7 @@ ELog::ELog() :
 		m_suppresssEmailNotification(false)
 {
 #ifndef DQM4HEP_USE_ELOG
-	throw StatusCodeException(STATUS_COE_FAILURE);
+	throw StatusCodeException(STATUS_CODE_FAILURE);
 #endif
 }
 
@@ -66,7 +66,7 @@ ELog::ELog(const std::string &host, int port) :
 		m_suppresssEmailNotification(false)
 {
 #ifndef DQM4HEP_USE_ELOG
-	throw StatusCodeException(STATUS_COE_FAILURE);
+	throw StatusCodeException(STATUS_CODE_FAILURE);
 #endif
 }
 
@@ -84,7 +84,7 @@ ELog::ELog(const std::string &host, int port, const std::string &userName, const
 		m_suppresssEmailNotification(false)
 {
 #ifndef DQM4HEP_USE_ELOG
-	throw StatusCodeException(STATUS_COE_FAILURE);
+	throw StatusCodeException(STATUS_CODE_FAILURE);
 #endif
 }
 
