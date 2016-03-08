@@ -161,9 +161,9 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if (statusCode Operator StatusCode1)				\
       {									\
-		  LOG4CXX_ERROR( dqmMainLogger , #Command << " return " << dqm4hep::statusCodeToString(statusCode) ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , #Command << " return " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
 		  return statusCode;						\
       }									\
   }
@@ -175,10 +175,10 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
       {									\
-		  LOG4CXX_ERROR( dqmMainLogger , #Command << " return " << dqm4hep::statusCodeToString(statusCode) ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
-	    return statusCode;						\
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , #Command << " return " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+		  return statusCode;						\
       }									\
   }
 
@@ -189,9 +189,9 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if (statusCode Operator StatusCode1)				\
       {									\
-		  LOG4CXX_ERROR( dqmMainLogger , #Command << " throw " << dqm4hep::statusCodeToString(statusCode) ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , #Command << " throw " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
 	    throw dqm4hep::StatusCodeException(statusCode);			\
       }									\
   }
@@ -203,10 +203,10 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
       {									\
-		  LOG4CXX_ERROR( dqmMainLogger , #Command << " throw " << dqm4hep::statusCodeToString(statusCode) ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-		  LOG4CXX_ERROR( dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
-	    throw dqm4hep::StatusCodeException(statusCode);			\
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , #Command << " throw " << dqm4hep::statusCodeToString(statusCode) ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
+		  LOG4CXX_ERROR( dqm4hep::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+		  throw dqm4hep::StatusCodeException(statusCode);			\
       }									\
   }
 
@@ -217,8 +217,8 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
     const dqm4hep::StatusCode statusCode(Command);			\
     if (statusCode Operator StatusCode1)				\
       {									\
-    	Code								\
-	  return statusCode;						\
+    		Code								\
+			return statusCode;						\
       }									\
   }
 
@@ -237,7 +237,7 @@ typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
 //-------------------------------------------------------------------------------------------------
 
 #define NOTIFY_METHOD_CALLED \
-		LOG4CXX_DEBUG( dqmMainLogger ,  "Method called : " << __FUNCTION__ );
+		LOG4CXX_DEBUG( dqm4hep::dqmMainLogger ,  "Method called : " << __FUNCTION__ );
 
 //-------------------------------------------------------------------------------------------------
 
