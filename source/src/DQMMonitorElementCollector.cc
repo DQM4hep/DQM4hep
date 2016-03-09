@@ -392,7 +392,8 @@ DQMMonitorElementCollector::DQMMonitorElementCollector() :
 		m_collectorName("DEFAULT"),
 		m_collectorState(STOPPED_STATE),
 		m_pMonitorElementNameListRpc(NULL),
-		m_pMonitorElementCollectorInfoRpc(NULL)
+		m_pMonitorElementCollectorInfoRpc(NULL),
+		m_pInBuffer(NULL)
 {
 	m_pOutBuffer = new xdrstream::BufferDevice(5*1024*1024);
 }
