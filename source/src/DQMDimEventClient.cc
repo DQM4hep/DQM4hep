@@ -371,6 +371,8 @@ StatusCode DQMDimEventClient::eventReception(dqm_char *pBuffer, dqm_uint bufferS
 	DQMEvent *pEvent = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getEventStreamer()->read(pEvent, m_pReadBuffer));
 
+	LOG4CXX_DEBUG( dqmMainLogger , "DQMDimEventClient : Event received !" );
+
 	// add it to event queue
 	this->pushEvent(pEvent);
 
