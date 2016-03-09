@@ -366,15 +366,15 @@ StatusCode DQMGenericEventStreamer::write(const DQMEvent *const pEvent, const st
 //-------------------------------------------------------------------------------------------------
 
 // template specialization declaration
-template StatusCode DQMGenericEvent::setValues(const std::string &key, const IntVector &vals);
-template StatusCode DQMGenericEvent::setValues(const std::string &key, const FloatVector &vals);
-template StatusCode DQMGenericEvent::setValues(const std::string &key, const DoubleVector &vals);
-template StatusCode DQMGenericEvent::setValues(const std::string &key, const StringVector &vals);
+// template StatusCode DQMGenericEvent::setValues(const std::string &key, const IntVector &vals);
+// template StatusCode DQMGenericEvent::setValues(const std::string &key, const FloatVector &vals);
+// template StatusCode DQMGenericEvent::setValues(const std::string &key, const DoubleVector &vals);
+// template StatusCode DQMGenericEvent::setValues(const std::string &key, const StringVector &vals);
 
-template StatusCode DQMGenericEvent::getValues(const std::string &key, IntVector &vals) const;
-template StatusCode DQMGenericEvent::getValues(const std::string &key, FloatVector &vals) const;
-template StatusCode DQMGenericEvent::getValues(const std::string &key, DoubleVector &vals) const;
-template StatusCode DQMGenericEvent::getValues(const std::string &key, StringVector &vals) const;
+// template StatusCode DQMGenericEvent::getValues(const std::string &key, IntVector &vals) const;
+// template StatusCode DQMGenericEvent::getValues(const std::string &key, FloatVector &vals) const;
+// template StatusCode DQMGenericEvent::getValues(const std::string &key, DoubleVector &vals) const;
+// template StatusCode DQMGenericEvent::getValues(const std::string &key, StringVector &vals) const;
 
 } 
 
