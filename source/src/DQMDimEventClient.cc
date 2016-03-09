@@ -429,6 +429,11 @@ StatusCode DQMDimEventClient::readSettings(const TiXmlHandle &xmlHandle)
 	if( reconnect )
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->connectToService());
 
+	LOG4CXX_INFO( dqmMainLogger , "Collector name : " << collectorName );
+	LOG4CXX_INFO( dqmMainLogger , "Sub event identifier : " << subEventIdentifier );
+	LOG4CXX_INFO( dqmMainLogger , "Streamer name : " << eventStreamerName );
+	LOG4CXX_INFO( dqmMainLogger , "Update mode : " << updateMode );
+
 	return STATUS_CODE_SUCCESS;
 }
 
