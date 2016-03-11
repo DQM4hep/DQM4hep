@@ -257,10 +257,10 @@ void DQMMonitorElement::reset()
 
 bool DQMMonitorElement::isHistogram() const
 {
-	if(m_type >= INT_HISTOGRAM_1D_ELEMENT_TYPE && m_type <= PROFILE_2D_ELEMENT_TYPE)
-		return true;
+	if( ! m_pObject )
+		return false;
 
-	return false;
+	return ( dynamic_cast<const TH1 *>(m_pObject) != 0 );
 }
 
 //-------------------------------------------------------------------------------------------------
