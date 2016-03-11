@@ -74,6 +74,14 @@ StatusCode DQMXmlHelper::createQualityTest(const DQMModule *const pModule, const
 StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
 		DQMMonitorElement *&pMonitorElement)
 {
+	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, "", pMonitorElement);
+}
+
+//----------------------------------------------------------------------------------------------------
+
+StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+		const std::string &strSuffix, DQMMonitorElement *&pMonitorElement)
+{
     for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
         pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
     {
@@ -83,10 +91,26 @@ StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, cons
     	if(meId != meStringId)
     		continue;
 
-    	return DQMModuleApi::bookMonitorElement(pModule, pXmlElement, pMonitorElement);
+    	std::string meName;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", meName));
+
+    	meName += strSuffix;
+
+    	return DQMModuleApi::bookMonitorElement(pModule, pXmlElement, meName, pMonitorElement);
     }
 
 	return STATUS_CODE_NOT_FOUND;
+}
+
+//----------------------------------------------------------------------------------------------------
+
+StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+		unsigned int suffix, DQMMonitorElement *&pMonitorElement)
+{
+	std::stringstream ss;
+	ss << suffix;
+
+	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, ss.str(), pMonitorElement);
 }
 
 

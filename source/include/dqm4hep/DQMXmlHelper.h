@@ -85,10 +85,20 @@ public:
 	 */
 	static StatusCode createQualityTest(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
 
-	/** Create a built-in monitor element from a xml handle
+	/** Create a monitor element from a xml handle
 	 */
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
 			DQMMonitorElement *&pMonitorElement);
+
+	/** Create a monitor element from a xml handle
+	 */
+	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+			const std::string &strSuffix, DQMMonitorElement *&pMonitorElement);
+
+	/** Create a monitor element from a xml handle
+	 */
+	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+			unsigned int suffix, DQMMonitorElement *&pMonitorElement);
 
 	/** Tokenize a string
 	 */

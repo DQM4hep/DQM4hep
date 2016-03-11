@@ -64,13 +64,6 @@ public:
 	*/
 	~DQMMonitorElementManager();
 
-//	/** Read the settings for quality tests and initialized them.
-//	 *
-//	 *  Create the quality tests which
-//	 *  must be registered before calling this method
-//	 */
-//	StatusCode readSettings(const TiXmlHandle xmlHandle);
-
  	/////////////////////////
  	// DIRECTORY INTERFACE //
  	/////////////////////////
@@ -177,6 +170,24 @@ public:
  			int nXBins, float xMin, float xMax,
  			int nYBins, float yMin, float yMax);
 
+ 	/** Book a 3D float histogram. The histogram is encapsulated in the DQMMonitorElement
+ 	 *  and added to monitor element list of the module.
+ 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
+ 	 */
+ 	StatusCode bookRealHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &moduleName,
+ 			int nXBins, float xMin, float xMax,
+ 			int nYBins, float yMin, float yMax,
+ 			int nZBins, float zMin, float zMax);
+
+ 	/** Book a 3D int histogram. The histogram is encapsulated in the DQMMonitorElement
+ 	 *  and added to monitor element list of the module.
+ 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
+ 	 */
+ 	StatusCode bookIntHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &moduleName,
+ 			int nXBins, float xMin, float xMax,
+ 			int nYBins, float yMin, float yMax,
+ 			int nZBins, float zMin, float zMax);
+
  	/** Book a 1D profile. The profile is encapsulated in the DQMMonitorElement
  	 *  and added to monitor element list of the module.
  	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
@@ -222,7 +233,7 @@ public:
  	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
  	 */
  	StatusCode bookObject(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &moduleName,
- 			TObject *pROOTObject);
+ 			const std::string &className);
 
 
 
@@ -274,6 +285,24 @@ public:
  	StatusCode bookShortHistogram2D(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
  			const std::string &moduleName, int nXBins, float xMin, float xMax, int nYBins, float yMin, float yMax);
 
+ 	/** Book a 3D float histogram. The histogram is encapsulated in the DQMMonitorElement
+ 	 *  and added to monitor element list of the module.
+ 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
+ 	 */
+ 	StatusCode bookRealHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const std::string &moduleName,
+ 			int nXBins, float xMin, float xMax,
+ 			int nYBins, float yMin, float yMax,
+ 			int nZBins, float zMin, float zMax);
+
+ 	/** Book a 3D int histogram. The histogram is encapsulated in the DQMMonitorElement
+ 	 *  and added to monitor element list of the module.
+ 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
+ 	 */
+ 	StatusCode bookIntHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const std::string &moduleName,
+ 			int nXBins, float xMin, float xMax,
+ 			int nYBins, float yMin, float yMax,
+ 			int nZBins, float zMin, float zMax);
+
  	/** Book a 1D profile. The profile is encapsulated in the DQMMonitorElement
  	 *  Such a function should be used in DQMModule implementation
  	 */
@@ -315,13 +344,14 @@ public:
  	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
  	 */
  	StatusCode bookObject(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
- 			const std::string &moduleName, TObject *pROOTObject);
+ 			const std::string &moduleName, const std::string &className);
 
 
 
  	/** Book a monitor element from the xml element
  	 */
- 	StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName, DQMMonitorElement *&pMonitorElement);
+ 	StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
+ 			const std::string &meName, DQMMonitorElement *&pMonitorElement);
 
  	///////////////////////
  	// GETTERS INTERFACE //

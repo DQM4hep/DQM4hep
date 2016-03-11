@@ -44,6 +44,8 @@
 #include "TH2I.h"
 #include "TH2S.h"
 #include "TH2C.h"
+#include "TH3F.h"
+#include "TH3I.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TROOT.h"
@@ -533,6 +535,102 @@ StatusCode DQMMonitorElementManager::bookShortHistogram2D(DQMMonitorElement *&pM
 
 //-------------------------------------------------------------------------------------------------
 
+StatusCode DQMMonitorElementManager::bookRealHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+		const std::string &moduleName, int nXBins, float xMin, float xMax, int nYBins, float yMin, float yMax,
+		int nZBins, float zMin, float zMax)
+{
+	pMonitorElement = NULL;
+	TH3 *pHistogram = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	try
+	{
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
+
+		// create the histogram first
+		pHistogram = new TH3F(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, nZBins, zMin, zMax);
+
+		if(NULL == pHistogram)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// and the monitor element
+		pMonitorElement = new DQMMonitorElement(pHistogram, REAL_HISTOGRAM_3D_ELEMENT_TYPE, name, title, moduleName);
+
+		if(NULL == pMonitorElement)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// add it to the monitor element list of the module
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(pMonitorElement));
+	}
+	catch(StatusCodeException &exception)
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
+
+		if(NULL != pHistogram)
+			delete pHistogram;
+
+		if(NULL != pMonitorElement)
+			delete pMonitorElement;
+
+		return exception.getStatusCode();
+	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMMonitorElementManager::bookIntHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+		const std::string &moduleName, int nXBins, float xMin, float xMax, int nYBins, float yMin, float yMax,
+		int nZBins, float zMin, float zMax)
+{
+	pMonitorElement = NULL;
+	TH3 *pHistogram = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	try
+	{
+		DQMPath currentDirPath = m_pMonitorElementStorage->getCurrentDirectory()->getFullPathName();
+		std::string objectName = (currentDirPath + name).getPath();
+
+		// create the histogram first
+		pHistogram = new TH3I(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, nZBins, zMin, zMax);
+
+		if(NULL == pHistogram)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// and the monitor element
+		pMonitorElement = new DQMMonitorElement(pHistogram, INT_HISTOGRAM_3D_ELEMENT_TYPE, name, title, moduleName);
+
+		if(NULL == pMonitorElement)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// add it to the monitor element list of the module
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(pMonitorElement));
+	}
+	catch(StatusCodeException &exception)
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
+
+		if(NULL != pHistogram)
+			delete pHistogram;
+
+		if(NULL != pMonitorElement)
+			delete pMonitorElement;
+
+		return exception.getStatusCode();
+	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 StatusCode DQMMonitorElementManager::bookProfile1D(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
 		const std::string &moduleName, int nXBins, float xMin, float xMax, float yMin, float yMax)
 {
@@ -805,7 +903,7 @@ StatusCode DQMMonitorElementManager::bookString(DQMMonitorElement *&pMonitorElem
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
-		const std::string &moduleName, TObject *pROOTObject)
+		const std::string &moduleName, const std::string &className)
 {
 	pMonitorElement = NULL;
 
@@ -814,8 +912,18 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 
 	try
 	{
+    	TClass *pClass = gROOT->GetClass(className.c_str());
+
+    	if(!pClass)
+    		return STATUS_CODE_FAILURE;
+
+    	TObject *pObject = reinterpret_cast<TObject *>(pClass->New());
+
+    	if(!pObject)
+    		return STATUS_CODE_FAILURE;
+
 		// create the monitor element
-		pMonitorElement = new DQMMonitorElement(pROOTObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
+		pMonitorElement = new DQMMonitorElement(pObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
 
 		if(NULL == pMonitorElement)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1223,6 +1331,102 @@ StatusCode DQMMonitorElementManager::bookShortHistogram2D(DQMMonitorElement *&pM
 
 //-------------------------------------------------------------------------------------------------
 
+StatusCode DQMMonitorElementManager::bookRealHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+		const std::string &moduleName, int nXBins, float xMin, float xMax, int nYBins, float yMin, float yMax, int nZBins, float zMin, float zMax)
+{
+	pMonitorElement = NULL;
+	TH3 *pHistogram = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	try
+	{
+		DQMDirectory *pDirectory = NULL;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
+
+		// create the histogram first
+		pHistogram = new TH3F(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, nZBins, zMin, zMax);
+
+		if(NULL == pHistogram)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// and the monitor element
+		pMonitorElement = new DQMMonitorElement(pHistogram, REAL_HISTOGRAM_3D_ELEMENT_TYPE, name, title, moduleName);
+
+		if(NULL == pMonitorElement)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// add it to the monitor element list of the module
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(dirName, pMonitorElement));
+	}
+	catch(StatusCodeException &exception)
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
+
+		if(NULL != pHistogram)
+			delete pHistogram;
+
+		if(NULL != pMonitorElement)
+			delete pMonitorElement;
+
+		return exception.getStatusCode();
+	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMMonitorElementManager::bookIntHistogram3D(DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+		const std::string &moduleName, int nXBins, float xMin, float xMax, int nYBins, float yMin, float yMax, int nZBins, float zMin, float zMax)
+{
+	pMonitorElement = NULL;
+	TH3 *pHistogram = NULL;
+
+	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	try
+	{
+		DQMDirectory *pDirectory = NULL;
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(dirName, pDirectory));
+		std::string objectName = (pDirectory->getFullPathName() + name).getPath();
+
+		// create the histogram first
+		pHistogram = new TH3I(objectName.c_str(), title.c_str(), nXBins, xMin, xMax, nYBins, yMin, yMax, nZBins, zMin, zMax);
+
+		if(NULL == pHistogram)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// and the monitor element
+		pMonitorElement = new DQMMonitorElement(pHistogram, INT_HISTOGRAM_3D_ELEMENT_TYPE, name, title, moduleName);
+
+		if(NULL == pMonitorElement)
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		// add it to the monitor element list of the module
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(dirName, pMonitorElement));
+	}
+	catch(StatusCodeException &exception)
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
+
+		if(NULL != pHistogram)
+			delete pHistogram;
+
+		if(NULL != pMonitorElement)
+			delete pMonitorElement;
+
+		return exception.getStatusCode();
+	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 StatusCode DQMMonitorElementManager::bookProfile1D(DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		const std::string &moduleName, int nXBins, float xMin, float xMax, float yMin, float yMax)
 {
@@ -1496,7 +1700,7 @@ StatusCode DQMMonitorElementManager::bookString(DQMMonitorElement *&pMonitorElem
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
-		const std::string &moduleName, TObject *pROOTObject)
+		const std::string &moduleName, const std::string &className)
 {
 	pMonitorElement = NULL;
 
@@ -1505,8 +1709,18 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 
 	try
 	{
+    	TClass *pClass = gROOT->GetClass(className.c_str());
+
+    	if(!pClass)
+    		return STATUS_CODE_FAILURE;
+
+    	TObject *pObject = reinterpret_cast<TObject *>(pClass->New());
+
+    	if(!pObject)
+    		return STATUS_CODE_FAILURE;
+
 		// create the monitor element
-		pMonitorElement = new DQMMonitorElement(pROOTObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
+		pMonitorElement = new DQMMonitorElement(pObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
 
 		if(NULL == pMonitorElement)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -1529,7 +1743,8 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName, DQMMonitorElement *&pMonitorElement)
+StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
+		const std::string &name, DQMMonitorElement *&pMonitorElement)
 {
 	if(NULL == pXmlElement)
 		return STATUS_CODE_INVALID_PTR;
@@ -1541,9 +1756,6 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 
 	if(NO_ELEMENT_TYPE == monitorElementType || monitorElementType >= NUMBER_OF_DQM_MONITOR_ELEMENT_TYPES)
 		return STATUS_CODE_INVALID_PARAMETER;
-
-	std::string name;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", name));
 
 	// empty path means current directory
 	std::string path;
@@ -1735,6 +1947,54 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 
     	break;
 	}
+	case INT_HISTOGRAM_3D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+		int nBinsZ;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsZ", nBinsZ, &PositiveValidator<int>::validate ));
+    	float minZ, maxZ;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minZ", minZ));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookIntHistogram3D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
+
+    	break;
+	}
+	case REAL_HISTOGRAM_3D_ELEMENT_TYPE :
+	{
+		int nBinsX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
+    	float minX, maxX;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minX", minX));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
+
+		int nBinsY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
+    	float minY, maxY;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
+
+		int nBinsZ;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "nBinsZ", nBinsZ, &PositiveValidator<int>::validate ));
+    	float minZ, maxZ;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minZ", minZ));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
+
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookRealHistogram3D(pMonitorElement, path, name, title, moduleName, nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
+
+    	break;
+	}
 	case PROFILE_1D_ELEMENT_TYPE :
 	{
 		int nBinsX;
@@ -1778,18 +2038,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 		std::string rootClass;
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "ROOTClass", rootClass));
 
-    	TClass *pClass = gROOT->GetClass(rootClass.c_str());
-
-    	if(!pClass)
-    		return STATUS_CODE_FAILURE;
-
-    	TObject *pObject = reinterpret_cast<TObject *>(pClass->New());
-    	delete pClass; // no longer needed
-
-    	if(!pObject)
-    		return STATUS_CODE_FAILURE;
-
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, path, name, title, moduleName, pObject));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, path, name, title, moduleName, rootClass));
 
     	break;
 	}

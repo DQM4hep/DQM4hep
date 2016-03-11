@@ -41,6 +41,8 @@
 #include "TH2I.h"
 #include "TH2S.h"
 #include "TH2C.h"
+#include "TH3F.h"
+#include "TH3I.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
 #include "TObject.h"
@@ -168,6 +170,22 @@ public:
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
+	/** Book a 3D real histogram. The histogram is encapsulated in the DQMMonitorElement
+	 *  Such a function should be used in DQMModule implementation
+	 */
+	static StatusCode bookRealHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+			int nXBins, float xMin, float xMax,
+			int nYBins, float yMin, float yMax,
+			int nZBins, float zMin, float zMax);
+
+	/** Book a 3D int histogram. The histogram is encapsulated in the DQMMonitorElement
+	 *  Such a function should be used in DQMModule implementation
+	 */
+	static StatusCode bookIntHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+			int nXBins, float xMin, float xMax,
+			int nYBins, float yMin, float yMax,
+			int nZBins, float zMin, float zMax);
+
 	/** Book a 1D profile. The profile is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
@@ -208,12 +226,11 @@ public:
 	 */
 	static StatusCode bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &value);
 
-	/** Book a generic TObject. The TObject must be valid and must be a built-in ROOT object or
+	/** Book a generic TObject. The class name must be a valid built-in ROOT one or
 	 *  a user defined class inheriting from TObject and providing a dictionary.
-	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
 	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
-			TObject *pROOTObject);
+			const std::string &className);
 
 
 
@@ -265,6 +282,22 @@ public:
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
+	/** Book a 3D real histogram. The histogram is encapsulated in the DQMMonitorElement
+	 *  Such a function should be used in DQMModule implementation
+	 */
+	static StatusCode bookRealHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+			int nXBins, float xMin, float xMax,
+			int nYBins, float yMin, float yMax,
+			int nZBins, float zMin, float zMax);
+
+	/** Book a 3D int histogram. The histogram is encapsulated in the DQMMonitorElement
+	 *  Such a function should be used in DQMModule implementation
+	 */
+	static StatusCode bookIntHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+			int nXBins, float xMin, float xMax,
+			int nYBins, float yMin, float yMax,
+			int nZBins, float zMin, float zMax);
+
 	/** Book a 1D profile. The profile is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
@@ -299,12 +332,11 @@ public:
 	 */
 	static StatusCode bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const std::string &value);
 
-	/** Book a generic TObject. The TObject must be valid and must be a built-in ROOT object or
+	/** Book a generic TObject. The class name must be a valid built-in ROOT one or
 	 *  a user defined class inheriting from TObject and providing a dictionary.
-	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
 	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
-			TObject *pROOTObject);
+			const std::string &className);
 
 
 	///////////////////////
@@ -407,7 +439,8 @@ public:
 private:
 	/** Book a monitor element from the xml element
 	 */
-	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement, DQMMonitorElement *&pMonitorElement);
+	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement,
+			const std::string &meName, DQMMonitorElement *&pMonitorElement);
 
 	friend class DQMXmlHelper;
 };
