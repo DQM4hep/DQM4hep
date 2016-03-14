@@ -131,15 +131,24 @@ SET( DQMCore_additional_cmake_args
 	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 )
 
-# fixme : problems on lyoserv to install DQMCore. 
-# Couldn't find mysql because mysql install path is not standard 
+# fixme : problems on lyoserv. 
+# Couldn't find mysql and log4cxx because install path is not standard 
+
 IF( MySQL_DIR )
-	SET( DQMCore_additional_cmake_args 
-		${DQMCore_additional_cmake_args} 
+	SET( common_cmake_args 
+		${common_cmake_args} 
 		-DMySQL_DIR=${MySQL_DIR}
 	)
 ENDIF()
 
+IF( LOG4CXX_DIR )
+	SET( LOG4CXX_ROOT ${LOG4CXX_DIR} )
+	
+	SET( common_cmake_args 
+		${common_cmake_args} 
+		-DLOG4CXX_ROOT=${LOG4CXX_DIR}
+	)
+ENDIF()
 
 
 # ----- xdrstream package -----
