@@ -1349,14 +1349,14 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pCollector->m_pOutBuffer , infoList ) )
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
-		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Sending back request !" )
+		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Sending back request !" );
 
 		// and set it as data to send back
 		setData((void*) m_pCollector->m_pOutBuffer->getBuffer(), m_pCollector->m_pOutBuffer->getPosition());
 	}
 	catch(StatusCodeException &exception)
 	{
-		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Exception caught : " << exception.toString() )
+		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Exception caught : " << exception.toString() );
 	}
 	catch(...)
 	{
