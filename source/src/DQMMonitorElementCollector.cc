@@ -1356,7 +1356,7 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 	}
 	catch(StatusCodeException &exception)
 	{
-		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Exception caught : " << exception.toString() )
+		LOG4CXX_ERROR( dqmMainLogger , "DQMMonitorElementNameListRpc::rpcHandler() : Exception caught : " << exception.toString() );
 	}
 	catch(...)
 	{

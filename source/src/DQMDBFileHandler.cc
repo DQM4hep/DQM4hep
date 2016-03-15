@@ -59,7 +59,7 @@ const std::string &DQMDBFileHandler::type() const
 
 StatusCode DQMDBFileHandler::download(const std::string &pattern)
 {
-	LOG4CXX_INFO( dqmMainLogger , "DQMDBFileHandler: Performing download step ... " )
+	LOG4CXX_INFO( dqmMainLogger , "DQMDBFileHandler: Performing download step ... " );
 
 	m_localFileName = "";
 
@@ -89,8 +89,8 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 
 	if(invalidPattern)
 	{
-		LOG4CXX_ERROR( dqmMainLogger , "DQMDBFileHandler: Invalid pattern => " << pattern )
-		LOG4CXX_ERROR( dqmMainLogger , "Expected pattern : 'HOST=hostname:USER=username:PWD=password:FILE=filename'" )
+		LOG4CXX_ERROR( dqmMainLogger , "DQMDBFileHandler: Invalid pattern => " << pattern );
+		LOG4CXX_ERROR( dqmMainLogger , "Expected pattern : 'HOST=hostname:USER=username:PWD=password:FILE=filename'" );
 
 		return STATUS_CODE_INVALID_PARAMETER;
 	}
@@ -100,10 +100,10 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 	const std::string password = pattern.substr(pwdStart+4, fileStart-1-pwdStart-4);
 	const std::string fileName = pattern.substr(fileStart+5);
 
-	LOG4CXX_DEBUG( dqmMainLogger , "Host : " << host )
-	LOG4CXX_DEBUG( dqmMainLogger , "User : " << user )
-	LOG4CXX_DEBUG( dqmMainLogger , "Password : " << password )
-	LOG4CXX_DEBUG( dqmMainLogger , "FileName : " << fileName )
+	LOG4CXX_DEBUG( dqmMainLogger , "Host : " << host );
+	LOG4CXX_DEBUG( dqmMainLogger , "User : " << user );
+	LOG4CXX_DEBUG( dqmMainLogger , "Password : " << password );
+	LOG4CXX_DEBUG( dqmMainLogger , "FileName : " << fileName );
 
 	if(m_pDBInterface->isConnected())
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pDBInterface->disconnect());
@@ -118,7 +118,7 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 
 	if(ret < 0)
 	{
-		LOG4CXX_DEBUG( dqmMainLogger , "Counldn't create tmp file for db download !" )
+		LOG4CXX_DEBUG( dqmMainLogger , "Counldn't create tmp file for db download !" );
 		return STATUS_CODE_FAILURE;
 	}
 
@@ -129,7 +129,7 @@ StatusCode DQMDBFileHandler::download(const std::string &pattern)
 
 	if(!file.is_open())
 	{
-		LOG4CXX_DEBUG( dqmMainLogger , "Counldn't open tmp file for db download !" )
+		LOG4CXX_DEBUG( dqmMainLogger , "Counldn't open tmp file for db download !" );
 		m_localFileName = "";
 
 		return STATUS_CODE_FAILURE;
