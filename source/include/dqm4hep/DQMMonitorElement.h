@@ -36,6 +36,7 @@
 
 // -- root headers
 #include <TObject.h>
+#include <TGraph.h>
 #include <TPaveText.h>
 #include <Rtypes.h>
 
@@ -244,15 +245,6 @@ private:
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-template <typename T>
-T *DQMMonitorElement::get() const
-{
-	return dynamic_cast<T*>(m_pObject);
-}
-
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-
 /** TScalarObject class.
  *  Extension of a TObject for scalar values like int,
  *  float, double or string.
@@ -313,6 +305,66 @@ typedef TScalarObject<dqm_short>   TScalarShort;
 typedef TScalarObject<long>       TScalarLong;
 typedef TScalarObject<Long64_t>    TScalarLong64_t;
 typedef TScalarObject<std::string> TScalarString;
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+/** TDynamicGraph class
+ *
+ *  A TGraph with a dynamic x range axis
+ */
+class TDynamicGraph : public TGraph
+{
+public:
+	enum
+	{
+		kDynamicRange  = BIT(14),
+		kShrinkToRange = BIT(15)
+	};
+
+	/** Constructor
+	 */
+	TDynamicGraph();
+
+	/** Destructor
+	 */
+	~TDynamicGraph();
+
+	/** Set the range length.
+	 *  If kDynamicRange and kShrinkToRange bit are set
+	 *  then all points that do not fit the x range are removed
+	 */
+	void SetRangeLength(Double_t rangeLength);
+
+	/** Add a point at end of array.
+	 *  Remove points that do not fit the dynamic range
+	 *  if kDynamicRange and kShrinkToRange bit are set
+	 */
+	void AddPoint(Double_t x, Double_t y);
+
+	/** Draw dynamic graph. Apply dynamic range if bit set
+	 */
+	void Draw(Option_t *option = "");
+
+private:
+	/**
+	 */
+	void ShrinkToRange();
+
+private:
+	Double_t       m_rangeLength;
+
+	ClassDef(TDynamicGraph, 1);
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+template <typename T>
+T *DQMMonitorElement::get() const
+{
+	return dynamic_cast<T*>(m_pObject);
+}
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------

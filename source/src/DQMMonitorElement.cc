@@ -45,8 +45,11 @@
 #include "TH2C.h"
 #include "TProfile.h"
 #include "TProfile2D.h"
+#include "TAxis.h"
+#include "TPad.h"
 
 templateClassImp(dqm4hep::TScalarObject)
+ClassImp(dqm4hep::TDynamicGraph)
 
 namespace dqm4hep
 {
@@ -617,6 +620,98 @@ StatusCode DQMMonitorElement::removeQualityTest(const std::string &qualityTestNa
 	m_qualityTestMap.erase(findIter);
 
 	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+TDynamicGraph::TDynamicGraph() :
+		TGraph(),
+		m_rangeLength(-1.)
+{
+	SetBit(kDynamicRange);
+	SetBit(kShrinkToRange);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+TDynamicGraph::~TDynamicGraph()
+{
+
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void TDynamicGraph::SetRangeLength(Double_t rangeLength)
+{
+	m_rangeLength = rangeLength;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void TDynamicGraph::AddPoint(Double_t x, Double_t y)
+{
+	Int_t nPoints = this->GetN();
+	this->SetPoint(nPoints, x, y);
+	this->ShrinkToRange();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void TDynamicGraph::Draw(Option_t *option)
+{
+	TGraph::Draw(option);
+
+	if( TestBit(kDynamicRange) )
+	{
+		Int_t nPoints = this->GetN();
+
+		if( m_rangeLength <= 0 || nPoints == 0)
+			return;
+
+		Double_t lastX, lastY;
+		Int_t res = this->GetPoint( nPoints-1 , lastX, lastY );
+
+		this->GetXaxis()->SetRangeUser( lastX - m_rangeLength , lastX );
+
+		if(gPad)
+			gPad->Update();
+	}
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void TDynamicGraph::ShrinkToRange()
+{
+	if( ! TestBit(kDynamicRange) || ! TestBit(kShrinkToRange) )
+		return;
+
+	Int_t nPoints = this->GetN();
+
+	if( m_rangeLength <= 0 || nPoints == 0)
+		return;
+
+	Double_t lastX, lastY;
+	Int_t res = this->GetPoint( nPoints-1 , lastX, lastY );
+
+	if( res < 0 )
+		return;
+
+	Double_t xLimit = lastX - m_rangeLength;
+
+	while(1)
+	{
+		Double_t x, y;
+		res = this->GetPoint(0, x, y);
+
+		if( res < 0 )
+			break;
+
+		if( x < xLimit )
+			this->RemovePoint(0);
+		else
+			break;
+	}
 }
 
 } 

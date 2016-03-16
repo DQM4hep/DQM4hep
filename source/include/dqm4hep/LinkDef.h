@@ -17,4 +17,6 @@
 #pragma link C++ class dqm4hep::TScalarShort+;
 #pragma link C++ class dqm4hep::TScalarLong+;
 
+#pragma link C++ class dqm4hep::TDynamicGraph+;
+
 #endif
