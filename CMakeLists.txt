@@ -108,6 +108,21 @@ INSTALL(
 )
 
 ###############################
+# Install conf files
+FILE ( GLOB CONF_FILES conf/* 
+	PATTERN "*~" EXCLUDE
+    PATTERN "*#*" EXCLUDE
+    PATTERN ".#*" EXCLUDE
+    PATTERN "*CVS" EXCLUDE
+    PATTERN "*.svn" EXCLUDE
+)
+
+INSTALL( 
+	FILES ${CONF_FILES} 
+	DESTINATION conf
+)
+
+###############################
 # display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
 
