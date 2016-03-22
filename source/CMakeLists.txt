@@ -5,7 +5,7 @@
 #######################################################
 
 # include directories
-INCLUDE_DIRECTORIES( include )
+INCLUDE_DIRECTORIES( BEFORE include )
 
 # require proper c++
 ADD_DEFINITIONS( "-pedantic -Wunused-value -O2" )
