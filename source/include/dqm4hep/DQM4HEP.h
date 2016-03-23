@@ -48,6 +48,8 @@
 #include <limits>
 #include <pthread.h>
 
+#include <memory>
+
 
 // apple stuff for stdint.h
 #ifdef __APPLE__
@@ -131,14 +133,21 @@ typedef std::vector<double>         DoubleVector;
 typedef std::vector<std::string>    StringVector;
 typedef std::set<std::string>       StringSet;
 
-// specifics typedefs
-//typedef std::map<std::string, std::vector<std::string> > SubscriptionMap;
+// monitor element typedefs
+typedef std::shared_ptr<DQMMonitorElement> DQMMonitorElementPtr;
+typedef std::vector<DQMMonitorElementPtr> DQMMonitorElementPtrList;
+typedef std::map<const std::string, DQMMonitorElementPtr> DQMMonitorElementPtrMap;
 
 typedef std::vector<DQMMonitorElement*> DQMMonitorElementList;
 typedef std::map<const std::string, DQMMonitorElement*> DQMMonitorElementMap;
 
+// event typedef
+typedef std::shared_ptr<DQMEvent> DQMEventPtr;
+typedef std::queue<DQMEventPtr>  DQMEventPtrQueue;
+
 typedef std::queue<DQMEvent*> DQMEventQueue;
 
+typedef std::shared_ptr<DQMQualityTest> DQMQualityTestPtr;
 typedef std::map<std::string, DQMQualityTestResult> DQMQualityTestResultMap;
 typedef std::map<std::string, DQMQualityTest*>      DQMQualityTestMap;
 
