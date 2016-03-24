@@ -38,7 +38,8 @@ DQMModuleApplication::DQMModuleApplication() :
 		m_shouldStop(false),
 		m_pModule(NULL),
 		m_pMonitorElementManager(NULL),
-		m_pMonitorElementSender(NULL)
+		m_pMonitorElementSender(NULL),
+		m_pAlertNotifier(NULL)
 {
 	m_pMonitorElementManager = new DQMMonitorElementManager();
 	m_pMonitorElementSender = new DQMMonitorElementSender(this);
@@ -53,6 +54,9 @@ DQMModuleApplication::~DQMModuleApplication()
 
 	if(m_pModule)
 		delete m_pModule;
+
+	if(m_pAlertNotifier)
+		delete m_pAlertNotifier;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -178,6 +182,13 @@ DQMMonitorElementSender *DQMModuleApplication::getMonitorElementSender() const
 
 //-------------------------------------------------------------------------------------------------
 
+DQMAlertNotifier *DQMModuleApplication::getAlertNotifier() const
+{
+	return m_pAlertNotifier;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 StatusCode DQMModuleApplication::setModule(DQMModule *pModule)
 {
 	if(!pModule)
@@ -186,6 +197,20 @@ StatusCode DQMModuleApplication::setModule(DQMModule *pModule)
 	m_pModule = pModule;
 	m_pModule->setName(m_moduleName);
 	m_pModule->setModuleApplication(this);
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->createAlertNotifier(m_moduleName))
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMModuleApplication::createAlertNotifier(const std::string moduleName)
+{
+	if( m_pAlertNotifier )
+		return STATUS_CODE_ALREADY_INITIALIZED;
+
+	m_pAlertNotifier = new DQMDimAlertNotifier(moduleName);
 
 	return STATUS_CODE_SUCCESS;
 }

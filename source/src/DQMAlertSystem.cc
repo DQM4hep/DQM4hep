@@ -184,6 +184,9 @@ const std::string &DQMAlertNotifier::getEmitter() const
 
 StatusCode DQMAlertNotifier::notify(DQMAlertType type, const std::string &message, const DQMMonitorElementPtr &monitorElement)
 {
+	if( ! this->isRunning() )
+		return STATUS_CODE_NOT_INITIALIZED;
+
 	time_t currentTime = time(0);
 
 	if( m_minAlertInterval > 0 && currentTime - m_lastNotificationTime < m_minAlertInterval )
@@ -191,7 +194,7 @@ StatusCode DQMAlertNotifier::notify(DQMAlertType type, const std::string &messag
 
 	m_lastNotificationTime = currentTime;
 
-	return this->notify(m_emitter, type, message, monitorElement);
+	return this->notify(type, message, monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -258,12 +261,12 @@ bool DQMDimAlertNotifier::isRunning() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDimAlertNotifier::notify(const std::string &emitter, DQMAlertType type, const std::string &message, const DQMMonitorElementPtr &monitorElement)
+StatusCode DQMDimAlertNotifier::userNotify(DQMAlertType type, const std::string &message, const DQMMonitorElementPtr &monitorElement)
 {
 	if( this->isRunning() )
 		return STATUS_CODE_NOT_INITIALIZED;
 
-	DQMAlert alert(emitter, type, message, monitorElement);
+	DQMAlert alert(this->getEmitter(), type, message, monitorElement);
 
 	if( ! XDR_TESTBIT( alert.stream(xdrstream::XDR_WRITE_STREAM, m_pBuffer) , xdrstream::XDR_SUCCESS ) )
 		return STATUS_CODE_FAILURE;

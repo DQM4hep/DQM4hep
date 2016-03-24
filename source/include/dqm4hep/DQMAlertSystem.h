@@ -41,16 +41,6 @@
 namespace dqm4hep
 {
 
-enum DQMAlertType
-{
-	SOFTWARE_ALERT,
-	DANGER_ALERT,
-	BIOHAZRD_ALERT,
-	LEAK_ALERT,
-	DAQ_ALERT,
-	OTHER_ALERT
-};
-
 /** DQMAlertSystem class
  */
 class DQMAlert : public xdrstream::Streamable
@@ -154,8 +144,8 @@ public:
 protected:
 	/** Send alert notification to clients
 	 */
-	virtual StatusCode notify(const std::string &emitter, DQMAlertType type,
-			const std::string &message, const DQMMonitorElementPtr &monitorElement = DQMMonitorElementPtr() ) = 0;
+	virtual StatusCode userNotify(DQMAlertType type, const std::string &message,
+			const DQMMonitorElementPtr &monitorElement = DQMMonitorElementPtr() ) = 0;
 
 private:
 	std::string                      m_emitter;
@@ -192,7 +182,7 @@ public:
 	bool isRunning() const;
 
 protected:
-	StatusCode notify(const std::string &emitter, DQMAlertType type, const std::string &message, const DQMMonitorElementPtr &monitorElement = DQMMonitorElementPtr() );
+	StatusCode userNotify(DQMAlertType type, const std::string &message, const DQMMonitorElementPtr &monitorElement = DQMMonitorElementPtr() );
 
 private:
 	DimService                    *m_pNotificationService;

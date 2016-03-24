@@ -31,29 +31,14 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-
-// -- root headers
-#include "TH1F.h"
-#include "TH1I.h"
-#include "TH1S.h"
-#include "TH1C.h"
-#include "TH2F.h"
-#include "TH2I.h"
-#include "TH2S.h"
-#include "TH2C.h"
-#include "TH3F.h"
-#include "TH3I.h"
-#include "TProfile.h"
-#include "TProfile2D.h"
-#include "TObject.h"
-#include "TClass.h"
+#include "dqm4hep/DQMModule.h"
+#include "dqm4hep/DQMMonitorElement.h"
+#include "dqm4hep/DQMMonitorElementManager.h"
+#include "dqm4hep/DQMModuleApplication.h"
 
 namespace dqm4hep
 {
 
-class DQMModule;
-class DQMModuleApplication;
-class DQMMonitorElement;
 class DQMQualityTestFactory;
 class DQMQualityTest;
 class DQMArchiver;
@@ -229,8 +214,10 @@ public:
 	/** Book a generic TObject. The class name must be a valid built-in ROOT one or
 	 *  a user defined class inheriting from TObject and providing a dictionary.
 	 */
+	template <typename ObjectType, typename... Args>
 	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
-			const std::string &className);
+			allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
+
 
 
 
@@ -335,8 +322,9 @@ public:
 	/** Book a generic TObject. The class name must be a valid built-in ROOT one or
 	 *  a user defined class inheriting from TObject and providing a dictionary.
 	 */
+	template <typename ObjectType, typename... Args>
 	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
-			const std::string &className);
+			allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
 
 	///////////////////////
@@ -373,10 +361,6 @@ public:
 	/** Delete the monitor element (by element ptr)
 	 */
 	static StatusCode deleteMonitorElement(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement);
-
-//	/** Delete the monitor element (by element name)
-//	 */
-//	static StatusCode deleteMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElement);
 
 public:
 
@@ -417,6 +401,20 @@ public:
 
 public:
 
+	////////////////////////////
+	// ALERT SYSTEM INTERFACE //
+	////////////////////////////
+
+	/** Send an alert to all listeners - type and message
+	 */
+	static StatusCode sendAlert(const DQMModule *const pModule, DQMAlertType type, const std::string &message);
+
+	/** Send an alert to all listeners - type, message and monitor element
+	 */
+	static StatusCode sendAlert(const DQMModule *const pModule, DQMAlertType type, const std::string &message, const DQMMonitorElementPtr &monitorElement);
+
+public:
+
 	////////////////////////
 	// UITILITY FUNCTIONS //
 	////////////////////////
@@ -446,6 +444,32 @@ private:
 };
 
 //-------------------------------------------------------------------------------------------------
+
+template <typename ObjectType, typename... Args>
+inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+		allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement,
+			USER_DEFINED_ELEMENT_TYPE, ".", name, title, pModule->getName(), allocator, args...));
+
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename ObjectType, typename... Args>
+inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+		allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement,
+			USER_DEFINED_ELEMENT_TYPE, dirName, name, title, pModule->getName(), allocator, args...));
+
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+
+	return STATUS_CODE_SUCCESS;
+}
 
 } 
 

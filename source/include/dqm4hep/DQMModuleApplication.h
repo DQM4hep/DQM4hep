@@ -31,10 +31,11 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMMonitorElementManager.h"
 #include "dqm4hep/DQMApplication.h"
 #include "dqm4hep/DQMModule.h"
 #include "dqm4hep/DQMMonitorElementSender.h"
+#include "dqm4hep/DQMMonitorElementManager.h"
+#include "dqm4hep/DQMAlertSystem.h"
 
 namespace dqm4hep
 {
@@ -126,9 +127,17 @@ protected:
 	 */
 	DQMMonitorElementSender *getMonitorElementSender() const;
 
+	/** Get the alert notifier
+	 */
+	DQMAlertNotifier *getAlertNotifier() const;
+
 	/** Set the module in use in this application
 	 */
 	StatusCode setModule(DQMModule *pModule);
+
+	/** Create the alert notifier with the module name
+	 */
+	StatusCode createAlertNotifier(const std::string moduleName);
 
 protected:
 	StatusCode               m_returnCode;
@@ -142,6 +151,7 @@ private:
 
 	DQMMonitorElementManager     *m_pMonitorElementManager;
 	DQMMonitorElementSender      *m_pMonitorElementSender;
+	DQMAlertNotifier             *m_pAlertNotifier;
 }; 
 
 } 
