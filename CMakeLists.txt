@@ -4,15 +4,27 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6 FATAL_ERROR)
 ########################################################
 
-
 # project name
 PROJECT( DQM4HEP )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 3 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 1 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 2 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
+###############################
+# Require C++11
+INCLUDE( CheckCXXCompilerFlag )
+
+CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+
+IF( COMPILER_SUPPORTS_CXX11 )
+	LIST( APPEND CMAKE_CXX_FLAGS "-std=c++11" )
+ELSE()
+	MESSAGE( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
+ENDIF()
+
+###############################
 # versions of DQM4HEP subpackages
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
