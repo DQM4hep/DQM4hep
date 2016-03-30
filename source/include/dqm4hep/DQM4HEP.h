@@ -172,10 +172,11 @@ typedef std::queue<DQMEventPtr>  DQMEventPtrQueue;
 
 typedef std::shared_ptr<DQMQualityTest> DQMQualityTestPtr;
 
+typedef std::map<std::string, DQMMonitorElementPtrList> DQMPublication;
+
 #endif
 
 // typedef for messaging
-typedef std::map<std::string, DQMMonitorElementPtrList> DQMPublication;
 typedef std::map<std::string, std::string> DQMMonitorElementInfo;
 typedef std::vector<DQMMonitorElementInfo> DQMMonitorElementInfoList;
 typedef std::map<std::string, std::string> DQMHostInfo;
