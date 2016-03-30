@@ -58,20 +58,20 @@ public:
 	StatusCode endModule();
 
 protected:
-	DQMMonitorElement                        *m_pRealHistogram1DElement;
-	DQMMonitorElement                        *m_pIntHistogram1DElement;
-	DQMMonitorElement                        *m_pCharHistogram1DElement;
-	DQMMonitorElement                        *m_pShortHistogram1DElement;
+	DQMMonitorElementPtr                        m_pRealHistogram1DElement;
+	DQMMonitorElementPtr                        m_pIntHistogram1DElement;
+	DQMMonitorElementPtr                        m_pCharHistogram1DElement;
+	DQMMonitorElementPtr                        m_pShortHistogram1DElement;
 
-	DQMMonitorElement                        *m_pRealHistogram2DElement;
-	DQMMonitorElement                        *m_pIntHistogram2DElement;
-	DQMMonitorElement                        *m_pCharHistogram2DElement;
-	DQMMonitorElement                        *m_pShortHistogram2DElement;
+	DQMMonitorElementPtr                        m_pRealHistogram2DElement;
+	DQMMonitorElementPtr                        m_pIntHistogram2DElement;
+	DQMMonitorElementPtr                        m_pCharHistogram2DElement;
+	DQMMonitorElementPtr                        m_pShortHistogram2DElement;
 
-	DQMMonitorElement                        *m_pIntElement;
-	DQMMonitorElement                        *m_pFloatElement;
-	DQMMonitorElement                        *m_pShortElement;
-	DQMMonitorElement                        *m_pStringElement;
+	DQMMonitorElementPtr                        m_pIntElement;
+	DQMMonitorElementPtr                        m_pFloatElement;
+	DQMMonitorElementPtr                        m_pShortElement;
+	DQMMonitorElementPtr                        m_pStringElement;
 
 	float                                     m_histoXMin;
 	float                                     m_histoXMax;

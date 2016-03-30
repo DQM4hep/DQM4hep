@@ -264,16 +264,16 @@ StatusCode DQMAnalysisModuleApplication::run()
 				if( this->shouldStopApplication() )
 					break;
 
-				DQMEvent *pEvent = NULL;
-				m_pEventClient->takeEvent(pEvent);
+				DQMEventPtr event;
+				m_pEventClient->takeEvent(event);
 
-				if(NULL == pEvent)
+				if(NULL == event)
 					continue;
 
 				try
 				{
-					StatusCode statusCode = pAnalysisModule->processEvent(pEvent);
-					m_pCycle->eventProcessed(pEvent);
+					StatusCode statusCode = pAnalysisModule->processEvent(event.get());
+					m_pCycle->eventProcessed(event.get());
 				}
 				catch(StatusCodeException &exception)
 				{
@@ -283,9 +283,6 @@ StatusCode DQMAnalysisModuleApplication::run()
 				{
 					LOG4CXX_ERROR( dqmMainLogger , m_moduleLogStr << " , Module::processEvent(evt) caught unknown exception !");
 				}
-
-				if(pEvent)
-					delete pEvent;
 			}
 
 			m_pCycle->stopCycle();

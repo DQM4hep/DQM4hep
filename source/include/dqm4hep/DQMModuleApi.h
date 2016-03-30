@@ -103,31 +103,31 @@ public:
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 1D integer histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 1D char histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 1D short histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 2D float histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookRealHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookRealHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
@@ -135,7 +135,7 @@ public:
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookIntHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookIntHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
@@ -143,7 +143,7 @@ public:
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookCharHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookCharHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
@@ -151,14 +151,14 @@ public:
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookShortHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookShortHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
 	/** Book a 3D real histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookRealHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookRealHistogram3D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax,
 			int nZBins, float zMin, float zMax);
@@ -166,7 +166,7 @@ public:
 	/** Book a 3D int histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookIntHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookIntHistogram3D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax,
 			int nZBins, float zMin, float zMax);
@@ -175,14 +175,14 @@ public:
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookProfile1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookProfile1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax, float yMin, float yMax);
 
 	/** Book a 2D profile. The profile is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookProfile2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookProfile2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax,
 			float zMin, float zMax);
@@ -191,31 +191,31 @@ public:
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookInt(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const int &value);
+	static StatusCode bookInt(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, const int &value);
 
 	/** Book a float scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookFloat(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const float &value);
+	static StatusCode bookFloat(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, const float &value);
 
 	/** Book a short scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookShort(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const short &value);
+	static StatusCode bookShort(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, const short &value);
 
 	/** Book a std::string scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  and added to monitor element list of the module.
 	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
 	 */
-	static StatusCode bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title, const std::string &value);
+	static StatusCode bookString(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, const std::string &value);
 
 	/** Book a generic TObject. The class name must be a valid built-in ROOT one or
 	 *  a user defined class inheriting from TObject and providing a dictionary.
 	 */
 	template <typename ObjectType, typename... Args>
-	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 			allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
 
@@ -224,55 +224,55 @@ public:
 	/** Book a 1D float histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 1D integer histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookIntHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 1D char histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookCharHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 1D short histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
+	static StatusCode bookShortHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, int nBins, float minimum, float maximum);
 
 	/** Book a 2D float histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookRealHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookRealHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
 	/** Book a 2D integer histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookIntHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookIntHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
 	/** Book a 2D char histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookCharHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookCharHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
 	/** Book a 2D short histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookShortHistogram2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookShortHistogram2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax);
 
 	/** Book a 3D real histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookRealHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookRealHistogram3D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax,
 			int nZBins, float zMin, float zMax);
@@ -280,7 +280,7 @@ public:
 	/** Book a 3D int histogram. The histogram is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookIntHistogram3D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookIntHistogram3D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax,
 			int nZBins, float zMin, float zMax);
@@ -288,13 +288,13 @@ public:
 	/** Book a 1D profile. The profile is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookProfile1D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookProfile1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax, float yMin, float yMax);
 
 	/** Book a 2D profile. The profile is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookProfile2D(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookProfile2D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			int nXBins, float xMin, float xMax,
 			int nYBins, float yMin, float yMax,
 			float zMin, float zMax);
@@ -302,28 +302,28 @@ public:
 	/** Book an integer scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookInt(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const int &value);
+	static StatusCode bookInt(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, const int &value);
 
 	/** Book a float scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookFloat(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const float &value);
+	static StatusCode bookFloat(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, const float &value);
 
 	/** Book a short scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookShort(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const short &value);
+	static StatusCode bookShort(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, const short &value);
 
 	/** Book a std::string scalar element. The scalar is encapsulated in the DQMMonitorElement
 	 *  Such a function should be used in DQMModule implementation
 	 */
-	static StatusCode bookString(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title, const std::string &value);
+	static StatusCode bookString(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title, const std::string &value);
 
 	/** Book a generic TObject. The class name must be a valid built-in ROOT one or
 	 *  a user defined class inheriting from TObject and providing a dictionary.
 	 */
 	template <typename ObjectType, typename... Args>
-	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+	static StatusCode bookObject(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 			allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
 
@@ -333,25 +333,25 @@ public:
 
 	/** Get all the monitor elements already booked by this module in all the directories
 	 */
-	static StatusCode getAllMonitorElements(const DQMModule *const pModule, std::vector<DQMMonitorElement*> &monitorElementList);
+	static StatusCode getAllMonitorElements(const DQMModule *const pModule, DQMMonitorElementPtrList &monitorElementList);
 
 	/** Get the monitor element in the current directory (result by ptr reference)
 	 */
-	static StatusCode getMonitorElement(const DQMModule *const pModule, const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement);
+	static StatusCode getMonitorElement(const DQMModule *const pModule, const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement);
 
 	/** Get the monitor element in the given directory (result by ptr reference)
 	 */
-	static StatusCode getMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement);
+	static StatusCode getMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement);
 
 	/** Get the monitor element in the current directory.
 	 *  The element is directly returned without any ptr check
 	 */
-	static DQMMonitorElement *getMonitorElement(const DQMModule *const pModule, const std::string &monitorElementName);
+	static DQMMonitorElementPtr getMonitorElement(const DQMModule *const pModule, const std::string &monitorElementName);
 
 	/** Get the monitor element in the given directory.
 	 *  The element is directly returned without any ptr check
 	 */
-	static DQMMonitorElement *getMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElementName);
+	static DQMMonitorElementPtr getMonitorElement(const DQMModule *const pModule, const std::string &dirName, const std::string &monitorElementName);
 
 
 	////////////////////////
@@ -360,7 +360,7 @@ public:
 
 	/** Delete the monitor element (by element ptr)
 	 */
-	static StatusCode deleteMonitorElement(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement);
+	static StatusCode deleteMonitorElement(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement);
 
 public:
 
@@ -385,15 +385,15 @@ public:
 	 *  The quality test must have been registered in the framework before
 	 *  calling this method.
 	 */
-	static StatusCode addQualityTest(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement, const std::string &qualityTestName);
+	static StatusCode addQualityTest(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName);
 
 	/** Run all the quality test attached to this monitor element
 	 */
-	static StatusCode runQualityTests(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement);
+	static StatusCode runQualityTests(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement);
 
 	/** Run a specific quality test attached to this monitor element
 	 */
-	static StatusCode runQualityTest(const DQMModule *const pModule, DQMMonitorElement *pMonitorElement, const std::string &qualityTestName);
+	static StatusCode runQualityTest(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName);
 
 	/** Run all the quality test of all the monitor elements of this module
 	 */
@@ -438,7 +438,7 @@ private:
 	/** Book a monitor element from the xml element
 	 */
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement,
-			const std::string &meName, DQMMonitorElement *&pMonitorElement);
+			const std::string &meName, DQMMonitorElementPtr &monitorElement);
 
 	friend class DQMXmlHelper;
 };
@@ -446,13 +446,13 @@ private:
 //-------------------------------------------------------------------------------------------------
 
 template <typename ObjectType, typename... Args>
-inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &name, const std::string &title,
+inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title,
 		allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
 {
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement,
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(monitorElement,
 			USER_DEFINED_ELEMENT_TYPE, ".", name, title, pModule->getName(), allocator, args...));
 
-	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(monitorElement);
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -460,13 +460,13 @@ inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMo
 //-------------------------------------------------------------------------------------------------
 
 template <typename ObjectType, typename... Args>
-inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElement *&pMonitorElement, const std::string &dirName, const std::string &name, const std::string &title,
+inline StatusCode DQMModuleApi::bookObject(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &dirName, const std::string &name, const std::string &title,
 		allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
 {
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(pMonitorElement,
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookObject(monitorElement,
 			USER_DEFINED_ELEMENT_TYPE, dirName, name, title, pModule->getName(), allocator, args...));
 
-	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(pMonitorElement);
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(monitorElement);
 
 	return STATUS_CODE_SUCCESS;
 }

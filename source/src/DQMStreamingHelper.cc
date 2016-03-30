@@ -60,20 +60,17 @@ xdrstream::Status DQMStreamingHelper::read( xdrstream::IODevice *pDevice, DQMPub
 		uint32_t meListSize = 0;
 		XDR_STREAM( pDevice->read( & meListSize ) );
 
-		DQMPublication::value_type value(moduleName, DQMMonitorElementList());
+		DQMPublication::value_type value(moduleName, DQMMonitorElementPtrList());
 		DQMPublication::iterator iter = publication.insert(value).first;
 
 		for(unsigned int i=0 ; i<meListSize ; i++)
 		{
-			DQMMonitorElement *pMonitorElement = new DQMMonitorElement();
+			DQMMonitorElementPtr monitorElement = std::make_shared<DQMMonitorElement>();
 
-			if( xdrstream::XDR_SUCCESS != pMonitorElement->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
-			{
-				delete pMonitorElement;
+			if( xdrstream::XDR_SUCCESS != monitorElement->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
 				continue;
-			}
 
-			iter->second.push_back(pMonitorElement);
+			iter->second.push_back(monitorElement);
 		}
 	}
 
@@ -91,7 +88,7 @@ xdrstream::Status DQMStreamingHelper::write( xdrstream::IODevice *pDevice, const
 		endIter != iter ; ++iter)
 	{
 		std::string moduleName(iter->first);
-		DQMMonitorElementList meList(iter->second);
+		DQMMonitorElementPtrList meList(iter->second);
 		uint32_t nMonitorElements = meList.size();
 
 		XDR_STREAM( pDevice->write( & moduleName ) );
@@ -103,11 +100,11 @@ xdrstream::Status DQMStreamingHelper::write( xdrstream::IODevice *pDevice, const
 
 		for(unsigned int i=0 ; i<meList.size() ; i++)
 		{
-			DQMMonitorElement *pMonitorElement = meList.at(i);
+			DQMMonitorElementPtr &monitorElement = meList.at(i);
 
 			xdrstream::xdr_size_t mePosition = pDevice->getPosition();
 
-			if( xdrstream::XDR_SUCCESS != pMonitorElement->stream( xdrstream::XDR_WRITE_STREAM , pDevice ) )
+			if( xdrstream::XDR_SUCCESS != monitorElement->stream( xdrstream::XDR_WRITE_STREAM , pDevice ) )
 			{
 				pDevice->seek(mePosition);
 				continue;

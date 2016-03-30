@@ -72,15 +72,15 @@ StatusCode DQMXmlHelper::createQualityTest(const DQMModule *const pModule, const
 //----------------------------------------------------------------------------------------------------
 
 StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-		DQMMonitorElement *&pMonitorElement)
+		DQMMonitorElementPtr &monitorElement)
 {
-	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, "", pMonitorElement);
+	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, "", monitorElement);
 }
 
 //----------------------------------------------------------------------------------------------------
 
 StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-		const std::string &strSuffix, DQMMonitorElement *&pMonitorElement)
+		const std::string &strSuffix, DQMMonitorElementPtr &monitorElement)
 {
     for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
         pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
@@ -96,7 +96,7 @@ StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, cons
 
     	meName += strSuffix;
 
-    	return DQMModuleApi::bookMonitorElement(pModule, pXmlElement, meName, pMonitorElement);
+    	return DQMModuleApi::bookMonitorElement(pModule, pXmlElement, meName, monitorElement);
     }
 
 	return STATUS_CODE_NOT_FOUND;
@@ -105,12 +105,12 @@ StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, cons
 //----------------------------------------------------------------------------------------------------
 
 StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-		unsigned int suffix, DQMMonitorElement *&pMonitorElement)
+		unsigned int suffix, DQMMonitorElementPtr &monitorElement)
 {
 	std::stringstream ss;
 	ss << suffix;
 
-	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, ss.str(), pMonitorElement);
+	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, ss.str(), monitorElement);
 }
 
 

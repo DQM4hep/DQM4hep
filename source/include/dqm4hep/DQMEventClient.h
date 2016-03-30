@@ -137,7 +137,7 @@ public:
 	 *  If no event is available, the queue remains unchanged and the
 	 *  pointer is not set
 	 */
-	void takeEvent(DQMEvent *&pEvent);
+	void takeEvent(DQMEventPtr &event);
 
 	/** Add a listener to this event client
 	 */
@@ -221,7 +221,7 @@ private:
 	DQMEventStreamer                    *m_pEventStreamer;
 	std::string                          m_collectorName;
 	std::string                          m_subEventIdentifier;
-	DQMEventQueue                        m_eventQueue;
+	DQMEventPtrQueue                     m_eventQueue;
 	unsigned int                         m_maximumQueueSize;
 	std::set<DQMEventClientListener*>    m_listeners;
 	mutable pthread_mutex_t              m_mutex;   // to prevent data race on access

@@ -159,10 +159,10 @@ StatusCode DQMMonitorElementManager::getFullPathName(const std::string &subDirNa
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
 		const std::string &moduleName, const std::string &className)
 {
-	pMonitorElement = NULL;
+	monitorElement = NULL;
 
 	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
 		return STATUS_CODE_INVALID_PARAMETER;
@@ -180,21 +180,17 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
     		return STATUS_CODE_FAILURE;
 
 		// create the monitor element
-		pMonitorElement = new DQMMonitorElement(pObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
+    	monitorElement = std::make_shared<DQMMonitorElement>(pObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
 
-		if(NULL == pMonitorElement)
+		if(NULL == monitorElement)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// add it to the monitor element list of the module
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, pMonitorElement));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, monitorElement));
 	}
 	catch(StatusCodeException &exception)
 	{
 		LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
-
-		if(NULL != pMonitorElement)
-			delete pMonitorElement;
-
 		return exception.getStatusCode();
 	}
 
@@ -204,7 +200,7 @@ StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElem
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
-		const std::string &name, DQMMonitorElement *&pMonitorElement)
+		const std::string &name, DQMMonitorElementPtr &monitorElement)
 {
 	if(NULL == pXmlElement)
 		return STATUS_CODE_INVALID_PTR;
@@ -256,7 +252,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 		if(!DQM4HEP::stringToType(value, intValue))
 			return STATUS_CODE_FAILURE;
 
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, INT_ELEMENT_TYPE, path, name, title, moduleName, TScalarIntAllocator(), intValue));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, INT_ELEMENT_TYPE, path, name, title, moduleName, TScalarIntAllocator(), intValue));
 
 		break;
 	}
@@ -267,7 +263,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 		if(!DQM4HEP::stringToType(value, floatValue))
 			return STATUS_CODE_FAILURE;
 
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, REAL_ELEMENT_TYPE, path, name, title, moduleName, TScalarFloatAllocator(), floatValue));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, REAL_ELEMENT_TYPE, path, name, title, moduleName, TScalarFloatAllocator(), floatValue));
 
 		break;
 	}
@@ -279,13 +275,13 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 		if(!DQM4HEP::stringToType(value, shortValue))
 			return STATUS_CODE_FAILURE;
 
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, SHORT_ELEMENT_TYPE, path, name, title, moduleName, TScalarShortAllocator(), shortValue));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, SHORT_ELEMENT_TYPE, path, name, title, moduleName, TScalarShortAllocator(), shortValue));
 
 		break;
 	}
 	case STRING_ELEMENT_TYPE :
 	{
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, STRING_ELEMENT_TYPE, path, name, title, moduleName, TScalarStringAllocator(), value));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, STRING_ELEMENT_TYPE, path, name, title, moduleName, TScalarStringAllocator(), value));
 
 		break;
 	}
@@ -297,7 +293,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, INT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1IAllocator(), nBins, min, max));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1IAllocator(), nBins, min, max));
 
     	break;
 	}
@@ -309,7 +305,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, REAL_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1FAllocator(), nBins, min, max));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1FAllocator(), nBins, min, max));
 
     	break;
 	}
@@ -321,7 +317,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, SHORT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1SAllocator(), nBins, min, max));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, SHORT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1SAllocator(), nBins, min, max));
 
     	break;
 	}
@@ -333,7 +329,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "min", min));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, CHAR_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1CAllocator(), nBins, min, max));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, CHAR_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1CAllocator(), nBins, min, max));
 
     	break;
 	}
@@ -351,7 +347,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, INT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
 
     	break;
 	}
@@ -369,7 +365,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, REAL_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
 
     	break;
 	}
@@ -387,7 +383,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, CHAR_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2CAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, CHAR_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2CAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
 
     	break;
 	}
@@ -405,7 +401,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, SHORT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2SAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, SHORT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2SAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
 
     	break;
 	}
@@ -429,7 +425,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minZ", minZ));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, INT_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
 
     	break;
 	}
@@ -453,7 +449,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minZ", minZ));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, REAL_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
 
     	break;
 	}
@@ -469,7 +465,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minY", minY));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxY", maxX, BiggerThanValidator<float>(minY) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, PROFILE_1D_ELEMENT_TYPE, path, name, title, moduleName, TProfileAllocator(), nBinsX, minX, maxX, minY, maxY));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, PROFILE_1D_ELEMENT_TYPE, path, name, title, moduleName, TProfileAllocator(), nBinsX, minX, maxX, minY, maxY));
 
     	break;
 	}
@@ -491,7 +487,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "minZ", minZ));
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minZ) ));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(pMonitorElement, PROFILE_2D_ELEMENT_TYPE, path, name, title, moduleName, TProfile2DAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, minZ, maxZ));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, PROFILE_2D_ELEMENT_TYPE, path, name, title, moduleName, TProfile2DAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, minZ, maxZ));
 
     	break;
 	}
@@ -500,7 +496,7 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 		std::string rootClass;
     	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "ROOTClass", rootClass));
 
-    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(pMonitorElement, path, name, title, moduleName, rootClass));
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, path, name, title, moduleName, rootClass));
 
     	break;
 	}
@@ -508,9 +504,9 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 		return STATUS_CODE_FAILURE;
 	}
 
-	pMonitorElement->setDrawOption(drawOption);
-	pMonitorElement->setDescription(description);
-	pMonitorElement->setResetPolicy(stringToResetPolicy(resetPolicyStr));
+	monitorElement->setDrawOption(drawOption);
+	monitorElement->setDescription(description);
+	monitorElement->setResetPolicy(stringToResetPolicy(resetPolicyStr));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -518,58 +514,55 @@ StatusCode DQMMonitorElementManager::bookMonitorElement(const TiXmlElement *cons
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::getAllMonitorElements(std::vector<DQMMonitorElement*> &monitorElementList) const
+StatusCode DQMMonitorElementManager::getAllMonitorElements(DQMMonitorElementPtrList &monitorElementList) const
 {
 	return m_pMonitorElementStorage->getAllMonitorElements(monitorElementList);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::getMonitorElement(const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const
+StatusCode DQMMonitorElementManager::getMonitorElement(const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const
 {
-	return m_pMonitorElementStorage->getMonitorElement(monitorElementName, pMonitorElement);
+	return m_pMonitorElementStorage->getMonitorElement(monitorElementName, monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const
+StatusCode DQMMonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const
 {
-	return m_pMonitorElementStorage->getMonitorElement(dirName, monitorElementName, pMonitorElement);
+	return m_pMonitorElementStorage->getMonitorElement(dirName, monitorElementName, monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-DQMMonitorElement *DQMMonitorElementManager::getMonitorElement(const std::string &monitorElementName) const
+DQMMonitorElementPtr DQMMonitorElementManager::getMonitorElement(const std::string &monitorElementName) const
 {
-	DQMMonitorElement *pMonitorElement = NULL;
-	this->getMonitorElement(monitorElementName, pMonitorElement);
-	return pMonitorElement;
+	DQMMonitorElementPtr monitorElement = NULL;
+	this->getMonitorElement(monitorElementName, monitorElement);
+	return monitorElement;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-DQMMonitorElement *DQMMonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &monitorElementName) const
+DQMMonitorElementPtr DQMMonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &monitorElementName) const
 {
-	DQMMonitorElement *pMonitorElement = NULL;
-	this->getMonitorElement(dirName, monitorElementName, pMonitorElement);
-	return pMonitorElement;
+	DQMMonitorElementPtr monitorElement = NULL;
+	this->getMonitorElement(dirName, monitorElementName, monitorElement);
+	return monitorElement;
 }
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::deleteMonitorElement(DQMMonitorElement *pMonitorElement)
+StatusCode DQMMonitorElementManager::deleteMonitorElement(DQMMonitorElementPtr &monitorElement)
 {
-	if(NULL == pMonitorElement)
+	if(NULL == monitorElement)
 		return STATUS_CODE_INVALID_PTR;
 
-	const std::string fullPath = pMonitorElement->getPath().getPath();
-	const std::string name = pMonitorElement->getName();
+	const std::string fullPath = monitorElement->getPath().getPath();
+	const std::string name = monitorElement->getName();
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(fullPath, name));
-
-	if(!m_pMonitorElementStorage->isOwner() && NULL != pMonitorElement)
-		delete pMonitorElement;
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -578,20 +571,7 @@ StatusCode DQMMonitorElementManager::deleteMonitorElement(DQMMonitorElement *pMo
 
 StatusCode DQMMonitorElementManager::deleteMonitorElement(const std::string &dirName, const std::string &monitorElementName)
 {
-	if(m_pMonitorElementStorage->isOwner())
-	{
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(dirName, monitorElementName));
-	}
-	else
-	{
-		DQMMonitorElement *pMonitorElement = NULL;
-
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->getMonitorElement(dirName, monitorElementName, pMonitorElement));
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(dirName, monitorElementName));
-
-		if(NULL != pMonitorElement)
-			delete pMonitorElement;
-	}
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(dirName, monitorElementName));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -601,19 +581,17 @@ StatusCode DQMMonitorElementManager::deleteMonitorElement(const std::string &dir
 
 StatusCode DQMMonitorElementManager::resetMonitorElements(DQMResetPolicy policy) const
 {
-	DQMMonitorElementList monitorElementList;
+	DQMMonitorElementPtrList monitorElementList;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements(monitorElementList));
 
-	for(DQMMonitorElementList::iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
+	for(DQMMonitorElementPtrList::iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
 			endIter != iter ; ++iter)
 	{
-		DQMMonitorElement *pMonitorElement = *iter;
-
-		if(NULL == pMonitorElement)
+		if(NULL == *iter)
 			continue;
 
-		if(policy == pMonitorElement->getResetPolicy())
-			pMonitorElement->reset();
+		if(policy == (*iter)->getResetPolicy())
+			(*iter)->reset();
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -623,18 +601,16 @@ StatusCode DQMMonitorElementManager::resetMonitorElements(DQMResetPolicy policy)
 
 StatusCode DQMMonitorElementManager::resetMonitorElements() const
 {
-	DQMMonitorElementList monitorElementList;
+	DQMMonitorElementPtrList monitorElementList;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements(monitorElementList));
 
-	for(DQMMonitorElementList::iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
+	for(DQMMonitorElementPtrList::iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
 			endIter != iter ; ++iter)
 	{
-		DQMMonitorElement *pMonitorElement = *iter;
-
-		if(NULL == pMonitorElement)
+		if(NULL == *iter)
 			continue;
 
-		pMonitorElement->reset();
+		(*iter)->reset();
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -642,18 +618,16 @@ StatusCode DQMMonitorElementManager::resetMonitorElements() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::getMonitorElementListToPublish(DQMMonitorElementList &monitorElementListToPublish) const
+StatusCode DQMMonitorElementManager::getMonitorElementListToPublish(DQMMonitorElementPtrList &monitorElementListToPublish) const
 {
-	DQMMonitorElementList moduleElementList;
+	DQMMonitorElementPtrList moduleElementList;
 	RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements( moduleElementList ) );
 
-	for( DQMMonitorElementList::const_iterator iter = moduleElementList.begin(), endIter = moduleElementList.end() ;
+	for( DQMMonitorElementPtrList::const_iterator iter = moduleElementList.begin(), endIter = moduleElementList.end() ;
 			endIter != iter ; ++iter )
 	{
-		DQMMonitorElement *pMonitorElement = *iter;
-
-		if( pMonitorElement->isToPublish() )
-			monitorElementListToPublish.push_back( pMonitorElement );
+		if( (*iter)->isToPublish() )
+			monitorElementListToPublish.push_back( *iter );
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -735,43 +709,43 @@ StatusCode DQMMonitorElementManager::createQualityTest(TiXmlElement *const pXmlE
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::addQualityTest(DQMMonitorElement *pMonitorElement, const std::string &qualityTestName) const
+StatusCode DQMMonitorElementManager::addQualityTest(DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName) const
 {
-	if(NULL == pMonitorElement)
+	if(NULL == monitorElement)
 		return STATUS_CODE_INVALID_PTR;
 
 	DQMQualityTest *pQualityTest = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getQualityTest(qualityTestName, pQualityTest));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->addQualityTest(pQualityTest));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->addQualityTest(pQualityTest));
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::runQualityTests(DQMMonitorElement *pMonitorElement)
+StatusCode DQMMonitorElementManager::runQualityTests(DQMMonitorElementPtr &monitorElement)
 {
-	if(NULL == pMonitorElement)
+	if(NULL == monitorElement)
 		return STATUS_CODE_INVALID_PTR;
 
-	return pMonitorElement->runQualityTests();
+	return monitorElement->runQualityTests();
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::runQualityTest(DQMMonitorElement *pMonitorElement, const std::string &qualityTestName)
+StatusCode DQMMonitorElementManager::runQualityTest(DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName)
 {
-	if(NULL == pMonitorElement)
+	if(NULL == monitorElement)
 		return STATUS_CODE_INVALID_PTR;
 
-	return pMonitorElement->runQualityTest(qualityTestName);
+	return monitorElement->runQualityTest(qualityTestName);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMMonitorElementManager::runQualityTests()
 {
-	DQMMonitorElementList monitorElementList;
+	DQMMonitorElementPtrList monitorElementList;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements(monitorElementList));
 
 	return this->runQualityTests(monitorElementList);
@@ -779,12 +753,13 @@ StatusCode DQMMonitorElementManager::runQualityTests()
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMMonitorElementManager::runQualityTests(const DQMMonitorElementList &monitorElementList)
+StatusCode DQMMonitorElementManager::runQualityTests(const DQMMonitorElementPtrList &monitorElementList)
 {
-	for(DQMMonitorElementList::const_iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
+	for(DQMMonitorElementPtrList::const_iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
 			endIter != iter ; ++iter)
 	{
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->runQualityTests(*iter));
+		DQMMonitorElementPtr monitorElement = *iter;
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->runQualityTests(monitorElement));
 	}
 
 	return STATUS_CODE_SUCCESS;
@@ -811,16 +786,14 @@ StatusCode DQMMonitorElementManager::getQualityTest(const std::string &qualityTe
 
 StatusCode DQMMonitorElementManager::getQualityTestResults(DQMQualityTestResultMap &results) const
 {
-	DQMMonitorElementList monitorElementList;
+	DQMMonitorElementPtrList monitorElementList;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements(monitorElementList));
 
-	for( DQMMonitorElementList::const_iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
+	for( DQMMonitorElementPtrList::const_iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
 			endIter != iter ; ++iter )
 	{
-		DQMMonitorElement *pMonitorElement = *iter;
-
-		const DQMQualityTestResultMap &meResults(pMonitorElement->getQualityTestResults());
-		results.insert(meResults.begin(), meResults.end());
+		const DQMQualityTestResultMap &meResults( (*iter)->getQualityTestResults() );
+		results.insert( meResults.begin(), meResults.end() );
 	}
 
 	return STATUS_CODE_SUCCESS;

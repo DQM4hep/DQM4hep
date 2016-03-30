@@ -53,12 +53,7 @@ ModuleMeInfo::~ModuleMeInfo()
 {
 	for(MeInfoMap::iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
-	{
-		if(NULL != iter->second->m_pMonitorElement)
-			delete iter->second->m_pMonitorElement;
-
 		delete iter->second;
-	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -77,13 +72,13 @@ const DQMMonitorElementInfoList &ModuleMeInfo::getAvailableMeList() const
 
 //-------------------------------------------------------------------------------------------------
 
-bool ModuleMeInfo::updateMonitorElement(DQMMonitorElement *pMonitorElement)
+bool ModuleMeInfo::updateMonitorElement(DQMMonitorElementPtr &monitorElement)
 {
-	if(NULL == pMonitorElement)
+	if(NULL == monitorElement)
 		return false;
 
 	// full name = path + name
-	std::string fullName = (pMonitorElement->getPath() + pMonitorElement->getName()).getPath();
+	std::string fullName = (monitorElement->getPath() + monitorElement->getName()).getPath();
 
 	if(fullName.at(0) != '/')
 		fullName = "/" + fullName;
@@ -103,28 +98,17 @@ bool ModuleMeInfo::updateMonitorElement(DQMMonitorElement *pMonitorElement)
 		}
 
 		findIter = ret.first;
-
-		// initialize monitor element pointer
-		findIter->second->m_pMonitorElement = NULL;
-	}
-
-	// here, findIter is always defined !
-	if(NULL != findIter->second->m_pMonitorElement)
-	{
-		// destroy it !
-		delete findIter->second->m_pMonitorElement;
-		findIter->second->m_pMonitorElement = NULL;
 	}
 
 	// replace it !
-	findIter->second->m_pMonitorElement = pMonitorElement;
+	findIter->second->m_monitorElement = monitorElement;
 
 	return true;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-DQMMonitorElement *ModuleMeInfo::getMonitorElement(const std::string &meName, bool partialCompare, bool lowerCaseCompare) const
+DQMMonitorElementPtr ModuleMeInfo::getMonitorElement(const std::string &meName, bool partialCompare, bool lowerCaseCompare) const
 {
 	std::string elementNameToCompare = meName;
 
@@ -150,10 +134,10 @@ DQMMonitorElement *ModuleMeInfo::getMonitorElement(const std::string &meName, bo
 				continue;
 		}
 
-		return iter->second->m_pMonitorElement;
+		return iter->second->m_monitorElement;
 	}
 
-	return NULL;
+	return DQMMonitorElementPtr();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -190,9 +174,9 @@ StringSet ModuleMeInfo::getSubscribedList(int clientID) const
 
 //-------------------------------------------------------------------------------------------------
 
-DQMMonitorElementList ModuleMeInfo::getSubscribedMeList(int clientID) const
+DQMMonitorElementPtrList ModuleMeInfo::getSubscribedMeList(int clientID) const
 {
-	DQMMonitorElementList meList;
+	DQMMonitorElementPtrList meList;
 
 	for(MeInfoMap::const_iterator iter = m_meInfoMap.begin(), endIter = m_meInfoMap.end() ;
 			endIter != iter ; ++iter)
@@ -203,10 +187,10 @@ DQMMonitorElementList ModuleMeInfo::getSubscribedMeList(int clientID) const
 		{
 			LOG4CXX_DEBUG( dqmMainLogger , "Client " << clientID << " subscribed to it !" );
 
-			if( NULL != iter->second->m_pMonitorElement )
+			if( NULL != iter->second->m_monitorElement )
 			{
 				LOG4CXX_DEBUG( dqmMainLogger , "Element is not null. Pushed back !" );
-				meList.push_back( iter->second->m_pMonitorElement );
+				meList.push_back( iter->second->m_monitorElement );
 			}
 		}
 	}
@@ -660,31 +644,21 @@ void DQMMonitorElementCollector::handleMeCollectUpdate(DimCommand *pCommand)
 		int nElements = 0;
 		ClientUpdateMap clientUpdateMap;
 
-		// update the monitor element with ones received !
+		// update the monitor element with the ones received !
 		// build the monitor element list to update for each client
 		for(DQMPublication::iterator iter = publication.begin(), endIter = publication.end() ;
 				endIter != iter ; ++iter)
 		{
 			ModuleMeInfoMap::iterator findIter = m_moduleMeInfoMap.find(iter->first);
 
-			// if module not found, clean the monitor elements related to this module
 			if(findIter == m_moduleMeInfoMap.end())
-			{
-				for(DQMMonitorElementList::iterator meIter = iter->second.begin(), meEndIter = iter->second.end() ;
-						meEndIter != meIter ; ++meIter)
-					delete *meIter;
-
 				continue;
-			}
 
 			// update monitor elements !
-			for(DQMMonitorElementList::iterator meIter = iter->second.begin(), meEndIter = iter->second.end() ;
-									meEndIter != meIter ; ++meIter)
+			for(DQMMonitorElementPtrList::iterator meIter = iter->second.begin(), meEndIter = iter->second.end() ;
+					meEndIter != meIter ; ++meIter)
 			{
 				bool updated = findIter->second->updateMonitorElement(*meIter);
-
-				if(!updated)
-					delete *meIter;
 
 				nElements++;
 
@@ -906,13 +880,13 @@ void DQMMonitorElementCollector::handleMeQuery(int clientId, DimCommand *pComman
 			}
 
 			// find the monitor element
-			DQMMonitorElement *pMonitorElement = moduleIter->second->getMonitorElement(iter->second);
+			DQMMonitorElementPtr monitorElement = moduleIter->second->getMonitorElement(iter->second);
 
-			if(NULL == pMonitorElement)
+			if(NULL == monitorElement)
 				continue;
 
 			LOG4CXX_DEBUG( dqmMainLogger , "Element : " << iter->second << " found !" );
-			monitorElementPublication[iter->first].push_back(pMonitorElement);
+			monitorElementPublication[iter->first].push_back(monitorElement);
 		}
 
 		for(StringSet::iterator iter = updateModuleList.begin(), endIter = updateModuleList.end() ;
@@ -1080,7 +1054,7 @@ void DQMMonitorElementCollector::sendMeUpdate(int clientId)
 	{
 		std::string moduleName = iter->first;
 
-		DQMMonitorElementList subscribedMeList = iter->second->getSubscribedMeList(clientId);
+		DQMMonitorElementPtrList subscribedMeList = iter->second->getSubscribedMeList(clientId);
 
 		if(subscribedMeList.empty())
 			continue;

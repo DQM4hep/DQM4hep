@@ -52,7 +52,7 @@ public:
 	StatusCode endModule();
 
 protected:
-	DQMMonitorElement                        *m_pTestElement;
+	DQMMonitorElementPtr                        m_pTestElement;
 
 	int            m_min;
 	int            m_max;

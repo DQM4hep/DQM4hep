@@ -107,7 +107,7 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 
 	DQMPublication::iterator publicationIter =
 			publication.insert(
-					DQMPublication::value_type(moduleName, DQMMonitorElementList() ) ).first;
+					DQMPublication::value_type(moduleName, DQMMonitorElementPtrList() ) ).first;
 
 	// build the publication to send
 	LOG4CXX_DEBUG( dqmMainLogger , "N subscribed me : " << subscribedMeList.size() );
@@ -139,12 +139,12 @@ StatusCode DQMMonitorElementSender::sendMonitorElements()
 		if(path.empty() || meName.empty())
 			continue;
 
-		DQMMonitorElement *pMonitorElement = NULL;
+		DQMMonitorElementPtr monitorElement = NULL;
 
-		if(STATUS_CODE_SUCCESS !=  DQMModuleApi::getMonitorElement(m_pApplication->getModule(), path, meName, pMonitorElement))
+		if(STATUS_CODE_SUCCESS !=  DQMModuleApi::getMonitorElement(m_pApplication->getModule(), path, meName, monitorElement))
 			continue;
 
-		publicationIter->second.push_back(pMonitorElement);
+		publicationIter->second.push_back(monitorElement);
 	}
 
 	if(publication.empty())
@@ -269,9 +269,9 @@ void DQMMonitorElementSender::infoHandler()
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMMonitorElementSender::addAvailableMonitorElement(DQMMonitorElement *pMonitorElement)
+void DQMMonitorElementSender::addAvailableMonitorElement(const DQMMonitorElementPtr &monitorElement)
 {
-	std::string fullName = ( pMonitorElement->getPath() + pMonitorElement->getName() ).getPath();
+	std::string fullName = ( monitorElement->getPath() + monitorElement->getName() ).getPath();
 
 	if(fullName.at(0) != '/')
 		fullName = "/" + fullName;
@@ -288,10 +288,10 @@ void DQMMonitorElementSender::addAvailableMonitorElement(DQMMonitorElement *pMon
 
 	// fill info
 	ret.first->second[DQMKey::MODULE_NAME] = m_pApplication->getModule()->getName();
-	ret.first->second[DQMKey::ME_PATH] = pMonitorElement->getPath().getPath();
-	ret.first->second[DQMKey::ME_TYPE] = monitorElementTypeToString(pMonitorElement->getType());
-	ret.first->second[DQMKey::ME_NAME] = pMonitorElement->getName();
-	ret.first->second[DQMKey::ME_DESCRIPTION] = pMonitorElement->getDescription();
+	ret.first->second[DQMKey::ME_PATH] = monitorElement->getPath().getPath();
+	ret.first->second[DQMKey::ME_TYPE] = monitorElementTypeToString(monitorElement->getType());
+	ret.first->second[DQMKey::ME_NAME] = monitorElement->getName();
+	ret.first->second[DQMKey::ME_DESCRIPTION] = monitorElement->getDescription();
 
 	// for future update on the collector side
 	m_sendAvailableMeList = true;

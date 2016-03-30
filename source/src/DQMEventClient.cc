@@ -103,10 +103,7 @@ void DQMEventClient::setMaximumQueueSize(unsigned int maxQueueSize)
 
 	// shrink the queue to fit the new max queue size
 	while( m_eventQueue.size() >  m_maximumQueueSize )
-	{
-		delete m_eventQueue.front();
 		m_eventQueue.pop();
-	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -120,13 +117,10 @@ unsigned int DQMEventClient::getMaximumQueueSize() const
 
 void DQMEventClient::clearQueue()
 {
-	scoped_lock( & this->m_mutex);
+	scoped_lock( & this->m_mutex );
 
 	while( ! m_eventQueue.empty() )
-	{
-		delete m_eventQueue.front();
 		m_eventQueue.pop();
-	}
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -145,13 +139,13 @@ const std::string &DQMEventClient::getSubEventIdentifier() const
 
 //-------------------------------------------------------------------------------------------------
 
-void DQMEventClient::takeEvent(DQMEvent *&pEvent)
+void DQMEventClient::takeEvent(DQMEventPtr &event)
 {
-	scoped_lock( & this->m_mutex);
+	scoped_lock( & this->m_mutex );
 
 	if( ! m_eventQueue.empty() )
 	{
-		pEvent = m_eventQueue.front();
+		event = m_eventQueue.front();
 		m_eventQueue.pop();
 	}
 }
@@ -190,12 +184,10 @@ void DQMEventClient::pushEvent(DQMEvent *pEvent)
 	pthread_mutex_lock(& this->m_mutex);
 
 	if( m_eventQueue.size() == m_maximumQueueSize )
-	{
-		delete m_eventQueue.front();
 		m_eventQueue.pop();
-	}
 
-	m_eventQueue.push(pEvent);
+	DQMEventPtr event(pEvent);
+	m_eventQueue.push(event);
 
 	// need unlock before notifying
 	pthread_mutex_unlock(& this->m_mutex );

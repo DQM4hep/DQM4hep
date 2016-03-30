@@ -67,11 +67,10 @@ void DQMDirectory::ls(bool recursive) const
 	LOG4CXX_INFO( dqmMainLogger , "Directory " << m_name << " (parent = " << parentDirName << ") :" );
 
 	// print contents first
-	for(std::vector<DQMMonitorElement*>::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
+	for(DQMMonitorElementPtrList::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
 			endIter != iter ; ++iter)
 	{
-		DQMMonitorElement *pMonitorElement = *iter;
-		LOG4CXX_INFO( dqmMainLogger , " [ME]  " << pMonitorElement->getName() );
+		LOG4CXX_INFO( dqmMainLogger , " [ME]  " << (*iter)->getName() );
 	}
 
 	// print sub-directories
@@ -172,34 +171,32 @@ StatusCode DQMDirectory::findDir(const std::string &dirName, DQMDirectory *&pDir
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDirectory::addMonitorElement(DQMMonitorElement *pMonitorElement)
+StatusCode DQMDirectory::addMonitorElement(const DQMMonitorElementPtr &monitorElement)
 {
-	if(NULL == pMonitorElement)
+	if(NULL == monitorElement)
 		return STATUS_CODE_INVALID_PTR;
 
-	if(containsMonitorElement(pMonitorElement))
+	if(containsMonitorElement(monitorElement))
 		return STATUS_CODE_ALREADY_PRESENT;
 
-	m_contentsList.push_back(pMonitorElement);
+	m_contentsList.push_back(monitorElement);
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDirectory::findMonitorElement(const std::string &name, DQMMonitorElement *&pMonitorElement) const
+StatusCode DQMDirectory::findMonitorElement(const std::string &name, DQMMonitorElementPtr &monitorElement) const
 {
-	pMonitorElement = NULL;
+	monitorElement = NULL;
 
 	// print contents first
-	for(std::vector<DQMMonitorElement*>::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
+	for(DQMMonitorElementPtrList::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
 			endIter != iter ; ++iter)
 	{
-		DQMMonitorElement *pME = *iter;
-
-		if(pME->getName() == name)
+		if((*iter)->getName() == name)
 		{
-			pMonitorElement = pME;
+			monitorElement = *iter;
 			return STATUS_CODE_SUCCESS;
 		}
 	}
@@ -209,36 +206,34 @@ StatusCode DQMDirectory::findMonitorElement(const std::string &name, DQMMonitorE
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMDirectory::containsMonitorElement(const DQMMonitorElement *pMonitorElement) const
+bool DQMDirectory::containsMonitorElement(const DQMMonitorElementPtr &monitorElement) const
 {
-	return containsMonitorElement(pMonitorElement->getName());
+	return containsMonitorElement(monitorElement->getName());
 }
 
 //-------------------------------------------------------------------------------------------------
 
 bool DQMDirectory::containsMonitorElement(const std::string &monitorElementName) const
 {
-	DQMMonitorElement *pMonitorElement = NULL;
-	return findMonitorElement(monitorElementName, pMonitorElement) == STATUS_CODE_SUCCESS;
+	DQMMonitorElementPtr monitorElement;
+	return findMonitorElement(monitorElementName, monitorElement) == STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDirectory::removeMonitorElement(DQMMonitorElement *pMonitorElement)
+StatusCode DQMDirectory::removeMonitorElement(const DQMMonitorElementPtr &monitorElement)
 {
-	return removeMonitorElement(pMonitorElement->getName());
+	return removeMonitorElement(monitorElement->getName());
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMDirectory::removeMonitorElement(const std::string &monitorElementName)
 {
-	for(std::vector<DQMMonitorElement*>::iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
+	for(DQMMonitorElementPtrList::iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
 			endIter != iter ; ++iter)
 	{
-		DQMMonitorElement *pME = *iter;
-
-		if(pME->getName() == monitorElementName)
+		if((*iter)->getName() == monitorElementName)
 		{
 			m_contentsList.erase(iter);
 			return STATUS_CODE_SUCCESS;
@@ -250,14 +245,14 @@ StatusCode DQMDirectory::removeMonitorElement(const std::string &monitorElementN
 
 //-------------------------------------------------------------------------------------------------
 
-const std::vector<DQMMonitorElement*> &DQMDirectory::getMonitorElementList() const
+const DQMMonitorElementPtrList &DQMDirectory::getMonitorElementList() const
 {
 	return m_contentsList;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDirectory::removeDir(const std::string &dirName, bool deepClean)
+StatusCode DQMDirectory::removeDir(const std::string &dirName)
 {
 	for(std::vector<DQMDirectory*>::iterator iter = m_directoryList.begin(), endIter = m_directoryList.end() ;
 			endIter != iter ; ++iter)
@@ -266,7 +261,7 @@ StatusCode DQMDirectory::removeDir(const std::string &dirName, bool deepClean)
 
 		if(pDirectory->getName() == dirName)
 		{
-			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->clear(deepClean));
+			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->clear());
 			delete pDirectory;
 			m_directoryList.erase(iter);
 
@@ -279,18 +274,8 @@ StatusCode DQMDirectory::removeDir(const std::string &dirName, bool deepClean)
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMDirectory::clear(bool deepClean)
+StatusCode DQMDirectory::clear()
 {
-	if(deepClean)
-	{
-		for(std::vector<DQMMonitorElement*>::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
-				endIter != iter ; ++iter)
-		{
-			DQMMonitorElement *pMonitorElement = *iter;
-			delete pMonitorElement;
-		}
-	}
-
 	m_contentsList.clear();
 
 	for(std::vector<DQMDirectory*>::iterator iter = m_directoryList.begin(), endIter = m_directoryList.end() ;
@@ -298,7 +283,7 @@ StatusCode DQMDirectory::clear(bool deepClean)
 	{
 		DQMDirectory *pDirectory = *iter;
 		// clear recursively the sub dir
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->clear(deepClean));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->clear());
 		// delete ptr
 		delete pDirectory;
 	}
@@ -340,20 +325,14 @@ void DQMDirectory::ls(int depth) const
 	LOG4CXX_INFO( dqmMainLogger , std::string(depth*3, ' ') << "Directory " << m_name << " (parent = " << parentDirName << ") :" );
 
 	// print contents first
-	for(std::vector<DQMMonitorElement*>::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
+	for(DQMMonitorElementPtrList::const_iterator iter = m_contentsList.begin(), endIter = m_contentsList.end() ;
 			endIter != iter ; ++iter)
-	{
-		DQMMonitorElement *pMonitorElement = *iter;
-		LOG4CXX_INFO( dqmMainLogger , std::string(depth*3, ' ') << " [ME]  " << pMonitorElement->getName() );
-	}
+		LOG4CXX_INFO( dqmMainLogger , std::string(depth*3, ' ') << " [ME]  " << (*iter)->getName() );
 
 	// print sub dirs
 	for(std::vector<DQMDirectory*>::const_iterator iter = m_directoryList.begin(), endIter = m_directoryList.end() ;
 			endIter != iter ; ++iter)
-	{
-		DQMDirectory *pDirectory = *iter;
-		pDirectory->ls(depth+1);
-	}
+		(*iter)->ls(depth+1);
 }
 
 //-------------------------------------------------------------------------------------------------

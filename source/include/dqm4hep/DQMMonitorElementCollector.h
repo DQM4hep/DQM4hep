@@ -52,7 +52,7 @@ private:
 	struct MeInfo
 	{
 		std::set<int>         m_clientList;
-		DQMMonitorElement    *m_pMonitorElement;
+		DQMMonitorElementPtr  m_monitorElement;
 	};
 	typedef std::map<std::string,  MeInfo *> MeInfoMap;
 
@@ -76,12 +76,12 @@ public:
 	/** Update the monitor element entry.
 	 *  Return whether the monitor element was updated
 	 */
-	bool updateMonitorElement(DQMMonitorElement *pMonitorElement);
+	bool updateMonitorElement(DQMMonitorElementPtr &monitorElement);
 
 	/** Get a specific monitor element.
 	 *  Return NULL is the entry doesn't exists
 	 */
-	DQMMonitorElement *getMonitorElement(const std::string &meName, bool partialCompare = false, bool lowerCaseCompare = false) const;
+	DQMMonitorElementPtr getMonitorElement(const std::string &meName, bool partialCompare = false, bool lowerCaseCompare = false) const;
 
 	/** Get the subscribed me name list. Simply iterate over stored monitor element
 	 *  and add the element to list if a client has subscribed to it
@@ -94,7 +94,7 @@ public:
 
 	/** Get the subscribed me list for a particular client
 	 */
-	DQMMonitorElementList getSubscribedMeList(int clientID) const;
+	DQMMonitorElementPtrList getSubscribedMeList(int clientID) const;
 
 	/** Subscribe client to a monitor element.
 	 *
@@ -250,10 +250,9 @@ public:
 	bool isRunning() const;
 
 public:
-	typedef std::map<std::string, DQMMonitorElementList>   DQMMonitorElementListMap; ///< Module name to element list map
-	typedef std::map<std::string, ModuleMeInfo *>          ModuleMeInfoMap;  ///< Module element storage
-	typedef std::set<DQMMonitorElement *>                  DQMMonitorElementSet;
-	typedef std::map<int, DQMMonitorElementSet>            ClientUpdateMap;  ///< Map of monitor element list to update
+	typedef std::map<std::string, ModuleMeInfo *>             ModuleMeInfoMap;  ///< Module element storage
+	typedef std::set<DQMMonitorElementPtr>                    DQMMonitorElementPtrSet;
+	typedef std::map<int, DQMMonitorElementPtrSet>            ClientUpdateMap;  ///< Map of monitor element list to update
 
 	static const std::string         m_emptyBufferStr;
 

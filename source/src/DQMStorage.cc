@@ -35,8 +35,7 @@
 namespace dqm4hep
 {
 
-DQMStorage::DQMStorage(bool owner) :
-		m_isOwner(owner)
+DQMStorage::DQMStorage()
 {
 	m_pRootDir = new DQMDirectory("");
 	m_pCurrentDir = m_pRootDir;
@@ -46,6 +45,8 @@ DQMStorage::DQMStorage(bool owner) :
 
 DQMStorage::~DQMStorage()
 {
+	clear();
+
 	delete m_pRootDir;
 	m_pCurrentDir = NULL;
 }
@@ -180,7 +181,7 @@ StatusCode DQMStorage::rmdir(const std::string &dirName)
 	if(pos == 0 || pos != std::string::npos)
 		return STATUS_CODE_FAILURE;
 
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->getParentDir()->removeDir(pDirectory->getName(), m_isOwner));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->getParentDir()->removeDir(pDirectory->getName()));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -237,47 +238,37 @@ DQMDirectory *DQMStorage::getCurrentDirectory() const
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMStorage::isOwner() const
-{
-	return m_isOwner;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-StatusCode DQMStorage::addMonitorElement(DQMMonitorElement *pMonitorElement)
+StatusCode DQMStorage::addMonitorElement(const DQMMonitorElementPtr &monitorElement)
 {
 	DQMPath path = m_pCurrentDir->getFullPathName();
-	pMonitorElement->setPath(path);
+	monitorElement->setPath(path);
 
-	return m_pCurrentDir->addMonitorElement(pMonitorElement);
+	return m_pCurrentDir->addMonitorElement(monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMStorage::addMonitorElement(const std::string &dirName, DQMMonitorElement *pMonitorElement)
+StatusCode DQMStorage::addMonitorElement(const std::string &dirName, const DQMMonitorElementPtr &monitorElement)
 {
 	DQMDirectory *pDirectory = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, mkdir(dirName));
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, findDir(dirName, pDirectory));
 
 	DQMPath path = pDirectory->getFullPathName();
-	pMonitorElement->setPath(path);
+	monitorElement->setPath(path);
 
-	return pDirectory->addMonitorElement(pMonitorElement);
+	return pDirectory->addMonitorElement(monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMStorage::removeMonitorElement(const std::string &monitorElementName)
 {
-	DQMMonitorElement *pMonitorElement = NULL;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentDir->findMonitorElement(monitorElementName, pMonitorElement));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentDir->removeMonitorElement(pMonitorElement));
+	DQMMonitorElementPtr monitorElement;
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentDir->findMonitorElement(monitorElementName, monitorElement));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pCurrentDir->removeMonitorElement(monitorElement));
 
-	pMonitorElement->setPath(DQMPath(""));
-
-	if(isOwner())
-		delete pMonitorElement;
+	monitorElement->setPath(DQMPath(""));
 
 	return STATUS_CODE_SUCCESS;
 }
@@ -289,79 +280,74 @@ StatusCode DQMStorage::removeMonitorElement(const std::string &dirName, const st
 	DQMDirectory *pDirectory = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, findDir(dirName, pDirectory));
 
-	DQMMonitorElement *pMonitorElement = NULL;
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->findMonitorElement(monitorElementName, pMonitorElement));
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->removeMonitorElement(pMonitorElement));
-
-	pMonitorElement->setPath(DQMPath(""));
-
-	if(isOwner())
-		delete pMonitorElement;
+	DQMMonitorElementPtr monitorElement;
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->findMonitorElement(monitorElementName, monitorElement));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->removeMonitorElement(monitorElement));
 
 	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMStorage::getMonitorElement(const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const
+StatusCode DQMStorage::getMonitorElement(const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const
 {
-	pMonitorElement = NULL;
-	return m_pCurrentDir->findMonitorElement(monitorElementName, pMonitorElement);
+	monitorElement = NULL;
+	return m_pCurrentDir->findMonitorElement(monitorElementName, monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMStorage::getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const
+StatusCode DQMStorage::getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const
 {
 	DQMDirectory *pDirectory = NULL;
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, findDir(dirName, pDirectory));
 
-	return pDirectory->findMonitorElement(monitorElementName, pMonitorElement);
+	return pDirectory->findMonitorElement(monitorElementName, monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMStorage::monitorElementExists(DQMMonitorElement *pMonitorElement) const
+bool DQMStorage::monitorElementExists(const DQMMonitorElementPtr &monitorElement) const
 {
-	return m_pCurrentDir->containsMonitorElement(pMonitorElement);
+	return m_pCurrentDir->containsMonitorElement(monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-bool DQMStorage::monitorElementExists(const std::string &dirName, DQMMonitorElement *pMonitorElement) const
+bool DQMStorage::monitorElementExists(const std::string &dirName, const DQMMonitorElementPtr &monitorElement) const
 {
 	DQMDirectory *pDirectory = NULL;
 
-	if(!dirExists(dirName))
+	if( ! this->dirExists(dirName) )
 		return false;
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, findDir(dirName, pDirectory));
 
-	return pDirectory->containsMonitorElement(pMonitorElement);
+	return pDirectory->containsMonitorElement(monitorElement);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMStorage::getAllMonitorElements(std::vector<DQMMonitorElement*> &monitorElementList)
+StatusCode DQMStorage::getAllMonitorElements(DQMMonitorElementPtrList &monitorElementList)
 {
 	return DQMStorage::recursiveContentList(m_pRootDir, monitorElementList);
 }
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMStorage::recursiveContentList(DQMDirectory *pDirectory, std::vector<DQMMonitorElement*> &monitorElementList)
+StatusCode DQMStorage::recursiveContentList(DQMDirectory *pDirectory, DQMMonitorElementPtrList &monitorElementList)
 {
 	if(NULL == pDirectory)
 		return STATUS_CODE_INVALID_PTR;
 
 	// add directory contents
-	const std::vector<DQMMonitorElement*> &directoryMonitorElementList(pDirectory->getMonitorElementList());
+	const DQMMonitorElementPtrList &directoryMonitorElementList(pDirectory->getMonitorElementList());
 	monitorElementList.insert(monitorElementList.end(), directoryMonitorElementList.begin(), directoryMonitorElementList.end());
 
 	// get the sub dir list ...
 	const std::vector<DQMDirectory*> &subDirList(pDirectory->getSubDirList());
 
-	if(subDirList.empty())
+	if( subDirList.empty() )
 		return STATUS_CODE_SUCCESS;
 
 	// ... and loop over to add the contents
@@ -378,7 +364,7 @@ StatusCode DQMStorage::recursiveContentList(DQMDirectory *pDirectory, std::vecto
 
 StatusCode DQMStorage::clear()
 {
-	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRootDir->clear(true));
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pRootDir->clear());
 	m_pCurrentDir = m_pRootDir;
 
 	return STATUS_CODE_SUCCESS;

@@ -47,16 +47,13 @@ class DQMDirectory;
  *  refers to an absolute path if it starts by the '/' character.
  *  In this case it is considered to start from the root dir and else
  *  from the current directory.
- *
- *  Set the storage to be the owner of the monitor elements
- *  by passing the flag owner to true in the constructor.
  */ 
 class DQMStorage
 {
 public:
 	/** Constructor.
 	 */
-	DQMStorage(bool owner = true);
+	DQMStorage();
 
 	/** Destructor
 	 */
@@ -106,17 +103,13 @@ public:
 	 */
 	StatusCode rmdir(const std::string &fullDirName);
 
-	/** Whether the storage is the owner of the monitor elements
-	 */
-	bool isOwner() const;
-
 	/** Add a monitor element to the current directory
 	 */
-	StatusCode addMonitorElement(DQMMonitorElement *pMonitorElement);
+	StatusCode addMonitorElement(const DQMMonitorElementPtr &monitorElement);
 
 	/** Add a monitor element to the given directory
 	 */
-	StatusCode addMonitorElement(const std::string &dirName, DQMMonitorElement *pMonitorElement);
+	StatusCode addMonitorElement(const std::string &dirName, const DQMMonitorElementPtr &monitorElement);
 
 	/** Remove a monitor element from the current directory
 	 */
@@ -128,29 +121,25 @@ public:
 
 	/** Get the monitor element in the current directory
 	 */
-	StatusCode getMonitorElement(const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const;
+	StatusCode getMonitorElement(const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const;
 
 	/** Get the monitor element in the given directory
 	 */
-	StatusCode getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const;
+	StatusCode getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const;
 
 	/** Get all monitor elements in all the directories starting from the root directory
  	 */
-	StatusCode getAllMonitorElements(std::vector<DQMMonitorElement*> &monitorElementList);
+	StatusCode getAllMonitorElements(DQMMonitorElementPtrList &monitorElementList);
 
 	/** Whether the monitor element exists in the current dir
 	 */
-	bool monitorElementExists(DQMMonitorElement *pMonitorElement) const;
+	bool monitorElementExists(const DQMMonitorElementPtr &monitorElement) const;
 
 	/** Whether the monitor element exists in the current dir
 	 */
-	bool monitorElementExists(const std::string &dirName, DQMMonitorElement *pMonitorElement) const;
+	bool monitorElementExists(const std::string &dirName, const DQMMonitorElementPtr &monitorElement) const;
 
 	/** Clear the storage.
-	 *
-	 *  If the flag 'owner' in the constructor has been passed,
-	 *  then the monitor elements will be deleted recursively.
-	 *  Users can check the flag using the method isOwner()
 	 */
 	StatusCode clear();
 
@@ -168,7 +157,7 @@ public:
 
 	/** Get recursively all the monitor elements in the sub dirs
 	 */
-	static StatusCode recursiveContentList(DQMDirectory *pDirectory, std::vector<DQMMonitorElement*> &monitorElementList);
+	static StatusCode recursiveContentList(DQMDirectory *pDirectory, DQMMonitorElementPtrList &monitorElementList);
 
 private:
 

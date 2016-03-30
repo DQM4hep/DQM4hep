@@ -170,7 +170,7 @@ public:
  	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
  	 */
  	template <typename HistoType, typename ... Args>
- 	StatusCode bookHistogram(DQMMonitorElement *&pMonitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
+ 	StatusCode bookHistogram(DQMMonitorElementPtr &monitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
  			const std::string &moduleName, allocator_helper<TObject, HistoType, const char *, const char *, Args...> allocator, Args ...args);
 
  	/** Book a generic ROOT TObject.
@@ -178,19 +178,19 @@ public:
  	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
  	 */
  	template <typename ObjectType, typename ... Args>
- 	StatusCode bookObject(DQMMonitorElement *&pMonitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
+ 	StatusCode bookObject(DQMMonitorElementPtr &monitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
  			const std::string &moduleName, allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
  	/** Book a monitor element from the xml element
  	 */
  	StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
- 			const std::string &meName, DQMMonitorElement *&pMonitorElement);
+ 			const std::string &meName, DQMMonitorElementPtr &monitorElement);
 
  	/** Book a generic TObject. The TObject must be valid and must be a built-in ROOT object or
  	 *  a user defined class inheriting from TObject and providing a dictionary.
  	 *  Such a function should be used in DQMModule implementation by passing 'this' as first argument
  	 */
- 	StatusCode bookObject(DQMMonitorElement *&pMonitorElement, const std::string &directory, const std::string &name, const std::string &title,
+ 	StatusCode bookObject(DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
  			const std::string &moduleName, const std::string &className);
 
  public:
@@ -201,25 +201,25 @@ public:
 
  	/** Get all the monitor elements already booked by this module in all the directories
  	 */
- 	StatusCode getAllMonitorElements(std::vector<DQMMonitorElement*> &monitorElementList) const;
+ 	StatusCode getAllMonitorElements(DQMMonitorElementPtrList &monitorElementList) const;
 
  	/** Get the monitor element in the current directory (result by ptr reference)
  	 */
- 	StatusCode getMonitorElement(const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const;
+ 	StatusCode getMonitorElement(const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const;
 
  	/** Get the monitor element in the given directory (result by ptr reference)
  	 */
- 	StatusCode getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElement *&pMonitorElement) const;
+ 	StatusCode getMonitorElement(const std::string &dirName, const std::string &monitorElementName, DQMMonitorElementPtr &monitorElement) const;
 
  	/** Get the monitor element in the current directory.
  	 *  The element is directly returned without any ptr check
  	 */
- 	DQMMonitorElement *getMonitorElement(const std::string &monitorElementName) const;
+ 	DQMMonitorElementPtr getMonitorElement(const std::string &monitorElementName) const;
 
  	/** Get the monitor element in the given directory.
  	 *  The element is directly returned without any ptr check
  	 */
- 	DQMMonitorElement *getMonitorElement(const std::string &dirName, const std::string &monitorElementName) const;
+ 	DQMMonitorElementPtr getMonitorElement(const std::string &dirName, const std::string &monitorElementName) const;
 
 
  	////////////////////////
@@ -228,7 +228,7 @@ public:
 
  	/** Delete the monitor element (by element ptr)
  	 */
- 	StatusCode deleteMonitorElement(DQMMonitorElement *pMonitorElement);
+ 	StatusCode deleteMonitorElement(DQMMonitorElementPtr &monitorElement);
 
  	/** Delete the monitor element (by element name)
  	 */
@@ -255,23 +255,27 @@ public:
  	 *  The quality test must have been registered in the framework before
  	 *  calling this method.
  	 */
- 	StatusCode addQualityTest(DQMMonitorElement *pMonitorElement, const std::string &qualityTestName) const;
+ 	StatusCode addQualityTest(DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName) const;
 
  	/** Remove a specific quality test attached to this monitor element
  	 */
- 	StatusCode removeQualityTest(DQMMonitorElement *pMonitorElement, const std::string &qualityTestName);
+ 	StatusCode removeQualityTest(DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName);
 
  	/** Remove all quality tests attached to this monitor element
  	 */
- 	StatusCode removeQualityTests(DQMMonitorElement *pMonitorElement);
+ 	StatusCode removeQualityTests(DQMMonitorElementPtr &monitorElement);
 
  	/** Run all the quality test attached to this monitor element
  	 */
- 	StatusCode runQualityTests(DQMMonitorElement *pMonitorElement);
+ 	StatusCode runQualityTests(DQMMonitorElementPtr &monitorElement);
+
+ 	/** Run all the quality test attached to these monitor elements
+ 	 */
+ 	StatusCode runQualityTests(const DQMMonitorElementPtrList &monitorElementList);
 
  	/** Run a specific quality test attached to this monitor element
  	 */
- 	StatusCode runQualityTest(DQMMonitorElement *pMonitorElement, const std::string &qualityTestName);
+ 	StatusCode runQualityTest(DQMMonitorElementPtr &monitorElement, const std::string &qualityTestName);
 
  	/** Run all the quality test of all the monitor elements
  	 */
@@ -311,7 +315,7 @@ public:
 
  	/** Get the monitor element list for which the flag "setToPublish" is true
  	 */
- 	StatusCode getMonitorElementListToPublish(DQMMonitorElementList &monitorElementList) const;
+ 	StatusCode getMonitorElementListToPublish(DQMMonitorElementPtrList &monitorElementList) const;
 
  private:
 
@@ -328,10 +332,10 @@ public:
 //-------------------------------------------------------------------------------------------------
 
 template <typename HistoType, typename ... Args>
-inline StatusCode DQMMonitorElementManager::bookHistogram(DQMMonitorElement *&pMonitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
+inline StatusCode DQMMonitorElementManager::bookHistogram(DQMMonitorElementPtr &monitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
 		const std::string &moduleName, allocator_helper<TObject, HistoType, const char *, const char *, Args...> allocator, Args ...args)
 {
-	pMonitorElement = NULL;
+	monitorElement = NULL;
 	TObject *pObject = NULL;
 
 	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
@@ -350,13 +354,13 @@ inline StatusCode DQMMonitorElementManager::bookHistogram(DQMMonitorElement *&pM
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// and the monitor element
-		pMonitorElement = new DQMMonitorElement(pObject, type, name, title, moduleName);
+		monitorElement = std::make_shared<DQMMonitorElement>(pObject, type, name, title, moduleName);
 
-		if(NULL == pMonitorElement)
+		if(NULL == monitorElement)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// add it to the monitor element list of the module
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, pMonitorElement));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, monitorElement));
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -364,9 +368,6 @@ inline StatusCode DQMMonitorElementManager::bookHistogram(DQMMonitorElement *&pM
 
 		if(NULL != pObject)
 			delete pObject;
-
-		if(NULL != pMonitorElement)
-			delete pMonitorElement;
 
 		return exception.getStatusCode();
 	}
@@ -377,10 +378,10 @@ inline StatusCode DQMMonitorElementManager::bookHistogram(DQMMonitorElement *&pM
 //-------------------------------------------------------------------------------------------------
 
 template <typename ObjectType, typename ... Args>
-inline StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMonitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
+inline StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElementPtr &monitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
 		const std::string &moduleName, allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
 {
-	pMonitorElement = NULL;
+	monitorElement = NULL;
 	TObject *pObject = NULL;
 
 	if(name.empty() || DQMCoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
@@ -399,13 +400,13 @@ inline StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMoni
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// and the monitor element
-		pMonitorElement = new DQMMonitorElement(pObject, type, name, title, moduleName);
+		monitorElement = std::make_shared<DQMMonitorElement>(pObject, type, name, title, moduleName);
 
-		if(NULL == pMonitorElement)
+		if(NULL == monitorElement)
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
 		// add it to the monitor element list of the module
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, pMonitorElement));
+		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, monitorElement));
 	}
 	catch(StatusCodeException &exception)
 	{
@@ -413,9 +414,6 @@ inline StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElement *&pMoni
 
 		if(NULL != pObject)
 			delete pObject;
-
-		if(NULL != pMonitorElement)
-			delete pMonitorElement;
 
 		return exception.getStatusCode();
 	}

@@ -30,7 +30,7 @@
 	    },
 	    {
 		"NAME":"CaloHitModule",
-		"ARGS" : ["-f", "/home/rete/soft/DQMCore/conf/lcioCaloHit.xml", "-l"],
+		"ARGS" : ["-f", "/home/rete/soft/DQM4ILC/source/examples/CaloHitModule/lcioCaloHit.xml"],
 		"ENV" : [
 		    "DIM_DNS_NODE=localhost",
 		    "DQM4HEP_PLUGIN_DLL=/home/rete/soft/DQM4ILC/lib/libCaloHitModule.so"

@@ -88,17 +88,17 @@ public:
 	/** Create a monitor element from a xml handle
 	 */
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-			DQMMonitorElement *&pMonitorElement);
+			DQMMonitorElementPtr &monitorElement);
 
 	/** Create a monitor element from a xml handle
 	 */
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-			const std::string &strSuffix, DQMMonitorElement *&pMonitorElement);
+			const std::string &strSuffix, DQMMonitorElementPtr &monitorElement);
 
 	/** Create a monitor element from a xml handle
 	 */
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-			unsigned int suffix, DQMMonitorElement *&pMonitorElement);
+			unsigned int suffix, DQMMonitorElementPtr &monitorElement);
 
 	/** Tokenize a string
 	 */

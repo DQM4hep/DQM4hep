@@ -81,7 +81,7 @@ private:
 
 	/**
 	 */
-	void addAvailableMonitorElement(DQMMonitorElement *pMonitorElement);
+	void addAvailableMonitorElement(const DQMMonitorElementPtr &monitorElement);
 
 	/**
 	 */

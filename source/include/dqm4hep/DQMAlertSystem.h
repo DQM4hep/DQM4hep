@@ -36,8 +36,6 @@
 #include "dis.hxx"
 #include "dic.hxx"
 
-#include <memory>
-
 namespace dqm4hep
 {
 

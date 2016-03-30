@@ -92,15 +92,15 @@ public:
 
 	/** Add a monitor elements to the directory
 	 */
-	StatusCode addMonitorElement(DQMMonitorElement *pMonitorElement);
+	StatusCode addMonitorElement(const DQMMonitorElementPtr &monitorElement);
 
 	/** Find a monitor element with a given name in the directory
 	 */
-	StatusCode findMonitorElement(const std::string &name, DQMMonitorElement *&pMonitorElement) const;
+	StatusCode findMonitorElement(const std::string &name, DQMMonitorElementPtr &monitorElement) const;
 
 	/** Whether the directory contains the monitor element (search by ptr compare)
 	 */
-	bool containsMonitorElement(const DQMMonitorElement *pMonitorElement) const;
+	bool containsMonitorElement(const DQMMonitorElementPtr &monitorElement) const;
 
 	/** Whether the directory contains the monitor element (search by name compare)
 	 */
@@ -108,7 +108,7 @@ public:
 
 	/** Remove the monitor element from the directory
 	 */
-	StatusCode removeMonitorElement(DQMMonitorElement *pMonitorElement);
+	StatusCode removeMonitorElement(const DQMMonitorElementPtr &monitorElement);
 
 	/** Remove the monitor element from the directory
 	 */
@@ -116,18 +116,16 @@ public:
 
 	/** Get the monitor element list
 	 */
-	const std::vector<DQMMonitorElement*> &getMonitorElementList() const;
+	const DQMMonitorElementPtrList &getMonitorElementList() const;
 
 	/** Remove the directory and its contents
-	 *  Delete monitor element if deepClean set to true
 	 */
-	StatusCode removeDir(const std::string &dirName, bool deepClean = false);
+	StatusCode removeDir(const std::string &dirName);
 
-	/** Clear the directory by calling delete on each
-	 *  sub-dirs and clear the monitor element list by calling delete if asked.
+	/** Clear the directory.
 	 *  The operation is done recursively
 	 */
-	StatusCode clear(bool deepClean = false);
+	StatusCode clear();
 
 	/** Get the full path name of the directory
 	 */
@@ -151,7 +149,7 @@ private:
 	std::string                        m_name;
 	DQMDirectory                      *m_pParentDir;
 	std::vector<DQMDirectory*>         m_directoryList;
-	std::vector<DQMMonitorElement*>    m_contentsList;
+	DQMMonitorElementPtrList           m_contentsList;
 };
 
 } 

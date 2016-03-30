@@ -160,16 +160,9 @@ typedef std::map<std::string, DQMQualityTest*>      DQMQualityTestMap;
 
 typedef std::vector<DQMStats> DQMStatsList;
 
-// typedef for messaging
-typedef std::map<std::string, DQMMonitorElementList> DQMPublication;
-typedef std::map<std::string, std::string> DQMMonitorElementInfo;
-typedef std::vector<DQMMonitorElementInfo> DQMMonitorElementInfoList;
-typedef std::map<std::string, std::string> DQMHostInfo;
-typedef std::map<std::string, std::string> DQMMonitorElementListNameRequest;
-typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
-
 // C++11 stuff incompatible with CINT
 #ifndef __CINT__
+
 typedef std::shared_ptr<DQMMonitorElement> DQMMonitorElementPtr;
 typedef std::vector<DQMMonitorElementPtr> DQMMonitorElementPtrList;
 typedef std::map<const std::string, DQMMonitorElementPtr> DQMMonitorElementPtrMap;
@@ -178,7 +171,16 @@ typedef std::shared_ptr<DQMEvent> DQMEventPtr;
 typedef std::queue<DQMEventPtr>  DQMEventPtrQueue;
 
 typedef std::shared_ptr<DQMQualityTest> DQMQualityTestPtr;
+
 #endif
+
+// typedef for messaging
+typedef std::map<std::string, DQMMonitorElementPtrList> DQMPublication;
+typedef std::map<std::string, std::string> DQMMonitorElementInfo;
+typedef std::vector<DQMMonitorElementInfo> DQMMonitorElementInfoList;
+typedef std::map<std::string, std::string> DQMHostInfo;
+typedef std::map<std::string, std::string> DQMMonitorElementListNameRequest;
+typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
 
 }
 

@@ -482,8 +482,6 @@ void DQMMonitorElementClient::infoHandler()
 		catch(...)
 		{
 		}
-
-		this->clearPublication(monitorElementPublication);
 	}
 	else if(pInfo == m_pCollectorStateInfo)
 	{
@@ -514,23 +512,6 @@ void DQMMonitorElementClient::infoHandler()
 				(*iter)->onServerShutdown(this);
 		}
 	}
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMMonitorElementClient::clearPublication(DQMPublication &publication)
-{
-	for(DQMPublication::iterator iter = publication.begin(), endIter = publication.end() ;
-			endIter != iter ; ++iter)
-	{
-		for(DQMMonitorElementList::iterator meIter = iter->second.begin(), meEndIter = iter->second.end() ;
-				meEndIter != meIter ; ++meIter)
-		{
-			delete *meIter;
-		}
-	}
-
-	publication.clear();
 }
 
 //-------------------------------------------------------------------------------------------------

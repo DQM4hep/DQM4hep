@@ -33,9 +33,9 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMApplication.h"
 #include "dqm4hep/DQMModule.h"
+#include "dqm4hep/DQMAlertSystem.h"
 #include "dqm4hep/DQMMonitorElementSender.h"
 #include "dqm4hep/DQMMonitorElementManager.h"
-#include "dqm4hep/DQMAlertSystem.h"
 
 namespace dqm4hep
 {
