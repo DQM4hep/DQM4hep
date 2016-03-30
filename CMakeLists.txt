@@ -46,7 +46,7 @@ SET( JsonCpp_repository             "https://github.com/open-source-parsers/json
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/mirabitl/dimjc.git" )
 
-# the external project in used are 
+# the external project in used are
 # set gradually along the CMakeLists.txt
 # When a project is added with ExternalProject_Add(...)
 # these variables are set to the package name
@@ -68,10 +68,11 @@ SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WI
 
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
+# ----- Also complains about multi-line // comment [-Werror,-Wcomment]
 IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-	SET( DQMCore_additional_cmake_args 
-		${DQMCore_additional_cmake_args}
-		-DCMAKE_CXX_FLAGS=-Wno-keyword-macro
+  SET( DQMCore_additional_cmake_args
+    ${DQMCore_additional_cmake_args}
+    "-DCMAKE_CXX_FLAGS=-Wno-keyword-macro -Wno-comment"
 	)
 ENDIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
@@ -138,26 +139,26 @@ ELSE()
 	SET( DIM_GUI_FLAG "GUI=no" )
 ENDIF()
 
-SET( DQMCore_additional_cmake_args 
-	${DQMCore_additional_cmake_args} 
+SET( DQMCore_additional_cmake_args
+	${DQMCore_additional_cmake_args}
 	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 )
 
-# fixme : problems on lyoserv. 
-# Couldn't find mysql and log4cxx because install path is not standard 
+# fixme : problems on lyoserv.
+# Couldn't find mysql and log4cxx because install path is not standard
 
 IF( MySQL_DIR )
-	SET( common_cmake_args 
-		${common_cmake_args} 
+	SET( common_cmake_args
+		${common_cmake_args}
 		-DMySQL_DIR=${MySQL_DIR}
 	)
 ENDIF()
 
 IF( LOG4CXX_DIR )
 	SET( LOG4CXX_ROOT ${LOG4CXX_DIR} )
-	
-	SET( common_cmake_args 
-		${common_cmake_args} 
+
+	SET( common_cmake_args
+		${common_cmake_args}
 		-DLOG4CXX_ROOT=${LOG4CXX_DIR}
 	)
 ENDIF()
@@ -190,9 +191,9 @@ IF ( NOT DIM_FOUND )
 		PATCH_COMMAND ${DIMDIR}/external-project/patch-command ${DIM_OS}
 	    CONFIGURE_COMMAND ""
 	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS} ${DIM_GUI_FLAG}
-	    INSTALL_COMMAND ${DIMDIR}/external-project/install-command ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/include 
+	    INSTALL_COMMAND ${DIMDIR}/external-project/install-command ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/include
 	)
-	
+
 	SET( dim_package_depends "dim" )
 ENDIF ()
 
@@ -206,20 +207,20 @@ IF( NOT LOG4CXX_FOUND )
 ENDIF()
 
 
-SET( DQMCore_additional_cmake_args 
+SET( DQMCore_additional_cmake_args
 	${DQMCore_additional_cmake_args}
 	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 	-DDIMDIR=${DIMDIR}
 )
 
-SET( xdrlcio_additional_cmake_args 
+SET( xdrlcio_additional_cmake_args
 	${xdrlcio_additional_cmake_args}
 	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 )
 
-SET( DIMJC_additional_cmake_args 
-	${DIMJC_additional_cmake_args} 
+SET( DIMJC_additional_cmake_args
+	${DIMJC_additional_cmake_args}
 	-DDIMDIR=${DIMDIR}
 )
 
@@ -229,8 +230,8 @@ SET( DQMVis_additional_cmake_args
 	-DDIMDIR=${DIMDIR}
 )
 
-SET( DQM4ILC_additional_cmake_args 
-	${DQM4ILC_additional_cmake_args} 
+SET( DQM4ILC_additional_cmake_args
+	${DQM4ILC_additional_cmake_args}
 	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-Dxdrlcio_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
 	-DDQMCore_DIR=${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
@@ -262,9 +263,9 @@ IF ( NOT JSONCPP_FOUND )
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${JSONCPP_DIR}
 	)
-	
+
 	SET( jsoncpp_package_depends "jsoncpp" )
-	
+
 ENDIF()
 
 # ----- DIMJC package -----
@@ -282,20 +283,20 @@ IF ( NOT DIMJC_FOUND )
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${DIMJC_DIR}
 	)
-	
+
 	SET( dimjc_package_depends "dimjc" )
-		
+
 ENDIF ()
 
-SET( DQMVis_additional_cmake_args 
-	${DQMVis_additional_cmake_args} 
+SET( DQMVis_additional_cmake_args
+	${DQMVis_additional_cmake_args}
 	-DDIMJC_DIR=${DIMJC_DIR}
 )
 
 
 
 IF( BUILD_DQM4ILC )
-	
+
 	# ----- xdrlcio package -----
     ExternalProject_Add( xdrlcio
         DEPENDS ${xdrstream_package_depends}
@@ -306,14 +307,14 @@ IF( BUILD_DQM4ILC )
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
     )
-    
+
     SET( xdrlcio_package_depends "xdrlcio" )
-    
+
 	# ----- DQM4ILC package -----
     ExternalProject_Add( DQM4ILC
-        DEPENDS 
+        DEPENDS
         	${xdrstream_package_depends}
-        	${xdrlcio_package_depends} 
+        	${xdrlcio_package_depends}
         	${DQMCore_package_depends}
         GIT_REPOSITORY ${DQM4ILC_repository}
         GIT_TAG ${DQM4ILC_version}
@@ -322,7 +323,7 @@ IF( BUILD_DQM4ILC )
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQM4ILC
     )
-	
+
 ENDIF()
 
 
@@ -331,10 +332,10 @@ IF( BUILD_DQMVIZ )
 
 	# ----- DIMViz package -----
     ExternalProject_Add( DQMViz
-        DEPENDS 
-        	${DQMCore_package_depends} 
-        	${dim_package_depends} 
-        	${jsoncpp_package_depends} 
+        DEPENDS
+        	${DQMCore_package_depends}
+        	${dim_package_depends}
+        	${jsoncpp_package_depends}
         	${dimjc_package_depends}
         	${xdrstream_package_depends}
         GIT_REPOSITORY ${DQMViz_repository}
