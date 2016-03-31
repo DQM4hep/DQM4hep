@@ -77,12 +77,22 @@ public:
 	 */
 	bool isOwner() const;
 
+	/** Set the event size as read by the socket (unit in bytes)
+	 */
+	void setEventSize(uint64_t eventSize);
+
+	/**
+	 */
+	uint64_t getEventSize() const;
+
 protected:
 	/** Private constructor
 	 */
 	DQMEvent();
 
+protected:
 	bool            m_isOwner;
+	uint64_t        m_size;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -113,7 +123,8 @@ public:
 //-------------------------------------------------------------------------------------------------
 
 inline DQMEvent::DQMEvent() :
-		m_isOwner(true)
+		m_isOwner(true),
+		m_size(0)
 {
 }
 
@@ -164,6 +175,8 @@ inline void DQMEvent::clear()
 
 		pBaseEvent->clear();
 	}
+
+	m_size = 0;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -171,6 +184,20 @@ inline void DQMEvent::clear()
 inline bool DQMEvent::isOwner() const
 {
 	return m_isOwner;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+inline void DQMEvent::setEventSize(uint64_t eventSize)
+{
+	m_size = eventSize;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+inline uint64_t DQMEvent::getEventSize() const
+{
+	return m_size;
 }
 
 //-------------------------------------------------------------------------------------------------
