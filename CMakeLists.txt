@@ -19,7 +19,7 @@ INCLUDE( CheckCXXCompilerFlag )
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 
 IF( COMPILER_SUPPORTS_CXX11 )
-	LIST( APPEND CMAKE_CXX_FLAGS "-std=c++11" )
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ELSE()
 	MESSAGE( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
 ENDIF()
