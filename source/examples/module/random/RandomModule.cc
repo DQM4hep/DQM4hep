@@ -366,7 +366,7 @@ StatusCode RandomModule::startOfRun(DQMRun *pRun)
 {
 	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- startOfRun()" );
 	LOG4CXX_INFO( dqmMainLogger , "Run no " << pRun->getRunNumber() );
-	time_t startTime = pRun->getStartTime();
+	time_t startTime = std::chrono::system_clock::to_time_t(pRun->getStartTime());
 
 	std::string timeStr;
 	DQMCoreTool::timeToHMS(startTime, timeStr);
@@ -392,7 +392,7 @@ StatusCode RandomModule::endOfRun(DQMRun *pRun)
 	LOG4CXX_INFO( dqmMainLogger , "Module : " << getName() << " -- endOfRun()" );
 	LOG4CXX_INFO( dqmMainLogger , "Run no " << pRun->getRunNumber() );
 
-	time_t endTime = pRun->getEndTime();
+	time_t endTime = std::chrono::system_clock::to_time_t(pRun->getEndTime());
 	std::string timeStr;
 	DQMCoreTool::timeToHMS(endTime, timeStr);
 
