@@ -74,12 +74,6 @@
 
 //-------------------------------------------------------------------------------------------------
 
-// bit operations
-#define DQM_BIT(n)       (1ULL << (n))
-#define DQM_SETBIT(n,i)  ((n) |= DQM_BIT(i))
-#define DQM_CLRBIT(n,i)  ((n) &= ~DQM_BIT(i))
-#define DQM_TESTBIT(n,i) ((bool)(((n) & DQM_BIT(i)) != 0))
-
 #if defined(__GNUC__) && defined(BACKTRACE)
     #include <cstdlib>
     #include <execinfo.h>
