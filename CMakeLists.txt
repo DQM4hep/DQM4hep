@@ -20,7 +20,7 @@ INCLUDE( CheckCXXCompilerFlag )
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 
 IF( COMPILER_SUPPORTS_CXX11 )
-	LIST( APPEND CMAKE_CXX_FLAGS "-std=c++11" )
+  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ELSE()
 	MESSAGE( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
 ENDIF()
@@ -73,7 +73,7 @@ FOREACH( pkg ROOT DIM MySQL xdrstream LOG4CXX )
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
   ADD_DEFINITIONS ( ${${pkg}_DEFINITIONS} )
-  
+
   LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${${pkg}_INCLUDE_DIRS} )
   LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${${pkg}_LIBRARY_DIRS} )
   LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${${pkg}_LIBRARIES} )
@@ -94,17 +94,17 @@ IF( INSTALL_DOC )
 ENDIF()
 
 ###############################
-# Generate DQMCoreConfig.h 
+# Generate DQMCoreConfig.h
 CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.h.cmake.in"
     "${PROJECT_SOURCE_DIR}/source/include/${PROJECT_NAME}Config.h" @ONLY )
-    
+
 ###############################
 # Add source directory
 ADD_SUBDIRECTORY( ./source )
 
 ###############################
 # Install scripts files
-FILE ( GLOB SCRIPTS_FILES scripts/* 
+FILE ( GLOB SCRIPTS_FILES scripts/*
 	PATTERN "*~" EXCLUDE
     PATTERN "*#*" EXCLUDE
     PATTERN ".#*" EXCLUDE
@@ -112,10 +112,10 @@ FILE ( GLOB SCRIPTS_FILES scripts/*
     PATTERN "*.svn" EXCLUDE
 )
 
-INSTALL( 
-	FILES ${SCRIPTS_FILES} 
-	DESTINATION bin 
-    PERMISSIONS 
+INSTALL(
+	FILES ${SCRIPTS_FILES}
+	DESTINATION bin
+    PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
@@ -123,7 +123,7 @@ INSTALL(
 
 ###############################
 # Install conf files
-FILE ( GLOB CONF_FILES conf/* 
+FILE ( GLOB CONF_FILES conf/*
 	PATTERN "*~" EXCLUDE
     PATTERN "*#*" EXCLUDE
     PATTERN ".#*" EXCLUDE
@@ -131,8 +131,8 @@ FILE ( GLOB CONF_FILES conf/*
     PATTERN "*.svn" EXCLUDE
 )
 
-INSTALL( 
-	FILES ${CONF_FILES} 
+INSTALL(
+	FILES ${CONF_FILES}
 	DESTINATION conf
 )
 
