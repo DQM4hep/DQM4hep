@@ -50,6 +50,8 @@
 
 #ifndef __CINT__
 #include <memory>
+#include <chrono>
+#include <ratio>
 #endif
 
 
@@ -153,6 +155,9 @@ typedef std::vector<DQMStats>                            DQMStatsList;
 
 // C++11 stuff incompatible with CINT
 #ifndef __CINT__
+
+typedef std::chrono::system_clock::time_point               DQMTimePoint;
+typedef std::chrono::duration<double>                       DQMTimeDuration;
 
 typedef std::shared_ptr<DQMMonitorElement>                  DQMMonitorElementPtr;
 typedef std::vector<DQMMonitorElementPtr>                   DQMMonitorElementPtrList;

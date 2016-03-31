@@ -60,6 +60,13 @@ void DQMCoreTool::timeToHMS(time_t t, std::string &timeStr)
 
 //-------------------------------------------------------------------------------------------------
 
+static DQMTimePoint DQMCoreTool::now()
+{
+	return std::chrono::system_clock::now();
+}
+
+//-------------------------------------------------------------------------------------------------
+
 StringVector DQMCoreTool::getSpecialCharacterList()
 {
 	StringVector specialCharacterList;

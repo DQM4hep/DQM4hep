@@ -48,6 +48,10 @@ public:
 	 */
 	static void timeToHMS(time_t t, std::string &timeStr);
 
+	/** Get the current time (unit seconds)
+	 */
+	static DQMTimePoint now();
+
 	/** Get the special character list that are to be avoided in some strings
 	 */
 	static StringVector getSpecialCharacterList();
