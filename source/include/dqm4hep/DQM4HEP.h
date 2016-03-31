@@ -103,11 +103,14 @@ class DQMStatisticsService;
 class DQMPath;
 struct DQMStats;
 
+/** allocator_helper class
+ */
 template <typename BaseType, typename RealType, typename... Args>
 class allocator_helper
 {
 public:
-	/**
+	/** Create a new instance of RealType, inheriting
+	 *  from BaseType using Args type as constructor parameters
 	 */
 	BaseType *create(Args ... parameters) const
 	{
@@ -141,41 +144,32 @@ typedef std::vector<double>         DoubleVector;
 typedef std::vector<std::string>    StringVector;
 typedef std::set<std::string>       StringSet;
 
-// monitor element typedefs
-typedef std::vector<DQMMonitorElement*> DQMMonitorElementList;
-typedef std::map<const std::string, DQMMonitorElement*> DQMMonitorElementMap;
-
-// event typedef
-typedef std::queue<DQMEvent*> DQMEventQueue;
-
-// qtest typedef
-typedef std::map<std::string, DQMQualityTestResult> DQMQualityTestResultMap;
-typedef std::map<std::string, DQMQualityTest*>      DQMQualityTestMap;
-
-typedef std::vector<DQMStats> DQMStatsList;
+typedef std::vector<DQMMonitorElement*>                  DQMMonitorElementList;
+typedef std::map<const std::string, DQMMonitorElement*>  DQMMonitorElementMap;
+typedef std::queue<DQMEvent*>                            DQMEventQueue;
+typedef std::map<std::string, DQMQualityTestResult>      DQMQualityTestResultMap;
+typedef std::map<std::string, DQMQualityTest*>           DQMQualityTestMap;
+typedef std::vector<DQMStats>                            DQMStatsList;
 
 // C++11 stuff incompatible with CINT
 #ifndef __CINT__
 
-typedef std::shared_ptr<DQMMonitorElement> DQMMonitorElementPtr;
-typedef std::vector<DQMMonitorElementPtr> DQMMonitorElementPtrList;
-typedef std::map<const std::string, DQMMonitorElementPtr> DQMMonitorElementPtrMap;
-
-typedef std::shared_ptr<DQMEvent> DQMEventPtr;
-typedef std::queue<DQMEventPtr>  DQMEventPtrQueue;
-
-typedef std::shared_ptr<DQMQualityTest> DQMQualityTestPtr;
-
-typedef std::map<std::string, DQMMonitorElementPtrList> DQMPublication;
+typedef std::shared_ptr<DQMMonitorElement>                  DQMMonitorElementPtr;
+typedef std::vector<DQMMonitorElementPtr>                   DQMMonitorElementPtrList;
+typedef std::map<const std::string, DQMMonitorElementPtr>   DQMMonitorElementPtrMap;
+typedef std::shared_ptr<DQMEvent>                           DQMEventPtr;
+typedef std::queue<DQMEventPtr>                             DQMEventPtrQueue;
+typedef std::shared_ptr<DQMQualityTest>                     DQMQualityTestPtr;
+typedef std::map<std::string, DQMMonitorElementPtrList>     DQMPublication;
 
 #endif
 
 // typedef for messaging
-typedef std::map<std::string, std::string> DQMMonitorElementInfo;
-typedef std::vector<DQMMonitorElementInfo> DQMMonitorElementInfoList;
-typedef std::map<std::string, std::string> DQMHostInfo;
-typedef std::map<std::string, std::string> DQMMonitorElementListNameRequest;
-typedef std::multimap<std::string, std::string> DQMMonitorElementRequest;
+typedef std::map<std::string, std::string>         DQMMonitorElementInfo;
+typedef std::vector<DQMMonitorElementInfo>         DQMMonitorElementInfoList;
+typedef std::map<std::string, std::string>         DQMHostInfo;
+typedef std::map<std::string, std::string>         DQMMonitorElementListNameRequest;
+typedef std::multimap<std::string, std::string>    DQMMonitorElementRequest;
 
 }
 
