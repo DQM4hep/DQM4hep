@@ -28,9 +28,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMTimerCycle.h"
 #include "dqm4hep/DQMPlugin.h"
-
-#include "TTime.h"
-#include "TSystem.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -57,7 +55,7 @@ DQMTimerCycle::~DQMTimerCycle()
 
 bool DQMTimerCycle::isEndOfCycleReached() const
 {
-	if( gSystem->Now() > this->getStartTime() + TTime(this->getCycleValue()*1000) )
+	if( DQMCoreTool::now() > this->getStartTime() + std::chrono::seconds(static_cast<unsigned int>(this->getCycleValue())) )
 		return true;
 
 	return false;

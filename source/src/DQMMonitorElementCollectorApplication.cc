@@ -29,6 +29,7 @@
 #include "dqm4hep/DQMMonitorElementCollectorApplication.h"
 #include "dqm4hep/DQMMonitorElementCollector.h"
 #include "dqm4hep/DQMLogging.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 // -- dim headers
 #include "dis.hxx"
@@ -68,13 +69,8 @@ StatusCode DQMMonitorElementCollectorApplication::run()
 
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementCollector->start());
 
-	while(!m_shouldExit)
-	{
-		timespec timesleep;
-	    timesleep.tv_sec = 0;
-	    timesleep.tv_nsec = 100000L;
-		nanosleep(&timesleep, NULL);
-	}
+	while( ! m_shouldExit )
+		DQMCoreTool::sleep(std::chrono::seconds(1));
 
 	return STATUS_CODE_SUCCESS;
 }

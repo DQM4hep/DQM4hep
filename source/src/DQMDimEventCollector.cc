@@ -29,6 +29,7 @@
 #include "dqm4hep/DQMEvent.h"
 #include "dqm4hep/DQMEventStreamer.h"
 #include "dqm4hep/DQMLogging.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -145,7 +146,7 @@ StatusCode DQMDimEventCollector::startCollector()
 	DimServer::start( ("DQM4HEP/EventCollector/" + getCollectorName()).c_str() );
 
 	// time needed for registration on dns node
-	sleep(1);
+	DQMCoreTool::sleep(std::chrono::seconds(1));
 
 	m_state = 1;
 	m_pServerStateService->updateService(m_state);

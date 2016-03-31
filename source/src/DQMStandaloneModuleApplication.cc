@@ -36,6 +36,7 @@
 #include "dqm4hep/DQMTimerCycle.h"
 #include "dqm4hep/DQMArchiver.h"
 #include "dqm4hep/DQMXmlHelper.h"
+#include "dqm4hep/DQMCoreTool.h"
 #include "dqm4hep/tinyxml.h"
 
 // -- std headers
@@ -304,7 +305,7 @@ StatusCode DQMStandaloneModuleApplication::run()
 
 			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pStandaloneModule->process());
 
-			usleep(m_settings.m_sleepTime);
+			DQMCoreTool::sleep(std::chrono::microseconds(m_settings.m_sleepTime));
 		}
 
 		m_pTimerCycle->stopCycle();

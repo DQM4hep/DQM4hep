@@ -28,6 +28,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMCoreTool.h"
 
+#include <thread>
 #include <sys/utsname.h>
 #include <unistd.h>
 
@@ -60,9 +61,16 @@ void DQMCoreTool::timeToHMS(time_t t, std::string &timeStr)
 
 //-------------------------------------------------------------------------------------------------
 
-static DQMTimePoint DQMCoreTool::now()
+DQMTimePoint DQMCoreTool::now()
 {
 	return std::chrono::system_clock::now();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMCoreTool::sleep(const DQMTimeDuration &duration)
+{
+	std::this_thread::sleep_for(duration);
 }
 
 //-------------------------------------------------------------------------------------------------

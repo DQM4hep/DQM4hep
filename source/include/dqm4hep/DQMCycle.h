@@ -115,7 +115,7 @@ public:
 
 	/** Get the total time spent to process the last cycle
 	 */
-	TTime getTotalCycleTime() const;
+	DQMTimeDuration getTotalCycleTime() const;
 
 	/** Called back when the application has processed an event
 	 */
@@ -123,12 +123,12 @@ public:
 
 	/** Get the start time of the current cycle
 	 */
-	const TTime &getStartTime() const;
+	const DQMTimePoint &getStartTime() const;
 
 	/** Get the end time of the last cycle.
 	 *  Valid only between two cycle after stopCycle() call
 	 */
-	const TTime &getEndTime() const;
+	const DQMTimePoint &getEndTime() const;
 
 	/** Start the cycle
 	 */
@@ -176,9 +176,9 @@ private:
 	float                            m_cycleValue;
 	unsigned int                     m_cycleTimeout;
 	unsigned int                     m_nProcessedEvents;
-	TTime                            m_startTime;
-	TTime                            m_endTime;
-	TTime                            m_lastEventProcessedTime;
+	DQMTimePoint                     m_startTime;
+	DQMTimePoint                     m_endTime;
+	DQMTimePoint                     m_lastEventProcessedTime;
 	std::set<DQMCycleListener*>      m_listeners;
 	DQMState                         m_state;
 };

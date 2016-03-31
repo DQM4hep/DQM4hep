@@ -485,7 +485,7 @@ StatusCode DQMMonitorElementCollector::start()
 	m_pCollectorStateService = new DimService((char *)ss.str().c_str(), m_collectorState);
 
 	// for registration on dns ...
-	sleep(1);
+	DQMCoreTool::sleep(std::chrono::seconds(1));
 
 	// notify server running !
 	LOG4CXX_INFO( dqmMainLogger , "Monitor element collector server started !" );

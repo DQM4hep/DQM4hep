@@ -30,6 +30,7 @@
 #include "dqm4hep/DQMEventCollector.h"
 #include "dqm4hep/DQMEventCollectorImp.h"
 #include "dqm4hep/DQMLogging.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -64,13 +65,8 @@ StatusCode DQMEventCollectorApplication::run()
 
 	m_applicationState = RUNNING_STATE;
 
-	while(!m_shouldExit)
-	{
-		timespec timesleep;
-	    timesleep.tv_sec = 0;
-	    timesleep.tv_nsec = 100000L;
-		nanosleep(&timesleep, NULL);
-	}
+	while( ! m_shouldExit )
+		DQMCoreTool::sleep(std::chrono::seconds(1));
 
 	return STATUS_CODE_SUCCESS;
 }

@@ -27,8 +27,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMCycle.h"
-
-#include "TSystem.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -93,7 +92,7 @@ unsigned int DQMCycle::getNProcessedEvents() const
 
 //-------------------------------------------------------------------------------------------------
 
-TTime DQMCycle::getTotalCycleTime() const
+DQMTimeDuration DQMCycle::getTotalCycleTime() const
 {
 	return (m_endTime - m_startTime);
 }
@@ -109,7 +108,7 @@ void DQMCycle::eventProcessed(const DQMEvent *const pEvent)
 		return;
 
 	m_nProcessedEvents++;
-	m_lastEventProcessedTime = gSystem->Now();
+	m_lastEventProcessedTime = DQMCoreTool::now();
 
 	// call back for daughter class
 	this->onEventProcessed(pEvent);
@@ -122,14 +121,14 @@ void DQMCycle::eventProcessed(const DQMEvent *const pEvent)
 
 //-------------------------------------------------------------------------------------------------
 
-const TTime &DQMCycle::getStartTime() const
+const DQMTimePoint &DQMCycle::getStartTime() const
 {
 	return m_startTime;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-const TTime &DQMCycle::getEndTime() const
+const DQMTimePoint &DQMCycle::getEndTime() const
 {
 	return m_endTime;
 }
@@ -138,9 +137,9 @@ const TTime &DQMCycle::getEndTime() const
 
 void DQMCycle::startCycle()
 {
-	m_startTime = gSystem->Now();
+	m_startTime = DQMCoreTool::now();
 	m_lastEventProcessedTime = m_startTime;
-	m_endTime = TTime(0);
+	m_endTime = DQMTimePoint();
 
 	m_nProcessedEvents = 0;
 	m_processingRate = 0.f;
@@ -159,13 +158,12 @@ void DQMCycle::startCycle()
 
 void DQMCycle::stopCycle()
 {
-	m_endTime = gSystem->Now();
+	m_endTime = DQMCoreTool::now();
 	m_state = STOPPED_STATE;
 
-	TTime timeDifference = this->getTotalCycleTime();
+	DQMTimeDuration timeDifference = this->getTotalCycleTime();
 
-	if(timeDifference != TTime(0))
-		m_processingRate = (static_cast<float>(m_nProcessedEvents) / timeDifference.operator long long());
+	m_processingRate = (static_cast<float>(m_nProcessedEvents) / timeDifference.count());
 
 	// call back for daughter class
 	this->onCycleStopped();
@@ -187,10 +185,7 @@ DQMState DQMCycle::getState() const
 
 bool DQMCycle::isTimeoutReached() const
 {
-	if(m_lastEventProcessedTime == TTime(0))
-		return false;
-
-	if( gSystem->Now() > m_lastEventProcessedTime + TTime(this->getTimeout()*1000) )
+	if( DQMCoreTool::now() > m_lastEventProcessedTime + std::chrono::seconds(this->getTimeout()) )
 		return true;
 
 	return false;
