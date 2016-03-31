@@ -76,6 +76,11 @@ public:
 	template <typename T>
 	static StatusCode readParameterValue(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t);
 
+	/** Read a parameter value from an xml element and use a validator to validate the value
+	 */
+	template <typename T, typename Validator>
+	static StatusCode readParameterValue(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t, Validator validator);
+
 	/** Read a vector of values for a parameter from a (space separated) list in an xml element
 	 */
 	template <typename T>
@@ -288,6 +293,19 @@ inline StatusCode DQMXmlHelper::readParameterValue(const TiXmlHandle &xmlHandle,
     }
 
     return STATUS_CODE_NOT_FOUND;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename T, typename Validator>
+inline StatusCode DQMXmlHelper::readParameterValue(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t, Validator validator)
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::readParameterValue(xmlHandle, parameterName, t));
+
+	if( ! validator(t) )
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	return STATUS_CODE_SUCCESS;
 }
 
 //-------------------------------------------------------------------------------------------------
