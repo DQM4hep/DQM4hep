@@ -28,6 +28,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMModuleApi.h"
 #include "dqm4hep/DQMModuleApplication.h"
+#include "dqm4hep/DQMAnalysisModuleApplication.h"
 #include "dqm4hep/DQMLogging.h"
 #include "dqm4hep/DQMMonitorElement.h"
 #include "dqm4hep/DQMMonitorElementManager.h"
@@ -36,6 +37,8 @@
 #include "dqm4hep/DQMModule.h"
 #include "dqm4hep/DQMArchiver.h"
 #include "dqm4hep/DQMAlertSystem.h"
+#include "dqm4hep/DQMRun.h"
+#include "dqm4hep/DQMCycle.h"
 #include "dqm4hep/tinyxml.h"
 
 namespace dqm4hep
@@ -629,6 +632,44 @@ StatusCode DQMModuleApi::runQualityTest(const DQMModule *const pModule, DQMMonit
 StatusCode DQMModuleApi::runQualityTests(const DQMModule *const pModule)
 {
 	return pModule->getModuleApplication()->getMonitorElementManager()->runQualityTests();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMModuleApi::getTimeSinceStartOfRun(const DQMAnalysisModule *const pModule, DQMTimeDuration &duration)
+{
+	DQMAnalysisModuleApplication *pApplication = dynamic_cast<DQMAnalysisModuleApplication *>(pModule->getModuleApplication());
+
+	if( ! pApplication )
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	DQMRun *pRun = pApplication->getCurrentRun();
+
+	if( ! pRun )
+		return STATUS_CODE_FAILURE;
+
+	duration = pRun->getStartTime() - DQMCoreTool::now();
+
+	return STATUS_CODE_FAILURE;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMModuleApi::getTimeSinceStartOfCycle(const DQMAnalysisModule *const pModule, DQMTimeDuration &duration)
+{
+	DQMAnalysisModuleApplication *pApplication = dynamic_cast<DQMAnalysisModuleApplication *>(pModule->getModuleApplication());
+
+	if( ! pApplication )
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	DQMCycle *pCycle = pApplication->getCycle();
+
+	if( ! pCycle )
+		return STATUS_CODE_FAILURE;
+
+	duration = pCycle->getStartTime() - DQMCoreTool::now();
+
+	return STATUS_CODE_FAILURE;
 }
 
 //-------------------------------------------------------------------------------------------------

@@ -32,6 +32,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMModule.h"
+#include "dqm4hep/DQMAnalysisModule.h"
 #include "dqm4hep/DQMMonitorElement.h"
 #include "dqm4hep/DQMMonitorElementManager.h"
 #include "dqm4hep/DQMModuleApplication.h"
@@ -433,6 +434,22 @@ public:
 //	 *  in a root file
 //	 */
 //	static StatusCode archive(DQMModule *const pModule, DQMArchiver *pArchiver);
+
+public:
+
+	///////////////////////
+	// RUNTIME FUNCTIONS //
+	///////////////////////
+
+	/** Get the elapsed time since start of current run.
+	 *  Valid only within run
+	 */
+	static StatusCode getTimeSinceStartOfRun(const DQMAnalysisModule *const pModule, DQMTimeDuration &duration);
+
+	/** Get the elapsed time since start of current cycle.
+	 *  Valid only within cycle
+	 */
+	static StatusCode getTimeSinceStartOfCycle(const DQMAnalysisModule *const pModule, DQMTimeDuration &duration);
 
 private:
 	/** Book a monitor element from the xml element

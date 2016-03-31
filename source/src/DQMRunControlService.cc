@@ -30,6 +30,7 @@
 #include "dqm4hep/DQMRunControl.h"
 #include "dqm4hep/DQMRun.h"
 #include "dqm4hep/DQMLogging.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -203,7 +204,7 @@ StatusCode DQMRunControlService::endCurrentRun()
 		return STATUS_CODE_SUCCESS;
 
 	m_currentRunNumber = -1;
-	m_pRunControl->getCurrentRun()->setEndTime(time(0));
+	m_pRunControl->getCurrentRun()->setEndTime(DQMCoreTool::now());
 	m_pOutBuffer->reset();
 
 	if( xdrstream::XDR_SUCCESS != m_pRunControl->getCurrentRun()->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )

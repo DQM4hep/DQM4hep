@@ -42,6 +42,7 @@ class DQMRunControlClient;
 class DQMCycle;
 class DQMArchiver;
 class DQMEvent;
+class DQMRun;
 class TiXmlHandle;
 
 /** DQMAnalysisModuleApplication class
@@ -101,6 +102,14 @@ public:
 	/** Run the application.
 	 */
 	StatusCode run();
+
+	/** Get the current run if any
+	 */
+	DQMRun *getCurrentRun() const;
+
+	/** Get the cycle if any
+	 */
+	DQMCycle *getCycle() const;
 
 private:
 	/** Configure the module

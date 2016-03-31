@@ -28,6 +28,7 @@
 
 #include "dqm4hep/DQMRun.h"
 #include "dqm4hep/DQMStreamingHelper.h"
+#include "dqm4hep/DQMCoreTool.h"
 
 namespace dqm4hep
 {
@@ -38,8 +39,7 @@ DQMRun::DQMRun(int runNumber, const std::string &description, const std::string 
 		m_runNumber(runNumber),
 		m_description(description),
 		m_detectorName(detectorName),
-		m_startTime(time(0)),
-		m_endTime(0)
+		m_startTime(DQMCoreTool::now())
 {
 	/* nop */
 }
@@ -60,11 +60,12 @@ xdrstream::Status DQMRun::stream(xdrstream::StreamingMode mode, xdrstream::IODev
 	{
 		XDR_STREAM( pDevice->read<int32_t>( & m_runNumber ) )
 
-		int64_t startTime = m_startTime, endTime = m_endTime;
+		int64_t startTime;// = std::chrono::system_clock::to_time_t(m_startTime);
+		int64_t endTime; //= std::chrono::system_clock::to_time_t(m_endTime);
 		XDR_STREAM( pDevice->read<int64_t>( & startTime ) )
 		XDR_STREAM( pDevice->read<int64_t>( & endTime ) )
-		m_startTime = startTime;
-		m_endTime = endTime;
+		m_startTime = std::chrono::system_clock::from_time_t(startTime);
+		m_endTime = std::chrono::system_clock::from_time_t(endTime);
 
 		XDR_STREAM( pDevice->read( & m_detectorName ) )
 		XDR_STREAM( pDevice->read( & m_description ) )
@@ -74,7 +75,8 @@ xdrstream::Status DQMRun::stream(xdrstream::StreamingMode mode, xdrstream::IODev
 	{
 		XDR_STREAM( pDevice->write<int32_t>( & m_runNumber ) )
 
-		int64_t startTime = m_startTime, endTime = m_endTime;
+		int64_t startTime = std::chrono::system_clock::to_time_t(m_startTime);
+		int64_t endTime = std::chrono::system_clock::to_time_t(m_endTime);
 		XDR_STREAM( pDevice->write<int64_t>( & startTime ) )
 		XDR_STREAM( pDevice->write<int64_t>( & endTime ) )
 

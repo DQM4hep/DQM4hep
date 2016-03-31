@@ -321,7 +321,7 @@ StatusCode DQMAnalysisModuleApplication::run()
 		m_pEventClient->clearQueue();
 
 		// fill the run end time
-		pRun->setEndTime(time(NULL));
+		pRun->setEndTime(DQMCoreTool::now());
 
 		// process the end of run module stuff
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pAnalysisModule->endOfRun(pRun));
@@ -340,6 +340,20 @@ StatusCode DQMAnalysisModuleApplication::run()
 	LOG4CXX_INFO( dqmMainLogger , m_moduleLogStr << " , Exiting application !");
 
 	return this->getReturnCode();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+DQMRun *DQMAnalysisModuleApplication::getCurrentRun() const
+{
+	return m_pRunControlClient->getCurrentRun();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+DQMCycle *DQMAnalysisModuleApplication::getCycle() const
+{
+	return m_pCycle;
 }
 
 //-------------------------------------------------------------------------------------------------

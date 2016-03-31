@@ -61,11 +61,11 @@ public:
 
 	/** Get the start time
 	 */
-	time_t getStartTime() const;
+	DQMTimePoint getStartTime() const;
 
 	/** Get the end time
 	 */
-	time_t getEndTime() const;
+	DQMTimePoint getEndTime() const;
 
 	/** Get the run description
 	 */
@@ -81,11 +81,11 @@ public:
 
 	/** Set the start time
 	 */
-	void setStartTime(time_t startTime);
+	void setStartTime(const DQMTimePoint &startTime);
 
 	/** Set the end time
 	 */
-	void setEndTime(time_t endTime);
+	void setEndTime(const DQMTimePoint &endTime);
 
 	/** Set the run description
 	 */
@@ -117,9 +117,9 @@ public:
 
 protected:
 
-	int                                   m_runNumber;
-	time_t                                 m_startTime;
-	time_t                                 m_endTime;
+	int                                    m_runNumber;
+	DQMTimePoint                           m_startTime;
+	DQMTimePoint                           m_endTime;
 	std::string                            m_detectorName;
 	std::string                            m_description;
 	std::map<std::string, std::string>     m_parametersMap;
@@ -135,14 +135,14 @@ inline int DQMRun::getRunNumber() const
 
 //-------------------------------------------------------------------------------------------------
 
-inline time_t DQMRun::getStartTime() const
+inline DQMTimePoint DQMRun::getStartTime() const
 {
 	return m_startTime;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-inline time_t DQMRun::getEndTime() const
+inline DQMTimePoint DQMRun::getEndTime() const
 {
 	return m_endTime;
 }
@@ -170,14 +170,14 @@ inline void DQMRun::setRunNumber(int runNumber)
 
 //-------------------------------------------------------------------------------------------------
 
-inline void DQMRun::setStartTime(time_t startTime)
+inline void DQMRun::setStartTime(const DQMTimePoint &startTime)
 {
 	m_startTime = startTime;
 }
 
 //-------------------------------------------------------------------------------------------------
 
-inline void DQMRun::setEndTime(time_t endTime)
+inline void DQMRun::setEndTime(const DQMTimePoint &endTime)
 {
 	m_endTime = endTime;
 }
