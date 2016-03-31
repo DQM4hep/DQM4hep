@@ -101,7 +101,7 @@ private:
 	 */
 	void handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo);
 
-	/**
+	/** Configure the xdrstream buffer with the input socket buffer
 	 */
 	void configureInBuffer( char *pBuffer , uint32_t bufferSize );
 
