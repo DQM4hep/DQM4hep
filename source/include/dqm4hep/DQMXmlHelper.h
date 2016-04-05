@@ -86,6 +86,11 @@ public:
 	template <typename T>
 	static StatusCode readParameterValues(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector);
 
+	/** Read a vector of values for a parameter from a (space separated) list in an xml element
+	 */
+	template <typename T, typename Validator>
+	static StatusCode readParameterValues(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector, Validator validator);
+
 	/** Create a quality test. Works if the quality test factory has been registered first
 	 */
 	static StatusCode createQualityTest(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
@@ -339,6 +344,19 @@ inline StatusCode DQMXmlHelper::readParameterValues(const TiXmlHandle &xmlHandle
     }
 
     return STATUS_CODE_NOT_FOUND;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename T, typename Validator>
+inline StatusCode DQMXmlHelper::readParameterValues(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector, Validator validator)
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::readParameterValues(xmlHandle, parameterName, vector));
+
+	if( ! validator(vector) )
+		return STATUS_CODE_INVALID_PARAMETER;
+
+	return STATUS_CODE_SUCCESS;
 }
 
 }
