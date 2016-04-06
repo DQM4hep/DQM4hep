@@ -39,6 +39,9 @@
 #include <iostream>
 #include <signal.h>
 
+// -- root headers
+#include "TObject.h"
+
 using namespace std;
 using namespace dqm4hep;
 
@@ -87,6 +90,7 @@ void seg_viol_signal_handling(int signal)
 int main(int argc, char* argv[])
 {
 	DQM4HEP::screenSplash();
+	TObject::SetObjectStat(false);
 
 	std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
 	TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4HEP_VERSION_STR);
