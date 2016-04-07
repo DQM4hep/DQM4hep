@@ -71,6 +71,18 @@ StatusCode DQMStorage::mkdir(const std::string &dirName)
 	{
 		std::string dirName = *iter;
 
+		if(dirName == ".")
+			continue;
+
+		if(dirName == "..")
+		{
+			if(pDirectory == m_pRootDir)
+				return STATUS_CODE_FAILURE;
+
+			pDirectory = pDirectory->getParentDir();
+			continue;
+		}
+
 		// if sub dir doesn't exists, create it
 		if(!pDirectory->containsDir(dirName))
 			RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->mkdir(dirName));
@@ -112,6 +124,18 @@ StatusCode DQMStorage::cd(const std::string &dirName)
 			endIter != iter ; ++iter)
 	{
 		std::string dirName = *iter;
+
+		if(dirName == ".")
+			continue;
+
+		if(dirName == "..")
+		{
+			if(pDirectory == m_pRootDir)
+				return STATUS_CODE_FAILURE;
+
+			pDirectory = pDirectory->getParentDir();
+			continue;
+		}
 
 		// navigate forward
 		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->findDir(dirName, pDirectory));
@@ -211,6 +235,18 @@ StatusCode DQMStorage::findDir(const std::string &dirName, DQMDirectory *&pDirec
 			endIter != iter ; ++iter)
 	{
 		std::string dirName = *iter;
+
+		if(dirName == ".")
+			continue;
+
+		if(dirName == "..")
+		{
+			if(pDirectory == m_pRootDir)
+				return STATUS_CODE_FAILURE;
+
+			pDirectory = pDirectory->getParentDir();
+			continue;
+		}
 
 		// navigate forward
 		StatusCode statusCode = pDirectory->findDir(dirName, pDirectory);
