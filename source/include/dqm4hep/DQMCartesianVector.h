@@ -47,42 +47,42 @@ public:
      *  @param  y the y coordinate
      *  @param  z the z coordinate
      */
-    void SetValues(float x, float y, float z);
+    void setValues(float x, float y, float z);
 
     /**
      *  @brief  Get the cartesian x coordinate
      *
      *  @return The cartesian x coordinate
      */
-    float GetX() const;
+    float getX() const;
 
     /**
      *  @brief  Get the cartesian y coordinate
      *
      *  @return The cartesian y coordinate
      */
-    float GetY() const;
+    float getY() const;
 
     /**
      *  @brief  Get the cartesian z coordinate
      *
      *  @return The cartesian z coordinate
      */
-    float GetZ() const;
+    float getZ() const;
 
     /**
      *  @brief  Get the magnitude
      *
      *  @return The magnitude
      */
-    float GetMagnitude() const;
+    float getMagnitude() const;
 
     /**
      *  @brief  Get the magnitude squared
      *
      *  @return The magnitude squared
      */
-    float GetMagnitudeSquared() const;
+    float getMagnitudeSquared() const;
 
     /**
      *  @brief  Get the dot product of the cartesian vector with a second cartesian vector
@@ -91,7 +91,7 @@ public:
      *
      *  @return The dot product
      */
-    float GetDotProduct(const DQMCartesianVector &rhs) const;
+    float getDotProduct(const DQMCartesianVector &rhs) const;
 
     /**
      *  @brief  Get the cross product of the cartesian vector with a second cartesian vector
@@ -100,7 +100,7 @@ public:
      *
      *  @return The cross product
      */
-    DQMCartesianVector GetCrossProduct(const DQMCartesianVector &rhs) const;
+    DQMCartesianVector getCrossProduct(const DQMCartesianVector &rhs) const;
 
     /**
      *  @brief  Get the cosine of the opening angle of the cartesian vector with respect to a second cartesian vector
@@ -109,7 +109,7 @@ public:
      *
      *  @return The cosine of the opening angle
      */
-    float GetCosOpeningAngle(const DQMCartesianVector &rhs) const;
+    float getCosOpeningAngle(const DQMCartesianVector &rhs) const;
 
     /**
      *  @brief  Get the opening angle of the cartesian vector with respect to a second cartesian vector
@@ -118,7 +118,7 @@ public:
      *
      *  @return The opening angle
      */
-    float GetOpeningAngle(const DQMCartesianVector &rhs) const;
+    float getOpeningAngle(const DQMCartesianVector &rhs) const;
 
     /**
      *  @brief  Get the spherical coordinates of the cartesian vector
@@ -127,7 +127,7 @@ public:
      *  @param  phi the azimuth of the vector
      *  @param  theta the inclination of the vector
      */
-    void GetSphericalCoordinates(float &radius, float &phi, float &theta) const;
+    void getSphericalCoordinates(float &radius, float &phi, float &theta) const;
 
     /**
      *  @brief  Get the cylindrical coordinates of the cartesian vector (x/y .. radius, z .. z)
@@ -136,14 +136,14 @@ public:
      *  @param  phi the azimuth of the vector
      *  @param  z the z position of the vector
      */
-    void GetCylindricalCoordinates(float &radius, float &phi, float &z) const;
+    void getCylindricalCoordinates(float &radius, float &phi, float &z) const;
 
     /**
      *  @brief  Get a unit vector in the direction of the cartesian vector
      *
      *  @return The unit vector
      */
-    DQMCartesianVector GetUnitVector() const;
+    DQMCartesianVector getUnitVector() const;
 
     /**
      *  @brief  Cartesian vector assignment operator
@@ -238,7 +238,7 @@ inline DQMCartesianVector::DQMCartesianVector(const DQMCartesianVector &rhs) :
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline void DQMCartesianVector::SetValues(float x, float y, float z)
+inline void DQMCartesianVector::setValues(float x, float y, float z)
 {
     m_x = x;
     m_y = y;
@@ -247,49 +247,49 @@ inline void DQMCartesianVector::SetValues(float x, float y, float z)
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetX() const
+inline float DQMCartesianVector::getX() const
 {
     return m_x;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetY() const
+inline float DQMCartesianVector::getY() const
 {
     return m_y;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetZ() const
+inline float DQMCartesianVector::getZ() const
 {
     return m_z;
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetMagnitude() const
+inline float DQMCartesianVector::getMagnitude() const
 {
-    return sqrt(this->GetMagnitudeSquared());
+    return sqrt(this->getMagnitudeSquared());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetMagnitudeSquared() const
+inline float DQMCartesianVector::getMagnitudeSquared() const
 {
     return ((m_x * m_x) + (m_y * m_y) + (m_z * m_z));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetDotProduct(const DQMCartesianVector &rhs) const
+inline float DQMCartesianVector::getDotProduct(const DQMCartesianVector &rhs) const
 {
     return ((m_x * rhs.m_x) + (m_y * rhs.m_y) + (m_z * rhs.m_z));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline DQMCartesianVector DQMCartesianVector::GetCrossProduct(const DQMCartesianVector &rhs) const
+inline DQMCartesianVector DQMCartesianVector::getCrossProduct(const DQMCartesianVector &rhs) const
 {
     return DQMCartesianVector( (m_y * rhs.m_z) - (rhs.m_y * m_z),
                             (m_z * rhs.m_x) - (rhs.m_z * m_x),
@@ -298,16 +298,16 @@ inline DQMCartesianVector DQMCartesianVector::GetCrossProduct(const DQMCartesian
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-inline float DQMCartesianVector::GetOpeningAngle(const DQMCartesianVector &rhs) const
+inline float DQMCartesianVector::getOpeningAngle(const DQMCartesianVector &rhs) const
 {
-    return acos(this->GetCosOpeningAngle(rhs));
+    return acos(this->getCosOpeningAngle(rhs));
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline DQMCartesianVector &DQMCartesianVector::operator=(const DQMCartesianVector &rhs)
 {
-    this->SetValues(rhs.m_x, rhs.m_y, rhs.m_z);
+    this->setValues(rhs.m_x, rhs.m_y, rhs.m_z);
     return *this;
 }
 
@@ -315,7 +315,7 @@ inline DQMCartesianVector &DQMCartesianVector::operator=(const DQMCartesianVecto
 
 inline DQMCartesianVector &DQMCartesianVector::operator+=(const DQMCartesianVector &rhs)
 {
-    this->SetValues(m_x + rhs.m_x, m_y + rhs.m_y, m_z + rhs.m_z);
+    this->setValues(m_x + rhs.m_x, m_y + rhs.m_y, m_z + rhs.m_z);
     return *this;
 }
 
@@ -323,7 +323,7 @@ inline DQMCartesianVector &DQMCartesianVector::operator+=(const DQMCartesianVect
 
 inline DQMCartesianVector &DQMCartesianVector::operator-=(const DQMCartesianVector &rhs)
 {
-    this->SetValues(m_x - rhs.m_x, m_y - rhs.m_y, m_z - rhs.m_z);
+    this->setValues(m_x - rhs.m_x, m_y - rhs.m_y, m_z - rhs.m_z);
     return *this;
 }
 
@@ -331,7 +331,7 @@ inline DQMCartesianVector &DQMCartesianVector::operator-=(const DQMCartesianVect
 
 inline DQMCartesianVector &DQMCartesianVector::operator*=(const double scalar)
 {
-    this->SetValues(static_cast<float>(m_x * scalar), static_cast<float>(m_y * scalar), static_cast<float>(m_z * scalar));
+    this->setValues(static_cast<float>(m_x * scalar), static_cast<float>(m_y * scalar), static_cast<float>(m_z * scalar));
     return *this;
 }
 
@@ -349,21 +349,21 @@ inline bool DQMCartesianVector::operator==(const DQMCartesianVector &rhs) const
 
 inline DQMCartesianVector operator+(const DQMCartesianVector &lhs, const DQMCartesianVector &rhs)
 {
-    return DQMCartesianVector(lhs.GetX() + rhs.GetX(), lhs.GetY() + rhs.GetY(), lhs.GetZ() + rhs.GetZ());
+    return DQMCartesianVector(lhs.getX() + rhs.getX(), lhs.getY() + rhs.getY(), lhs.getZ() + rhs.getZ());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline DQMCartesianVector operator-(const DQMCartesianVector &lhs, const DQMCartesianVector &rhs)
 {
-    return DQMCartesianVector(lhs.GetX() - rhs.GetX(), lhs.GetY() - rhs.GetY(), lhs.GetZ() - rhs.GetZ());
+    return DQMCartesianVector(lhs.getX() - rhs.getX(), lhs.getY() - rhs.getY(), lhs.getZ() - rhs.getZ());
 }
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 inline DQMCartesianVector operator*(const DQMCartesianVector &lhs, const double scalar)
 {
-    return DQMCartesianVector(static_cast<float>(lhs.GetX() * scalar), static_cast<float>(lhs.GetY() * scalar), static_cast<float>(lhs.GetZ() * scalar));
+    return DQMCartesianVector(static_cast<float>(lhs.getX() * scalar), static_cast<float>(lhs.getY() * scalar), static_cast<float>(lhs.getZ() * scalar));
 }
 
 } 

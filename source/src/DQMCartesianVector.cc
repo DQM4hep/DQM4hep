@@ -14,14 +14,14 @@
 namespace dqm4hep
 {
 
-float DQMCartesianVector::GetCosOpeningAngle(const DQMCartesianVector &rhs) const
+float DQMCartesianVector::getCosOpeningAngle(const DQMCartesianVector &rhs) const
 {
-    const float magnitudesSquared(this->GetMagnitudeSquared() * rhs.GetMagnitudeSquared());
+    const float magnitudesSquared(this->getMagnitudeSquared() * rhs.getMagnitudeSquared());
 
     if (magnitudesSquared < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
 
-    float cosTheta = this->GetDotProduct(rhs) / sqrt(magnitudesSquared);
+    float cosTheta = this->getDotProduct(rhs) / sqrt(magnitudesSquared);
 
     if (cosTheta > 1.f)
     {
@@ -37,9 +37,9 @@ float DQMCartesianVector::GetCosOpeningAngle(const DQMCartesianVector &rhs) cons
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void DQMCartesianVector::GetSphericalCoordinates(float &radius, float &phi, float &theta) const
+void DQMCartesianVector::getSphericalCoordinates(float &radius, float &phi, float &theta) const
 {
-    const float magnitude(this->GetMagnitude());
+    const float magnitude(this->getMagnitude());
 
     if (fabs(magnitude) < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -51,9 +51,9 @@ void DQMCartesianVector::GetSphericalCoordinates(float &radius, float &phi, floa
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-void DQMCartesianVector::GetCylindricalCoordinates(float &radius, float &phi, float &z) const
+void DQMCartesianVector::getCylindricalCoordinates(float &radius, float &phi, float &z) const
 {
-    const float magnitude(this->GetMagnitude());
+    const float magnitude(this->getMagnitude());
 
     if (fabs(magnitude) < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -65,9 +65,9 @@ void DQMCartesianVector::GetCylindricalCoordinates(float &radius, float &phi, fl
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
-DQMCartesianVector DQMCartesianVector::GetUnitVector() const
+DQMCartesianVector DQMCartesianVector::getUnitVector() const
 {
-    const float magnitude(this->GetMagnitude());
+    const float magnitude(this->getMagnitude());
 
     if (fabs(magnitude) < std::numeric_limits<float>::epsilon())
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -80,10 +80,10 @@ DQMCartesianVector DQMCartesianVector::GetUnitVector() const
 
 std::ostream &operator<<(std::ostream & stream, const DQMCartesianVector& cartesianVector)
 {
-    stream  << "  x: " << cartesianVector.GetX()
-            << "  y: " << cartesianVector.GetY()
-            << "  z: " << cartesianVector.GetZ()
-            << " length: " << cartesianVector.GetMagnitude();
+    stream  << "  x: " << cartesianVector.getX()
+            << "  y: " << cartesianVector.getY()
+            << "  z: " << cartesianVector.getZ()
+            << " length: " << cartesianVector.getMagnitude();
 
     return stream;
 }
