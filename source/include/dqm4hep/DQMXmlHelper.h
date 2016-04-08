@@ -33,6 +33,7 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/tinyxml.h"
 #include "dqm4hep/DQMLogging.h"
+#include "dqm4hep/DQMCartesianVector.h"
 
 namespace dqm4hep
 {
@@ -156,6 +157,32 @@ inline StatusCode DQMXmlHelper::readValue<bool>(const TiXmlHandle &xmlHandle, co
     {
         return STATUS_CODE_FAILURE;
     }
+
+    return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <>
+inline StatusCode DQMXmlHelper::readValue<DQMCartesianVector>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, DQMCartesianVector &t)
+{
+    const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
+
+    if (NULL == pXmlElement)
+        return STATUS_CODE_NOT_FOUND;
+
+    StringVector tokens;
+    tokenizeString(pXmlElement->GetText(), tokens);
+
+    if(tokens.size() != 3)
+    	return STATUS_CODE_FAILURE;
+
+    float x(0.f), y(0.f), z(0.f);
+
+    if ( ! DQM4HEP::stringToType(tokens[0], x) || DQM4HEP::stringToType(tokens[1], y) || DQM4HEP::stringToType(tokens[2], z) )
+        return STATUS_CODE_FAILURE;
+
+    t = DQMCartesianVector(x, y, z);
 
     return STATUS_CODE_SUCCESS;
 }
@@ -293,6 +320,39 @@ inline StatusCode DQMXmlHelper::readParameterValue(const TiXmlHandle &xmlHandle,
 
         if (!DQM4HEP::stringToType(pXmlElement->GetText(), t))
             return STATUS_CODE_FAILURE;
+
+        return STATUS_CODE_SUCCESS;
+    }
+
+    return STATUS_CODE_NOT_FOUND;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <>
+inline StatusCode DQMXmlHelper::readParameterValue<DQMCartesianVector>(const TiXmlHandle &xmlHandle, const std::string &parameterName, DQMCartesianVector &t)
+{
+    for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("parameter").Element(); NULL != pXmlElement;
+        pXmlElement = pXmlElement->NextSiblingElement("parameter"))
+    {
+    	std::string name;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", name));
+
+    	if(name != parameterName)
+    		continue;
+
+        StringVector tokens;
+        tokenizeString(pXmlElement->GetText(), tokens);
+
+        if(tokens.size() != 3)
+        	return STATUS_CODE_FAILURE;
+
+        float x(0.f), y(0.f), z(0.f);
+
+        if ( ! DQM4HEP::stringToType(tokens[0], x) || DQM4HEP::stringToType(tokens[1], y) || DQM4HEP::stringToType(tokens[2], z) )
+            return STATUS_CODE_FAILURE;
+
+        t = DQMCartesianVector(x, y, z);
 
         return STATUS_CODE_SUCCESS;
     }
