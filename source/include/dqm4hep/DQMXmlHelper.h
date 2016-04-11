@@ -349,7 +349,7 @@ inline StatusCode DQMXmlHelper::readParameterValue<DQMCartesianVector>(const TiX
 
         float x(0.f), y(0.f), z(0.f);
 
-        if ( ! DQM4HEP::stringToType(tokens[0], x) || DQM4HEP::stringToType(tokens[1], y) || DQM4HEP::stringToType(tokens[2], z) )
+        if ( ! DQM4HEP::stringToType(tokens[0], x) || ! DQM4HEP::stringToType(tokens[1], y) || ! DQM4HEP::stringToType(tokens[2], z) )
             return STATUS_CODE_FAILURE;
 
         t = DQMCartesianVector(x, y, z);
