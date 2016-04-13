@@ -113,6 +113,12 @@ public:
 	template <typename T>
 	StatusCode queryVector(const std::string &query, std::vector<T> &result);
 
+	/** Send query to database
+	 *  The result is passed in the handler function for user parsing
+	 */
+	template <typename Handler>
+	StatusCode queryAndHandle(const std::string &query, Handler handler);
+
 	/** Execute the query (no result expected)
 	 */
 	StatusCode execute(const std::string &query);
@@ -217,6 +223,35 @@ inline StatusCode DQMDBInterface::queryVector(const std::string &query, std::vec
 
 		result.push_back(value);
 	}
+
+	mysql_free_result(pMySQLResult);
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename Handler>
+inline StatusCode DQMDBInterface::queryAndHandle(const std::string &query, Handler handler)
+{
+	if( ! this->isConnected() )
+		return STATUS_CODE_NOT_INITIALIZED;
+
+	if(mysql_query(m_pMySQL, query.c_str()))
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
+		return STATUS_CODE_FAILURE;
+	}
+
+	MYSQL_RES *pMySQLResult = mysql_store_result(m_pMySQL);
+
+	if(!pMySQLResult)
+	{
+		LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
+		return STATUS_CODE_FAILURE;
+	}
+
+	handler( pMySQLResult );
 
 	mysql_free_result(pMySQLResult);
 
