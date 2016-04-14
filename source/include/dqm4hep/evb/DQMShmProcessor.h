@@ -40,6 +40,8 @@ namespace dqm4hep
 {
 
 class DQMEvent;
+class DQMRun;
+class TiXmlHandle;
 
 /** DQMShmProcessor class
  */
