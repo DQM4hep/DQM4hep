@@ -229,6 +229,12 @@ StatusCode DQMShmProxyApplication::configureGlobal(TiXmlElement *pGlobalSettings
     TiXmlElement *pShmSettings = globalHandle.FirstChild("shmdriver").Element();
     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureShmDriver(pShmSettings));
 
+
+    // read run control settings
+    TiXmlElement *pRunControlSettings = globalHandle.FirstChild("runcontrol").Element();
+    RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureRunControlClient(pRunControlSettings));
+
+
     // parse event client settings
     TiXmlElement *pEventClientSettings = globalHandle.FirstChild("eventclient").Element();
 
