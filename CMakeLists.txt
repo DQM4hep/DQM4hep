@@ -35,6 +35,7 @@ INCLUDE( default_settings )
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 OPTION( BUILD_EXAMPLES "Whether to build DQM4HEP examples" OFF )
+OPTION( BUILD_EVB "Whether to build the evb examples" OFF )
 
 ###############################
 FIND_PROGRAM( ELOG_EXECUTABLE elog HINTS /usr/local/bin /usr/bin )
@@ -91,6 +92,26 @@ IF( INSTALL_DOC )
         MESSAGE( "Please install doxygen or set INSTALL_DOC to OFF" )
         MESSAGE( "" )
     ENDIF()
+ENDIF()
+
+# ----- levbdim -----
+IF( BUILD_EVB )
+	
+	FIND_PACKAGE( levbdim REQUIRED )
+	
+	IF( NOT levbdim_FOUND )
+		MESSAGE( SEND_ERROR "levbdim package not found !" )
+		MESSAGE( "Please switch OFF BUILD_EVB or adjust your CMAKE_MODULE_PATH" )
+	ENDIF()
+	
+	INCLUDE_DIRECTORIES( ${levbdim_INCLUDE_DIRS} )
+	LINK_LIBRARIES( ${levbdim_LIBRARIES} )
+	ADD_DEFINITIONS ( ${levbdim_DEFINITIONS} )
+
+	LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${levbdim_INCLUDE_DIRS} )
+	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${levbdim_LIBRARY_DIRS} )
+	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${levbdim_LIBRARIES} )
+	
 ENDIF()
 
 ###############################

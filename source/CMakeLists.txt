@@ -40,6 +40,10 @@ ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT
 AUX_SOURCE_DIRECTORY( src SRC_FILES )
 AUX_SOURCE_DIRECTORY( src/elog SRC_FILES )
 
+IF( BUILD_EVB )
+	AUX_SOURCE_DIRECTORY( src/evb SRC_FILES )
+ENDIF()
+
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
 
 INSTALL(
@@ -129,6 +133,22 @@ INSTALL (
     TARGETS dqm4hep_db_insert_config_file
     RUNTIME DESTINATION bin
 )
+
+
+# -------------------------------------------------
+# build start shm driver executable
+
+IF( BUILD_EVB )
+
+	ADD_EXECUTABLE( dqm4hep_start_shm_driver main/dqm4hep_start_shm_driver.cc )
+	TARGET_LINK_LIBRARIES( dqm4hep_start_shm_driver ${PROJECT_NAME} )
+	
+	INSTALL (
+	    TARGETS dqm4hep_start_shm_driver
+	    RUNTIME DESTINATION bin
+	)
+
+ENDIF()
 
 # -------------------------------------------------
 # build examples
