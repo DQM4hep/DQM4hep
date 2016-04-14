@@ -21,7 +21,7 @@ CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 IF( COMPILER_SUPPORTS_CXX11 )
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ELSE()
-	MESSAGE( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
+	MESSAGE( SEND_ERROR "DQM4GHEP requires C++11 support. Please upgrade your compiler !" )
 ENDIF()
 
 ###############################
@@ -35,6 +35,7 @@ SET( DQMViz_version               "master" )
 SET( DQM4ILC_version              "master" )
 SET( JsonCpp_version              "0.10.5" )
 SET( DIMJC_version                "master" )
+SET( levbdim_version              "master" )
 
 # ----- download settings -----
 SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
@@ -42,9 +43,10 @@ SET( xdrlcio_repository             "https://github.com/DQM4HEP/xdrlcio.git" )
 SET( DQMCore_repository             "https://github.com/DQM4HEP/DQMCore.git" )
 SET( DQMViz_repository              "https://github.com/DQM4HEP/DQMViz.git" )
 SET( DQM4ILC_repository             "https://github.com/DQM4HEP/DQM4ILC.git" )
-SET( JsonCpp_repository             "https://github.com/open-source-parsers/jsoncpp.git" )
+SET( JsonCpp_repository             "https://github.com/DQM4HEP/jsoncpp.git" )
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
-SET( DIMJC_repository               "https://github.com/mirabitl/dimjc.git" )
+SET( DIMJC_repository               "https://github.com/DQM4HEP/dimjc.git" )
+SET( levbdim_repository             "https://github.com/DQM4HEP/levbdim.git" )
 
 # the external project in used are
 # set gradually along the CMakeLists.txt
@@ -131,6 +133,9 @@ MESSAGE( STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLES}" )
 OPTION( DIM_GUI "Whether to build dim gui part (did, webDid)" OFF )
 MESSAGE( STATUS "DIM_GUI: ${DIM_GUI}" )
 
+OPTION( BUILD_EVB "Whether to compile the evb sources of DQMCore" OFF )
+MESSAGE( STATUS "BUILD_EVB: ${BUILD_EVB}" )
+
 # ----------------------------------------------------------------------------
 
 IF( DIM_GUI )
@@ -142,6 +147,7 @@ ENDIF()
 SET( DQMCore_additional_cmake_args
 	${DQMCore_additional_cmake_args}
 	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
+	-DBUILD_EVB=${BUILD_EVB}
 )
 
 # fixme : problems on lyoserv.
@@ -238,17 +244,6 @@ SET( DQM4ILC_additional_cmake_args
 	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 )
 
-# ----- DQMCore package -----
-ExternalProject_Add( DQMCore
-    DEPENDS ${dim_package_depends} ${xdrstream_package_depends}
-    GIT_REPOSITORY ${DQMCore_repository}
-    GIT_TAG ${DQMCore_version}
-    CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
-    PREFIX DQMCore
-    LIST_SEPARATOR %
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
-)
-
 # ----- JsonCpp package -----
 FIND_PACKAGE( JSONCPP QUIET )
 
@@ -267,6 +262,35 @@ IF ( NOT JSONCPP_FOUND )
 	SET( jsoncpp_package_depends "jsoncpp" )
 
 ENDIF()
+
+# ----- levbdim package -----
+IF ( BUILD_EVB )
+	SET ( levbdim_DIR ${CMAKE_CURRENT_SOURCE_DIR}/levbdim )
+
+	ExternalProject_Add( levbdim
+		DEPENDS ${jsoncpp_package_depends}
+	    GIT_REPOSITORY ${levbdim_repository}
+	    GIT_TAG ${levbdim_version}
+	    CMAKE_ARGS ${common_cmake_args} ${levbdim_additional_cmake_args}
+		PREFIX levbdim
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${levbdim_DIR}
+	)
+
+	SET( levbdim_package_depends "levbdim" )
+
+ENDIF()
+
+# ----- DQMCore package -----
+ExternalProject_Add( DQMCore
+    DEPENDS ${dim_package_depends} ${xdrstream_package_depends} ${jsoncpp_package_depends} ${levbdim_package_depends}
+    GIT_REPOSITORY ${DQMCore_repository}
+    GIT_TAG ${DQMCore_version}
+    CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
+    PREFIX DQMCore
+    LIST_SEPARATOR %
+    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
+)
 
 # ----- DIMJC package -----
 FIND_PACKAGE( DIMJC QUIET )
