@@ -229,7 +229,12 @@ public:
 
 	/** Destructor
 	 */
-	virtual ~DQMGenericEventStreamer();
+	~DQMGenericEventStreamer();
+
+	/** Factory method to create the corresponding DQM event to this streamer.
+	 *  The dqm event is expected to contains an allocated wrapped event
+	 */
+	DQMEvent *createEvent() const;
 
 	/** Serialize the event and store it into a data stream.
 	 */

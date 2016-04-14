@@ -45,6 +45,11 @@ public:
 	 */
 	virtual ~DQMEventStreamer() {}
 
+	/** Factory method to create the corresponding DQM event to this streamer.
+	 *  The dqm event is expected to contains an allocated wrapped event
+	 */
+	virtual DQMEvent *createEvent() const = 0;
+
 	/** Serialize a DQMEvent object and store it in the data stream
 	 */
 	virtual StatusCode write(const DQMEvent *const pObject, xdrstream::IODevice *pDevice) = 0;
