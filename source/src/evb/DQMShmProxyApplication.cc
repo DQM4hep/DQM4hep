@@ -32,6 +32,7 @@
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/DQMPluginManager.h"
 #include "dqm4hep/DQMCoreTool.h"
+#include "dqm4hep/DQMEventStreamer.h"
 
 namespace dqm4hep
 {
@@ -414,19 +415,11 @@ StatusCode DQMShmProxyApplication::configureRunControlClient(TiXmlElement *pRunC
 }
 
 //-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
-//       FSM functions. Call back functions steered by external process via dim
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
 
 void DQMShmProxyApplication::processEvent(uint32_t key, std::vector<levbdim::buffer*> bufferList)
 {
 	DQMEventStreamer *pEventStreamer = m_pEventClient->getEventStreamer();
-
-	// TODO change interface in event streamer to allow event creation
-	DQMEvent *pEvent
-//	=  pEventStreamer->createEvent();
-	= NULL;
+	DQMEvent *pEvent = pEventStreamer->createEvent();
 
 	try
 	{
