@@ -76,6 +76,11 @@ IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     ${DQMCore_additional_cmake_args}
     "-DCMAKE_CXX_FLAGS=-Wno-keyword-macro -Wno-comment"
 	)
+SET( levbdim_additional_cmake_args
+    ${levbdim_additional_cmake_args}
+    "-DCMAKE_CXX_FLAGS= -Wno-macro-redefined -Wno-format"
+  )
+
 ENDIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
 
@@ -194,7 +199,7 @@ IF ( NOT DIM_FOUND )
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${DIMDIR}
 	    BINARY_DIR ${DIMDIR}
-		PATCH_COMMAND ${DIMDIR}/external-project/patch-command ${DIM_OS}
+	   	PATCH_COMMAND ${DIMDIR}/external-project/patch-command ${DIM_OS}
 	    CONFIGURE_COMMAND ""
 	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS} ${DIM_GUI_FLAG}
 	    INSTALL_COMMAND ${DIMDIR}/external-project/install-command ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/include
