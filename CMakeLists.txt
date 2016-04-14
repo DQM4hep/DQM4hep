@@ -9,7 +9,7 @@ PROJECT( DQM4HEP )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 4 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 1 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 2 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 ###############################
@@ -28,14 +28,14 @@ ENDIF()
 # versions of DQM4HEP subpackages
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
-SET( xdrstream_version            "master" )
-SET( xdrlcio_version              "master" )
-SET( DQMCore_version              "master" )
-SET( DQMViz_version               "master" )
-SET( DQM4ILC_version              "master" )
+SET( xdrstream_version            "v01-00-00" )
+SET( xdrlcio_version              "v01-00-00" )
+SET( DQMCore_version              "v02-02-00" )
+SET( DQMViz_version               "v02-00-00" )
+SET( DQM4ILC_version              "v01-01-00" )
 SET( JsonCpp_version              "0.10.5" )
-SET( DIMJC_version                "master" )
-SET( levbdim_version              "master" )
+SET( DIMJC_version                "v01-01-00" )
+SET( levbdim_version              "v01-00-00" )
 
 # ----- download settings -----
 SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
