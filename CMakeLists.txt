@@ -24,18 +24,32 @@ ELSE()
 	MESSAGE( SEND_ERROR "DQM4HEP requires C++11 support. Please upgrade your compiler !" )
 ENDIF()
 
+OPTION( USE_MASTER "Whether to use master version of subpackages" OFF )
+
 ###############################
 # versions of DQM4HEP subpackages
 # don't forget to update when releasing DQM4HEP
 # e.g. SET( DQMCore_version "v01-00-00" )
-SET( xdrstream_version            "v01-00-00" )
-SET( xdrlcio_version              "v01-00-00" )
-SET( DQMCore_version              "v02-02-00" )
-SET( DQMViz_version               "v02-00-00" )
-SET( DQM4ILC_version              "v01-01-00" )
-SET( JsonCpp_version              "0.10.5" )
-SET( DIMJC_version                "v01-01-00" )
-SET( levbdim_version              "v01-00-00" )
+
+IF( USE_MASTER )
+	SET( xdrstream_version            "master" )
+	SET( xdrlcio_version              "master" )
+	SET( DQMCore_version              "master" )
+	SET( DQMViz_version               "master" )
+	SET( DQM4ILC_version              "master" )
+	SET( JsonCpp_version              "0.10.5" )
+	SET( DIMJC_version                "master" )
+	SET( levbdim_version              "master" )
+ELSE()
+	SET( xdrstream_version            "v01-00-00" )
+	SET( xdrlcio_version              "v01-00-00" )
+	SET( DQMCore_version              "v02-02-00" )
+	SET( DQMViz_version               "v02-00-00" )
+	SET( DQM4ILC_version              "v01-01-00" )
+	SET( JsonCpp_version              "0.10.5" )
+	SET( DIMJC_version                "v01-01-00" )
+	SET( levbdim_version              "v01-00-00" )
+ENDIF()
 
 # ----- download settings -----
 SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
