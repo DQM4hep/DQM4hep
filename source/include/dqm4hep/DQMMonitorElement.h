@@ -488,6 +488,30 @@ inline void TScalarObject<std::string>::Init()
 	m_pPaveText = 0;
 }
 
+//-------------------------------------------------------------------------------------------------
+
+template <>
+inline void TScalarObject<std::string>::Draw(Option_t *option)
+{
+	dqm4hep::StringVector lines;
+	dqm4hep::DQM4HEP::tokenize( m_scalar , lines , "\n" );
+
+	if(0 == m_pPaveText)
+	{
+		m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
+		m_pPaveText->SetFillColor(0);
+		m_pPaveText->SetBorderSize(0);
+		m_pPaveText->SetShadowColor(0);
+	}
+
+	m_pPaveText->Clear();
+
+	for(auto iter = lines.begin(), endIter = lines.end() ; endIter != iter ; ++iter)
+		m_pPaveText->AddText( (*iter).c_str() );
+
+	m_pPaveText->Draw(option);
+}
+
 } 
 
 #endif  //  DQMMONITORELEMENT_H
