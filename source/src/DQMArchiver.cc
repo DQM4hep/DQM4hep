@@ -252,7 +252,7 @@ StatusCode DQMArchiver::recursiveFill(DQMDirectory *pDirectory, TDirectory *pROO
 
 			if(NULL != pROOTSubDir)
 			{
-				RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveFill(pSubDir, pROOTSubDir));
+				RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMArchiver::recursiveFill(pSubDir, pROOTSubDir));
 			}
 		}
 	}
@@ -262,7 +262,7 @@ StatusCode DQMArchiver::recursiveFill(DQMDirectory *pDirectory, TDirectory *pROO
 	// write the monitor elements
 	if( ! monitorElementList.empty() )
 	{
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, writeMonitorElements(pDirectory, pROOTDir));
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMArchiver::writeMonitorElements(pDirectory, pROOTDir));
 	}
 
 	return STATUS_CODE_SUCCESS;

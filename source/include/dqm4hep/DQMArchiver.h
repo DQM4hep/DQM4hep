@@ -94,18 +94,17 @@ public:
 	 */
 	const std::string &getOpeningMode() const;
 
-protected:
 	/** Fill recursively the TDirectory with the DQMDirectory
 	 */
-	StatusCode recursiveFill(DQMDirectory *pDirectory, TDirectory *pROOTDir);
+	static StatusCode recursiveFill(DQMDirectory *pDirectory, TDirectory *pROOTDir);
 
 	/** Create TDirectories as labeled in the DQMDirectory
 	 */
-	StatusCode createTDirectories(DQMDirectory *pDirectory, TDirectory *pROOTDir);
+	static StatusCode createTDirectories(DQMDirectory *pDirectory, TDirectory *pROOTDir);
 
 	/** Write the monitor elements contained in the DQMDirectory in the TDirectory
 	 */
-	StatusCode writeMonitorElements(DQMDirectory *pDirectory, TDirectory *pROOTDir);
+	static StatusCode writeMonitorElements(DQMDirectory *pDirectory, TDirectory *pROOTDir);
 
 private:
 	// members
