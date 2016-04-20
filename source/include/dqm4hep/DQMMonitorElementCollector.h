@@ -350,6 +350,7 @@ private:
 	DimService                        *m_pMeUpdateService;
 	DimService                        *m_pNotifyWatchedMeService;
 	DimService                        *m_pCollectorStateService;
+	DimService                        *m_pAvailableMeService;
 	DQMStatisticsService              *m_pStatisticsService;
 
 	// runtime

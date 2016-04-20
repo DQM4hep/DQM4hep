@@ -105,12 +105,12 @@ public:
 	virtual void monitorElementCollectorInfoReceived(DQMMonitorElementClient */*pClient*/, const DQMHostInfo &/*collectorInfo*/) {}
 
 	/** Called back when monitor elements are received.
-	 *  WARNING ! The client owns the publication passed in argument.
-	 *  After notifying the publication is cleared and monitor elements deleted.
-	 *  Since the publication is not constant, the listener can take elements and
-	 *  remove them from the publication.
 	 */
 	virtual void monitorElementsReceived(DQMMonitorElementClient */*pClient*/, DQMPublication &/*publication*/) {}
+
+	/** Called back when a module post new available monitor elements
+	 */
+	virtual void monitorElementsAvailable(DQMMonitorElementClient */*pClient*/, const DQMMonitorElementInfoList &/*infoList*/) {};
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -231,6 +231,7 @@ private:
 	DimRpcInfo                            *m_pMeListNameRpcInfo;
 	DimUpdatedInfo                        *m_pMeUpdateInfo;
 	DimInfo                               *m_pCollectorStateInfo;
+	DimInfo                               *m_pAvailableMeInfo;
 
 	xdrstream::BufferDevice               *m_pInBuffer;
 	xdrstream::BufferDevice               *m_pOutBuffer;

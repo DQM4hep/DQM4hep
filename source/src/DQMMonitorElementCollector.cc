@@ -477,6 +477,11 @@ StatusCode DQMMonitorElementCollector::start()
 	m_pMeUpdateService = new DimService((char *)ss.str().c_str(), "C",
 			(void*) pMeCollectormptyBuffer, 5);
 
+	ss.str("");
+	ss << baseName << "AVAILABLE_ME_SVC";
+	m_pAvailableMeService = new DimService((char *)ss.str().c_str(), "C",
+			(void*) pMeCollectormptyBuffer, 5);
+
 
 	m_collectorState = RUNNING_STATE;
 
@@ -514,6 +519,7 @@ StatusCode DQMMonitorElementCollector::stop()
 	delete m_pStatisticsService;
 	delete m_pMeUpdateService;
 	delete m_pNotifyWatchedMeService;
+	delete m_pAvailableMeService;
 
 	m_collectorState = STOPPED_STATE;
 	m_pCollectorStateService->updateService(m_collectorState);
@@ -745,6 +751,14 @@ void DQMMonitorElementCollector::handleAvailableListUpdate(DimCommand *pCommand)
 
 		if(newClient)
 			this->notifyWatchedMe(moduleName);
+
+		m_pOutBuffer->reset();
+
+		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::write( m_pOutBuffer , availableMeList ) )
+			throw StatusCodeException(STATUS_CODE_FAILURE);
+
+		LOG4CXX_DEBUG( dqmMainLogger , "Sending available me list from module '" << moduleName << "' to all clients " );
+		m_pAvailableMeService->updateService((void *) m_pOutBuffer->getBuffer(), m_pOutBuffer->getPosition() );
 	}
 	catch(const StatusCodeException &exception)
 	{
@@ -798,6 +812,8 @@ void DQMMonitorElementCollector::handleClientRequestList(int clientId, DimComman
 		if( xdrstream::XDR_SUCCESS != DQMStreamingHelper::read( m_pInBuffer , request ) )
 			throw StatusCodeException(STATUS_CODE_FAILURE);
 
+		std::map<std::string, DQMMonitorElementRequest> moduleRequestList;
+
 		for(DQMMonitorElementRequest::iterator iter = request.begin(), endIter = request.end() ;
 				endIter != iter ; ++iter)
 		{
@@ -807,13 +823,25 @@ void DQMMonitorElementCollector::handleClientRequestList(int clientId, DimComman
 				continue;
 
 			LOG4CXX_DEBUG( dqmMainLogger , "Found module : " << iter->first );
+			moduleRequestList[ iter->first ].insert(*iter);
+		}
 
-			// first unsubscribe to all elements
+		for(auto iter = moduleRequestList.begin(), endIter = moduleRequestList.end() ;
+				endIter != iter ; ++iter)
+		{
+			std::string moduleName = iter->first;
+			ModuleMeInfoMap::iterator moduleIter = m_moduleMeInfoMap.find(moduleName);
+
+			// first unsubscribe to all
 			moduleIter->second->unsubscribe(clientId);
-			moduleIter->second->subscribe(clientId, iter->second);
 
-			// in case the subscribed element is different
-			this->notifyWatchedMe(iter->first);
+			// subscribe to all requested elements
+			for(DQMMonitorElementRequest::iterator reqIter = iter->second.begin(), endReqIter = iter->second.end() ;
+					endReqIter != reqIter ; ++reqIter)
+				moduleIter->second->subscribe(clientId, reqIter->second);
+
+			// notify module of watched elements
+			this->notifyWatchedMe(moduleName);
 		}
 	}
 	catch(const StatusCodeException &exception)
