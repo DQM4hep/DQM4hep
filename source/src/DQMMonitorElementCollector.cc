@@ -1329,12 +1329,10 @@ void DQMMonitorElementNameListRpc::rpcHandler()
 
 				std::string type = (*meIter)[ DQMKey::ME_TYPE ];
 
-				// partial and lower case compare of me name
-				if(meName.find(requestMonitorElementName) == std::string::npos && !requestMonitorElementName.empty())
-					continue;
-
+				// partial and lower case compare of me name and
 				// partial and lower case compare of path using me name
-				if(path.find(requestMonitorElementName) == std::string::npos && !requestMonitorElementName.empty())
+				if(meName.find(requestMonitorElementName) == std::string::npos && !requestMonitorElementName.empty()
+				&& path.find(requestMonitorElementName) == std::string::npos && !requestMonitorElementName.empty())
 					continue;
 
 				// compare me type
