@@ -92,6 +92,13 @@ StatusCode DQMModuleApi::rmdir(const DQMModule *const pModule, const std::string
 }
 
 //-------------------------------------------------------------------------------------------------
+
+bool DQMModuleApi::dirExists(const DQMModule *const pModule, const std::string &dirName)
+{
+	return pModule->getModuleApplication()->getMonitorElementManager()->dirExists(dirName);
+}
+
+//-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMModuleApi::bookRealHistogram1D(const DQMModule *const pModule, DQMMonitorElementPtr &monitorElement, const std::string &name, const std::string &title, int nBins, float minimum, float maximum)

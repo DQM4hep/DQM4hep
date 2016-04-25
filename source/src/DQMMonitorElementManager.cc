@@ -157,6 +157,13 @@ StatusCode DQMMonitorElementManager::getFullPathName(const std::string &subDirNa
 }
 
 //-------------------------------------------------------------------------------------------------
+
+bool DQMMonitorElementManager::dirExists(const std::string &dirName) const
+{
+	return m_pMonitorElementStorage->dirExists(dirName);
+}
+
+//-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
 StatusCode DQMMonitorElementManager::bookObject(DQMMonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,

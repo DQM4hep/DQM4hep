@@ -94,6 +94,10 @@ public:
 	 */
 	static StatusCode rmdir(const DQMModule *const pModule, const std::string &dirName);
 
+	/** Whether the directory exists
+	 */
+	static bool dirExists(const DQMModule *const pModule, const std::string &dirName);
+
 public:
 
 	///////////////////////
