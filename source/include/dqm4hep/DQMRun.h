@@ -112,20 +112,42 @@ public:
 	 */
 	unsigned int getNParameters() const;
 
+	/** Get the parameters keys
+	 */
+	StringVector getParameterKeys() const;
+
 	xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
 			xdrstream::xdr_version_t version = 0);
 
 protected:
-
 	int                                    m_runNumber;
 	DQMTimePoint                           m_startTime;
 	DQMTimePoint                           m_endTime;
 	std::string                            m_detectorName;
 	std::string                            m_description;
 	std::map<std::string, std::string>     m_parametersMap;
+
+	friend std::ostream &operator <<(std::ostream &, const DQMRun &);
 };
 
 //-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+inline std::ostream &operator <<(std::ostream &out, const DQMRun &run)
+{
+	out << "DQMRun :\n"
+		"  -> run number " << run.getRunNumber() << "\n"
+		"  -> detector " << run.getDetectorName() << "\n"
+		"  -> description : " << run.getDescription() << "\n"
+		"  -> parameters : \n";
+
+	for(auto iter = run.m_parametersMap.begin(), endIter = run.m_parametersMap.end() ;
+			endIter != iter ; ++iter)
+		out << "   * " << iter->first << " = " << iter->second << "\n";
+
+	return out;
+}
+
 //-------------------------------------------------------------------------------------------------
 
 inline int DQMRun::getRunNumber() const

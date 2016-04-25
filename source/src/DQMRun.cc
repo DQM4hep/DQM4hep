@@ -53,6 +53,19 @@ DQMRun::~DQMRun()
 
 //-------------------------------------------------------------------------------------------------
 
+StringVector DQMRun::getParameterKeys() const
+{
+	StringVector keys;
+
+	for(auto iter = m_parametersMap.begin(), endIter = m_parametersMap.end() ;
+			endIter != iter ; ++iter)
+		keys.push_back( iter->first );
+
+	return keys;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 xdrstream::Status DQMRun::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
 		xdrstream::xdr_version_t version)
 {
