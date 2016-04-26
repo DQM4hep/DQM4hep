@@ -399,7 +399,7 @@ morekeywords={string,fstream,ofstream,ifstream}
   
   \begin{frame}
     \frametitle{\secname}
-    \frametitle{SDHCAL analysis tools}
+    \framesubtitle{SDHCAL analysis tools}
     \begin{block}{Online data feeding}
     Implementation of shm plugin (levbdim) with LCEvent data structure :
       \begin{itemize}
@@ -428,7 +428,7 @@ morekeywords={string,fstream,ofstream,ifstream}
   
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
-    \frametitle{SDHCAL analysis tools}
+    \framesubtitle{SDHCAL analysis tools}
     \begin{block}{Event classifier}
       Class \verb|EventClassifier| from DQMSDHCAL package\\ ~\\
       Interface to particle ID for online analysis. User needs to implements \verb|processEvent(LCEvent*)| and decide for one of the following tag : \\ 
@@ -463,7 +463,7 @@ morekeywords={string,fstream,ofstream,ifstream}
   
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
-    \frametitle{SDHCAL analysis tools}
+    \framesubtitle{SDHCAL analysis tools}
     \begin{block}{Trivent module}
       Class \verb|DQMAnalysisModule| from DQMCore package and \verb|LCTriventListener| from Trivent package\\~\\
       \verb|DQMTriventModule| is a base class that runs Trivent on \textit{trigger} event $\rightarrow$ split the input event into \textit{time clustered} event representing each a particle event. \\~\\
@@ -478,6 +478,69 @@ morekeywords={string,fstream,ofstream,ifstream}
     \end{block}
   \end{frame}
   
+  \section{SDHCAL modules}
+  
+  
+  
+  \begin{frame}[containsverbatim]
+    \frametitle{\secname}
+    \framesubtitle{\textit{AsicAnalysisModule}}
+    \begin{block}{Purpose}
+      Inherits from \verb|DQMTriventModule| and analyze particle per particle events. \\
+      Use CaloSoftWare to find and analyze muons (beam and cosmic ones) in detector. \\
+      Can be adapted to SiWECal by tunning some parameters in xml only
+    \end{block}
+    
+    \begin{block}{Monitor elements}
+      \begin{itemize}
+        \item Layer efficiency (thr 1,2,3) (TH1)
+        \item Layer multiplicity (TH1)
+        \item Per layer :
+        \begin{itemize}
+          \item Asic efficiency map (thr 1,2,3) (TH2)
+          \item Asic multiplicity map (TH2)
+        \end{itemize}
+        \item Asic efficiency (thr 1,2,3) (TH1)
+        \item Asic multiplicity (TH1)
+        \item Asic stacked efficiency map (thr 1,2,3) (TH2)
+        \item Asic stacked multiplicity (TH2)
+        \item N track per asic (TH1)
+      \end{itemize}      
+    \end{block}
+  \end{frame}
+  
+  
+  
+  
+  \begin{frame}[containsverbatim]
+    \frametitle{\secname}
+    \framesubtitle{Conclusion and questions}
+    \begin{block}{Conclusion}
+      \begin{itemize}
+        \item Online DQM for SDHCAL developed using DQM4HEP
+        \item Finalizing monitoring depending on your remarks
+        \item Need SiWECal implementation for upcoming beam test in June.
+      \end{itemize}
+    \end{block}
+    \begin{block}{Needs from SiWECal team}
+      \begin{itemize}
+        \item Electronics mapping. Geometry conversion of (DIF, Roc, Channel) $\leftrightarrow$ (I, J, layer) $\leftrightarrow$ (x,y,z)
+        \item Data conversion :
+        \begin{itemize}
+          \item from raw data from each DIF (ECAL format) to RawCalorimeterHit collection (DIF, Roc, Channel, time, energy)
+          \item from RawCalorimeterHit to CalorimeterHit using electronics mapping
+        \end{itemize}
+        \item Shm processor using the raw data conversion
+        \item Common analysis tools :
+        \begin{itemize}
+          \item Combined particle ID functions
+        \end{itemize}
+      \end{itemize}
+      ~ \\
+      If you want to see more things implemented in the DQM system for the ECal, let us know !
+      
+    \end{block}
+  \end{frame}
   
 
 \end{document}
