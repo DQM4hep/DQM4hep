@@ -99,6 +99,10 @@ public:
 	 */
 	StatusCode readSettings( const std::string &settingsFile );
 
+	/** Set the parameters to replace while reading settings
+	 */
+	void setReplacementParameters(const DQMParameters &parametersMap);
+
 	/** Run the application.
 	 */
 	StatusCode run();
@@ -148,6 +152,7 @@ private:
 private:
 	// members
 	Settings                       m_settings;
+	DQMParameters                  m_replacementParameters;
 
 	DQMEventClient                *m_pEventClient;
 	DQMRunControlClient           *m_pRunControlClient;

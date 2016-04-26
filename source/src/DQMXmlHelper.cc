@@ -113,5 +113,94 @@ StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, cons
 	return DQMXmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, ss.str(), monitorElement);
 }
 
+//----------------------------------------------------------------------------------------------------
+
+StatusCode DQMXmlHelper::replaceAllXmlAttributes(TiXmlElement *pXmlElement, const DQMParameters &parameters)
+{
+	for(auto paramIter = parameters.begin(), endParamIter = parameters.end() ;
+			endParamIter != paramIter ; ++paramIter)
+	{
+		std::string key(paramIter->first);
+		std::string value(paramIter->second);
+
+		StringVector xmlElementNames;
+		tokenizeString(key, xmlElementNames, ".");
+
+		TiXmlElement *pCurrentElement = pXmlElement;
+		bool keyIsParameter = false;
+
+		for(unsigned int e=0 ; e<xmlElementNames.size() ; e++)
+		{
+			std::string subKey(xmlElementNames.at(e));
+
+			// last sub key
+			if( e == xmlElementNames.size()-1 )
+			{
+				if( keyIsParameter )
+				{
+					if( ! pCurrentElement->NoChildren() )
+						pCurrentElement->Clear();
+
+					TiXmlText *pText = new TiXmlText( value );
+					pCurrentElement->LinkEndChild(pText);
+
+					LOG4CXX_DEBUG( dqmMainLogger, "Parameter key '" << key << "' set to " << value );
+				}
+				else
+				{
+					pCurrentElement->SetAttribute( subKey , value );
+					LOG4CXX_DEBUG( dqmMainLogger, "Key attribute '" << key << "' set to " << value );
+				}
+			}
+			else
+			{
+				if( e == xmlElementNames.size()-2 && subKey == "parameter" )
+				{
+					bool found = false;
+					std::string parameterName( xmlElementNames.at(e+1) );
+
+				    for (TiXmlElement *pXmlElement = pCurrentElement->FirstChildElement("parameter"); NULL != pXmlElement;
+				        pXmlElement = pXmlElement->NextSiblingElement("parameter"))
+				    {
+				    	std::string name;
+				    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "name", name));
+
+				    	if( name == parameterName )
+				    	{
+				    		pCurrentElement = pXmlElement;
+				    		found = true;
+				    		break;
+				    	}
+				    }
+
+				    if( ! found )
+				    {
+				    	LOG4CXX_ERROR( dqmMainLogger , "Key '" << key << "' , subKey '" << subKey << "' xml element not found !" );
+				    	return STATUS_CODE_NOT_FOUND;
+				    }
+
+					keyIsParameter = true;
+				}
+				else
+					pCurrentElement = pCurrentElement->FirstChildElement( subKey );
+
+				if( NULL == pCurrentElement )
+				{
+					LOG4CXX_ERROR( dqmMainLogger , "Key '" << key << "' , subKey '" << subKey << "' xml element not found !" );
+					return STATUS_CODE_NOT_FOUND;
+				}
+			}
+		}
+	}
+
+	return STATUS_CODE_SUCCESS;
+}
+
+
+
+
+
+
+
 
 }

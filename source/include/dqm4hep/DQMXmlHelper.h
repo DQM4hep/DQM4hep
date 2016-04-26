@@ -114,6 +114,10 @@ public:
 	/** Tokenize a string
 	 */
 	static void tokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ");
+
+	/** Replace all xml attribute recursively from the parameters map
+	 */
+	static StatusCode replaceAllXmlAttributes(TiXmlElement *pXmlElement, const DQMParameters &parameters);
 };
 
 //-------------------------------------------------------------------------------------------------

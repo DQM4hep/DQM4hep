@@ -88,6 +88,10 @@ public:
 	 */
 	const std::string &getName() const;
 
+	/** Set the parameters to replace while reading settings
+	 */
+	void setReplacementParameters(const DQMParameters &parametersMap);
+
 	/** Read settings from a xml file.
 	 *  Initialize the application. Declare all the services,
 	 *  load the shared libraries, configure the active module
@@ -114,12 +118,13 @@ private:
 
 	// user settings
 	Settings                      m_settings;
+	DQMParameters                 m_replacementParameters;
 
 	std::string                   m_name;
 	std::string                   m_type;
 	std::string                   m_moduleLogStr;
 
-	StatusCode                     m_returnStatusCode;
+	StatusCode                    m_returnStatusCode;
 }; 
 
 } 

@@ -145,6 +145,7 @@ typedef std::vector<float>          FloatVector;
 typedef std::vector<double>         DoubleVector;
 typedef std::vector<std::string>    StringVector;
 typedef std::set<std::string>       StringSet;
+typedef std::map<std::string, std::string> DQMParameters;
 
 typedef std::vector<DQMMonitorElement*>                  DQMMonitorElementList;
 typedef std::map<const std::string, DQMMonitorElement*>  DQMMonitorElementMap;

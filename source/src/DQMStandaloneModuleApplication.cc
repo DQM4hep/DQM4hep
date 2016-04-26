@@ -136,9 +136,14 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
     }
 
     const TiXmlHandle xmlDocumentHandle(&xmlDocument);
+
+    if( ! m_replacementParameters.empty() )
+    {
+        TiXmlElement *pXmlElement = xmlDocumentHandle.FirstChildElement().Element();
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::replaceAllXmlAttributes(pXmlElement, m_replacementParameters));
+    }
+
     const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
-
-
 
     // monitor element sender
 	TiXmlElement *const pMeCollectorElement = xmlHandle.FirstChildElement("monitorelementcollector").Element();
@@ -257,6 +262,13 @@ StatusCode DQMStandaloneModuleApplication::readSettings( const std::string &sett
 	m_settings.print(m_moduleLogStr);
 
 	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMStandaloneModuleApplication::setReplacementParameters(const DQMParameters &parametersMap)
+{
+	m_replacementParameters = parametersMap;
 }
 
 //-------------------------------------------------------------------------------------------------

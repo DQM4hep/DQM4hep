@@ -137,6 +137,13 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
     }
 
     const TiXmlHandle xmlDocumentHandle(&xmlDocument);
+
+    if( ! m_replacementParameters.empty() )
+    {
+        TiXmlElement *pXmlElement = xmlDocumentHandle.FirstChildElement().Element();
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::replaceAllXmlAttributes(pXmlElement, m_replacementParameters));
+    }
+
     const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
 	// configure module
@@ -177,6 +184,13 @@ StatusCode DQMAnalysisModuleApplication::readSettings(const std::string &setting
 	setInitialized(true);
 
 	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMAnalysisModuleApplication::setReplacementParameters(const DQMParameters &parametersMap)
+{
+	m_replacementParameters = parametersMap;
 }
 
 //-------------------------------------------------------------------------------------------------
