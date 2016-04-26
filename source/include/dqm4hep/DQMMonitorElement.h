@@ -420,6 +420,7 @@ void TScalarObject<T>::Draw(Option_t *option)
 
 	m_pPaveText->Clear();
 	m_pPaveText->AddText(scalarStr.c_str());
+	m_pPaveText->SetTextAlign(11);
 	m_pPaveText->Draw(option);
 }
 
