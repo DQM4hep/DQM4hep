@@ -127,42 +127,42 @@ morekeywords={string,fstream,ofstream,ifstream}
       \includegraphics[width=\textwidth]{figs/DQM4HEP_workflow.pdf}
     \end{center}
   \end{frame}
-  
-  
-  
+
+
+
     \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{Online builder interface}
-  
+
       New package (optionnal) in DQM4HEP : levbdim \\
       Use \verb|-DBUILD_EVB=ON| cmake flag to compile levbdim support \\
       ~ \\
-      Generic online event builder based on DIM 
+      Generic online event builder based on DIM
       \begin{itemize}
         \item Uses DIM sockets to collect raw data from different source and dump them in shared memory
         \item Groups all data packets into buffer list by reading them into shared memory
         \item Pass them to user callback functions
       \end{itemize}
-      ~ \\      
+      ~ \\
       Developed by the SDHCAL team for future combined test beams with ECAL. \\
       Can managed many subdetectors (ECAL, HCAL, Cherenkov, TPC, ...) \\
       ~ \\
       Interface implemented in DQMCore to feed the DQM system with raw data. \\
       Application provided and use plugin manager to get user raw data converters to event interface
-    
+
   \end{frame}
-  
-  
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{Online builder interface}
-  
+
     \begin{center}
       \includegraphics[width=0.8\textwidth]{figs/DQMeventbuilder.pdf}
     \end{center}
-    
-  \end{frame} 
-  
+
+  \end{frame}
+
 
 
   %% MODULE APPLICATION %%
@@ -278,7 +278,7 @@ morekeywords={string,fstream,ofstream,ifstream}
         		\begin{onlyenv}<4>\includegraphics[width=0.7\textwidth]{figs/JobInterface/JobInterface_Module.png}\end{onlyenv}
         		\begin{onlyenv}<1>\includegraphics[width=0.7\textwidth]{figs/JobInterface/JobInterface_MultiHost.png}\end{onlyenv}
         		\begin{onlyenv}<3>\includegraphics[width=0.7\textwidth]{figs/JobInterface/JobInterface_Update.png}\end{onlyenv}
-        		%\begin{onlyenv}<6>\includegraphics[width=0.7\textwidth]{figs/JobInterface.pdf}\end{onlyenv}	
+        		%\begin{onlyenv}<6>\includegraphics[width=0.7\textwidth]{figs/JobInterface.pdf}\end{onlyenv}
       \end{center}
       \vspace{-5em}
        \begin{minipage}{\textwidth}
@@ -365,9 +365,9 @@ morekeywords={string,fstream,ofstream,ifstream}
       \end{minipage}
     \end{overlayarea}
   \end{frame}
-  
+
   \section{DQM for SDHCAL prototype}
-  
+
   \begin{frame}
     \frametitle{\secname}
     Implements online analysis for the SDHCAL $m^3$ prototype. \\
@@ -375,7 +375,7 @@ morekeywords={string,fstream,ofstream,ifstream}
     Development made in parallel with the DQM4HEP framework \\
     Use last DQM4HEP version (currently v04-03-00) \\
     ~ \\
-    Additional software used : 
+    Additional software used :
     \begin{itemize}
       \item \textbf{Trivent} : standalone and generic time clustering.
       \item \textbf{CaloSoftWare} : various SDHCAL analysis tools from A. Steen :
@@ -395,8 +395,8 @@ morekeywords={string,fstream,ofstream,ifstream}
       \item Set of DQM modules
     \end{itemize}
   \end{frame}
-  
-  
+
+
   \begin{frame}
     \frametitle{\secname}
     \framesubtitle{SDHCAL analysis tools}
@@ -414,9 +414,9 @@ morekeywords={string,fstream,ofstream,ifstream}
     \underline{Missing} : SiWECAL shm plugin. Which raw data structure ? \\
     Need conversion to RawCalorimeterHit format (cellID + energy + time stamp)
   \end{frame}
-  
-  
-  
+
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{Online builder - SDHCAL implementation}
@@ -424,25 +424,25 @@ morekeywords={string,fstream,ofstream,ifstream}
       \includegraphics[width=0.8\textwidth]{figs/DQMeventbuilder_sdhcal.pdf}
     \end{center}
   \end{frame}
-  
-  
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{SDHCAL analysis tools}
     \begin{block}{Event classifier}
       Class \verb|EventClassifier| from DQMSDHCAL package\\ ~\\
-      Interface to particle ID for online analysis. User needs to implements \verb|processEvent(LCEvent*)| and decide for one of the following tag : \\ 
+      Interface to particle ID for online analysis. User needs to implements \verb|processEvent(LCEvent*)| and decide for one of the following tag : \\
       ~ \\
       {\tt Undefined, noise event, beam muon, cosmic muon, charged/neutral em shower, charged/neutral had shower} \\
       ~ \\
-      
+
       Various analysis in SDHCAL DQM modules uses this plugin to perform particle id dependent analysis. \\
       SDHCAL Event classifier implemented. \\~\\
       \underline{Missing} : SiWECAL + SDHCAL event classifier. In particular, electrons will be stopped before entering the SDHCAL -> different identification
     \end{block}
   \end{frame}
-    
-    
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \frametitle{SDHCAL analysis tools}
@@ -459,8 +459,8 @@ morekeywords={string,fstream,ofstream,ifstream}
       \underline{Missing} : SiWECAL data conversion (same io types) \\
     \end{block}
   \end{frame}
-  
-  
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{SDHCAL analysis tools}
@@ -474,14 +474,201 @@ morekeywords={string,fstream,ofstream,ifstream}
         \item For each clustered event : convert each LCCollection using data converter plugins and notify user that a physics event has been reconstructed
       \end{itemize}
       ~ \\
-      In DQMSDHCAL, most of the analysis modules inherits this module to analyze directly particle per particle events 
+      In DQMSDHCAL, most of the analysis modules inherits this module to analyze directly particle per particle events
     \end{block}
   \end{frame}
-  
+
   \section{SDHCAL modules}
-  
-  
-  
+
+    \section{Modules}
+
+  %% Module %%
+  \begin{frame}
+  \frametitle{\secname}
+  \framesubtitle{Modules}
+
+  Some modules are already available, they were developed for the SDHCAL but some of them will be easily adaptable to other detectors
+    \begin{itemize}
+      \item Slow Control: HV, LV, P, T
+      \item Beam Analysis Module : Spill length, particle Rates
+      \item Asic Analysis Module : Efficiency/Multiplicity per Plane/Asic
+      \item Noise Analysis Module : Plane/DIF/Asic/Channel
+      \item Hit Analysis Module study : Number Of hits per threshold
+      \item Particle Identification
+      \item Event Display
+      \item Tracking (Hough Transform)
+    \end{itemize}
+
+  \end{frame}
+
+ \section{Modules}
+
+
+
+
+  %% Module %%
+  \begin{frame}
+  \frametitle{\secname}
+  \framesubtitle{Modules - Slow Control}
+
+    \begin{block}{Purpose}
+      Uses Dim to collect information about the SlowControl services registered\\
+      Completely standalone module. Easy implementation for SiWECal
+    \end{block}
+
+    \begin{block}{Monitor Elements}
+    Currently implemented with:
+      \begin{itemize}
+        \item HV Info
+          \begin{itemize}
+            \item Expects a list of HV module/channel
+            \item Can use wildcard to get a list of services
+            \item Each HVInfo expects 1 integer (chID) and 4 floats : Vset, Iset, Vout, Iout
+          \end{itemize}
+        \item LV Info - expects 3 floats : Vset, Vread, IRead
+        \item Temperature Info - expects 1 float\\
+      \end{itemize}
+
+    Histograms can then be quickly configure via an xml file to display:
+      \begin{itemize}
+        \item Evolution of the variables in time as a TGraph
+        \item Instantaneous values as a string
+      \end{itemize}
+    \end{block}
+
+  \end{frame}
+
+%% modules %%
+  \begin{frame}[containsverbatim]
+  \frametitle{\secname}
+  \framesubtitle{\textit{BeamAnalysisModules}}
+
+
+    \begin{block}{Purpose}
+      Inherits from \verb|DQMAnalysisModule|, no time clusterisation \\
+      Can be adapted to SiWECal if providing electronics mapping and geometry conversion.
+    \end{block}
+
+    \begin{block}{Monitor Elements}
+    \begin{itemize}
+        \item Instant rate for the current spill for each particle (TScalar)
+        \item Mean rate for the current run for each particle (TScalar)
+        \item Mean number of clusters vs global rate (TProfile)
+        \item Time between two spill (TH1, TScalar)
+        \item Time between two ramfull (TH1, TScalar)
+        \item Spill Length (TH1, TScalar)
+        \item Number of ramfull per Spill (TH1, TScalar)
+        \item Acquisition Time (TH1)
+      \end{itemize}
+\end{block}
+  \end{frame}
+
+
+  %% Module %%
+  \begin{frame}[containsverbatim]
+  \frametitle{\secname}
+  \framesubtitle{\textit{EventDisplayModule}}
+
+    \begin{block}{Purpose}
+      Inherits from \verb|DQMTriventModule| and analyze particle per particle events. \\
+      Use CaloSoftWare to find and analyze muons (beam and cosmic ones) in detector. \\
+      Can be adapted to SiWECal by providing electronics mapping and geometry conversion.
+    \end{block}
+
+    \begin{block}{Monitor Elements}
+    List of Monitor Elements available for each particle type:
+      \begin{itemize}
+        \item Display last found particle over XY, ZX, ZY plans or in 3D
+        \item Display all particles from the current cycle over XY, ZX, ZY plans or in 3D
+      \end{itemize}
+
+    Can also be parametrised through xml config file to set drawing option (color, marker etc.)
+        \end{block}
+
+  \end{frame}
+
+
+    %% Module %%
+  \begin{frame}[containsverbatim]
+  \frametitle{\secname}
+  \framesubtitle{\textit{HitAnalysisModule}}
+
+
+    \begin{block}{Purpose}
+      Inherits from \verb|DQMTriventModule|. \\
+      Use CaloSoftWare to find and analyze clusters in detector. \\
+      Not adaptable to SiWECal.
+    \end{block}
+
+    \begin{block}{Monitor Elements}
+      \begin{itemize}
+        \item Number of hits for each threshold (0,1,2) in whole detector (TH1)
+        \item Number of hits for each threshold (0,1,2) for each layer (TH1)
+        \item Hit Map for each threshold (0,1,2) for each layer (TH2)
+      \end{itemize}
+      \end{block}
+
+  \end{frame}
+
+
+    %% Module %%
+  \begin{frame}[containsverbatim]
+  \frametitle{\secname}
+  \framesubtitle{\textit{HoughTransformModule}}
+
+    \begin{block}{Purpose}
+      Inherits from \verb|DQMTriventModule| and analyze particle per particle events. \\
+      Use CaloSoftWare to find and analyze tracks in detector. \\
+      Could be adapted to SiWECal if combined analysis
+    \end{block}
+
+  \begin{block}{Monitor Element}
+    List of Monitor Elements already available for each particle type:
+      \begin{itemize}
+        \item Number of reconstructed track (TH1)
+        \item Chi2 track distribution (TH1)
+        \item Track length (in layers) (TH1)
+        \item Mean cluster size per tracks (TH1)
+        \item Track theta angle distribution (TH1)
+        \item Track phi angle distribution (TH1)
+      \end{itemize}
+  \end{block}{}
+
+  \end{frame}
+
+
+    %% Module %%
+  \begin{frame}[containsverbatim]
+  \frametitle{\secname}
+  \framesubtitle{\textit{RawAnalysisModule}}
+
+    \begin{block}{Purpose}
+      Inherits from \verb|DQMAnalysisModule|, no time clusterisation. \\
+      Takes RawCalorimeterHits in input. \\
+      Can be adapted to SiWECal if providing electronics mapping and geometry conversion.
+    \end{block}
+
+  \begin{block}{Monitor Element}
+  \begin{itemize}
+      \item Occupancy of each channel (TH1)
+      \item Occupancy of each DIF (TH1)
+      \item Occupancy of each Chamber (TH1)
+      \item Occupancy Map of Asic vs DIF (TH2)
+      \item Per Layer:
+      \begin{itemize}
+        \item HitMap for each threshold (TH2)
+        \item For each DIF in the layer:
+          \begin{itemize}
+            \item Occupancy per Asic (TH1)
+            \item Number of hits per Asic for each threshold (TH1)
+          \end{itemize}
+      \end{itemize}
+  \end{itemize}
+  \end{block}
+\end{frame}
+
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{\textit{AsicAnalysisModule}}
@@ -490,7 +677,7 @@ morekeywords={string,fstream,ofstream,ifstream}
       Use CaloSoftWare to find and analyze muons (beam and cosmic ones) in detector. \\
       Can be adapted to SiWECal by tunning some parameters in xml only
     \end{block}
-    
+
     \begin{block}{Monitor elements}
       \begin{itemize}
         \item Layer efficiency (thr 1,2,3) (TH1)
@@ -505,13 +692,24 @@ morekeywords={string,fstream,ofstream,ifstream}
         \item Asic stacked efficiency map (thr 1,2,3) (TH2)
         \item Asic stacked multiplicity (TH2)
         \item N track per asic (TH1)
-      \end{itemize}      
+      \end{itemize}
     \end{block}
   \end{frame}
-  
-  
-  
-  
+
+
+  \begin{frame}
+  \frametitle{\secname}
+  \framesubtitle{\textit{TestBeam Deployment}}
+
+  \begin{block}{TestBeam Deployment}
+    In order to diminish the load we can run multiple collector (event \& Monitor Element).\\
+    Analysis will be split to run on at least two machine
+
+  \end{block}
+  \end{frame}
+
+
+
   \begin{frame}[containsverbatim]
     \frametitle{\secname}
     \framesubtitle{Conclusion and questions}
@@ -538,9 +736,9 @@ morekeywords={string,fstream,ofstream,ifstream}
       \end{itemize}
       ~ \\
       If you want to see more things implemented in the DQM system for the ECal, let us know !
-      
+
     \end{block}
   \end{frame}
-  
+
 
 \end{document}
