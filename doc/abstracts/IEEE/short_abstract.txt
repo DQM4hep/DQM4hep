@@ -1,0 +1,6 @@
+
+With increasingly sophisticated devices, online data quality monitoring is of a significant importance for the detector and operation efficiency. Monitoring data is also a first step to a certification of the reliability of the recorded data for offline physics analyses. Experiments usually develop their event data model and file format to access and store their data. This dependency makes the monitoring systems even more specific for each experiment and leads to difficulties to adapt it for other ones. 
+
+With this in mind, a generic online data quality monitoring system has been developed without any assumption on the event data model and data type to treat. A dedicated implementation was developed based on the LCIO event data model for the Linear Collider collaboration and used to monitor the data taking of the CALICE SDHCAL and SiWECal prototypes during beam test compaigns at CERN in real condition.
+
+After introducing the key points of the framework, the software architecture is introduced with the key technical aspects. Details on the dedicated implementation for the Linear Collider collaboration are presented. Finally, tests on the CALICE SDHCAL and SiWEcal combined detector setup using this implementation are described and used as proof of concept.
