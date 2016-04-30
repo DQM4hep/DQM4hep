@@ -140,6 +140,35 @@ DQMQuality DQM4HEP::scaleToQuality(float scale)
 }
 
 //-------------------------------------------------------------------------------------------------
+
+std::string &DQM4HEP::replace(std::string &str, const std::string &variable, const std::string &value)
+{
+	std::string replaceVar = "${" + variable + "}";
+	size_t pos = str.find(replaceVar);
+
+	while( pos != std::string::npos )
+	{
+		str.replace( pos , replaceVar.size() , value );
+		pos = str.find(replaceVar);
+	}
+
+	return str;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+std::string &DQM4HEP::replace(std::string &str, const DQMParameters &parameters)
+{
+	for( auto iter = parameters.begin(), endIter = parameters.end() ;
+			endIter != iter ; ++iter)
+	{
+		DQM4HEP::replace( str , iter->first , iter->second );
+	}
+
+	return str;
+}
+
+//-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
 scoped_lock::scoped_lock(pthread_mutex_t *pMutex) :

@@ -433,6 +433,26 @@ public:
 	 *  a value between 0 and 1
 	 */
 	static DQMQuality scaleToQuality(float scale);
+
+	/** Replace all occurrences of a variable in the target string.
+	 *  Example :
+	 *
+	 *  @code
+	 *  std::string myString("My key is ${key}");
+	 *  DQMHEP::replace(myString, "key", "A super key");
+	 *  // myString --> My key is A super key
+	 *  @endcode
+	 */
+	static std::string &replace(std::string &str, const std::string &variable, const std::string &value);
+
+	/**
+	 */
+	template <typename T>
+	static std::string &replace(std::string &str, const std::string &variable, const T &value);
+
+	/** Replace all occurrences of a set of variables in the target string.
+	 */
+	static std::string &replace(std::string &str, const DQMParameters &parameters);
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -456,6 +476,14 @@ inline std::string DQM4HEP::typeToString(const T &t)
 		throw;
 
 	return oss.str();
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <typename T>
+inline std::string &DQM4HEP::replace(std::string &str, const std::string &variable, const T &value)
+{
+	return DQM4HEP::replace( str, variable, DQM4HEP::typeToString( value ) );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -757,6 +785,16 @@ public:
 	~scoped_lock();
 private:
 	pthread_mutex_t      *m_pMutex;
+};
+
+//-------------------------------------------------------------------------------------------------
+
+/** DQMRpcResponse struct
+ */
+struct DQMRpcResponse
+{
+	int      m_ok;
+	char     m_pMessage[256];
 };
 
 //-------------------------------------------------------------------------------------------------
