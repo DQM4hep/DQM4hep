@@ -62,7 +62,7 @@ DQMDimRunControlClient::DQMDimRunControlClient() :
 		m_pEndOfRunInfo(NULL),
 		m_pInBuffer(0)
 {
-	/* nop */
+	m_pOutBuffer = new xdrstream::BufferDevice( 10*1024 );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -74,6 +74,8 @@ DQMDimRunControlClient::~DQMDimRunControlClient()
 
 	if( m_pInBuffer )
 		delete m_pInBuffer;
+
+	delete m_pOutBuffer;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -125,38 +127,177 @@ bool DQMDimRunControlClient::isConnectedToService() const
 
 //-------------------------------------------------------------------------------------------------
 
+StatusCode DQMDimRunControlClient::sendStartNewRun(DQMRun *pRun, const std::string &password)
+{
+	m_pOutBuffer->reset();
+
+	if( xdrstream::XDR_SUCCESS != m_pOutBuffer->write( &password ))
+		return STATUS_CODE_FAILURE;
+
+	if( xdrstream::XDR_SUCCESS != pRun->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+		return STATUS_CODE_FAILURE;
+
+	DimRpcInfo rpc( (char *)("DQM4HEP/RunControl/" + this->getRunControlName() + "/START_NEW_RUN").c_str(), (void *) NULL , 0 );
+
+	// send new run signal and wait for response
+	rpc.setData( (void *) m_pOutBuffer->getBuffer() , m_pOutBuffer->getPosition() );
+	DQMRpcResponse *response = (DQMRpcResponse *) rpc.getData();
+
+	if( ! response )
+	{
+		LOG4CXX_ERROR( dqmMainLogger, "FAILURE  ----> No response from server !");
+		return STATUS_CODE_FAILURE;
+	}
+
+	if( response->m_ok )
+	{
+		LOG4CXX_INFO( dqmMainLogger, "OK  ----> " << response->m_pMessage );
+	}
+	else
+	{
+		LOG4CXX_ERROR( dqmMainLogger, "FAILURE  ----> " << response->m_pMessage );
+		return STATUS_CODE_FAILURE;
+	}
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMRunControl::startNewRun( pRun, password ));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDimRunControlClient::sendStartNewRun(int runNumber, const std::string &description, const std::string &detectorName, const std::string &password)
+{
+	DQMRun *pRun = new DQMRun( runNumber, description, detectorName );
+
+	m_pOutBuffer->reset();
+
+	if( xdrstream::XDR_SUCCESS != m_pOutBuffer->write( &password ))
+		return STATUS_CODE_FAILURE;
+
+	if( xdrstream::XDR_SUCCESS != pRun->stream( xdrstream::XDR_WRITE_STREAM , m_pOutBuffer ) )
+	{
+		delete pRun;
+		return STATUS_CODE_FAILURE;
+	}
+
+	DimRpcInfo rpc( (char *)("DQM4HEP/RunControl/" + this->getRunControlName() + "/START_NEW_RUN").c_str(), (void *) NULL , 0 );
+
+	// send new run signal and wait for response
+	rpc.setData( (void *) m_pOutBuffer->getBuffer() , m_pOutBuffer->getPosition() );
+	DQMRpcResponse *response = (DQMRpcResponse *) rpc.getData();
+
+	if( ! response )
+	{
+		delete pRun;
+		LOG4CXX_ERROR( dqmMainLogger, "FAILURE  ----> No response from server !");
+		return STATUS_CODE_FAILURE;
+	}
+
+	if( response->m_ok )
+	{
+		LOG4CXX_INFO( dqmMainLogger, "OK  ----> " << response->m_pMessage );
+	}
+	else
+	{
+		LOG4CXX_ERROR( dqmMainLogger, "FAILURE  ----> " << response->m_pMessage );
+		delete pRun;
+		return STATUS_CODE_FAILURE;
+	}
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMRunControl::startNewRun( pRun, password ));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMDimRunControlClient::sendEndCurrentRun( const std::string &password )
+{
+	m_pOutBuffer->reset();
+
+	if( xdrstream::XDR_SUCCESS != m_pOutBuffer->write( &password ))
+		return STATUS_CODE_FAILURE;
+
+	if( xdrstream::XDR_SUCCESS != m_pOutBuffer->write( &password ) )
+		return STATUS_CODE_FAILURE;
+
+	DimRpcInfo rpc( (char *)("DQM4HEP/RunControl/" + this->getRunControlName() + "/END_CURRENT_RUN").c_str(), (void *) NULL , 0 );
+
+	// send end current run signal and wait for response
+	rpc.setData( (void *) m_pOutBuffer->getBuffer() , m_pOutBuffer->getPosition() );
+	DQMRpcResponse *response = (DQMRpcResponse *) rpc.getData();
+
+	if( ! response )
+	{
+		LOG4CXX_ERROR( dqmMainLogger, "FAILURE  ----> No response from server !");
+		return STATUS_CODE_FAILURE;
+	}
+
+	if( response->m_ok )
+	{
+		LOG4CXX_INFO( dqmMainLogger, "OK  ----> " << response->m_pMessage );
+	}
+	else
+	{
+		LOG4CXX_ERROR( dqmMainLogger, "FAILURE  ----> " << response->m_pMessage );
+		return STATUS_CODE_FAILURE;
+	}
+
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMRunControl::endCurrentRun( password ));
+
+	return STATUS_CODE_SUCCESS;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 void DQMDimRunControlClient::infoHandler()
 {
+	std::cout << "received info " << getInfo()->getName() << std::endl;
 	DimInfo *pCurrentDimInfo = getInfo();
 
 	if(m_pStartOfRunInfo == pCurrentDimInfo)
 	{
 		if(this->isRunning() || !this->isConnectedToService())
+		{
+			std::cout << "pouette 1 !" << std::endl;
 			return;
+		}
 
 		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
 		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
 
 		if(pBuffer == NULL || bufferSize == 0)
+		{
+			std::cout << "pouette 2 !" << std::endl;
 			return;
-
+		}
 		this->configureInBuffer( pBuffer, bufferSize );
 
 		DQMRun *pRun = new DQMRun();
 
 		try
 		{
+			std::cout << "pouette stream !" << std::endl;
 			if( xdrstream::XDR_SUCCESS != pRun->stream( xdrstream::XDR_READ_STREAM , m_pInBuffer ) )
 				throw StatusCodeException(STATUS_CODE_FAILURE);
 
+			std::cout << "pouette run number !" << std::endl;
 			if(pRun->getRunNumber() < 0)
 				throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
+			std::cout << "pouette start !" << std::endl;
 			// run is adopted here by the run control. No need to delete
 			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startNewRun(pRun));
+
+			std::cout << "pouette 1 after " << std::endl;
+
+			LOG4CXX_INFO( dqmMainLogger , "Starting new run " << this->getCurrentRun()->getRunNumber() );
 		}
 		catch(StatusCodeException &exception)
 		{
+			std::cout << "pouette catch !" << std::endl;
+
 			if(pRun)
 				delete pRun;
 		}
@@ -168,7 +309,9 @@ void DQMDimRunControlClient::infoHandler()
 
 		try
 		{
+			int currentRunNumber = this->getCurrentRun()->getRunNumber();
 			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->endCurrentRun());
+			LOG4CXX_INFO( dqmMainLogger , "Ending run " << currentRunNumber );
 		}
 		catch(StatusCodeException &exception)
 		{
@@ -210,6 +353,8 @@ void DQMDimRunControlClient::handleCurrentRunRpcInfo(DimRpcInfo *pRpcInfo)
 
 		// run is adopted here by the run control. No need to delete
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startNewRun(pRun));
+
+		LOG4CXX_INFO( dqmMainLogger , "Starting new run " << this->getCurrentRun()->getRunNumber() );
 
 		// return avoids run deletion
 		return;

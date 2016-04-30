@@ -134,6 +134,28 @@ INSTALL (
     RUNTIME DESTINATION bin
 )
 
+# -------------------------------------------------
+# build run control interface executable
+
+ADD_EXECUTABLE( dqm4hep_run_control main/dqm4hep_run_control.cc )
+TARGET_LINK_LIBRARIES( dqm4hep_run_control ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep_run_control
+    RUNTIME DESTINATION bin
+)
+
+# -------------------------------------------------
+# build run control server executable
+
+ADD_EXECUTABLE( dqm4hep_start_run_control_server main/dqm4hep_start_run_control_server.cc )
+TARGET_LINK_LIBRARIES( dqm4hep_start_run_control_server ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep_start_run_control_server
+    RUNTIME DESTINATION bin
+)
+
 
 # -------------------------------------------------
 # build start shm driver executable

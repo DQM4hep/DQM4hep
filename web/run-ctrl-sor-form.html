@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+
+#main_content_wrap {
+	border-top: 1px solid #111;
+}
+
+.outer {
+	width: 100%;
+}
+
+.inner {
+	position: relative;
+	max-width: 840px;
+	padding: 20px 10px;
+	margin: 0 auto;
+}
+
+#parameter-inserter {
+	padding-top: 20px;
+}
+
+</style>
+
+<link rel="stylesheet"
+	href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+</head>
+
+<body>
+
+	<div id="main_content_wrap" class="outer">
+		<div class="inner">
+			<h1 align="center">DQM4HEP Run Control - Run starter</h1>
+			<h2 align="center">Station : ${RUN_CONTROL_NAME} </h2>
+
+			<form id="run-ctl-form" method="post"
+				class="pure-form pure-form-aligned">
+				<fieldset id="main-form">
+
+					<div class="pure-control-group">
+						<label for="run"> Run number *</label> <input type="number"
+							name="run" placeholder="Run number" />
+					</div>
+
+					<div class="pure-control-group">
+						<label for="detectorName"> Detector name </label> <input
+							type="text" name="detectorName" placeholder="Detector name" />
+					</div>
+
+					<div class="pure-control-group">
+						<label for="description"> Description </label> <input type="text"
+							name="description" placeholder="Description" />
+					</div>
+					
+					<div class="pure-control-group">
+						<label for="password"> Password </label> <input type="password"
+							name="password" placeholder="Password" />
+					</div>
+
+					<h2>Parameters :</h2>
+
+					<div id="parameter-inserter" class="pure-control-group">
+						<label> New run parameter </label> <input type="text"
+							id="paramKey" /> <input type="button" onclick="addParameter()"
+							value="Add parameter" />
+					</div>
+
+					<p align="center">
+						<input id="submit-button" type="submit"
+							class="pure-button pure-button-primary" value="Start new run" />
+					</p>
+
+				</fieldset>
+			</form>
+		</div>
+
+	</div>
+
+	<script>
+
+      function addParameter() {
+      
+	  var parent = document.getElementById("main-form");
+      var name = document.getElementById("paramKey").value;
+
+      var placeHolder = document.getElementById("parameter-inserter");
+      var newParam = document.createElement("div");
+      newParam.className = "pure-control-group";
+      
+      var label = document.createElement("label");
+      label.innerHTML = name;
+      label.setAttribute("for", name); 
+      newParam.appendChild(label);
+      
+      var input = document.createElement("input");
+      input.type = "text";
+      input.name = name;
+      input.placeholder = name;
+      newParam.appendChild(input);
+      
+      parent.insertBefore(newParam, placeHolder);
+      
+      }
+      
+    </script>
+</body>
+</html>

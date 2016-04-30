@@ -77,54 +77,63 @@ public:
 
 	/** Set the run control name. This stops the current before
 	 */
-	void setRunControlName(const std::string &runControlName);
+	virtual void setRunControlName(const std::string &runControlName);
 
 	/** Get the run control name
 	 */
-	const std::string &getRunControlName() const;
+	virtual const std::string &getRunControlName() const;
 
 	/** Create a new run from a DQMRun
 	 *  The run control is the owner the run
 	 */
-	StatusCode startNewRun(DQMRun *pRun);
+	virtual StatusCode startNewRun(DQMRun *pRun, const std::string &password = "");
 
 	/** Create a new run.
 	 *  End the current run if running
 	 */
-	StatusCode startNewRun(int runNumber, const std::string &description = "", const std::string &detectorName = "");
+	virtual StatusCode startNewRun(int runNumber, const std::string &description = "", const std::string &detectorName = "", const std::string &password = "");
 
 	/** End the current run
 	 */
-	StatusCode endCurrentRun();
+	virtual StatusCode endCurrentRun( const std::string &password = "" );
 
 	/** Get the current run number
 	 */
-	int getCurrentRunNumber() const;
+	virtual int getCurrentRunNumber() const;
 
 	/** Get the current run header
 	 */
-	DQMRun *getCurrentRun() const;
+	virtual DQMRun *getCurrentRun() const;
 
 	/** Get the run state (running or not)
 	 */
-	DQMState getRunState() const;
+	virtual DQMState getRunState() const;
 
 	/** Whether a run has been started.
 	 */
-	bool isRunning() const;
+	virtual bool isRunning() const;
+
+	/** Set the password needed to start/stop runs
+	 */
+	void setPassword( const std::string &password );
 
 	/** Add a listener to the run control
 	 */
-	void addListener(DQMRunListener *pListener);
+	virtual void addListener(DQMRunListener *pListener);
 
 	/** Remove a listener from the run control
 	 */
-	void removeListener(DQMRunListener *pListener);
+	virtual void removeListener(DQMRunListener *pListener);
+
+	/** Check run control password
+	 */
+	bool checkPassword(const std::string &password);
 
 protected:
 	DQMState                         m_runState;
 	DQMRun                          *m_pCurrentRun;
 	std::string                      m_runControlName;
+	std::string                      m_password;
 	std::vector<DQMRunListener *>    m_listeners;
 }; 
 

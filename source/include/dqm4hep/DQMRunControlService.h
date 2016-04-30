@@ -38,6 +38,12 @@
 // -- dim headers
 #include "dis.hxx"
 
+#ifdef DQM4HEP_USE_MONGOOSE
+#include <mongoose/WebController.h>
+#endif
+
+using namespace Mongoose;
+
 namespace dqm4hep
 {
 
@@ -69,9 +75,54 @@ private:
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
+/** DQMStartNewRunRpc class
+ */
+class DQMStartNewRunRpc : public DimRpc
+{
+public:
+	/** Constructor
+	 */
+	DQMStartNewRunRpc(char *rpcName, DQMRunControlService *pService);
+
+private:
+	/** Dim rpc handler
+	 */
+	void rpcHandler();
+
+private:
+	DQMRunControlService         *m_pService;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+/** DQMEndCurrentRunRpc class
+ */
+class DQMEndCurrentRunRpc : public DimRpc
+{
+public:
+	/** Constructor
+	 */
+	DQMEndCurrentRunRpc(char *rpcName, DQMRunControlService *pService);
+
+private:
+	/** Dim rpc handler
+	 */
+	void rpcHandler();
+
+private:
+	DQMRunControlService         *m_pService;
+};
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
 /** DQMRunControlService class
  */ 
 class DQMRunControlService
+#ifdef DQM4HEP_USE_MONGOOSE
+ : public Mongoose::WebController
+#endif
 {
 public:
 	/** Constructor
@@ -119,16 +170,16 @@ public:
 	/** Create a new run.
 	 *  End the current run if there is one.
 	 */
-	StatusCode startNewRun(unsigned int runNumber, const std::string &description = "", const std::string &detectorName = "");
+	StatusCode startNewRun(unsigned int runNumber, const std::string &description = "", const std::string &detectorName = "", const std::string &password = "");
 
 	/** Create a new run.
 	 *  End the current run if there is one.
 	 */
-	StatusCode startNewRun(DQMRun *pRun);
+	StatusCode startNewRun(DQMRun *pRun, const std::string &password = "");
 
 	/** End the current run
 	 */
-	StatusCode endCurrentRun();
+	StatusCode endCurrentRun( const std::string &password = "" );
 
 	/** Get the current run number
 	 */
@@ -143,25 +194,62 @@ public:
 	 */
 	DQMRun *getCurrentRun() const;
 
+	/** Set the password for this run control service.
+	 *  Used when a user wants to start a new run using the dedicated RPC
+	 */
+	StatusCode setPassword( const std::string &password );
+
+
+#ifdef DQM4HEP_USE_MONGOOSE
+public:
+	/** Setup http routes
+	 */
+    void setup();
 private:
-	/**
+    /// call back methods on http request
+    void mongooseStartOfRunGetForm(Mongoose::Request &request, Mongoose::StreamResponse &response);
+    void mongooseEndCurrentRunGetForm(Mongoose::Request &request, Mongoose::StreamResponse &response);
+    void mongooseStartOfRun(Mongoose::Request &request, Mongoose::StreamResponse &response);
+    void mongooseEndOfRun(Mongoose::Request &request, Mongoose::StreamResponse &response);
+    void mongooseRunStatus(Mongoose::Request &request, Mongoose::StreamResponse &response);
+
+    std::string configureRunStatusHtml(const DQMRun *const pRun) const;
+#endif
+
+private:
+	/** Handle the received rpc to get the current run
 	 */
 	void handleCurrentRunRpc(DimRpc *pRpc);
+
+	/** Handle the received rpc to start a new run
+	 */
+	void handleStartNewRunRpc(DimRpc *pRpc);
+
+	/** Handle the received rpc to end the current run
+	 */
+	void handleEndCurrentRunRpc(DimRpc *pRpc);
+
+	/**
+	 */
+	void configureInBuffer( char *pBuffer, xdrstream::xdr_size_t bufferSize );
 
 private:
 	int                      m_currentRunNumber;
 	DQMState                 m_serviceState;
 	DQMRunControl            *m_pRunControl;
 
-	std::string               m_runControlName;
-
 	DimService               *m_pStartOfRunService;
 	DimService               *m_pEndOfRunService;
 	DimRpc                   *m_pCurrentRunRpc;
+	DimRpc                   *m_pStartNewRunRpc;
+	DimRpc                   *m_pEndCurrentRunRpc;
 
+	xdrstream::BufferDevice  *m_pInBuffer;
 	xdrstream::BufferDevice  *m_pOutBuffer;
 
 	friend class DQMCurrentRunRpc;
+	friend class DQMStartNewRunRpc;
+	friend class DQMEndCurrentRunRpc;
 }; 
 
 } 

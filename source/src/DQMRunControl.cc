@@ -59,7 +59,7 @@ DQMRunControl::DQMRunControl(const std::string &runControlName) :
 DQMRunControl::~DQMRunControl() 
 {
 	if(isRunning())
-		endCurrentRun();
+		endCurrentRun(m_password);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -67,7 +67,7 @@ DQMRunControl::~DQMRunControl()
 void DQMRunControl::setRunControlName(const std::string &runControlName)
 {
 	if(this->isRunning())
-		endCurrentRun();
+		endCurrentRun(m_password);
 
 	m_runControlName = runControlName;
 }
@@ -81,13 +81,16 @@ const std::string &DQMRunControl::getRunControlName() const
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMRunControl::startNewRun(DQMRun *pRun)
+StatusCode DQMRunControl::startNewRun(DQMRun *pRun, const std::string &password)
 {
 	if(NULL == pRun)
 		return STATUS_CODE_INVALID_PTR;
 
+	if( ! this->checkPassword(password) )
+		return STATUS_CODE_NOT_ALLOWED;
+
 	if(isRunning())
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, endCurrentRun());
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, endCurrentRun(password));
 
 	m_pCurrentRun = pRun;
 	m_runState = RUNNING_STATE;
@@ -101,10 +104,13 @@ StatusCode DQMRunControl::startNewRun(DQMRun *pRun)
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMRunControl::startNewRun(int runNumber, const std::string &description, const std::string &detectorName)
+StatusCode DQMRunControl::startNewRun(int runNumber, const std::string &description, const std::string &detectorName, const std::string &password)
 {
+	if( ! this->checkPassword(password) )
+		return STATUS_CODE_NOT_ALLOWED;
+
 	if(isRunning())
-		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, endCurrentRun());
+		RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, endCurrentRun(password));
 
 	m_pCurrentRun = new DQMRun(runNumber, description, detectorName);
 	m_runState = RUNNING_STATE;
@@ -118,8 +124,11 @@ StatusCode DQMRunControl::startNewRun(int runNumber, const std::string &descript
 
 //-------------------------------------------------------------------------------------------------
 
-StatusCode DQMRunControl::endCurrentRun()
+StatusCode DQMRunControl::endCurrentRun(const std::string &password)
 {
+	if( ! this->checkPassword(password) )
+		return STATUS_CODE_NOT_ALLOWED;
+
 	if(!isRunning())
 		return STATUS_CODE_SUCCESS;
 
@@ -190,6 +199,26 @@ void DQMRunControl::removeListener(DQMRunListener *pListener)
 
 	if(findIter != m_listeners.end())
 		m_listeners.erase(findIter);
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMRunControl::setPassword( const std::string &password )
+{
+	m_password = password;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+bool DQMRunControl::checkPassword(const std::string &password)
+{
+	if( m_password.empty() )
+		return true;
+
+	if( m_password == password )
+		return true;
+
+	return false;
 }
 
 } 

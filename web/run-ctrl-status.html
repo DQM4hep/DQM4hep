@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+
+#main_content_wrap {
+	border-top: 1px solid #111;
+}
+
+.outer {
+	width: 100%;
+}
+
+.inner {
+	position: relative;
+	max-width: 840px;
+	padding: 20px 10px;
+	margin: 0 auto;
+}
+
+#parameter-inserter {
+	padding-top: 20px;
+}
+
+h1 {
+	margin-top: 20px;
+}
+
+#run-status {
+	color: ${STATUS_COLOR};
+	text-align: center;
+}
+
+</style>
+
+<link rel="stylesheet"
+	href="http://yui.yahooapis.com/pure/0.6.0/pure-min.css">
+
+</head>
+
+<body>
+
+	<div id="main_content_wrap" class="outer">
+		<div class="inner">
+			<h1 align="center">DQM4HEP Run Control - Run Status</h1>
+			<h2 align="center">Station : ${RUN_CONTROL_NAME} </h2>
+			<h2 id="run-status"> ${RUN_STATUS} </h2>
+
+			<table class="pure-table">
+				<tbody>
+					<tr class="pure-table-odd">
+						<td>Run number</td>
+						<td>${RUN_NUMBER}</td>
+					</tr>
+
+					<tr>
+						<td>Start time</td>
+						<td>${START_TIME}</td>
+					</tr>
+					
+					<tr class="pure-table-odd">
+						<td>Ellasped time</td>
+						<td>${ELLAPSED_TIME}</td>
+					</tr>
+					
+					<tr>
+						<td>Description</td>
+						<td>${DESCRIPTION}</td>
+					</tr>
+
+					<tr class="pure-table-odd">
+						<td>Detector name</td>
+						<td>${DETECTOR_NAME}</td>
+					</tr>
+				</tbody>
+			</table>
+			
+			<h2> Parameters :</h2>
+			<table class="pure-table">
+				<tbody id="parameter-table">
+				</tbody>
+			</table>
+		</div>
+	</div>
+
+	<script>
+		
+	var parameters = ${PARAMETER_LIST};
+	
+	function fillTable() {
+		
+		var parameterTable = document.getElementById("parameter-table");
+		var odd = true;
+		
+		var nParameters = Object.keys(parameters).length;
+		
+		for (var index in parameters) {
+			
+			var tr = document.createElement("tr");
+			
+			var tdKey = document.createElement("td");
+			var tdValue = document.createElement("td");
+			
+			tr.appendChild(tdKey);
+			tr.appendChild(tdValue);
+			
+			tdKey.innerHTML = index;
+			tdValue.innerHTML = parameters[index];
+			
+			if( odd ) {
+				tr.className = "pure-table-odd";
+			}
+			
+			parameterTable.appendChild( tr );
+			
+			odd = !odd;
+		}
+		
+		if( nParameters == 0 ) {
+			parameterTable.parentNode.parentNode.appendChild( document.createTextNode("No additional run parameters") );
+		}
+	}
+	
+	fillTable();
+		
+    </script>
+</body>
+</html>

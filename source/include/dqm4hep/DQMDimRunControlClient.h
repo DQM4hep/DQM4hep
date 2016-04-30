@@ -91,6 +91,20 @@ public:
 	 */
 	bool isConnectedToService() const;
 
+	/** Create a new run from a DQMRun
+	 *  The run control is the owner the run
+	 */
+	StatusCode sendStartNewRun(DQMRun *pRun, const std::string &password = "");
+
+	/** Create a new run.
+	 *  End the current run if running
+	 */
+	StatusCode sendStartNewRun(int runNumber, const std::string &description = "", const std::string &detectorName = "", const std::string &password = "");
+
+	/** End the current run
+	 */
+	StatusCode sendEndCurrentRun( const std::string &password = "" );
+
 private:
 	/** Dim info handler
 	 */
@@ -108,12 +122,17 @@ private:
 private:
 	bool                     m_isConnected;          ///< Whether the client is connected to the server instance
 	xdrstream::BufferDevice *m_pInBuffer;            ///< The xdr buffer to deserialize the run at start of run
+	xdrstream::BufferDevice *m_pOutBuffer;           ///< The xdr buffer to serialize data
 
 	DimInfo                 *m_pStartOfRunInfo;      ///< The dim start of run info
 	DimInfo                 *m_pEndOfRunInfo;        ///< The dim end of run info
 	DimRpcInfo              *m_pCurrentRunRpcInfo;   ///< The dim current run rpc info
+	DimRpcInfo              *m_pStartNewRunRpcInfo;  ///< The dim start new run rpc info
+	DimRpcInfo              *m_pEndRunRpcInfo;       ///< The dim end current run rpc info
 
 	friend class DQMCurrentRunRpcInfo;
+	friend class DQMStartNewRunRpcInfo;
+	friend class DQMEndCurrentRunRpcInfo;
 }; 
 
 } 
