@@ -40,9 +40,9 @@
 
 #ifdef DQM4HEP_USE_MONGOOSE
 #include <mongoose/WebController.h>
-#endif
 
 using namespace Mongoose;
+#endif
 
 namespace dqm4hep
 {
