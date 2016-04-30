@@ -136,8 +136,8 @@ protected:
 inline std::ostream &operator <<(std::ostream &out, const DQMRun &run)
 {
 	out << "DQMRun :\n"
-		"  -> run number " << run.getRunNumber() << "\n"
-		"  -> detector " << run.getDetectorName() << "\n"
+		"  -> run number : " << run.getRunNumber() << "\n"
+		"  -> detector : " << run.getDetectorName() << "\n"
 		"  -> description : " << run.getDescription() << "\n"
 		"  -> parameters : \n";
 
