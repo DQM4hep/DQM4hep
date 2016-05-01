@@ -515,7 +515,8 @@ void DQMRunControlService::mongooseEndOfRun(Mongoose::Request &request, Mongoose
 		return;
 	}
 
-	response << this->configureRunStatusHtml( pRun );
+	DQMRun *pTmpRun = m_pRunControl->isRunning() ? pRun : 0;
+	response << this->configureRunStatusHtml( pTmpRun );
 }
 
 //-------------------------------------------------------------------------------------------------
