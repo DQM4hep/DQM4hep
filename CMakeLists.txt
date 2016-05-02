@@ -44,11 +44,11 @@ IF( USE_MASTER )
 ELSE()
 	SET( xdrstream_version            "v01-00-01" )
 	SET( xdrlcio_version              "v01-00-00" )
-	SET( DQMCore_version              "v02-02-00" )
-	SET( DQMViz_version               "v02-00-00" )
-	SET( DQM4ILC_version              "v01-01-00" )
+	SET( DQMCore_version              "v02-03-00" )
+	SET( DQMViz_version               "v02-01-00" )
+	SET( DQM4ILC_version              "v01-02-00" )
 	SET( JsonCpp_version              "0.10.5" )
-	SET( DIMJC_version                "v01-01-00" )
+	SET( DIMJC_version                "v01-02-00" )
 	SET( levbdim_version              "v01-00-00" )
 	SET( Mongoose_version             "master" )
 ENDIF()
@@ -258,17 +258,20 @@ SET( DIMJC_additional_cmake_args
 
 SET( DQMVis_additional_cmake_args
 	${DQMVis_additional_cmake_args}
-	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-DDIMDIR=${DIMDIR}
 )
 
 SET( DQM4ILC_additional_cmake_args
 	${DQM4ILC_additional_cmake_args}
-	-Dxdrstream_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
 	-Dxdrlcio_DIR=${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
 	-DDQMCore_DIR=${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
 	-DBUILD_EXAMPLES=${BUILD_EXAMPLES}
 )
+
+SET( levbdim_additional_cmake_args
+    ${levbdim_additional_cmake_args}
+    -DDIMDIR=${DIMDIR}
+  )
 
 # ----- JsonCpp package -----
 FIND_PACKAGE( JSONCPP QUIET )
@@ -294,7 +297,7 @@ IF ( BUILD_EVB )
 	SET ( levbdim_DIR ${CMAKE_CURRENT_SOURCE_DIR}/levbdim )
 
 	ExternalProject_Add( levbdim
-		DEPENDS ${jsoncpp_package_depends}
+		DEPENDS ${jsoncpp_package_depends} ${dim_package_depends}
 	    GIT_REPOSITORY ${levbdim_repository}
 	    GIT_TAG ${levbdim_version}
 	    CMAKE_ARGS ${common_cmake_args} ${levbdim_additional_cmake_args}
