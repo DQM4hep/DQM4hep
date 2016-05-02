@@ -40,8 +40,9 @@ IF( USE_MASTER )
 	SET( JsonCpp_version              "0.10.5" )
 	SET( DIMJC_version                "master" )
 	SET( levbdim_version              "master" )
+	SET( Mongoose_version             "master" )
 ELSE()
-	SET( xdrstream_version            "v01-00-00" )
+	SET( xdrstream_version            "v01-00-01" )
 	SET( xdrlcio_version              "v01-00-00" )
 	SET( DQMCore_version              "v02-02-00" )
 	SET( DQMViz_version               "v02-00-00" )
@@ -49,6 +50,7 @@ ELSE()
 	SET( JsonCpp_version              "0.10.5" )
 	SET( DIMJC_version                "v01-01-00" )
 	SET( levbdim_version              "v01-00-00" )
+	SET( Mongoose_version             "master" )
 ENDIF()
 
 # ----- download settings -----
@@ -61,6 +63,7 @@ SET( JsonCpp_repository             "https://github.com/DQM4HEP/jsoncpp.git" )
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/DQM4HEP/dimjc.git" )
 SET( levbdim_repository             "https://github.com/DQM4HEP/levbdim.git" )
+SET( Mongoose_repository            "https://github.com/DQM4HEP/mongoose-cpp.git" )
 
 # the external project in used are
 # set gradually along the CMakeLists.txt
@@ -73,6 +76,7 @@ SET( DQMViz_package_depends "" )
 SET( jsoncpp_package_depends "" )
 SET( dim_package_depends "" )
 SET( dimjc_package_depends "" )
+SET( Mongoose_package_depends "" )
 
 # ----- additional cmake args -----
 IF ( NOT APPLE )
@@ -154,6 +158,9 @@ MESSAGE( STATUS "DIM_GUI: ${DIM_GUI}" )
 
 OPTION( BUILD_EVB "Whether to compile the evb sources of DQMCore" OFF )
 MESSAGE( STATUS "BUILD_EVB: ${BUILD_EVB}" )
+
+OPTION( BUILD_HTTP "Whether to compile the http supprt of DQMCore" OFF )
+MESSAGE( STATUS "BUILD_HTTP: ${BUILD_HTTP}" )
 
 # ----------------------------------------------------------------------------
 
@@ -300,9 +307,26 @@ IF ( BUILD_EVB )
 
 ENDIF()
 
+# ----- Mongoose package -----
+IF ( BUILD_HTTP )
+	SET ( Mongoose_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongoose-cpp )
+
+	ExternalProject_Add( Mongoose
+	    GIT_REPOSITORY ${Mongoose_repository}
+	    GIT_TAG ${Mongoose_version}
+	    CMAKE_ARGS ${common_cmake_args} ${Mongoose_additional_cmake_args}
+		PREFIX mongoose-cpp
+	    LIST_SEPARATOR %
+	    SOURCE_DIR ${Mongoose_DIR}
+	)
+
+	SET( Mongoose_package_depends "Mongoose" )
+
+ENDIF()
+
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS ${dim_package_depends} ${xdrstream_package_depends} ${jsoncpp_package_depends} ${levbdim_package_depends}
+    DEPENDS ${dim_package_depends} ${xdrstream_package_depends} ${jsoncpp_package_depends} ${levbdim_package_depends} ${Mongoose_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}
