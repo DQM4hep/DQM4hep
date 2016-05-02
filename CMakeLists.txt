@@ -9,7 +9,7 @@ PROJECT( DQM4HEP )
 
 ### PACKAGE VERSIONS ########################################################
 SET( ${PROJECT_NAME}_VERSION_MAJOR 4 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 2 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 3 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 ###############################
