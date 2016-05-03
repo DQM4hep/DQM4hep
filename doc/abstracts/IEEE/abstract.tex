@@ -57,16 +57,19 @@ Email: mirabito@ipnl.in2p3.fr}
 
 With increasingly sophisticated devices, online data quality monitoring is of a significant importance for the detector and operation efficiency. Monitoring data is also a first step to a certification of the reliability of the recorded data for off-line physics analyses. Experiments usually develop their monitoring system on top of their event data model and file format to access and store data. This dependency has the tendency to tie the monitoring system to its dedicated experiment and leads to difficulties to adapt it to others.
 
-With this in mind, a generic online Data Quality Monitoring (DQM) system has been developed without any assumption on the event data model (EDM) and data type to treat. A dedicated implementation, based on the LCIO~\cite{LCIO} event data model for the Linear Collider collaboration was also developed. This implementation was put to real condition testing using a combined detector setup with the CALICE~\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire}.
+With this in mind, a generic online Data Quality Monitoring (DQM) system has been developed without any assumption on the event data model (EDM) and data type to treat. A dedicated implementation, based on the LCIO~\cite{LCIO} event data model for the Linear Collider collaboration was also developed. This implementation will be put to real condition testing using a combined detector setup with the CALICE~\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire}.
 
 \section{Key points and software architecture}
 
 The framework is strongly based on a plugin system that allows some part of the software to be switched from one to another. As a consequence, the data serialization used to send data across the network is encapsulated in plugins, loaded at run-time. It is also designed to be run in separate processes linked to each other by TCP/IP or HTTP protocols using DIM\cite{DIM} and Mongoose\cite{MONGOOSE} respectively. 
 
 \begin{figure}[htbp]
-  \includegraphics[width=\linewidth]{DQMWorkflow.pdf}
-  \caption{\label{DQM_WORKFLOW}The monitoring framework data flow: from data sources to visualization.}
+  \begin{center}
+    \includegraphics[width=0.9\linewidth]{DQMWorkflow.pdf}
+    \caption{\label{DQM_WORKFLOW}The monitoring framework data flow: from data sources to visualization.}    
+  \end{center}
 \end{figure}
+
 
 Fig.~\ref{DQM_WORKFLOW} shows the monitoring framework data flow from incoming data sources to the client visualization computers. An important effort has been put on the creation of a generic interface to the data acquisition system and the development of an event builder. An independent data acquisition (DAQ) process dumps the data sources content in the shared memory (shm) until a given limit in bytes is reached (set by the DAQ). In this way, a slow data treatment by the monitoring will not affect the data taking and writing to disk. Since the data structure is setup dependent, the implementation of the event builder becomes highly specific. The event building is encapsulated in series of \textit{shm processors} that convert data sources buffers into the user data structure. The whole reconstructed event is then serialized, dispatched across the network and stored into one or multiple data collector server applications.
 
@@ -74,7 +77,7 @@ Client interfaces are provided to either perform manual queries of collected dat
 
 The main aim of the online data analysis is to reduce the initial amount of data to a few monitorable quantities summarizing its quality and the status of the detection systems. Such quantities have been encapsulated in a unique interface called 'monitor element'. To evaluate the data quality, built-in template tests are provided and are frequently processed by the system. A user API is provided for the online analysis module to book \textit{monitor elements} and their quality tests which are then published across the network. They are in their turn collected by server applications and distributed to visualization clients, again, either on manual query or in update mode.
 
-To visualize monitor elements from the collectors, a graphical user interface has been developed using the Qt\cite{QT} GUI\footnote{Graphical User Interface} toolkit. It can use multiple client interfaces to every available collectors on the network. The user can then display received \textit{monitor elements} in areas organized in tabs. Multiple configurations with different sets of monitor elements can be set-up at once. This allows for a quick overview of all the critical elements and variables needed for the good operation of the experiment.
+To visualize monitor elements from the collectors, a graphical user interface has been developed using the Qt\cite{QT} toolkit. It can use multiple client interfaces to every available collectors on the network. The user can then display received \textit{monitor elements} in areas organized in tabs. Multiple configurations with different sets of monitor elements can be set-up at once. This allows for a quick overview of all the critical elements and variables needed for the good operation of the experiment.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -101,14 +104,16 @@ Other modules are dedicated to efficiency measurement of various parts of the de
 
 The Marlin\cite{MARLIN} framework being widely used within the Linear Collider Collaboration for data analysis, an interface is under development and will permit users to directly plug their analysis as it is into the monitoring.
 
-For the test beam campaign at CERN the framework has been successfully deployed across multiple computers, each one running a set of collectors (\textit{monitor element} and event) and analysis modules. Several monitoring GUIs were running on these computers and personal shifters equipment.
+The framework has been successfully tested with off-line SDHCAL data from previous beam test using the time structure of the beam spills. Successful online tests were also performed by taking cosmic muons data with the same deployment scheme foreseen for the full scale testing at CERN. For this campaign, the framework will be deployed across multiple computers, each one running a set of collectors (\textit{monitor element} and event) and analysis modules. Several monitoring GUIs will be running on these computers and personal shifters equipment.
 
 
 \section{Conclusion}
-In light of the critical importance of a mean to quickly detect problems and ensure a good data quality, a new generic framework for Data Quality Monitoring systems has been created.
+In light of the critical importance of a tool to quickly detect problems and ensure a good data quality, a new generic framework for Data Quality Monitoring systems has been created.
 
 Contrary to most systems available for High Energy Physics up to now, it is not tied to a given experiment set-up. All the tools needed to develop a specific implementation depending on specificities of the experiment, such as DAQ interface, data format and detector analysis, are provided within the framework.
-To put to test this system, a dedicated implementation has been developed in parallel for the CALICE SDHCAL and SiWEcal collaborations. The whole system has been successfully used to monitor both prototypes during a two weeks beam test campaign at CERN. The results are satisfactory and the framework is now in its final stage. Other collaborations within the LCC already manifested their interest to use this system for their technological prototypes.
+
+To put to test this system, a dedicated implementation has been developed in parallel for the CALICE SDHCAL and SiWEcal collaborations. 
+The whole system has been successfully tested with the CALICE SDHCAL prototype with offline data and online cosmic muons.  It will be put to full scale testing during a two weeks beam test campaign at CERN with the CALICE SDHCAL and SiWEcal prototypes. The framework being in its final stage and given successful SDHCAL tests, satisfactory results are expected.
 
 \begin{thebibliography}{1}
   
