@@ -86,6 +86,30 @@ void seg_viol_signal_handling(int signal)
 
 //-------------------------------------------------------------------------------------------------
 
+void parseParameterArg(const std::vector<std::string> &args, DQMParameters &parametersMap)
+{
+	for(auto iter = args.begin(), endIter = args.end() ; endIter != iter ; ++iter)
+	{
+		std::string arg(*iter);
+		size_t pos = arg.find_first_of("=");
+
+		if(pos == std::string::npos)
+		{
+			LOG4CXX_WARN( dqmMainLogger, "Parameter '" << arg << "' : wrong parsing !" );
+			continue;
+		}
+
+		std::string key = arg.substr(0, pos);
+		std::string value = arg.substr(pos+1);
+
+		parametersMap[ key ] = value;
+
+		LOG4CXX_DEBUG( dqmMainLogger, "Read key '" << key << "' , value '" << value << "'" );
+	}
+}
+
+//-------------------------------------------------------------------------------------------------
+
 int main(int argc, char* argv[])
 {
 	DQM4HEP::screenSplash();
@@ -112,6 +136,14 @@ int main(int argc, char* argv[])
 				 , "DQMShmProxy-DEFAULT"
 				 , "string");
 	pCommandLine->add(applicationNameArg);
+
+	TCLAP::MultiArg<std::string> parameterArg(
+				  "p"
+				 , "parameter"
+				 , "A parameter to replace in the application (see DQMXmlHelper)"
+				 , false
+				 , "");
+	pCommandLine->add(parameterArg);
 
 	TCLAP::ValueArg<std::string> loggerConfigArg(
 				  "l"
@@ -152,6 +184,9 @@ int main(int argc, char* argv[])
 	if( verbosityArg.isSet() )
 		dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
 
+	DQMParameters parametersMap;
+	parseParameterArg( parameterArg.getValue() , parametersMap );
+
 	// install signal handlers
 	LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
 	signal(SIGINT,  int_key_signal_handler);
@@ -179,6 +214,7 @@ int main(int argc, char* argv[])
 		if(applicationNameArg.isSet())
 			pApplication->setName(applicationNameArg.getValue());
 
+		pApplication->setReplacementParameters( parametersMap );
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->readSettings(steeringFileNameArg.getValue()));
 	}
 	catch(StatusCodeException &exception)
