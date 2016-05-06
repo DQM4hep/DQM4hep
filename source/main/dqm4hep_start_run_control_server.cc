@@ -98,7 +98,7 @@ int main(int argc, char* argv[])
 
 	TCLAP::ValueArg<std::string> loggerConfigArg(
 				  "l"
-				 , "logger-file"
+				 , "logger-config"
 				 , "The log4cxx logger xml file"
 				 , false
 				 , log4cxx_file
