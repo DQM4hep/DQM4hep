@@ -177,6 +177,7 @@ INSTALL(
 )
 
 INSTALL ( DIRECTORY cmake DESTINATION . PATTERN "*.in" EXCLUDE )
+INSTALL ( DIRECTORY web DESTINATION .  )
 
 ###############################
 # display some variables and write them to cache
