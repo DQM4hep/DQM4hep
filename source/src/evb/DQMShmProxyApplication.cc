@@ -101,6 +101,13 @@ StatusCode DQMShmProxyApplication::readSettings(const std::string &settingsFile)
     }
 
     const TiXmlHandle xmlDocumentHandle(&xmlDocument);
+
+    if( ! m_replacementParameters.empty() )
+    {
+        TiXmlElement *pXmlElement = xmlDocumentHandle.FirstChildElement().Element();
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::replaceAllXmlAttributes(pXmlElement, m_replacementParameters));
+    }
+
     const TiXmlHandle xmlHandle = TiXmlHandle(xmlDocumentHandle.FirstChildElement().Element());
 
     TiXmlElement *pGlobalSettings = xmlHandle.FirstChild("global").Element();
@@ -211,6 +218,13 @@ void DQMShmProxyApplication::onEndOfRun(const DQMRun *const pRun)
 	{
 		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second->endOfRun(pRun));
 	}
+}
+
+//-------------------------------------------------------------------------------------------------
+
+void DQMShmProxyApplication::setReplacementParameters( const DQMParameters &parameters )
+{
+	m_replacementParameters = parameters;
 }
 
 //-------------------------------------------------------------------------------------------------

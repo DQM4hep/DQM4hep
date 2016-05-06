@@ -82,6 +82,8 @@ public:
 	void onStartOfRun(DQMRun *const pRun);
 	void onEndOfRun(const DQMRun *const pRun);
 
+	void setReplacementParameters( const DQMParameters &parameters );
+
 private:
 	/** Set the application as initialized.
 	 *  Set to true after calling readSettings()
@@ -128,7 +130,9 @@ private:
 	DQMProcessorList                     m_processorList;
 	DQMEventClient                      *m_pEventClient;
 	DQMRunControlClient                 *m_pRunControlClient;
-	levbdim::shmdriver                   *m_pShmDriver;          ///< The shm driver to read data source in shared memory
+	levbdim::shmdriver                  *m_pShmDriver;          ///< The shm driver to read data source in shared memory
+
+	DQMParameters                        m_replacementParameters;
 
 	std::string                          m_type;
 	std::string                          m_name;

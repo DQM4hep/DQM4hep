@@ -132,6 +132,28 @@ StatusCode DQMXmlHelper::replaceAllXmlAttributes(TiXmlElement *pXmlElement, cons
 		for(unsigned int e=0 ; e<xmlElementNames.size() ; e++)
 		{
 			std::string subKey(xmlElementNames.at(e));
+			unsigned int eltId = 0;
+
+			size_t posStart = subKey.find("[");
+
+			if( posStart != std::string::npos )
+			{
+				if( subKey.back() != ']' )
+				{
+					LOG4CXX_ERROR( dqmMainLogger, "Missing ']' char in '" << subKey << "'" );
+					return STATUS_CODE_NOT_FOUND;
+				}
+
+				std::string eltIdStr = subKey.substr( posStart+1 , subKey.size() - (posStart+1) -1 );
+
+				if( ! DQM4HEP::stringToType( eltIdStr , eltId ) )
+				{
+					LOG4CXX_ERROR( dqmMainLogger, "Couldn't convert '" << eltIdStr << "' to array id in key '" << subKey << "' !" );
+					return STATUS_CODE_FAILURE;
+				}
+
+				subKey = subKey.substr( 0 , posStart );
+			}
 
 			// last sub key
 			if( e == xmlElementNames.size()-1 )
@@ -182,7 +204,18 @@ StatusCode DQMXmlHelper::replaceAllXmlAttributes(TiXmlElement *pXmlElement, cons
 					keyIsParameter = true;
 				}
 				else
-					pCurrentElement = pCurrentElement->FirstChildElement( subKey );
+				{
+					unsigned int currentElt = 0;
+					TiXmlElement *pElt = pCurrentElement->FirstChildElement( subKey );
+
+					while( pElt && currentElt < eltId )
+					{
+						pElt = pElt->NextSiblingElement( subKey );
+						currentElt++;
+					}
+
+					pCurrentElement = pElt;
+				}
 
 				if( NULL == pCurrentElement )
 				{
