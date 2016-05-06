@@ -38,7 +38,7 @@ namespace dqm4hep
 {
 
 DQMShmProxyApplication::DQMShmProxyApplication() :
-		m_pEventClient(NULL),
+		m_pEventStreamer(NULL),
 		m_pRunControlClient(NULL),
 		m_pShmDriver(NULL),
 		m_type("DQMShmProxyApplication"),
@@ -54,14 +54,19 @@ DQMShmProxyApplication::DQMShmProxyApplication() :
 
 DQMShmProxyApplication::~DQMShmProxyApplication() 
 {
-	if( m_pEventClient )
-		delete m_pEventClient;
-
 	if( m_pRunControlClient )
 		delete m_pRunControlClient;
 
 	if( m_pShmDriver )
 		delete m_pShmDriver;
+
+	if( m_pEventStreamer )
+		delete m_pEventStreamer;
+
+	for( auto iter = m_eventClientList.begin(), endIter = m_eventClientList.end() ; endIter != iter ; ++iter )
+		delete *iter;
+
+	m_eventClientList.clear();
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -249,28 +254,57 @@ StatusCode DQMShmProxyApplication::configureGlobal(TiXmlElement *pGlobalSettings
     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->configureRunControlClient(pRunControlSettings));
 
 
-    // parse event client settings
-    TiXmlElement *pEventClientSettings = globalHandle.FirstChild("eventclient").Element();
+    // parse event clients
+    TiXmlElement *pEventStreamerSettings = globalHandle.FirstChild("eventstreamer").Element();
 
-    if( ! pEventClientSettings )
+    if( ! pEventStreamerSettings )
     {
-		LOG4CXX_ERROR( dqmMainLogger , "No <eventclient> xml element in global section !" );
+		LOG4CXX_ERROR( dqmMainLogger , "No <eventstreamer> xml element in global section !" );
 		return STATUS_CODE_NOT_FOUND;
 	}
 
-    std::string eventClientPlugin;
-    RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pEventClientSettings, "plugin", eventClientPlugin));
+    std::string eventStreamerPlugin;
+    RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pEventStreamerSettings, "plugin", eventStreamerPlugin));
 
-    m_pEventClient = DQMPluginManager::instance()->createPluginClass<DQMEventClient>(eventClientPlugin);
+    m_pEventStreamer = DQMPluginManager::instance()->createPluginClass<DQMEventStreamer>(eventStreamerPlugin);
 
-    if( ! m_pEventClient )
+    if( ! m_pEventStreamer )
     {
-		LOG4CXX_ERROR( dqmMainLogger , "Event client plugin of type '" << eventClientPlugin << "' not found !" );
+		LOG4CXX_ERROR( dqmMainLogger , "Event streamer plugin of type '" << eventStreamerPlugin << "' not found !" );
 		return STATUS_CODE_NOT_FOUND;
     }
 
-    RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->readSettings(TiXmlHandle(pEventClientSettings)));
+    // parse event clients
+    TiXmlElement *pEventClientListSettings = globalHandle.FirstChild("eventclientlist").Element();
 
+    if( ! pEventClientListSettings )
+    {
+		LOG4CXX_ERROR( dqmMainLogger , "No <eventclientlist> xml element in global section !" );
+		return STATUS_CODE_NOT_FOUND;
+	}
+
+    TiXmlHandle eventClientListHandle( pEventClientListSettings );
+
+    for (TiXmlElement *pXmlElement = eventClientListHandle.FirstChild("eventclient").Element(); NULL != pXmlElement;
+        pXmlElement = pXmlElement->NextSiblingElement("eventclient"))
+    {
+        std::string eventClientPlugin;
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "plugin", eventClientPlugin));
+
+        DQMEventClient *pEventClient = DQMPluginManager::instance()->createPluginClass<DQMEventClient>(eventClientPlugin);
+
+        if( ! pEventClient )
+        {
+    		LOG4CXX_ERROR( dqmMainLogger , "Event client plugin of type '" << eventClientPlugin << "' not found !" );
+    		return STATUS_CODE_NOT_FOUND;
+        }
+
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pEventClient->readSettings(TiXmlHandle(pXmlElement)));
+
+        pEventClient->setEventStreamer( m_pEventStreamer , false );
+
+        m_eventClientList.push_back( pEventClient );
+    }
 
     // parse evb processors to run
     TiXmlElement *pProcessorsSettings = globalHandle.FirstChild("evbprocessors").Element();
@@ -438,8 +472,7 @@ StatusCode DQMShmProxyApplication::configureRunControlClient(TiXmlElement *pRunC
 
 void DQMShmProxyApplication::processEvent(uint32_t key, std::vector<levbdim::buffer*> bufferList)
 {
-	DQMEventStreamer *pEventStreamer = m_pEventClient->getEventStreamer();
-	DQMEvent *pEvent = pEventStreamer->createEvent();
+	DQMEvent *pEvent = m_pEventStreamer->createEvent();
 
 	try
 	{
@@ -450,7 +483,10 @@ void DQMShmProxyApplication::processEvent(uint32_t key, std::vector<levbdim::buf
 			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, iter->second->processEvent(pEvent, key, bufferList));
 		}
 
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pEventClient->sendEvent(pEvent));
+		for( auto iter = m_eventClientList.begin(), endIter = m_eventClientList.end() ; endIter != iter ; ++iter )
+		{
+			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, (*iter)->sendEvent(pEvent));
+		}
 	}
 	catch(StatusCodeException &exception)
 	{

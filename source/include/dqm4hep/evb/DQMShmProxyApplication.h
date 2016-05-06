@@ -128,7 +128,9 @@ private:
 	typedef std::vector< std::pair<std::string, DQMShmProcessor *> > DQMProcessorList;
 
 	DQMProcessorList                     m_processorList;
-	DQMEventClient                      *m_pEventClient;
+
+	DQMEventStreamer                    *m_pEventStreamer;
+	std::vector<DQMEventClient *>        m_eventClientList;
 	DQMRunControlClient                 *m_pRunControlClient;
 	levbdim::shmdriver                  *m_pShmDriver;          ///< The shm driver to read data source in shared memory
 
