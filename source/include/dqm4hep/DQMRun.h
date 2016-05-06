@@ -241,6 +241,27 @@ inline void DQMRun::getParameter(const std::string &key, T &value) const
 
 //-------------------------------------------------------------------------------------------------
 
+template <>
+inline void DQMRun::setParameter(const std::string &key, const std::string &value)
+{
+	m_parametersMap[key] = value;
+}
+
+//-------------------------------------------------------------------------------------------------
+
+template <>
+inline void DQMRun::getParameter(const std::string &key, std::string &value) const
+{
+	std::map<std::string, std::string>::const_iterator findIter = m_parametersMap.find(key);
+
+	if(m_parametersMap.end() == findIter)
+		return;
+
+	value = findIter->second;
+}
+
+//-------------------------------------------------------------------------------------------------
+
 inline unsigned int DQMRun::getNParameters() const
 {
 	return m_parametersMap.size();
