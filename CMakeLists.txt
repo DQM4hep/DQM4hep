@@ -323,7 +323,9 @@ IF ( BUILD_HTTP )
 	    SOURCE_DIR ${Mongoose_DIR}
 	)
 
-	SET( Mongoose_package_depends "Mongoose" )
+      SET( Mongoose_package_depends "Mongoose" )
+
+      LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${CMAKE_INSTALL_PREFIX}" )
 
 ENDIF()
 
