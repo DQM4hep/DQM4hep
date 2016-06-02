@@ -491,13 +491,17 @@ void DQMShmProxyApplication::processEvent(uint32_t key, std::vector<levbdim::buf
 	catch(StatusCodeException &exception)
 	{
 		LOG4CXX_ERROR( dqmMainLogger , "Caught status code exception : " << exception.toString() );
+		delete pEvent;
 		throw exception;
 	}
 	catch(...)
 	{
 		LOG4CXX_ERROR( dqmMainLogger , "Caught unknown exception !");
+		delete pEvent;
 		throw StatusCodeException(STATUS_CODE_FAILURE);
 	}
+
+	delete pEvent;
 }
 
 } 
