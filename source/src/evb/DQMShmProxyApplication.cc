@@ -32,6 +32,7 @@
 #include "dqm4hep/DQMXmlHelper.h"
 #include "dqm4hep/DQMPluginManager.h"
 #include "dqm4hep/DQMCoreTool.h"
+#include "dqm4hep/DQMEvent.h"
 #include "dqm4hep/DQMEventStreamer.h"
 
 namespace dqm4hep
