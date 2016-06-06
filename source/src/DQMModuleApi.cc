@@ -690,5 +690,16 @@ StatusCode DQMModuleApi::bookMonitorElement(const DQMModule *const pModule, cons
 	return STATUS_CODE_SUCCESS;
 }
 
+//-------------------------------------------------------------------------------------------------
+
+StatusCode DQMModuleApi::bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement,
+		DQMMonitorElementPtr &monitorElement, const DQMParameters &parameters)
+{
+	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pModule->getModuleApplication()->getMonitorElementManager()->bookMonitorElement(pXmlElement, pModule->getName(), monitorElement, parameters));
+	pModule->getModuleApplication()->getMonitorElementSender()->addAvailableMonitorElement(monitorElement);
+
+	return STATUS_CODE_SUCCESS;
+}
+
 } 
 

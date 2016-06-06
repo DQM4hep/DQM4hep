@@ -461,6 +461,11 @@ private:
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement,
 			const std::string &meName, DQMMonitorElementPtr &monitorElement);
 
+	/** Book a monitor element from the xml element
+	 */
+	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlElement *const pXmlElement,
+			DQMMonitorElementPtr &monitorElement, const DQMParameters &parameters);
+
 	friend class DQMXmlHelper;
 };
 

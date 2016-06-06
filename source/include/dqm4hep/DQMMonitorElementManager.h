@@ -184,10 +184,15 @@ public:
  	StatusCode bookObject(DQMMonitorElementPtr &monitorElement, DQMMonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
  			const std::string &moduleName, allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
- 	/** Book a monitor element from the xml element
+ 	/** Book a monitor element from the xml element (DEPRECATED, use version with parameters map)
  	 */
  	StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
  			const std::string &meName, DQMMonitorElementPtr &monitorElement);
+
+ 	/** Book a monitor element from the xml element
+ 	 */
+	StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
+			DQMMonitorElementPtr &monitorElement, const DQMParameters &parameters);
 
  	/** Book a generic TObject. The TObject must be valid and must be a built-in ROOT object or
  	 *  a user defined class inheriting from TObject and providing a dictionary.

@@ -111,6 +111,11 @@ public:
 	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
 			unsigned int suffix, DQMMonitorElementPtr &monitorElement);
 
+	/** Create a monitor element from a xml handle and configure name, path and title from parameters (see DQM4HEP::replace())
+	 */
+	static StatusCode bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+			DQMMonitorElementPtr &monitorElement, const DQMParameters &parameters);
+
 	/** Tokenize a string
 	 */
 	static void tokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ");

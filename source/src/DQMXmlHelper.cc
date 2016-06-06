@@ -115,6 +115,26 @@ StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, cons
 
 //----------------------------------------------------------------------------------------------------
 
+StatusCode DQMXmlHelper::bookMonitorElement(const DQMModule *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+		DQMMonitorElementPtr &monitorElement, const DQMParameters &parameters)
+{
+    for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
+        pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
+    {
+    	std::string meId;
+    	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMXmlHelper::getAttribute(pXmlElement, "ID", meId));
+
+    	if(meId != meStringId)
+    		continue;
+
+    	return DQMModuleApi::bookMonitorElement(pModule, pXmlElement, monitorElement, parameters);
+    }
+
+	return STATUS_CODE_NOT_FOUND;
+}
+
+//----------------------------------------------------------------------------------------------------
+
 StatusCode DQMXmlHelper::replaceAllXmlAttributes(TiXmlElement *pXmlElement, const DQMParameters &parameters)
 {
 	for(auto paramIter = parameters.begin(), endParamIter = parameters.end() ;
