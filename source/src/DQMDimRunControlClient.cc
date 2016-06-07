@@ -259,44 +259,34 @@ void DQMDimRunControlClient::infoHandler()
 	if(m_pStartOfRunInfo == pCurrentDimInfo)
 	{
 		if(this->isRunning() || !this->isConnectedToService())
-		{
-			std::cout << "pouette 1 !" << std::endl;
 			return;
-		}
 
 		dqm_char *pBuffer = static_cast<dqm_char*>(pCurrentDimInfo->getData());
 		dqm_uint  bufferSize = pCurrentDimInfo->getSize();
 
 		if(pBuffer == NULL || bufferSize == 0)
-		{
-			std::cout << "pouette 2 !" << std::endl;
 			return;
-		}
+
 		this->configureInBuffer( pBuffer, bufferSize );
 
 		DQMRun *pRun = new DQMRun();
 
 		try
 		{
-			std::cout << "pouette stream !" << std::endl;
 			if( xdrstream::XDR_SUCCESS != pRun->stream( xdrstream::XDR_READ_STREAM , m_pInBuffer ) )
 				throw StatusCodeException(STATUS_CODE_FAILURE);
 
-			std::cout << "pouette run number !" << std::endl;
 			if(pRun->getRunNumber() < 0)
 				throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
 
-			std::cout << "pouette start !" << std::endl;
 			// run is adopted here by the run control. No need to delete
 			THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->startNewRun(pRun));
-
-			std::cout << "pouette 1 after " << std::endl;
 
 			LOG4CXX_INFO( dqmMainLogger , "Starting new run " << this->getCurrentRun()->getRunNumber() );
 		}
 		catch(StatusCodeException &exception)
 		{
-			std::cout << "pouette catch !" << std::endl;
+			LOG4CXX_INFO( dqmMainLogger , "Caught exception : " << exception.what() );
 
 			if(pRun)
 				delete pRun;
