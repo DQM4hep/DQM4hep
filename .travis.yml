@@ -45,6 +45,7 @@ matrix:
       compiler: clang
       
 before_install:
+  - sudo apt-get update -q
   - sudo apt-get install libqt4-dev qt4-qmake
   #- sudo apt-get install libroot-*-dev root-graf2d-qt
   - sudo apt-get install libroot-core-dev root-graf2d-qt
