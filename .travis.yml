@@ -22,8 +22,6 @@ addons:
   apt:
     sources:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
-    packages:
-    - libroot-core-dev
 
 env:
   - BUILD_DQMVIZ=ON
@@ -47,8 +45,7 @@ matrix:
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install libqt4-dev qt4-qmake
-  #- sudo apt-get install libroot-*-dev root-graf2d-qt
-  - sudo apt-get install libroot-core-dev root-graf2d-qt
+  - sudo apt-get install libroot-*-dev root-plugin-graf2d-qt root-plugin-gui-qt
 
 before_script:
   - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
