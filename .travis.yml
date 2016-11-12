@@ -2,6 +2,8 @@ language: cpp
 
 sudo: required
 
+dist: trusty
+
 compilers:
   - gcc
   - clang
@@ -20,6 +22,8 @@ addons:
   apt:
     sources:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
+    packages:
+    - libroot-core-dev
 
 env:
   - BUILD_DQMVIZ=ON
