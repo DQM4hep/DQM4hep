@@ -49,7 +49,7 @@ matrix:
 before_install:
   - sudo apt-get update -q
   - sudo apt-get install libqt4-dev qt4-qmake
-  - sudo apt-get install libroot-*-dev root-plugin-graf2d-qt root-plugin-gui-qt
+  - sudo apt-get install libroot-* root-plugin-*
   - sudo apt-get install liblog4cxx10 liblog4cxx10-dev
 
 before_script:
