@@ -19,9 +19,7 @@ script:
 addons:
   apt:
     sources:
-    - libroot-core-dev
-    - sourceline: 'deb http://ftp.fr.debian.org/debian/ jessie/main i386 Packages'
-      key_url: null
+    - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
 
 env:
   - BUILD_DQMVIZ=ON
