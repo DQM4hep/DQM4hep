@@ -15,7 +15,14 @@ script:
   - cd build  
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP ..
   - make
-  
+
+addons:
+  apt:
+    sources:
+    - libroot-core-dev
+    - sourceline: 'deb http://ftp.fr.debian.org/debian/ jessie/main i386 Packages'
+      key_url: null
+
 env:
   - BUILD_DQMVIZ=ON
   - BUILD_DQMVIZ=OFF
@@ -37,7 +44,8 @@ matrix:
       
 before_install:
   - sudo apt-get install libqt4-dev qt4-qmake
-  - sudo apt-get install libroot-*-dev root-graf2d-qt
+  #- sudo apt-get install libroot-*-dev root-graf2d-qt
+  - sudo apt-get install libroot-core-dev root-graf2d-qt
 
 before_script:
   - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
