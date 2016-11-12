@@ -24,16 +24,20 @@ addons:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
 
 env:
+  global:
+    - BUILD_DQMVIZ=OFF
+    - INSTALL_DOC=OFF    
+    - BUILD_EXAMPLES=OFF    
+    - BUILD_EVB=OFF    
+    - BUILD_HTTP=OFF
+
+env:
   - BUILD_DQMVIZ=ON
-  - BUILD_DQMVIZ=OFF
   - INSTALL_DOC=ON
-  - INSTALL_DOC=OFF
   - BUILD_EXAMPLES=ON
-  - BUILD_EXAMPLES=OFF
   - BUILD_EVB=ON
-  - BUILD_EVB=OFF
   - BUILD_HTTP=ON
-  - BUILD_HTTP=OFF
+  
 
 matrix:
   include:
@@ -46,6 +50,7 @@ before_install:
   - sudo apt-get update -q
   - sudo apt-get install libqt4-dev qt4-qmake
   - sudo apt-get install libroot-*-dev root-plugin-graf2d-qt root-plugin-gui-qt
+  - sudo apt-get install liblog4cxx10 liblog4cxx10-dev
 
 before_script:
   - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
