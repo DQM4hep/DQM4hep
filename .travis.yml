@@ -1,0 +1,51 @@
+language: cpp
+
+sudo: required
+
+compilers:
+  - gcc
+  - clang
+
+os:
+  - linux
+  - osx
+        
+script:
+  - mkdir build
+  - cd build  
+  - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP ..
+  - make
+  
+env:
+  - BUILD_DQMVIZ=ON
+  - BUILD_DQMVIZ=OFF
+  - INSTALL_DOC=ON
+  - INSTALL_DOC=OFF
+  - BUILD_EXAMPLES=ON
+  - BUILD_EXAMPLES=OFF
+  - BUILD_EVB=ON
+  - BUILD_EVB=OFF
+  - BUILD_HTTP=ON
+  - BUILD_HTTP=OFF
+
+matrix:
+  include:
+    - os: osx
+      compiler: gcc
+    - os: linux
+      compiler: clang
+      
+before_install:
+  - sudo apt-get install libqt4-dev qt4-qmake
+  - sudo apt-get install libroot-*-dev root-graf2d-qt
+
+before_script:
+  - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
+  - cd LCIO
+  - mkdir -p build
+  - cd build
+  - cmake ..
+  - make install
+  - cd ../../
+  - export LCIO_DIR=$PWD/LCIO
+  
