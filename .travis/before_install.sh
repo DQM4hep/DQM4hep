@@ -15,7 +15,7 @@ sudo apt-get install liblog4cxx10 liblog4cxx10-dev
 
 # install root with Qt backend
 wget https://root.cern.ch/download/root_v5.34.36.source.tar.gz
-tar -xvzf root_v5.34.36.source.tar.gz
+tar -xzf root_v5.34.36.source.tar.gz
 cd root
 ./configure --enable-qt && make -j6 && . ./bin/thisroot.sh
 cd ..
