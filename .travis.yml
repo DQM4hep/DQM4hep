@@ -13,6 +13,8 @@ os:
   - osx
         
 script:
+  - ls /usr/lib/x86_64-linux-gnu/
+  - ls /usr/lib/x86_64-linux-gnu/root
   - mkdir build
   - cd build  
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP ..
