@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/DQM4HEP/DQM4HEP.svg?branch=master)](https://travis-ci.org/DQM4HEP/DQM4HEP)
+
 # DQM4HEP 
 # A Data Quality Monitoring for High Energy Physics
 Copyright IPNL/CNRS/IN2P3
