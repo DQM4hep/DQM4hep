@@ -61,7 +61,6 @@ before_install:
   - sudo ln -s /usr/lib/x86_64-linux-gnu/libASImage.so.5.34 /usr/lib/x86_64-linux-gnu/libASImage.so
   - sudo ln -s /usr/lib/x86_64-linux-gnu/libASImageGui.so.5.34 /usr/lib/x86_64-linux-gnu/libASImageGui.so
   - sudo ln -s /usr/lib/x86_64-linux-gnu/libSessionViewer.so.5.34 /usr/lib/x86_64-linux-gnu/libSessionViewer.so
-  - sudo ln -s /usr/lib/x86_64-linux-gnu/libHistPainter.so.5.34 /usr/lib/x86_64-linux-gnu/libHistPainter.so
 
 #before_script:
 #  - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
