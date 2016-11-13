@@ -17,5 +17,5 @@ sudo apt-get install liblog4cxx10 liblog4cxx10-dev
 wget https://root.cern.ch/download/root_v5.34.36.source.tar.gz
 tar -xzf root_v5.34.36.source.tar.gz
 cd root
-./configure --enable-qt && make -j6 && . ./bin/thisroot.sh
+./configure --enable-qt && make -j6 --quiet && . ./bin/thisroot.sh
 cd ..
