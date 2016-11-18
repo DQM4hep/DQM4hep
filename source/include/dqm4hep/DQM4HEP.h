@@ -107,17 +107,6 @@ namespace dqm4hep {
     class Alert;
     struct Stats;
 
-    // time
-    typedef std::chrono::system_clock::time_point               TimePoint;
-    typedef std::chrono::duration<double>                       TimeDuration;
-
-    // event
-    typedef std::queue<Event*>                                  EventQueue;
-    typedef std::shared_ptr<Event>                              EventPtr;
-    typedef std::queue<EventPtr>                                EventPtrQueue;
-
-    typedef std::shared_ptr<Alert>                              AlertPtr;
-
     /** allocator_helper class
      */
     template <typename BaseType, typename RealType, typename... Args>
@@ -132,6 +121,27 @@ namespace dqm4hep {
         return new RealType(args...);
       }
     };
+
+    // C++11 stuff incompatible with CINT
+#ifndef __CINT__
+    // time
+    typedef std::chrono::system_clock::time_point               TimePoint;
+    typedef std::chrono::duration<double>                       TimeDuration;
+
+    // event
+    typedef std::queue<Event*>                                  EventQueue;
+    typedef std::shared_ptr<Event>                              EventPtr;
+    typedef std::queue<EventPtr>                                EventPtrQueue;
+
+    typedef std::shared_ptr<Alert>                              AlertPtr;
+
+    typedef std::shared_ptr<MonitorElement>                     MonitorElementPtr;
+    typedef std::vector<MonitorElementPtr>                      MonitorElementPtrList;
+    typedef std::map<const std::string, MonitorElementPtr>      MonitorElementPtrMap;
+    typedef std::shared_ptr<QualityTest>                        QualityTestPtr;
+
+    typedef std::map<std::string, MonitorElementPtrList>        Publication;
+#endif
 
     // typedefs for streaming
     typedef char                  dqm_char;
@@ -163,12 +173,6 @@ namespace dqm4hep {
     typedef std::map<std::string, QualityTestResult>            QualityTestResultMap;
     typedef std::map<std::string, QualityTest*>                 QualityTestMap;
     typedef std::vector<Stats>                                  StatsList;
-
-    typedef std::shared_ptr<MonitorElement>                     MonitorElementPtr;
-    typedef std::vector<MonitorElementPtr>                      MonitorElementPtrList;
-    typedef std::map<const std::string, MonitorElementPtr>      MonitorElementPtrMap;
-    typedef std::shared_ptr<QualityTest>                        QualityTestPtr;
-    typedef std::map<std::string, MonitorElementPtrList>        Publication;
 
     // typedef for messaging
     typedef std::map<std::string, std::string>                  MonitorElementInfo;
