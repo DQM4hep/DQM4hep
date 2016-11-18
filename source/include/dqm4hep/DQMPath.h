@@ -33,7 +33,7 @@
 
 namespace dqm4hep {
 
-  namespace dqm4hep {
+  namespace core {
 
     /** Path class
      */
