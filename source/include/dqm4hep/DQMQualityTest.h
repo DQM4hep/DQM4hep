@@ -284,10 +284,10 @@ namespace dqm4hep {
       protected:
 
       std::string                m_formula;
-      std::vector<double>       m_inputParameterList;
-      unsigned int             m_functionNParameters;
-      double                    m_functionXMin;
-      double                    m_functionXMax;
+      std::vector<double>        m_inputParameterList;
+      unsigned int               m_functionNParameters;
+      double                     m_functionXMin;
+      double                     m_functionXMax;
     };
 
     //-------------------------------------------------------------------------------------------------
