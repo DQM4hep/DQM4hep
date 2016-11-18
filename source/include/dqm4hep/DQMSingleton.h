@@ -33,19 +33,19 @@ namespace dqm4hep {
 
   namespace core {
 
-    /** DQMSingleton class
+    /** Singleton class
      */
     template <typename T>
-    class DQMSingleton
+    class Singleton
     {
     public:
       /** Constructor
        */
-      DQMSingleton();
+      Singleton();
 
       /** Destructor
        */
-      ~DQMSingleton();
+      ~Singleton();
 
       /** Return a unique instance of the class
        */
@@ -63,12 +63,12 @@ namespace dqm4hep {
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    T *DQMSingleton<T>::m_pInstance = nullptr;
+    T *Singleton<T>::m_pInstance = nullptr;
 
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    DQMSingleton<T>::DQMSingleton()
+    Singleton<T>::Singleton()
     {
       /* nop */
     }
@@ -76,7 +76,7 @@ namespace dqm4hep {
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    DQMSingleton<T>::~DQMSingleton()
+    Singleton<T>::~Singleton()
     {
       /* nop */
     }
@@ -84,7 +84,7 @@ namespace dqm4hep {
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    T *DQMSingleton<T>::instance()
+    T *Singleton<T>::instance()
     {
       if(nullptr == m_pInstance)
         m_pInstance = new T();
@@ -95,7 +95,7 @@ namespace dqm4hep {
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    void DQMSingleton<T>::kill()
+    void Singleton<T>::kill()
     {
       if(nullptr == m_pInstance)
         return;
