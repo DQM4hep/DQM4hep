@@ -193,7 +193,7 @@ namespace dqm4hep {
       /** Book a monitor element from the xml element
        */
       StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
-          MonitorElementPtr &monitorElement, const Parameters &parameters);
+          MonitorElementPtr &monitorElement, const ParameterMap &parameters);
 
       /** Book a generic TObject. The TObject must be valid and must be a built-in ROOT object or
        *  a user defined class inheriting from TObject and providing a dictionary.

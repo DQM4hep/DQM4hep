@@ -91,7 +91,7 @@ namespace dqm4hep {
 
       /** Set the parameters to replace while reading settings
        */
-      void setReplacementParameters(const Parameters &parametersMap);
+      void setReplacementParameters(const ParameterMap &parametersMap);
 
       /** Read settings from a xml file.
        *  Initialize the application. Declare all the services,

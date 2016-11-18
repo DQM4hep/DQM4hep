@@ -465,7 +465,7 @@ namespace dqm4hep {
       /** Book a monitor element from the xml element
        */
       static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlElement *const pXmlElement,
-          MonitorElementPtr &monitorElement, const Parameters &parameters);
+          MonitorElementPtr &monitorElement, const ParameterMap &parameters);
 
       friend class XmlHelper;
     };

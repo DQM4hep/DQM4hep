@@ -115,7 +115,7 @@ namespace dqm4hep {
       /** Create a monitor element from a xml handle and configure name, path and title from parameters (see DQM4HEP::replace())
        */
       static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-          MonitorElementPtr &monitorElement, const Parameters &parameters);
+          MonitorElementPtr &monitorElement, const ParameterMap &parameters);
 
       /** Tokenize a string
        */
