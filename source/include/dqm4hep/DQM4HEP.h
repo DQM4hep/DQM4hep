@@ -181,19 +181,6 @@ namespace dqm4hep {
     typedef std::map<std::string, std::string>                  MonitorElementListNameRequest;
     typedef std::multimap<std::string, std::string>             MonitorElementRequest;
   }
-
-
-
-  //-------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
 }
 
 //-------------------------------------------------------------------------------------------------
