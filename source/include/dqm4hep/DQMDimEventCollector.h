@@ -25,8 +25,8 @@
  */
 
 
-#ifndef DQMDIMEVENTCOLLECTOR_H
-#define DQMDIMEVENTCOLLECTOR_H
+#ifndef DQM4HEP_DIMEVENTCOLLECTOR_H
+#define DQM4HEP_DIMEVENTCOLLECTOR_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQMEventCollectorImp.h"
@@ -38,157 +38,160 @@
 // -- dim headers
 #include "dis.hxx"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-class DQMDimEventCollector;
+  namespace core {
 
-/** DimEventRequestRpc class
- */
-class DimEventRequestRpc : public DimRpc
-{
-public:
-	/** Constructor
-	 */
-	DimEventRequestRpc(DQMDimEventCollector *pCollector);
+    class DimEventCollector;
 
-	/** The rpc handler
-	 */
-	void rpcHandler();
+    /** DimEventRequestRpc class
+     */
+    class DimEventRequestRpc : public DimRpc
+    {
+    public:
+      /** Constructor
+       */
+      DimEventRequestRpc(DimEventCollector *pCollector);
 
-private:
-	// the collector
-	DQMDimEventCollector        *m_pCollector;
-};
+      /** The rpc handler
+       */
+      void rpcHandler();
 
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+    private:
+      // the collector
+      DimEventCollector        *m_pCollector;
+    };
 
-/** DQMDimEventCollector class
- */
-class DQMDimEventCollector : public DQMEventCollectorImp, public DimServer
-{
-//	friend class DimEventReceptionRpc;
-	friend class DimEventRequestRpc;
- public:
-	/** Constructor
-	 */
-	DQMDimEventCollector();
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
-	/** Destructor
-	 */
-	virtual ~DQMDimEventCollector();
+    /** DimEventCollector class
+     */
+    class DimEventCollector : public EventCollectorImp, public DimServer
+    {
+      //	friend class DimEventReceptionRpc;
+      friend class DimEventRequestRpc;
+    public:
+      /** Constructor
+       */
+      DimEventCollector();
 
-	/** Set the collector name
-	 */
-	StatusCode setCollectorName(const std::string &collectorName);
+      /** Destructor
+       */
+      virtual ~DimEventCollector();
 
-	/** Get the collector name
-	 */
-	const std::string &getCollectorName() const;
+      /** Set the collector name
+       */
+      StatusCode setCollectorName(const std::string &collectorName);
 
-	/** Whether the collector server is running
-	 */
-	bool isRunning() const;
+      /** Get the collector name
+       */
+      const std::string &getCollectorName() const;
 
-	/** Start the collector server
-	 */
-	StatusCode startCollector();
+      /** Whether the collector server is running
+       */
+      bool isRunning() const;
 
-	/** Stop the collector server
-	 */
-	StatusCode stopCollector();
+      /** Start the collector server
+       */
+      StatusCode startCollector();
 
-	/** Set the event streamer to serialize/deserialize the in/out-coming events
-	 */
-	void setEventStreamer(DQMEventStreamer *pEventStreamer);
+      /** Stop the collector server
+       */
+      StatusCode stopCollector();
 
-	/** Get the event streamer
-	 */
-	DQMEventStreamer *getEventStreamer() const;
+      /** Set the event streamer to serialize/deserialize the in/out-coming events
+       */
+      void setEventStreamer(EventStreamer *pEventStreamer);
 
-private:
-	/** Dim command handler
-	 */
-	void commandHandler();
+      /** Get the event streamer
+       */
+      EventStreamer *getEventStreamer() const;
 
-	/** Dim client exit handler
-	 */
-	void clientExitHandler();
+    private:
+      /** Dim command handler
+       */
+      void commandHandler();
 
-	/** Client class
-	 *
-	 *  Represent a client instance from the point of
-	 *  view of the service (id and update booleans)
-	 */
-	class Client
-	{
-	public:
-		int           m_clientId;       ///< The client id (dim client id)
-		bool          m_updateMode;    ///< Whether the client uses an update mode
-		std::string    m_subEventIdentifier;   ///< The sub event identifier received from the client from
-	};
+      /** Dim client exit handler
+       */
+      void clientExitHandler();
 
-	/**
-	 */
-	void handleEventReception(DimCommand *pDimCommand);
+      /** Client class
+       *
+       *  Represent a client instance from the point of
+       *  view of the service (id and update booleans)
+       */
+      class Client
+      {
+      public:
+        int           m_clientId;       ///< The client id (dim client id)
+        bool          m_updateMode;    ///< Whether the client uses an update mode
+        std::string    m_subEventIdentifier;   ///< The sub event identifier received from the client from
+      };
 
-	/**
-	 */
-	void handleEventRequest(DimEventRequestRpc *pDimRpc);
+      /**
+       */
+      void handleEventReception(DimCommand *pDimCommand);
 
-	/** Get a client by id. Create it if not registered
-	 */
-	Client &getClient(int clientId);
+      /**
+       */
+      void handleEventRequest(DimEventRequestRpc *pDimRpc);
 
-	/** Update the event service for clients
-	 *  that have specified an update mode
-	 */
-	void updateEventService();
+      /** Get a client by id. Create it if not registered
+       */
+      Client &getClient(int clientId);
 
-	/** Remove a client from the map
-	 */
-	void removeClient(int clientId);
+      /** Update the event service for clients
+       *  that have specified an update mode
+       */
+      void updateEventService();
 
-	/** Configure the buffer. Allocate the ptr is needed and set
-	 *  the buffer to read only and owner of the buffer. The buffer
-	 *  is copied since event updates need to keep track of the buffer
-	 */
-	xdrstream::BufferDevice *configureBuffer(char *pBuffer, xdrstream::xdr_size_t bufferSize);
+      /** Remove a client from the map
+       */
+      void removeClient(int clientId);
 
-private:
+      /** Configure the buffer. Allocate the ptr is needed and set
+       *  the buffer to read only and owner of the buffer. The buffer
+       *  is copied since event updates need to keep track of the buffer
+       */
+      xdrstream::BufferDevice *configureBuffer(char *pBuffer, xdrstream::xdr_size_t bufferSize);
 
-	typedef std::map<int, Client> ClientMap;
+    private:
 
-	std::string              m_collectorName;
-	bool                    m_isRunning;
-	int                     m_state;
-	int                     m_clientRegisteredId;
+      typedef std::map<int, Client> ClientMap;
 
-	// services
-	DimService              *m_pServerStateService;
-	DimService              *m_pClientRegisteredService;
-	DimService              *m_pEventUpdateService;
-	DQMStatisticsService    *m_pStatisticsService;
+      std::string              m_collectorName;
+      bool                    m_isRunning;
+      int                     m_state;
+      int                     m_clientRegisteredId;
 
-	// commands
-	DimCommand              *m_pCollectEventCommand;
-	DimCommand              *m_pUpdateModeCommand;
-	DimCommand              *m_pSubEventIdentifierCommand;
-	DimCommand              *m_pClientRegitrationCommand;
+      // services
+      DimService              *m_pServerStateService;
+      DimService              *m_pClientRegisteredService;
+      DimService              *m_pEventUpdateService;
+      StatisticsService       *m_pStatisticsService;
 
-	// remote procedure call
-	DimEventRequestRpc      *m_pEventRequestRpc;
+      // commands
+      DimCommand              *m_pCollectEventCommand;
+      DimCommand              *m_pUpdateModeCommand;
+      DimCommand              *m_pSubEventIdentifierCommand;
+      DimCommand              *m_pClientRegitrationCommand;
 
-	xdrstream::BufferDevice *m_pBuffer;
-	xdrstream::BufferDevice *m_pSubEventBuffer;
+      // remote procedure call
+      DimEventRequestRpc      *m_pEventRequestRpc;
 
-	DQMEventStreamer        *m_pEventStreamer;
-	DQMEvent                *m_pCurrentEvent;
+      xdrstream::BufferDevice *m_pBuffer;
+      xdrstream::BufferDevice *m_pSubEventBuffer;
 
-	ClientMap                m_clientMap;
-}; 
+      EventStreamer           *m_pEventStreamer;
+      Event                   *m_pCurrentEvent;
+
+      ClientMap                m_clientMap;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMDIMEVENTCOLLECTOR_H
+#endif  //  DQM4HEP_DIMEVENTCOLLECTOR_H

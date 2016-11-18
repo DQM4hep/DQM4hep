@@ -25,8 +25,8 @@
  */
 
 
-#ifndef DQMSTATISTICSSERVICE_H
-#define DQMSTATISTICSSERVICE_H
+#ifndef DQM4HEP_STATISTICSSERVICE_H
+#define DQM4HEP_STATISTICSSERVICE_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
@@ -34,45 +34,48 @@
 // -- dim headers
 #include "dis.hxx"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-/** DQMStatisticsService class
- */
-class DQMStatisticsService
-{
-public:
-	/** Constructor
-	 */
-	DQMStatisticsService(const std::string &baseServiceName);
+  namespace core {
 
-	/** Destructor
-	 */
-	~DQMStatisticsService();
+    /** StatisticsService class
+     */
+    class StatisticsService
+    {
+    public:
+      /** Constructor
+       */
+      StatisticsService(const std::string &baseServiceName);
 
-	/** Update the service with the new statistics
-	 */
-	void update(unsigned int statistics);
+      /** Destructor
+       */
+      ~StatisticsService();
 
-private:
-	/** Static function to pass to std::accumulate
-	 */
-	static unsigned int accumulateStats(unsigned int sum, const DQMStats &stats);
+      /** Update the service with the new statistics
+       */
+      void update(unsigned int statistics);
 
-private:
-	DQMStatsList               m_statsList;
+    private:
+      /** Static function to pass to std::accumulate
+       */
+      static unsigned int accumulateStats(unsigned int sum, const Stats &stats);
 
-	DimService                *m_pLastUpdateTimeService;
-	DimService                *m_pRateService;
-	DimService                *m_pMeanStatsService;
-	DimService                *m_pLastUpdateStatisticsService;
+    private:
+      StatsList                  m_statsList;
 
-	long long int            m_lastStatsTimestamp;
-	float                     m_rate;
-	float                     m_meanStats;
-	int                       m_lastStatistics;
-};
+      DimService                *m_pLastUpdateTimeService;
+      DimService                *m_pRateService;
+      DimService                *m_pMeanStatsService;
+      DimService                *m_pLastUpdateStatisticsService;
+
+      long long int              m_lastStatsTimestamp;
+      float                      m_rate;
+      float                      m_meanStats;
+      int                       m_lastStatistics;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMSTATISTICSSERVICE_H
+#endif  //  DQM4HEP_STATISTICSSERVICE_H

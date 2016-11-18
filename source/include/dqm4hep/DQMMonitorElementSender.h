@@ -25,8 +25,8 @@
  */
 
 
-#ifndef DQMMONITORELEMENTSENDER_H
-#define DQMMONITORELEMENTSENDER_H
+#ifndef DQM4HEP_MONITORELEMENTSENDER_H
+#define DQM4HEP_MONITORELEMENTSENDER_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
@@ -34,84 +34,87 @@
 
 #include "dic.hxx"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-class DQMModuleApi;
-class DQMModuleApplication;
+  namespace core {
 
-/** DQMMonitorElementSender class
- */ 
-class DQMMonitorElementSender : public DimClient
-{
-	friend class DQMModuleApi;
-public:
-	/** Constructor
-	 */
-	DQMMonitorElementSender(DQMModuleApplication *pApplication);
+    class ModuleApi;
+    class ModuleApplication;
 
-	/** Destructor
-	 */
-	~DQMMonitorElementSender();
+    /** MonitorElementSender class
+     */
+    class MonitorElementSender : public DimClient
+    {
+      friend class ModuleApi;
+    public:
+      /** Constructor
+       */
+      MonitorElementSender(ModuleApplication *pApplication);
 
-	/** Set the collector name to which the elements will be sent
-	 */
-	StatusCode setCollectorName(const std::string &collectorName);
+      /** Destructor
+       */
+      ~MonitorElementSender();
 
-	/** Send the subscribed monitor element to the collector
-	 */
-	StatusCode sendMonitorElements();
+      /** Set the collector name to which the elements will be sent
+       */
+      StatusCode setCollectorName(const std::string &collectorName);
 
-	/** Connect the sender to the collector
-	 */
-	StatusCode connectToService();
+      /** Send the subscribed monitor element to the collector
+       */
+      StatusCode sendMonitorElements();
 
-	/** Disconnect the sender to the collector
-	 */
-	StatusCode disconnectFromService();
+      /** Connect the sender to the collector
+       */
+      StatusCode connectToService();
 
-	/** Whether the sender is connected to the collector
-	 */
-	bool isConnectedToService() const;
+      /** Disconnect the sender to the collector
+       */
+      StatusCode disconnectFromService();
 
-private:
-	/**
-	 */
-	void infoHandler();
+      /** Whether the sender is connected to the collector
+       */
+      bool isConnectedToService() const;
 
-	/**
-	 */
-	void addAvailableMonitorElement(const DQMMonitorElementPtr &monitorElement);
+    private:
+      /**
+       */
+      void infoHandler();
 
-	/**
-	 */
-	void removeAvailableMonitorElement(const std::string &monitorElementName);
+      /**
+       */
+      void addAvailableMonitorElement(const MonitorElementPtr &monitorElement);
 
-	/**
-	 */
-	void sendAvailableMonitorElementList();
+      /**
+       */
+      void removeAvailableMonitorElement(const std::string &monitorElementName);
 
-private:
-	typedef std::map<std::string, DQMMonitorElementInfo> DQMMonitorElementInfoMap;
+      /**
+       */
+      void sendAvailableMonitorElementList();
 
-	// from ui
-	DQMModuleApplication          *m_pApplication;          ///< The module application that sends elements to the collector
-	std::string                    m_collectorName;         ///<  The collector name to which the monitor elements will be sent
+    private:
+      typedef std::map<std::string, MonitorElementInfo> MonitorElementInfoMap;
 
-	xdrstream::BufferDevice        *m_pOutBuffer;           ///< The xdr buffer used to serialize dim info
-	xdrstream::BufferDevice        *m_pInBuffer;            ///< The xdr buffer used to serialize the monitor elements
+      // from ui
+      ModuleApplication             *m_pApplication;          ///< The module application that sends elements to the collector
+      std::string                    m_collectorName;         ///< The collector name to which the monitor elements will be sent
 
-	// internal
-	StringSet                      m_subscribedMeList;      ///< The subscribed monitor element list
-	DQMMonitorElementInfoMap       m_availableMeMap;        ///< The available monitor element list
-	pthread_mutex_t                m_mutex;                 ///< Mutex to lock unlock on service update
-	bool                           m_sendAvailableMeList;   ///< Whether the list of available me has to be re-sent to the collector
-	bool                           m_isConnected;           ///< Whether the sender is connected to the collector
+      xdrstream::BufferDevice        *m_pOutBuffer;           ///< The xdr buffer used to serialize dim info
+      xdrstream::BufferDevice        *m_pInBuffer;            ///< The xdr buffer used to serialize the monitor elements
 
-	DimUpdatedInfo                *m_pSubscribedListInfo;   ///< The dim info to receive subscribed me list from collector
-	DimUpdatedInfo                *m_pCollectorStateInfo;   ///< The dim info to receive when the collector state changes
-};
+      // internal
+      StringSet                      m_subscribedMeList;      ///< The subscribed monitor element list
+      MonitorElementInfoMap          m_availableMeMap;        ///< The available monitor element list
+      pthread_mutex_t                m_mutex;                 ///< Mutex to lock unlock on service update
+      bool                           m_sendAvailableMeList;   ///< Whether the list of available me has to be re-sent to the collector
+      bool                           m_isConnected;           ///< Whether the sender is connected to the collector
+
+      DimUpdatedInfo                *m_pSubscribedListInfo;   ///< The dim info to receive subscribed me list from collector
+      DimUpdatedInfo                *m_pCollectorStateInfo;   ///< The dim info to receive when the collector state changes
+    };
+
+  }
 
 } 
 
-#endif  //  DQMMONITORELEMENTSENDER_H
+#endif  //  DQM4HEP_MONITORELEMENTSENDER_H

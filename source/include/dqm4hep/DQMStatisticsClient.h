@@ -25,8 +25,8 @@
  */
 
 
-#ifndef DQMSTATISTICSCLIENT_H
-#define DQMSTATISTICSCLIENT_H
+#ifndef DQM4HEP_STATISTICSCLIENT_H
+#define DQM4HEP_STATISTICSCLIENT_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
@@ -37,62 +37,65 @@
 // -- pthread headers
 #include <pthread.h>
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-/** DQMStatisticsClient class
- */
-class DQMStatisticsClient : public DimClient
-{
-public:
-	/** Constructor
-	 */
-	DQMStatisticsClient(const std::string &baseServiceName);
+  namespace core {
 
-	/** Destructor
-	 */
-	~DQMStatisticsClient();
+    /** StatisticsClient class
+     */
+    class StatisticsClient : public DimClient
+    {
+    public:
+      /** Constructor
+       */
+      StatisticsClient(const std::string &baseServiceName);
 
-	/** Get the last update time
-	 */
-	int getLastUpdateTime() const;
+      /** Destructor
+       */
+      ~StatisticsClient();
 
-	/** Get the service rate
-	 */
-	float getRate() const;
+      /** Get the last update time
+       */
+      int getLastUpdateTime() const;
 
-	/** Get the mean statistics recorded by the service
-	 */
-	float getMeanStats() const;
+      /** Get the service rate
+       */
+      float getRate() const;
 
-	/** Get the last statistics received by the service
-	 */
-	float getLastStats() const;
+      /** Get the mean statistics recorded by the service
+       */
+      float getMeanStats() const;
 
-	/** Call back method called when one of the services is updated
-	 */
-	virtual void updated();
+      /** Get the last statistics received by the service
+       */
+      float getLastStats() const;
 
-private:
-	/** Dim call back methods when data are received.
-	 *  WARNING : this method is called in a different thread
-	 */
-	void infoHandler();
+      /** Call back method called when one of the services is updated
+       */
+      virtual void updated();
 
-private:
-	int                       m_lastStatsTimestamp;
-	float                     m_rate;
-	float                     m_meanStats;
-	int                       m_lastStatistics;
+    private:
+      /** Dim call back methods when data are received.
+       *  WARNING : this method is called in a different thread
+       */
+      void infoHandler();
 
-	DimUpdatedInfo            *m_pLastUpdateTimeInfo;
-	DimUpdatedInfo            *m_pRateInfo;
-	DimUpdatedInfo            *m_pMeanStatsInfo;
-	DimUpdatedInfo            *m_pLastUpdateStatisticsInfo;
+    private:
+      int                       m_lastStatsTimestamp;
+      float                     m_rate;
+      float                     m_meanStats;
+      int                       m_lastStatistics;
 
-	mutable pthread_mutex_t   m_mutex;
-}; 
+      DimUpdatedInfo            *m_pLastUpdateTimeInfo;
+      DimUpdatedInfo            *m_pRateInfo;
+      DimUpdatedInfo            *m_pMeanStatsInfo;
+      DimUpdatedInfo            *m_pLastUpdateStatisticsInfo;
+
+      mutable pthread_mutex_t   m_mutex;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMSTATISTICSCLIENT_H
+#endif  //  DQM4HEP_STATISTICSCLIENT_H

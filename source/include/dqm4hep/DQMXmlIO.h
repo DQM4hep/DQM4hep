@@ -26,32 +26,35 @@
  */
 
 
-#ifndef DQMXMLIO_H
-#define DQMXMLIO_H
+#ifndef DQM4HEP_XMLIO_H
+#define DQM4HEP_XMLIO_H
 
 #include "dqm4hep/tinyxml.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-/** DQMXmlIO class
- */
-class DQMXmlIO 
-{
-public:
-	/** Destructor
-	 */
-	virtual ~DQMXmlIO() {}
+  namespace core {
 
-	/** Export settings to xml element
-	 */
-	virtual TiXmlElement *toXml() const = 0;
+    /** XmlIO class
+     */
+    class XmlIO
+    {
+    public:
+      /** Destructor
+       */
+      virtual ~XmlIO() {}
 
-	/** Import settings from xml element
-	 */
-	virtual void fromXml(TiXmlElement *const pXmlElement) = 0;
-}; 
+      /** Export settings to xml element
+       */
+      virtual TiXmlElement *toXml() const = 0;
+
+      /** Import settings from xml element
+       */
+      virtual void fromXml(TiXmlElement *const pXmlElement) = 0;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMXMLIO_H
+#endif  //  DQM4HEP_XMLIO_H

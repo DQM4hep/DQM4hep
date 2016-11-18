@@ -25,97 +25,100 @@
  */
 
 
-#ifndef DQMPLUGINMANAGER_H
-#define DQMPLUGINMANAGER_H
+#ifndef DQM4HEP_PLUGINMANAGER_H
+#define DQM4HEP_PLUGINMANAGER_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/DQMSingleton.h"
 #include "dqm4hep/DQMPlugin.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-class DQMPlugin;
+  namespace core {
 
-/** DQMPluginManager class.
- *  Responsible for loading shared libraries
- *  that contains DQMPlugin instances
- */ 
-class DQMPluginManager : public DQMSingleton<DQMPluginManager>
-{
-	friend class DQMSingleton<DQMPluginManager>;
-	friend class DQMPlugin;
+    class Plugin;
 
-	typedef std::map<const std::string, DQMPlugin*> DQMPluginMap;
+    /** PluginManager class.
+     *  Responsible for loading shared libraries
+     *  that contains Plugin instances
+     */
+    class PluginManager : public Singleton<PluginManager>
+    {
+      friend class Singleton<PluginManager>;
+      friend class Plugin;
 
-public:
-	/** Load shared libraries from the environment variable DQM4HEP_PLUGIN_DLL
-	 */
-	StatusCode loadLibraries();
+      typedef std::map<const std::string, Plugin*> PluginMap;
 
-	/** Load the shared libraries
-	 */
-	StatusCode loadLibraries( const StringVector &libraryNameList );
+    public:
+      /** Load shared libraries from the environment variable 4HEP_PLUGIN_DLL
+       */
+      StatusCode loadLibraries();
 
-	/** Load the shared library
-	 */
-	StatusCode loadLibrary( const std::string &libraryName );
+      /** Load the shared libraries
+       */
+      StatusCode loadLibraries( const StringVector &libraryNameList );
 
-	/** Get the plug-in by name
-	 */
-	DQMPlugin *getPlugin( const std::string &pluginName ) const;
+      /** Load the shared library
+       */
+      StatusCode loadLibrary( const std::string &libraryName );
 
-	/** Get the plug-in clone. A new plug-in instance is allocated and returned
-	 *  to the user. Ownership of the plug-in transfered to the caller.
-	 */
-	template <typename T>
-	T *createPluginClass( const std::string &pluginName ) const;
+      /** Get the plug-in by name
+       */
+      Plugin *getPlugin( const std::string &pluginName ) const;
 
-	/** Whether the plug-in is registered within the plug-in manager
-	 */
-	bool isPluginRegistered( const std::string &pluginName ) const;
+      /** Get the plug-in clone. A new plug-in instance is allocated and returned
+       *  to the user. Ownership of the plug-in transfered to the caller.
+       */
+      template <typename T>
+      T *createPluginClass( const std::string &pluginName ) const;
 
-	/** Get the plug-in name list
-	 */
-	StringVector getPluginNameList() const;
+      /** Whether the plug-in is registered within the plug-in manager
+       */
+      bool isPluginRegistered( const std::string &pluginName ) const;
 
-private:
-	/** Constructor
-	 */
-	DQMPluginManager();
+      /** Get the plug-in name list
+       */
+      StringVector getPluginNameList() const;
 
-	/** Destructor
-	 */
-	~DQMPluginManager();
+    private:
+      /** Constructor
+       */
+      PluginManager();
 
-	/** Register the plug-in. Only available by plug-ins themselves
-	 */
-	StatusCode registerPlugin( DQMPlugin *pPlugin );
+      /** Destructor
+       */
+      ~PluginManager();
 
-private:
-	DQMPluginMap              m_pluginMap;
-};
+      /** Register the plug-in. Only available by plug-ins themselves
+       */
+      StatusCode registerPlugin( Plugin *pPlugin );
 
-//-------------------------------------------------------------------------------------------------
-//-------------------------------------------------------------------------------------------------
+    private:
+      PluginMap              m_pluginMap;
+    };
 
-template <typename T>
-inline T *DQMPluginManager::createPluginClass( const std::string &pluginName ) const
-{
-	DQMPlugin *pPlugin = this->getPlugin( pluginName );
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
-	if(!pPlugin)
-		return 0;
+    template <typename T>
+    inline T *PluginManager::createPluginClass( const std::string &pluginName ) const
+    {
+      Plugin *pPlugin = this->getPlugin( pluginName );
 
-	DQMPlugin *pClass = pPlugin->create();
+      if(!pPlugin)
+        return 0;
 
-	if(NULL == pClass)
-		return 0;
+      Plugin *pClass = pPlugin->create();
 
-	return dynamic_cast<T *>(pClass);
+      if(NULL == pClass)
+        return 0;
+
+      return dynamic_cast<T *>(pClass);
+    }
+
+  }
+
 }
 
-} 
-
-#endif  //  DQMPLUGINMANAGER_H
+#endif  //  DQM4HEP_PLUGINMANAGER_H

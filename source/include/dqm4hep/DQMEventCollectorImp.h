@@ -25,53 +25,56 @@
  */
 
 
-#ifndef DQMEVENTCOLLECTORIMP_H
-#define DQMEVENTCOLLECTORIMP_H
+#ifndef DQM4HEP_EVENTCOLLECTORIMP_H
+#define DQM4HEP_EVENTCOLLECTORIMP_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-/** DQMEventCollectorImp class
- */
-class DQMEventCollectorImp
-{
-public:
-	/** Destructor
-	 */
-	virtual ~DQMEventCollectorImp() {}
+  namespace core {
 
-	/** Set the collector name
-	 */
-	virtual StatusCode setCollectorName(const std::string &collectorName) = 0;
+    /** EventCollectorImp class
+     */
+    class EventCollectorImp
+    {
+    public:
+      /** Destructor
+       */
+      virtual ~EventCollectorImp() {}
 
-	/** Get the collector name
-	 */
-	virtual const std::string &getCollectorName() const = 0;
+      /** Set the collector name
+       */
+      virtual StatusCode setCollectorName(const std::string &collectorName) = 0;
 
-	/** Whether the collector server is running
-	 */
-	virtual bool isRunning() const = 0;
+      /** Get the collector name
+       */
+      virtual const std::string &getCollectorName() const = 0;
 
-	/** Start the collector server
-	 */
-	virtual StatusCode startCollector() = 0;
+      /** Whether the collector server is running
+       */
+      virtual bool isRunning() const = 0;
 
-	/** Stop the collector server
-	 */
-	virtual StatusCode stopCollector() = 0;
+      /** Start the collector server
+       */
+      virtual StatusCode startCollector() = 0;
 
-	/** Set the event streamer to serialize/deserialize the in/out-coming events
-	 */
-	virtual void setEventStreamer(DQMEventStreamer *pEventStreamer) = 0;
+      /** Stop the collector server
+       */
+      virtual StatusCode stopCollector() = 0;
 
-	/** Get the event streamer
-	 */
-	virtual DQMEventStreamer *getEventStreamer() const = 0;
-}; 
+      /** Set the event streamer to serialize/deserialize the in/out-coming events
+       */
+      virtual void setEventStreamer(EventStreamer *pEventStreamer) = 0;
+
+      /** Get the event streamer
+       */
+      virtual EventStreamer *getEventStreamer() const = 0;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMEVENTCOLLECTORIMP_H
+#endif  //  DQM4HEP_EVENTCOLLECTORIMP_H

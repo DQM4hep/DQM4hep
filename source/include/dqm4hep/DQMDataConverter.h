@@ -34,26 +34,26 @@
 namespace dqm4hep
 {
 
-class TiXmlHandle;
-
-/** DQMDataConverter class
- */
-template <typename InputType, typename OutputType>
-class DQMDataConverter 
-{
-public:
-	/** Destructor
-	 */
-	virtual ~DQMDataConverter() {}
-
-	/** Perform conversion from input type to output type
-	 */
-	virtual dqm4hep::StatusCode convert(const InputType *const pInputObject, OutputType *const pOutputObject) = 0;
-
-	/** Read settings from xml handle
-	 */
-	virtual dqm4hep::StatusCode readSettings(const TiXmlHandle handle) = 0;
-};
+//class TiXmlHandle;
+//
+///** DQMDataConverter class
+// */
+//template <typename InputType, typename OutputType>
+//class DQMDataConverter
+//{
+//public:
+//	/** Destructor
+//	 */
+//	virtual ~DQMDataConverter() {}
+//
+//	/** Perform conversion from input type to output type
+//	 */
+//	virtual dqm4hep::StatusCode convert(const InputType *const pInputObject, OutputType *const pOutputObject) = 0;
+//
+//	/** Read settings from xml handle
+//	 */
+//	virtual dqm4hep::StatusCode readSettings(const TiXmlHandle handle) = 0;
+//};
 
 } 
 

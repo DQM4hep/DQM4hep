@@ -25,43 +25,46 @@
  */
 
 
-#ifndef DQMPLUGIN_H
-#define DQMPLUGIN_H
+#ifndef DQM4HEP_PLUGIN_H
+#define DQM4HEP_PLUGIN_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-class DQMPluginManager;
+  namespace core {
 
-/** DQMPlugin class
- */ 
-class DQMPlugin
-{
-	friend class DQMPluginManager;
-public:
-	/** Constructor
-	 */
-	DQMPlugin(const std::string &pluginName, bool shouldRegister);
+    class PluginManager;
 
-	/** Destructor
-	 */
-	virtual ~DQMPlugin();
+    /** Plugin class
+     */
+    class Plugin
+    {
+      friend class PluginManager;
+    public:
+      /** Constructor
+       */
+      Plugin(const std::string &pluginName, bool shouldRegister);
 
-	/** Returns the plug-in name
-	 */
-	const std::string &getPluginName() const;
+      /** Destructor
+       */
+      virtual ~Plugin();
 
-	/** Create a new instance of the wrapped class
-	 */
-	virtual DQMPlugin *create() const = 0;
+      /** Returns the plug-in name
+       */
+      const std::string &getPluginName() const;
 
-private:
-	const std::string              m_pluginName;
-};
+      /** Create a new instance of the wrapped class
+       */
+      virtual Plugin *create() const = 0;
+
+    private:
+      const std::string              m_pluginName;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMPLUGIN_H
+#endif  //  DQM4HEP_PLUGIN_H

@@ -25,71 +25,74 @@
  */
 
 
-#ifndef DQMEVENTCOLLECTOR_H
-#define DQMEVENTCOLLECTOR_H
+#ifndef DQM4HEP_EVENTCOLLECTOR_H
+#define DQM4HEP_EVENTCOLLECTOR_H
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-class DQMEventCollectorImp;
+  namespace core {
 
-/** DQMEventCollector class
- */ 
-class DQMEventCollector 
-{
-public:
-	/** Constructor
-	 */
-	DQMEventCollector();
+    class EventCollectorImp;
 
-	/** Constructor with collector implementation
-	 */
-	DQMEventCollector(DQMEventCollectorImp *pCollectorImp);
+    /** EventCollector class
+     */
+    class EventCollector
+    {
+    public:
+      /** Constructor
+       */
+      EventCollector();
 
-	/** Destructor
-	 */
-	~DQMEventCollector();
+      /** Constructor with collector implementation
+       */
+      EventCollector(EventCollectorImp *pCollectorImp);
 
-	/** Set the collctor name
-	 */
-	StatusCode setCollectorName(const std::string &collectorName);
+      /** Destructor
+       */
+      ~EventCollector();
 
-	/** Get the collector name
-	 */
-	const std::string &getCollectorName() const;
+      /** Set the collctor name
+       */
+      StatusCode setCollectorName(const std::string &collectorName);
 
-	/** Whether the collector server is running
-	 */
-	bool isRunning() const;
+      /** Get the collector name
+       */
+      const std::string &getCollectorName() const;
 
-	/** Start the collector server
-	 */
-	StatusCode startCollector();
+      /** Whether the collector server is running
+       */
+      bool isRunning() const;
 
-	/** Stop the collector server
-	 */
-	StatusCode stopCollector();
+      /** Start the collector server
+       */
+      StatusCode startCollector();
 
-	/** Set the event collector implementation
-	 */
-	void setEventCollectorImp(DQMEventCollectorImp *pCollectorImp);
+      /** Stop the collector server
+       */
+      StatusCode stopCollector();
 
-	/** Set the event streamer to serialize/deserialize the in/out-coming events
-	 */
-	void setEventStreamer(DQMEventStreamer *pEventStreamer);
+      /** Set the event collector implementation
+       */
+      void setEventCollectorImp(EventCollectorImp *pCollectorImp);
 
-	/** Get the event streamer
-	 */
-	DQMEventStreamer *getEventStreamer() const;
+      /** Set the event streamer to serialize/deserialize the in/out-coming events
+       */
+      void setEventStreamer(EventStreamer *pEventStreamer);
 
-private:
+      /** Get the event streamer
+       */
+      EventStreamer *getEventStreamer() const;
 
-	DQMEventCollectorImp *m_pCollectorImp;
-};
+    private:
+
+      EventCollectorImp *m_pCollectorImp;
+    };
+
+  }
 
 } 
 
-#endif  //  DQMEVENTCOLLECTOR_H
+#endif  //  DQM4HEP_EVENTCOLLECTOR_H
