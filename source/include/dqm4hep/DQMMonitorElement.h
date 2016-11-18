@@ -416,7 +416,12 @@ void TScalarObject<T>::Draw(Option_t *option)
 	std::string scalarStr = ToString();
 
 	if(0 == m_pPaveText)
+	{
 		m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
+		m_pPaveText->SetFillColor(0);
+		m_pPaveText->SetBorderSize(0);
+		m_pPaveText->SetShadowColor(0);
+	}
 
 	m_pPaveText->Clear();
 	m_pPaveText->AddText(scalarStr.c_str());
