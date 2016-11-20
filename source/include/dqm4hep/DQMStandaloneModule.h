@@ -47,11 +47,11 @@ namespace dqm4hep {
     public:
       /** Constructor
        */
-      StandaloneModule();
+      StandaloneModule() {}
 
       /** Destructor
        */
-      virtual ~StandaloneModule();
+      virtual ~StandaloneModule() {}
 
       /** Process the module.
        *  See StandaloneModuleApplication class for explanations

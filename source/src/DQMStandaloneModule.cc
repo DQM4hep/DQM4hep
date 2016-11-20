@@ -31,18 +31,18 @@
 namespace dqm4hep
 {
 
-DQMStandaloneModule::DQMStandaloneModule() :
-		DQMModule()
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
-DQMStandaloneModule::~DQMStandaloneModule()
-{
-	/* nop */
-}
+//DQMStandaloneModule::DQMStandaloneModule() :
+//		DQMModule()
+//{
+//	/* nop */
+//}
+//
+////-------------------------------------------------------------------------------------------------
+//
+//DQMStandaloneModule::~DQMStandaloneModule()
+//{
+//	/* nop */
+//}
 
 
 } 
