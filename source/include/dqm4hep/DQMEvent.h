@@ -32,6 +32,9 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 
+// -- xdrstream headers
+#include "xdrstream/xdrstream.h"
+
 namespace dqm4hep
 {
   namespace core {
