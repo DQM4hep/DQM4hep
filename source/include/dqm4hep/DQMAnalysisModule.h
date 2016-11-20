@@ -63,11 +63,11 @@ namespace dqm4hep {
 
       /** Called at start of run
        */
-      virtual StatusCode startOfRun(const Run &run) = 0;
+      virtual StatusCode startOfRun(const Run *const pRun) = 0;
 
       /** Called at end of run
        */
-      virtual StatusCode endOfRun(const Run &run) = 0;
+      virtual StatusCode endOfRun(const Run *const pRun) = 0;
     };
 
     //-------------------------------------------------------------------------------------------------
