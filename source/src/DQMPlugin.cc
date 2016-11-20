@@ -30,29 +30,32 @@
 #include "dqm4hep/DQMVersion.h"
 #include "dqm4hep/DQMLogging.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-DQMPlugin::DQMPlugin(const std::string &pluginName, bool shouldRegister) :
-		m_pluginName( pluginName )
-{
-	if(shouldRegister)
-		THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->registerPlugin( this ) );
+  namespace core {
+
+    Plugin::Plugin(const std::string &pluginName, bool shouldRegister) :
+		    m_pluginName( pluginName )
+    {
+      if(shouldRegister)
+        THROW_RESULT_IF( STATUS_CODE_SUCCESS, !=, PluginManager::instance()->registerPlugin( this ) );
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    Plugin::~Plugin()
+    {
+      /* nop */
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const std::string &Plugin::getPluginName() const
+    {
+      return m_pluginName;
+    }
+
+  }
+
 }
-
-//-------------------------------------------------------------------------------------------------
-
-DQMPlugin::~DQMPlugin()
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
-const std::string &DQMPlugin::getPluginName() const
-{
-	return m_pluginName;
-}
-
-} 
 

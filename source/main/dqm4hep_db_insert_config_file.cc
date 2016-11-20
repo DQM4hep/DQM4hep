@@ -1,4 +1,4 @@
-  /// \file dqm4hep_db_insert_config_file.cc
+/// \file dqm4hep_db_insert_config_file.cc
 /*
  *
  * dqm4hep_db_insert_config_file.cc main source file template automatically generated
@@ -41,158 +41,158 @@
 #include <signal.h>
 
 using namespace std;
-using namespace dqm4hep;
+using namespace dqm4hep::core;
 
 int main(int argc, char* argv[])
 {
-	std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
-	TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
-	std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
+  std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
+  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
+  std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
 
-	TCLAP::ValueArg<std::string> userArg(
-				  "u"
-				 , "user"
-				 , "The MySQL database user name"
-				 , false
-				 , "DQM4HEP"
-				 , "string");
-	pCommandLine->add(userArg);
+  TCLAP::ValueArg<std::string> userArg(
+      "u"
+      , "user"
+      , "The MySQL database user name"
+      , false
+      , "DQM4HEP"
+      , "string");
+  pCommandLine->add(userArg);
 
-	TCLAP::ValueArg<std::string> hostArg(
-				  "k"
-				 , "host"
-				 , "The MySQL database host name"
-				 , false
-				 , "localhost"
-				 , "string");
-	pCommandLine->add(hostArg);
+  TCLAP::ValueArg<std::string> hostArg(
+      "k"
+      , "host"
+      , "The MySQL database host name"
+      , false
+      , "localhost"
+      , "string");
+  pCommandLine->add(hostArg);
 
-	TCLAP::ValueArg<std::string> passwordArg(
-				  "p"
-				 , "password"
-				 , "The MySQL database password"
-				 , false
-				 , "DQM4HEP"
-				 , "string");
-	pCommandLine->add(passwordArg);
+  TCLAP::ValueArg<std::string> passwordArg(
+      "p"
+      , "password"
+      , "The MySQL database password"
+      , false
+      , "DQM4HEP"
+      , "string");
+  pCommandLine->add(passwordArg);
 
-	TCLAP::ValueArg<std::string> fileArg(
-				  "f"
-				 , "file"
-				 , "The config file to store in database"
-				 , true
-				 , ""
-				 , "string");
-	pCommandLine->add(fileArg);
+  TCLAP::ValueArg<std::string> fileArg(
+      "f"
+      , "file"
+      , "The config file to store in database"
+      , true
+      , ""
+      , "string");
+  pCommandLine->add(fileArg);
 
-	TCLAP::ValueArg<std::string> configFileNameArg(
-				  "c"
-				 , "config-file-name"
-				 , "The MySQL primary key for the config file to store in database"
-				 , false
-				 , ""
-				 , "string");
-	pCommandLine->add(configFileNameArg);
+  TCLAP::ValueArg<std::string> configFileNameArg(
+      "c"
+      , "config-file-name"
+      , "The MySQL primary key for the config file to store in database"
+      , false
+      , ""
+      , "string");
+  pCommandLine->add(configFileNameArg);
 
-	TCLAP::ValueArg<std::string> fileDescriptionArg(
-				  "d"
-				 , "description"
-				 , "The config file to insert in database"
-				 , false
-				 , ""
-				 , "string");
-	pCommandLine->add(fileDescriptionArg);
+  TCLAP::ValueArg<std::string> fileDescriptionArg(
+      "d"
+      , "description"
+      , "The config file to insert in database"
+      , false
+      , ""
+      , "string");
+  pCommandLine->add(fileDescriptionArg);
 
-	TCLAP::SwitchArg forceReplaceArg(
-				  "r"
-				 , "force-replace"
-				 , "Whether to force replace the config file entry in database"
-				 , false);
-	pCommandLine->add(forceReplaceArg);
+  TCLAP::SwitchArg forceReplaceArg(
+      "r"
+      , "force-replace"
+      , "Whether to force replace the config file entry in database"
+      , false);
+  pCommandLine->add(forceReplaceArg);
 
-	TCLAP::ValueArg<std::string> loggerConfigArg(
-				  "l"
-				 , "logger-config"
-				 , "The xml logger file to configure log4cxx"
-				 , false
-				 , log4cxx_file
-				 , "string");
-	pCommandLine->add(loggerConfigArg);
+  TCLAP::ValueArg<std::string> loggerConfigArg(
+      "l"
+      , "logger-config"
+      , "The xml logger file to configure log4cxx"
+      , false
+      , log4cxx_file
+      , "string");
+  pCommandLine->add(loggerConfigArg);
 
-	std::vector<std::string> allowedLevels;
-	allowedLevels.push_back("INFO");
-	allowedLevels.push_back("WARN");
-	allowedLevels.push_back("DEBUG");
-	allowedLevels.push_back("TRACE");
-	allowedLevels.push_back("ERROR");
-	allowedLevels.push_back("FATAL");
-	allowedLevels.push_back("OFF");
-	allowedLevels.push_back("ALL");
-	TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
+  std::vector<std::string> allowedLevels;
+  allowedLevels.push_back("INFO");
+  allowedLevels.push_back("WARN");
+  allowedLevels.push_back("DEBUG");
+  allowedLevels.push_back("TRACE");
+  allowedLevels.push_back("ERROR");
+  allowedLevels.push_back("FATAL");
+  allowedLevels.push_back("OFF");
+  allowedLevels.push_back("ALL");
+  TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
 
-	TCLAP::ValueArg<std::string> verbosityArg(
-				  "v"
-				 , "verbosity"
-				 , "The verbosity level used for this application"
-				 , false
-				 , "INFO"
-				 , &allowedLevelsContraint);
-	pCommandLine->add(verbosityArg);
+  TCLAP::ValueArg<std::string> verbosityArg(
+      "v"
+      , "verbosity"
+      , "The verbosity level used for this application"
+      , false
+      , "INFO"
+      , &allowedLevelsContraint);
+  pCommandLine->add(verbosityArg);
 
-	// parse command line
-	pCommandLine->parse(argc, argv);
+  // parse command line
+  pCommandLine->parse(argc, argv);
 
-	log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
+  log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
 
-	if( verbosityArg.isSet() )
-		dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
+  if( verbosityArg.isSet() )
+    dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
 
-	DQMDBInterface *pDBInterface = NULL;
+  DBInterface *pDBInterface = NULL;
 
-	try
-	{
-		pDBInterface = new DQMDBInterface(hostArg.getValue(), userArg.getValue(), passwordArg.getValue(), "DQM4HEP");
-	}
-	catch(const StatusCodeException &exception)
-	{
-		if(NULL != pDBInterface)
-			delete pDBInterface;
+  try
+  {
+    pDBInterface = new DBInterface(hostArg.getValue(), userArg.getValue(), passwordArg.getValue(), "DQM4HEP");
+  }
+  catch(const StatusCodeException &exception)
+  {
+    if(NULL != pDBInterface)
+      delete pDBInterface;
 
-		return -1;
-	}
+    return -1;
+  }
 
-	try
-	{
-		// construct the config file name primary key to insert in data base
-		std::string configFilePrimaryKey;
+  try
+  {
+    // construct the config file name primary key to insert in data base
+    std::string configFilePrimaryKey;
 
-		if(configFileNameArg.isSet())
-		{
-			configFilePrimaryKey = configFileNameArg.getValue();
-		}
-		else
-		{
-			size_t slashPos = fileArg.getValue().rfind("/");
+    if(configFileNameArg.isSet())
+    {
+      configFilePrimaryKey = configFileNameArg.getValue();
+    }
+    else
+    {
+      size_t slashPos = fileArg.getValue().rfind("/");
 
-			if(slashPos != std::string::npos)
-				configFilePrimaryKey = fileArg.getValue().substr(slashPos+1);
-			else
-				configFilePrimaryKey = fileArg.getValue();
-		}
+      if(slashPos != std::string::npos)
+        configFilePrimaryKey = fileArg.getValue().substr(slashPos+1);
+      else
+        configFilePrimaryKey = fileArg.getValue();
+    }
 
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDBInterface->insertConfigFile(fileArg.getValue(), configFilePrimaryKey,
-				fileDescriptionArg.getValue(), forceReplaceArg.getValue()));
-	}
-	catch(const StatusCodeException &exception)
-	{
-		if(NULL != pDBInterface)
-			delete pDBInterface;
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDBInterface->insertConfigFile(fileArg.getValue(), configFilePrimaryKey,
+        fileDescriptionArg.getValue(), forceReplaceArg.getValue()));
+  }
+  catch(const StatusCodeException &exception)
+  {
+    if(NULL != pDBInterface)
+      delete pDBInterface;
 
-		return exception.getStatusCode();
-	}
+    return exception.getStatusCode();
+  }
 
-	std::cout << "OK" << std::endl;
-	delete pDBInterface;
+  std::cout << "OK" << std::endl;
+  delete pDBInterface;
 
-	return 0;
+  return 0;
 }

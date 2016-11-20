@@ -32,161 +32,164 @@
 #include <dlfcn.h>
 #include <cstdlib>
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-DQMPluginManager::DQMPluginManager()
-{
-	/* nop */
-}
+  namespace core {
 
-//-------------------------------------------------------------------------------------------------
+    PluginManager::PluginManager()
+    {
+      /* nop */
+    }
 
-DQMPluginManager::~DQMPluginManager()
-{
-	for( DQMPluginMap::const_iterator iter = m_pluginMap.begin(), endIter = m_pluginMap.end() ;
-			endIter != iter ; ++iter )
-	{
-		delete iter->second;
-	}
+    //-------------------------------------------------------------------------------------------------
 
-	m_pluginMap.clear();
-}
+    PluginManager::~PluginManager()
+    {
+      for( PluginMap::const_iterator iter = m_pluginMap.begin(), endIter = m_pluginMap.end() ;
+          endIter != iter ; ++iter )
+      {
+        delete iter->second;
+      }
 
-//-------------------------------------------------------------------------------------------------
+      m_pluginMap.clear();
+    }
 
-StatusCode DQMPluginManager::loadLibraries()
-{
-	// get the environment plug-in dll variable
-	char *pPluginDllEnv = getenv( "DQM4HEP_PLUGIN_DLL" );
+    //-------------------------------------------------------------------------------------------------
 
-	if( pPluginDllEnv == 0 )
-	{
-		LOG4CXX_WARN( dqmMainLogger , "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
-				"Set it before loading shared libraries. \n"
-				"Example : export DQM4HEP_PLUGIN_DLL=libPlugin1.so:libPlugin2.so" );
+    StatusCode PluginManager::loadLibraries()
+    {
+      // get the environment plug-in dll variable
+      char *pPluginDllEnv = getenv( "DQM4HEP_PLUGIN_DLL" );
 
-		return STATUS_CODE_SUCCESS;
-	}
+      if( pPluginDllEnv == 0 )
+      {
+        LOG4CXX_WARN( dqmMainLogger , "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
+            "Set it before loading shared libraries. \n"
+            "Example : export DQM4HEP_PLUGIN_DLL=libPlugin1.so:libPlugin2.so" );
 
-	// split the string into a list
-	std::string libraryConcatenateList( pPluginDllEnv );
-	StringVector libraryList;
+        return STATUS_CODE_SUCCESS;
+      }
 
-	DQM4HEP::tokenize( libraryConcatenateList, libraryList, ":" );
+      // split the string into a list
+      std::string libraryConcatenateList( pPluginDllEnv );
+      StringVector libraryList;
 
-	// load the shared libraries
-	return this->loadLibraries( libraryList );
-}
+      DQM4HEP::tokenize( libraryConcatenateList, libraryList, ":" );
 
-//-------------------------------------------------------------------------------------------------
+      // load the shared libraries
+      return this->loadLibraries( libraryList );
+    }
 
-StatusCode DQMPluginManager::loadLibraries( const StringVector &libraryNameList )
-{
-	for( StringVector::const_iterator iter = libraryNameList.begin(), endIter = libraryNameList.end() ;
-			endIter != iter ; ++iter )
-	{
-		RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->loadLibrary( *iter ) );
-	}
+    //-------------------------------------------------------------------------------------------------
 
-	return STATUS_CODE_SUCCESS;
-}
+    StatusCode PluginManager::loadLibraries( const StringVector &libraryNameList )
+    {
+      for( StringVector::const_iterator iter = libraryNameList.begin(), endIter = libraryNameList.end() ;
+          endIter != iter ; ++iter )
+      {
+        RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->loadLibrary( *iter ) );
+      }
 
-//-------------------------------------------------------------------------------------------------
+      return STATUS_CODE_SUCCESS;
+    }
 
-StatusCode DQMPluginManager::loadLibrary( const std::string &libraryName )
-{
-	size_t idx = libraryName.find_last_of( "/" );
+    //-------------------------------------------------------------------------------------------------
 
-	// the library basename, i.e. /path/to/libBlah.so --> libBlah.so
-	std::string libBaseName( libraryName.substr( idx + 1 ) );
+    StatusCode PluginManager::loadLibrary( const std::string &libraryName )
+    {
+      size_t idx = libraryName.find_last_of( "/" );
 
-	char *real_path = realpath( libraryName.c_str(), NULL );
+      // the library basename, i.e. /path/to/libBlah.so --> libBlah.so
+      std::string libBaseName( libraryName.substr( idx + 1 ) );
 
-	if( NULL != real_path )
-	{
-		LOG4CXX_INFO( dqmMainLogger , "<!-- Loading shared library : " << real_path << " ("<< libBaseName << ")-->" );
+      char *real_path = realpath( libraryName.c_str(), NULL );
 
-		// use real_path
-		free( real_path );
-	}
-	else
-	{
-		LOG4CXX_INFO( dqmMainLogger , "<!-- Loading shared library : " << libraryName << " ("<< libBaseName << ")-->" );
-	}
+      if( NULL != real_path )
+      {
+        LOG4CXX_INFO( dqmMainLogger , "<!-- Loading shared library : " << real_path << " ("<< libBaseName << ")-->" );
 
-	void *pLibPointer = dlopen( libraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL );
+        // use real_path
+        free( real_path );
+      }
+      else
+      {
+        LOG4CXX_INFO( dqmMainLogger , "<!-- Loading shared library : " << libraryName << " ("<< libBaseName << ")-->" );
+      }
 
-	if( pLibPointer == 0 )
-	{
-		LOG4CXX_ERROR( dqmMainLogger , "<!-- ERROR loading shared library : " << libraryName << "\n"
-												<< "    ->    "   << dlerror() << " -->" );
+      void *pLibPointer = dlopen( libraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL );
 
-		return STATUS_CODE_FAILURE;
-	}
-	else
-		return STATUS_CODE_SUCCESS;
-}
+      if( pLibPointer == 0 )
+      {
+        LOG4CXX_ERROR( dqmMainLogger , "<!-- ERROR loading shared library : " << libraryName << "\n"
+            << "    ->    "   << dlerror() << " -->" );
 
-//-------------------------------------------------------------------------------------------------
+        return STATUS_CODE_FAILURE;
+      }
+      else
+        return STATUS_CODE_SUCCESS;
+    }
 
-DQMPlugin *DQMPluginManager::getPlugin( const std::string &pluginName ) const
-{
-	if( ! isPluginRegistered( pluginName ) )
-		return 0;
+    //-------------------------------------------------------------------------------------------------
 
-	return m_pluginMap.find( pluginName )->second;
-}
+    Plugin *PluginManager::getPlugin( const std::string &pluginName ) const
+    {
+      if( ! isPluginRegistered( pluginName ) )
+        return 0;
 
-//-------------------------------------------------------------------------------------------------
+      return m_pluginMap.find( pluginName )->second;
+    }
 
-bool DQMPluginManager::isPluginRegistered( const std::string &pluginName ) const
-{
-	return ( m_pluginMap.find( pluginName ) != m_pluginMap.end() );
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    bool PluginManager::isPluginRegistered( const std::string &pluginName ) const
+    {
+      return ( m_pluginMap.find( pluginName ) != m_pluginMap.end() );
+    }
 
-StringVector DQMPluginManager::getPluginNameList() const
-{
-	StringVector pluginNameList;
+    //-------------------------------------------------------------------------------------------------
 
-	for( DQMPluginMap::const_iterator iter = m_pluginMap.begin(), endIter = m_pluginMap.end() ;
-			endIter != iter ; ++iter )
-	{
-		pluginNameList.push_back( iter->first );
-	}
+    StringVector PluginManager::getPluginNameList() const
+    {
+      StringVector pluginNameList;
 
-	return pluginNameList;
-}
+      for( PluginMap::const_iterator iter = m_pluginMap.begin(), endIter = m_pluginMap.end() ;
+          endIter != iter ; ++iter )
+      {
+        pluginNameList.push_back( iter->first );
+      }
 
-//-------------------------------------------------------------------------------------------------
+      return pluginNameList;
+    }
 
-StatusCode DQMPluginManager::registerPlugin( DQMPlugin *pPlugin )
-{
-	// null ptr case
-	if( NULL == pPlugin )
-		return STATUS_CODE_INVALID_PTR;
+    //-------------------------------------------------------------------------------------------------
 
-	// check if the plug is already registered
-	if( isPluginRegistered( pPlugin->getPluginName() ) )
-	{
-		delete pPlugin;
-		pPlugin = NULL;
-		return STATUS_CODE_ALREADY_PRESENT;
-	}
+    StatusCode PluginManager::registerPlugin( Plugin *pPlugin )
+    {
+      // null ptr case
+      if( NULL == pPlugin )
+        return STATUS_CODE_INVALID_PTR;
 
-	// try to register it
-	if( ! m_pluginMap.insert( DQMPluginMap::value_type( pPlugin->getPluginName(), pPlugin ) ).second )
-	{
-		delete pPlugin;
-		pPlugin = NULL;
+      // check if the plug is already registered
+      if( isPluginRegistered( pPlugin->getPluginName() ) )
+      {
+        delete pPlugin;
+        pPlugin = NULL;
+        return STATUS_CODE_ALREADY_PRESENT;
+      }
 
-		return STATUS_CODE_FAILURE;
-	}
+      // try to register it
+      if( ! m_pluginMap.insert( PluginMap::value_type( pPlugin->getPluginName(), pPlugin ) ).second )
+      {
+        delete pPlugin;
+        pPlugin = NULL;
 
-	return STATUS_CODE_SUCCESS;
-}
+        return STATUS_CODE_FAILURE;
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+  }
 
 } 
 

@@ -27,116 +27,118 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMStatisticsClient.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-DQMStatisticsClient::DQMStatisticsClient(const std::string &baseServiceName) :
-		m_lastStatsTimestamp(0),
-		m_rate(0.f),
-		m_meanStats(0.f),
-		m_lastStatistics(0)
-{
-	m_pLastUpdateTimeInfo = new DimUpdatedInfo((baseServiceName + "/LAST_UPDATE_TIME").c_str(), static_cast<int>(0), this);
-	m_pRateInfo = new DimUpdatedInfo((baseServiceName + "/RATE").c_str(), static_cast<float>(0.f), this);
-	m_pMeanStatsInfo = new DimUpdatedInfo((baseServiceName + "/MEAN_STATS").c_str(), static_cast<float>(0.f), this);
-	m_pLastUpdateStatisticsInfo = new DimUpdatedInfo((baseServiceName + "/LAST_UPDATE_STATS").c_str(), static_cast<int>(0), this);
+  namespace core {
 
-	pthread_mutex_init(&m_mutex, NULL);
+    StatisticsClient::StatisticsClient(const std::string &baseServiceName) :
+		    m_lastStatsTimestamp(0),
+		    m_rate(0.f),
+		    m_meanStats(0.f),
+		    m_lastStatistics(0)
+    {
+      m_pLastUpdateTimeInfo = new DimUpdatedInfo((baseServiceName + "/LAST_UPDATE_TIME").c_str(), static_cast<int>(0), this);
+      m_pRateInfo = new DimUpdatedInfo((baseServiceName + "/RATE").c_str(), static_cast<float>(0.f), this);
+      m_pMeanStatsInfo = new DimUpdatedInfo((baseServiceName + "/MEAN_STATS").c_str(), static_cast<float>(0.f), this);
+      m_pLastUpdateStatisticsInfo = new DimUpdatedInfo((baseServiceName + "/LAST_UPDATE_STATS").c_str(), static_cast<int>(0), this);
+
+      pthread_mutex_init(&m_mutex, NULL);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatisticsClient::~StatisticsClient()
+    {
+      delete m_pLastUpdateTimeInfo;
+      delete m_pRateInfo;
+      delete m_pMeanStatsInfo;
+      delete m_pLastUpdateStatisticsInfo;
+
+      pthread_mutex_destroy(&m_mutex);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    int StatisticsClient::getLastUpdateTime() const
+    {
+      pthread_mutex_lock(&m_mutex);
+      int lastStatsTimestamp = m_lastStatsTimestamp;
+      pthread_mutex_unlock(&m_mutex);
+
+      return lastStatsTimestamp;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float StatisticsClient::getRate() const
+    {
+      pthread_mutex_lock(&m_mutex);
+      int rate = m_rate;
+      pthread_mutex_unlock(&m_mutex);
+
+      return rate;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float StatisticsClient::getMeanStats() const
+    {
+      pthread_mutex_lock(&m_mutex);
+      int meanStats = m_meanStats;
+      pthread_mutex_unlock(&m_mutex);
+
+      return meanStats;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float StatisticsClient::getLastStats() const
+    {
+      pthread_mutex_lock(&m_mutex);
+      int lastStatistics = m_lastStatistics;
+      pthread_mutex_unlock(&m_mutex);
+
+      return lastStatistics;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void StatisticsClient::updated()
+    {
+      /* nop */
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void StatisticsClient::infoHandler()
+    {
+      DimInfo *pCurrentInfo = getInfo();
+
+      pthread_mutex_lock(&m_mutex);
+
+      if(pCurrentInfo == m_pLastUpdateTimeInfo)
+      {
+        m_lastStatsTimestamp = pCurrentInfo->getInt();
+      }
+      else if(pCurrentInfo == m_pRateInfo)
+      {
+        m_rate = pCurrentInfo->getFloat();
+      }
+      else if(pCurrentInfo == m_pMeanStatsInfo)
+      {
+        m_meanStats = pCurrentInfo->getFloat();
+      }
+      else if(pCurrentInfo == m_pLastUpdateStatisticsInfo)
+      {
+        m_lastStatistics = pCurrentInfo->getInt();
+      }
+
+      pthread_mutex_unlock(&m_mutex);
+
+      this->updated();
+    }
+
+  }
+
 }
-
-//-------------------------------------------------------------------------------------------------
-
-DQMStatisticsClient::~DQMStatisticsClient() 
-{
-	delete m_pLastUpdateTimeInfo;
-	delete m_pRateInfo;
-	delete m_pMeanStatsInfo;
-	delete m_pLastUpdateStatisticsInfo;
-
-	pthread_mutex_destroy(&m_mutex);
-}
-
-//-------------------------------------------------------------------------------------------------
-
-int DQMStatisticsClient::getLastUpdateTime() const
-{
-	pthread_mutex_lock(&m_mutex);
-	int lastStatsTimestamp = m_lastStatsTimestamp;
-	pthread_mutex_unlock(&m_mutex);
-
-	return lastStatsTimestamp;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-float DQMStatisticsClient::getRate() const
-{
-	pthread_mutex_lock(&m_mutex);
-	int rate = m_rate;
-	pthread_mutex_unlock(&m_mutex);
-
-	return rate;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-float DQMStatisticsClient::getMeanStats() const
-{
-	pthread_mutex_lock(&m_mutex);
-	int meanStats = m_meanStats;
-	pthread_mutex_unlock(&m_mutex);
-
-	return meanStats;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-float DQMStatisticsClient::getLastStats() const
-{
-	pthread_mutex_lock(&m_mutex);
-	int lastStatistics = m_lastStatistics;
-	pthread_mutex_unlock(&m_mutex);
-
-	return lastStatistics;
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMStatisticsClient::updated()
-{
-	/* nop */
-}
-
-//-------------------------------------------------------------------------------------------------
-
-void DQMStatisticsClient::infoHandler()
-{
-	DimInfo *pCurrentInfo = getInfo();
-
-	pthread_mutex_lock(&m_mutex);
-
-	if(pCurrentInfo == m_pLastUpdateTimeInfo)
-	{
-		m_lastStatsTimestamp = pCurrentInfo->getInt();
-	}
-	else if(pCurrentInfo == m_pRateInfo)
-	{
-		m_rate = pCurrentInfo->getFloat();
-	}
-	else if(pCurrentInfo == m_pMeanStatsInfo)
-	{
-		m_meanStats = pCurrentInfo->getFloat();
-	}
-	else if(pCurrentInfo == m_pLastUpdateStatisticsInfo)
-	{
-		m_lastStatistics = pCurrentInfo->getInt();
-	}
-
-	pthread_mutex_unlock(&m_mutex);
-
-	this->updated();
-}
-
-
-} 
 

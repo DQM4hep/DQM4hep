@@ -1,4 +1,4 @@
-  /// \file dqm4hep_start_run_control_server.cc
+/// \file dqm4hep_start_run_control_server.cc
 /*
  *
  * dqm4hep_start_run_control_server.cc main source file template automatically generated
@@ -44,7 +44,7 @@
 #endif
 
 using namespace std;
-using namespace dqm4hep;
+using namespace dqm4hep::core;
 
 bool process = true;
 
@@ -53,10 +53,10 @@ bool process = true;
 // key interrupt signal handling
 void int_key_signal_handler(int signal)
 {
-	LOG4CXX_WARN( dqmMainLogger , "*** SIGN INT ***" );
-	LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
+  LOG4CXX_WARN( dqmMainLogger , "*** SIGN INT ***" );
+  LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
 
-	process = false;
+  process = false;
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -64,133 +64,133 @@ void int_key_signal_handler(int signal)
 // segmentation violation signal handling
 void seg_viol_signal_handling(int signal)
 {
-	LOG4CXX_WARN( dqmMainLogger , "*** SIGN VIOL ***" );
-	LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
+  LOG4CXX_WARN( dqmMainLogger , "*** SIGN VIOL ***" );
+  LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
 }
 
 //-------------------------------------------------------------------------------------------------
 
 int main(int argc, char* argv[])
 {
-	DQM4HEP::screenSplash();
+  DQM4HEP::screenSplash();
 
-	std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
-	TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4HEP_VERSION_STR);
-	std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
+  std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
+  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4HEP_VERSION_STR);
+  std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
 
-	TCLAP::ValueArg<std::string> runControlNameArg(
-				  "r"
-				 , "run-control-name"
-				 , "The run control name"
-				 , true
-				 , ""
-				 , "string");
-	pCommandLine->add(runControlNameArg);
+  TCLAP::ValueArg<std::string> runControlNameArg(
+      "r"
+      , "run-control-name"
+      , "The run control name"
+      , true
+      , ""
+      , "string");
+  pCommandLine->add(runControlNameArg);
 
-	TCLAP::ValueArg<std::string> passwordArg(
-				  "k"
-				 , "password"
-				 , "The run control password to execute command from interfaces"
-				 , false
-				 , ""
-				 , "string");
-	pCommandLine->add(passwordArg);
+  TCLAP::ValueArg<std::string> passwordArg(
+      "k"
+      , "password"
+      , "The run control password to execute command from interfaces"
+      , false
+      , ""
+      , "string");
+  pCommandLine->add(passwordArg);
 
-	TCLAP::ValueArg<std::string> loggerConfigArg(
-				  "l"
-				 , "logger-config"
-				 , "The log4cxx logger xml file"
-				 , false
-				 , log4cxx_file
-				 , "string");
-	pCommandLine->add(loggerConfigArg);
+  TCLAP::ValueArg<std::string> loggerConfigArg(
+      "l"
+      , "logger-config"
+      , "The log4cxx logger xml file"
+      , false
+      , log4cxx_file
+      , "string");
+  pCommandLine->add(loggerConfigArg);
 
-	std::vector<std::string> allowedLevels;
-	allowedLevels.push_back("INFO");
-	allowedLevels.push_back("WARN");
-	allowedLevels.push_back("DEBUG");
-	allowedLevels.push_back("TRACE");
-	allowedLevels.push_back("ERROR");
-	allowedLevels.push_back("FATAL");
-	allowedLevels.push_back("OFF");
-	allowedLevels.push_back("ALL");
-	TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
+  std::vector<std::string> allowedLevels;
+  allowedLevels.push_back("INFO");
+  allowedLevels.push_back("WARN");
+  allowedLevels.push_back("DEBUG");
+  allowedLevels.push_back("TRACE");
+  allowedLevels.push_back("ERROR");
+  allowedLevels.push_back("FATAL");
+  allowedLevels.push_back("OFF");
+  allowedLevels.push_back("ALL");
+  TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
 
-	TCLAP::ValueArg<std::string> verbosityArg(
-				  "v"
-				 , "verbosity"
-				 , "The verbosity level used for this application"
-				 , false
-				 , "INFO"
-				 , &allowedLevelsContraint);
-	pCommandLine->add(verbosityArg);
+  TCLAP::ValueArg<std::string> verbosityArg(
+      "v"
+      , "verbosity"
+      , "The verbosity level used for this application"
+      , false
+      , "INFO"
+      , &allowedLevelsContraint);
+  pCommandLine->add(verbosityArg);
 
 
 #ifdef DQM4HEP_USE_MONGOOSE
-	TCLAP::ValueArg<unsigned int> httpPortArg(
-				  "p"
-				 , "http-port"
-				 , "The http port to listen on (with mongoose)"
-				 , false
-				 , 8082
-				 , "unsigned int");
-	pCommandLine->add(httpPortArg);
+  TCLAP::ValueArg<unsigned int> httpPortArg(
+      "p"
+      , "http-port"
+      , "The http port to listen on (with mongoose)"
+      , false
+      , 8082
+      , "unsigned int");
+  pCommandLine->add(httpPortArg);
 #endif
 
-	// parse command line
-	pCommandLine->parse(argc, argv);
+  // parse command line
+  pCommandLine->parse(argc, argv);
 
-	log4cxx_file = loggerConfigArg.getValue();
-	log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
+  log4cxx_file = loggerConfigArg.getValue();
+  log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
 
-	if( verbosityArg.isSet() )
-		dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
+  if( verbosityArg.isSet() )
+    dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
 
-	// install signal handlers
-	LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
-	signal(SIGINT,  int_key_signal_handler);
-//	signal(SIGSEGV, seg_viol_signal_handling);
+  // install signal handlers
+  LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
+  signal(SIGINT,  int_key_signal_handler);
+  //	signal(SIGSEGV, seg_viol_signal_handling);
 
 
-	std::string runControlName( runControlNameArg.getValue() );
-	std::string password( passwordArg.getValue() );
+  std::string runControlName( runControlNameArg.getValue() );
+  std::string password( passwordArg.getValue() );
 
-	DQMRunControlService runControlServer;
+  RunControlService runControlServer;
 
-	runControlServer.setRunControlName(runControlName);
-	runControlServer.setPassword(password);
+  runControlServer.setRunControlName(runControlName);
+  runControlServer.setPassword(password);
 
 #ifdef DQM4HEP_USE_MONGOOSE
-	Server server( httpPortArg.getValue() );
-	server.registerController( &runControlServer );
-	server.start();
+  Server server( httpPortArg.getValue() );
+  server.registerController( &runControlServer );
+  server.start();
 
-	runControlServer.dumpRoutes();
+  runControlServer.dumpRoutes();
 #endif
 
-	try
-	{
-		THROW_RESULT_IF( STATUS_CODE_SUCCESS , !=, runControlServer.start() );
+  try
+  {
+    THROW_RESULT_IF( STATUS_CODE_SUCCESS , !=, runControlServer.start() );
 
-		DimServer::start(  ("DQM4HEP/RunControl/" + runControlName).c_str() );
+    DimServer::start(  ("DQM4HEP/RunControl/" + runControlName).c_str() );
 
-		while( process )
-			DQMCoreTool::sleep(std::chrono::seconds(1));
-	}
-	catch(StatusCodeException &exception)
-	{
-		LOG4CXX_ERROR( dqmMainLogger , "Couldn't start run control server : " << exception.toString() );
+    while( process )
+      CoreTool::sleep(std::chrono::seconds(1));
+  }
+  catch(StatusCodeException &exception)
+  {
+    LOG4CXX_ERROR( dqmMainLogger , "Couldn't start run control server : " << exception.toString() );
 
 #ifdef DQM4HEP_USE_MONGOOSE
-		server.stop();
+    server.stop();
 #endif
 
-		return 1;
-	}
+    return 1;
+  }
 
 #ifdef DQM4HEP_USE_MONGOOSE
-		server.stop();
+  server.stop();
 #endif
 
-	return 0;
+  return 0;
 }

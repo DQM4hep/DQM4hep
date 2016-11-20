@@ -28,88 +28,91 @@
 #include "dqm4hep/DQMEventCollector.h"
 #include "dqm4hep/DQMDimEventCollector.h"
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-DQMEventCollector::DQMEventCollector()
-{
-	// default implementation is the DIM one
-	m_pCollectorImp = new DQMDimEventCollector();
-}
+  namespace core {
 
-//-------------------------------------------------------------------------------------------------
+    EventCollector::EventCollector()
+    {
+      // default implementation is the DIM one
+      m_pCollectorImp = new DimEventCollector();
+    }
 
-DQMEventCollector::DQMEventCollector(DQMEventCollectorImp *pCollectorImp) :
-		m_pCollectorImp(pCollectorImp)
-{
-	/* nop */
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    EventCollector::EventCollector(EventCollectorImp *pCollectorImp) :
+		        m_pCollectorImp(pCollectorImp)
+    {
+      /* nop */
+    }
 
-DQMEventCollector::~DQMEventCollector()
-{
-	delete m_pCollectorImp;
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    EventCollector::~EventCollector()
+    {
+      delete m_pCollectorImp;
+    }
 
-StatusCode DQMEventCollector::setCollectorName(const std::string &collectorName)
-{
-	return m_pCollectorImp->setCollectorName(collectorName);
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    StatusCode EventCollector::setCollectorName(const std::string &collectorName)
+    {
+      return m_pCollectorImp->setCollectorName(collectorName);
+    }
 
-const std::string &DQMEventCollector::getCollectorName() const
-{
-	return m_pCollectorImp->getCollectorName();
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    const std::string &EventCollector::getCollectorName() const
+    {
+      return m_pCollectorImp->getCollectorName();
+    }
 
-bool DQMEventCollector::isRunning() const
-{
-	return m_pCollectorImp->isRunning();
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    bool EventCollector::isRunning() const
+    {
+      return m_pCollectorImp->isRunning();
+    }
 
-StatusCode DQMEventCollector::startCollector()
-{
-	return m_pCollectorImp->startCollector();
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    StatusCode EventCollector::startCollector()
+    {
+      return m_pCollectorImp->startCollector();
+    }
 
-StatusCode DQMEventCollector::stopCollector()
-{
-	return m_pCollectorImp->stopCollector();
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    StatusCode EventCollector::stopCollector()
+    {
+      return m_pCollectorImp->stopCollector();
+    }
 
-void DQMEventCollector::setEventCollectorImp(DQMEventCollectorImp *pCollectorImp)
-{
-	if(NULL == pCollectorImp)
-		return;
+    //-------------------------------------------------------------------------------------------------
 
-	delete m_pCollectorImp;
-	m_pCollectorImp = pCollectorImp;
-}
+    void EventCollector::setEventCollectorImp(EventCollectorImp *pCollectorImp)
+    {
+      if(NULL == pCollectorImp)
+        return;
 
-//-------------------------------------------------------------------------------------------------
+      delete m_pCollectorImp;
+      m_pCollectorImp = pCollectorImp;
+    }
 
-void DQMEventCollector::setEventStreamer(DQMEventStreamer *pEventStreamer)
-{
-	m_pCollectorImp->setEventStreamer(pEventStreamer);
-}
+    //-------------------------------------------------------------------------------------------------
 
-//-------------------------------------------------------------------------------------------------
+    void EventCollector::setEventStreamer(EventStreamer *pEventStreamer)
+    {
+      m_pCollectorImp->setEventStreamer(pEventStreamer);
+    }
 
-DQMEventStreamer *DQMEventCollector::getEventStreamer() const
-{
-	return m_pCollectorImp->getEventStreamer();
-}
+    //-------------------------------------------------------------------------------------------------
+
+    EventStreamer *EventCollector::getEventStreamer() const
+    {
+      return m_pCollectorImp->getEventStreamer();
+    }
+
+  }
 
 }

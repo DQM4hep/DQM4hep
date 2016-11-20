@@ -1,4 +1,4 @@
-  /// \file dqm4hep_start_standalone_module.cc
+/// \file dqm4hep_start_standalone_module.cc
 /*
  *
  * dqm4hep_start_standalone_module.cc main source file template automatically generated
@@ -43,19 +43,19 @@
 #include "TObject.h"
 
 using namespace std;
-using namespace dqm4hep;
+using namespace dqm4hep::core;
 
-DQMStandaloneModuleApplication *pApplication = NULL;
+StandaloneModuleApplication *pApplication = NULL;
 
 // simple function to exit the program
 void exit_application(int returnCode)
 {
-	LOG4CXX_WARN( dqmMainLogger , "Exiting event collector application !" );
+  LOG4CXX_WARN( dqmMainLogger , "Exiting event collector application !" );
 
-	if(NULL != pApplication)
-		pApplication->exit( returnCode );
-	else
-		exit(0);
+  if(NULL != pApplication)
+    pApplication->exit( returnCode );
+  else
+    exit(0);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -63,12 +63,12 @@ void exit_application(int returnCode)
 // key interrupt signal handling
 void int_key_signal_handler(int signal)
 {
-	if(NULL == pApplication)
-		exit(0);
+  if(NULL == pApplication)
+    exit(0);
 
-	LOG4CXX_WARN( dqmMainLogger , "*** SIGN INT ***" );
-	LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
-	exit_application( static_cast<int>(STATUS_CODE_SUCCESS) );
+  LOG4CXX_WARN( dqmMainLogger , "*** SIGN INT ***" );
+  LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
+  exit_application( static_cast<int>(STATUS_CODE_SUCCESS) );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -76,36 +76,36 @@ void int_key_signal_handler(int signal)
 // segmentation violation signal handling
 void seg_viol_signal_handling(int signal)
 {
-	if(NULL == pApplication)
-		exit(1);
+  if(NULL == pApplication)
+    exit(1);
 
-	LOG4CXX_WARN( dqmMainLogger , "*** SIGN VIOL ***" );
-	LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
-	exit_application( static_cast<int>(STATUS_CODE_INVALID_PTR) );
+  LOG4CXX_WARN( dqmMainLogger , "*** SIGN VIOL ***" );
+  LOG4CXX_WARN( dqmMainLogger , "Caught signal " << signal << ". Stopping the application." );
+  exit_application( static_cast<int>(STATUS_CODE_INVALID_PTR) );
 }
 
 //-------------------------------------------------------------------------------------------------
 
-void parseParameterArg(const std::vector<std::string> &args, DQMParameters &parametersMap)
+void parseParameterArg(const std::vector<std::string> &args, ParameterMap &parametersMap)
 {
-	for(auto iter = args.begin(), endIter = args.end() ; endIter != iter ; ++iter)
-	{
-		std::string arg(*iter);
-		size_t pos = arg.find_first_of("=");
+  for(auto iter = args.begin(), endIter = args.end() ; endIter != iter ; ++iter)
+  {
+    std::string arg(*iter);
+    size_t pos = arg.find_first_of("=");
 
-		if(pos == std::string::npos)
-		{
-			LOG4CXX_WARN( dqmMainLogger, "Parameter '" << arg << "' : wrong parsing !" );
-			continue;
-		}
+    if(pos == std::string::npos)
+    {
+      LOG4CXX_WARN( dqmMainLogger, "Parameter '" << arg << "' : wrong parsing !" );
+      continue;
+    }
 
-		std::string key = arg.substr(0, pos);
-		std::string value = arg.substr(pos+1);
+    std::string key = arg.substr(0, pos);
+    std::string value = arg.substr(pos+1);
 
-		parametersMap[ key ] = value;
+    parametersMap[ key ] = value;
 
-		LOG4CXX_DEBUG( dqmMainLogger, "Read key '" << key << "' , value '" << value << "'" );
-	}
+    LOG4CXX_DEBUG( dqmMainLogger, "Read key '" << key << "' , value '" << value << "'" );
+  }
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -113,117 +113,117 @@ void parseParameterArg(const std::vector<std::string> &args, DQMParameters &para
 
 int main(int argc, char* argv[])
 {
-	DQM4HEP::screenSplash();
-	TObject::SetObjectStat(false);
+  DQM4HEP::screenSplash();
+  TObject::SetObjectStat(false);
 
-	std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
-	TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4HEP_VERSION_STR);
-	std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
+  std::string cmdLineFooter = "Please report bug to <rete@ipnl.in2p3.fr>";
+  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4HEP_VERSION_STR);
+  std::string log4cxx_file = std::string(DQMCore_DIR) + "/conf/defaultLoggerConfig.xml";
 
-	TCLAP::ValueArg<std::string> steeringFileNameArg(
-				  "f"
-				 , "steering-file"
-				 , "The xml steering file for the module application"
-				 , true
-				 , ""
-				 , "string");
-	pCommandLine->add(steeringFileNameArg);
+  TCLAP::ValueArg<std::string> steeringFileNameArg(
+      "f"
+      , "steering-file"
+      , "The xml steering file for the module application"
+      , true
+      , ""
+      , "string");
+  pCommandLine->add(steeringFileNameArg);
 
-	TCLAP::ValueArg<std::string> loggerConfigArg(
-				  "l"
-				 , "logger-config"
-				 , "The xml logger file to configure log4cxx"
-				 , false
-				 , log4cxx_file
-				 , "string");
-	pCommandLine->add(loggerConfigArg);
+  TCLAP::ValueArg<std::string> loggerConfigArg(
+      "l"
+      , "logger-config"
+      , "The xml logger file to configure log4cxx"
+      , false
+      , log4cxx_file
+      , "string");
+  pCommandLine->add(loggerConfigArg);
 
-	std::vector<std::string> allowedLevels;
-	allowedLevels.push_back("INFO");
-	allowedLevels.push_back("WARN");
-	allowedLevels.push_back("DEBUG");
-	allowedLevels.push_back("TRACE");
-	allowedLevels.push_back("ERROR");
-	allowedLevels.push_back("FATAL");
-	allowedLevels.push_back("OFF");
-	allowedLevels.push_back("ALL");
-	TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
+  std::vector<std::string> allowedLevels;
+  allowedLevels.push_back("INFO");
+  allowedLevels.push_back("WARN");
+  allowedLevels.push_back("DEBUG");
+  allowedLevels.push_back("TRACE");
+  allowedLevels.push_back("ERROR");
+  allowedLevels.push_back("FATAL");
+  allowedLevels.push_back("OFF");
+  allowedLevels.push_back("ALL");
+  TCLAP::ValuesConstraint<std::string> allowedLevelsContraint( allowedLevels );
 
-	TCLAP::ValueArg<std::string> verbosityArg(
-				  "v"
-				 , "verbosity"
-				 , "The verbosity level used for this application"
-				 , false
-				 , "INFO"
-				 , &allowedLevelsContraint);
-	pCommandLine->add(verbosityArg);
+  TCLAP::ValueArg<std::string> verbosityArg(
+      "v"
+      , "verbosity"
+      , "The verbosity level used for this application"
+      , false
+      , "INFO"
+      , &allowedLevelsContraint);
+  pCommandLine->add(verbosityArg);
 
-	TCLAP::MultiArg<std::string> parameterArg(
-				  "p"
-				 , "parameter"
-				 , "A parameter to replace in the application (see DQMXmlHelper)"
-				 , false
-				 , "");
-	pCommandLine->add(parameterArg);
+  TCLAP::MultiArg<std::string> parameterArg(
+      "p"
+      , "parameter"
+      , "A parameter to replace in the application (see DQMXmlHelper)"
+      , false
+      , "");
+  pCommandLine->add(parameterArg);
 
-	// parse command line
-	std::cout << "dqm4hep_start_standalone_module: Parsing command line ..." << std::endl;
-	pCommandLine->parse(argc, argv);
+  // parse command line
+  std::cout << "dqm4hep_start_standalone_module: Parsing command line ..." << std::endl;
+  pCommandLine->parse(argc, argv);
 
-	log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
+  log4cxx::xml::DOMConfigurator::configure(log4cxx_file);
 
-	if( verbosityArg.isSet() )
-		dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
+  if( verbosityArg.isSet() )
+    dqmMainLogger->setLevel( log4cxx::Level::toLevel( verbosityArg.getValue() ) );
 
-	DQMParameters parametersMap;
-	parseParameterArg( parameterArg.getValue() , parametersMap );
+  ParameterMap parametersMap;
+  parseParameterArg( parameterArg.getValue() , parametersMap );
 
-	// install signal handlers
-	LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
-	signal(SIGINT,  int_key_signal_handler);
-//	signal(SIGSEGV, seg_viol_signal_handling);
+  // install signal handlers
+  LOG4CXX_INFO( dqmMainLogger , "Installing signal handlers ..." );
+  signal(SIGINT,  int_key_signal_handler);
+  //	signal(SIGSEGV, seg_viol_signal_handling);
 
-	LOG4CXX_INFO( dqmMainLogger , "Creating standalone module application ..." );
+  LOG4CXX_INFO( dqmMainLogger , "Creating standalone module application ..." );
 
-	try
-	{
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, DQMPluginManager::instance()->loadLibraries());
+  try
+  {
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
 
-		pApplication = new DQMStandaloneModuleApplication();
-	}
-	catch(StatusCodeException &exception)
-	{
-		LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
-		exit_application( exception.getStatusCode() );
-	}
+    pApplication = new StandaloneModuleApplication();
+  }
+  catch(StatusCodeException &exception)
+  {
+    LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
+    exit_application( exception.getStatusCode() );
+  }
 
-	LOG4CXX_INFO( dqmMainLogger , "Creating module application ... OK" );
-	LOG4CXX_INFO( dqmMainLogger , "Module application read settings ..." );
+  LOG4CXX_INFO( dqmMainLogger , "Creating module application ... OK" );
+  LOG4CXX_INFO( dqmMainLogger , "Module application read settings ..." );
 
-	try
-	{
-		pApplication->setReplacementParameters( parametersMap );
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->readSettings(steeringFileNameArg.getValue()));
-	}
-	catch(StatusCodeException &exception)
-	{
-		LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
-		exit_application( exception.getStatusCode() );
-	}
+  try
+  {
+    pApplication->setReplacementParameters( parametersMap );
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->readSettings(steeringFileNameArg.getValue()));
+  }
+  catch(StatusCodeException &exception)
+  {
+    LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
+    exit_application( exception.getStatusCode() );
+  }
 
-	LOG4CXX_INFO( dqmMainLogger , "Module application read settings ... OK" );
-	LOG4CXX_INFO( dqmMainLogger , "Running module application ... " );
+  LOG4CXX_INFO( dqmMainLogger , "Module application read settings ... OK" );
+  LOG4CXX_INFO( dqmMainLogger , "Running module application ... " );
 
-	try
-	{
-		THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->run());
-	}
-	catch(StatusCodeException &exception)
-	{
-		LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
-		exit_application( exception.getStatusCode() );
-	}
+  try
+  {
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pApplication->run());
+  }
+  catch(StatusCodeException &exception)
+  {
+    LOG4CXX_FATAL( dqmMainLogger , "StatusCodeException caught : " << exception.toString() );
+    exit_application( exception.getStatusCode() );
+  }
 
-	delete pCommandLine;
-	exit_application( static_cast<int>(STATUS_CODE_SUCCESS) );
+  delete pCommandLine;
+  exit_application( static_cast<int>(STATUS_CODE_SUCCESS) );
 }
