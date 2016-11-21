@@ -16,7 +16,7 @@ ADD_DEFINITIONS("-Wno-long-long -Wreturn-type -Werror")
 
 SET (
   ${PROJECT_NAME}DictHeaders
-  ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/DQMMonitorElement.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/MonitorElement.h
 )
 
 SET( DICT_INCLUDE_DIRS "" )

@@ -28,7 +28,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/elog/ELogInterface.h"
 #include "DQMCoreConfig.h"
-#include "dqm4hep/DQMLogging.h"
+#include "dqm4hep/Logging.h"
 
 // -- std headers
 #include <cstdlib>

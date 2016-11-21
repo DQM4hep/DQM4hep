@@ -27,9 +27,9 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMLogging.h"
-#include "dqm4hep/DQMCoreTool.h"
-#include "dqm4hep/DQMRunControlService.h"
+#include "dqm4hep/Logging.h"
+#include "dqm4hep/CoreTool.h"
+#include "dqm4hep/RunControlService.h"
 
 // -- tclap headers
 #include "tclap/CmdLine.h"

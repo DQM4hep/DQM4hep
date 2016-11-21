@@ -28,10 +28,10 @@
 // -- dqm4hep headers
 #include "DQMCoreConfig.h"
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/DQMLogging.h"
-#include "dqm4hep/DQMPluginManager.h"
-#include "dqm4hep/DQMEventStreamer.h"
-#include "dqm4hep/DQMEventCollectorApplication.h"
+#include "dqm4hep/Logging.h"
+#include "dqm4hep/PluginManager.h"
+#include "dqm4hep/EventStreamer.h"
+#include "dqm4hep/EventCollectorApplication.h"
 
 // -- tclap headers
 #include "tclap/CmdLine.h"
