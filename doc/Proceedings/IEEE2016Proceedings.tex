@@ -423,8 +423,9 @@ Email: mirabito@ipnl.in2p3.fr}
 
 
 \begin{abstract}
-%\boldmath
-\blindtext[1]
+With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments developed and built a dedicated monitoring system on top of their Event Data Model (EDM). This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult. To increase the flexibility and porting of software across experiments, a generic online Data Quality Monitoring system has been developed without any assumption on the Event Data Model and data type to treat. The aim here, is to provide reusable and flexible tools for scientists to monitor their detectors by focusing on the analysis part.
+
+In addition, a dedicated implementation, based on the LCIO~\cite{LCIO} Event Data Model for the Linear Collider Collaboration (LCC), was also developed. It has already been put to real condition testing during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire} with a combined detector setup composed of the CALICE\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes.
 \end{abstract}
 % IEEEtran.cls defaults to using nonbold math in the Abstract.
 % This preserves the distinction between vectors and scalars. However,
@@ -435,7 +436,7 @@ Email: mirabito@ipnl.in2p3.fr}
 
 % Note that keywords are not normally used for peerreview papers.
 \begin{IEEEkeywords}
-IEEEtran, journal, \LaTeX, paper, template.
+DQM, High Energy Physics, Detector, DAQ.
 \end{IEEEkeywords}
 
 
@@ -458,36 +459,22 @@ IEEEtran, journal, \LaTeX, paper, template.
 %~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 \section{Introduction}
-With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments developed and built a dedicated monitoring system on top of their Event Data Model (EDM). This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult. To increase the flexibility and porting of software across experiments, a generic online Data Quality Monitoring system has been developed without any assumption on the Event Data Model and data type to treat. The aim here, is to provide reusable and flexible tools for scientists to monitor their detectors by focusing on the analysis part.
+The purpose of a monitoring system is to help identify problems when the experiment is running. For this, it needs to fulfil two requirements : it must display a quick overview of the status and working order of every detector part and should also evaluate the quality of the data being taken. This implies some key infrastructure points for the monitoring software. First, as it should be running at all times when taking data, it needs to interface with the Data Acquisition (DAQ) system. It must not however interfere with the data taking process (slow down, stop, etc.). It needs a system to distribute data coming from the DAQ to the analysis tools and then to visualization tools. The data analysis and data quality assessment needs to remain user-defined and visualization interfaces accessible from many client PCs.
 
-In addition, a dedicated implementation, based on the LCIO~\cite{LCIO} Event Data Model for the Linear Collider Collaboration (LCC), was also developed. It has already been put to real condition testing during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire} with a combined detector setup composed of the CALICE\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes .
+In computer science, generic programming implies an architecture with algorithms independent of a programming data type. Algorithms can be instantiated when needed, and in different ways to work with multiple data representations. This leads to more flexible and easily reusable software.
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~%
-%~~~~~~~~~~~~~~~~~~~~~~~~~%
-\section{Data Quality Monitoring in High Energy Physics}
-The purpose of a monitoring system is to help identify problems when the experiment is running. For this it needs to fulfil two main tasks. First, it must display a quick overview of the status and working order of every detector part. It should also evaluate the quality of the data being taken.
+The genericity of the framework that is presented here, lies in two core features: its Event Data Model (EDM) abstraction and plugin system.
 
-This implies some key infrastructure points for the monitoring software. First, as it should be running at all times when taking data it needs to interface with the Data Acquisition (DAQ) system. It must not however interfere with the data taking process (slow down, stop, etc.). It needs a system to distribute data coming from the DAQ to the analysis tools and then to the visualization tools. The analysis tools have to include quality test. And finally some Graphical User Interface (GUI) for data visualization with multiple client access.
-
-%~~~~~~~~~~~~~~~~~~~~~~~~~%
-%~~~~~~~~~~~~~~~~~~~~~~~~~%
-\section{A Generic Framework}
-
-Generic programming implies an architecture with algorithms independent of a programming data type (int, ROOT object, etc.). They can be instantiated when needed, and in different ways to work with multiple data representations. This leads to more flexible and easily reusable software.
-
-The genericity of the framework lies in two core features: its Event Data Model (EDM) abstraction and plugin system.
 The EDM abstraction gives the ability to the user to define the type of event to use together with its serialization process. The plugin system, permits the inclusion of any user classes via external libraries. One can use plugin abstraction and factories to select the serialization process, online analysis, etc.
-It is designed to run each applications as independent processes. They are linked to each other by network communications with either TCP/IP or HTTP protocols using DIM~\cite{DIM} and Mongoose~\cite{MONGOOSE} respectively. This helps distributing the load from the processes over the multiple cores and computers.
 
-To implement this solution for its own experiment, an user has to define the event type to treat and its serialization. An interface, \textit{xdrstream}, is provided within the framework to simplify the later.   and the online analysis.
+The framework is also designed to run each applications as an independent process. They are linked to each other by network communications with either TCP/IP or HTTP protocols using DIM~\cite{DIM} and Mongoose~\cite{MONGOOSE} respectively. This helps distributing the load from the processes over the multiple cores and computers.
 
-Analysed data suitable for visualization are encapsulated in a unique interface called \emph{Monitor Element}.
-
+To implement this solution for its own experiment, an user has to define the event type to treat and its serialization. An interface, \textit{xdrstream}, is provided within the framework to simplify the later.
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-\section{Software Architecture}
+\section{Software architecture}
 {\color{red}Some intro}
 
 Overall framework architecture is displayed on Fig.~\ref{fig:DQM4HEPArchitecture}
@@ -504,12 +491,12 @@ Overall framework architecture is displayed on Fig.~\ref{fig:DQM4HEPArchitecture
 As explained before, to efficiently run an experiment the monitoring system and the DAQ system needs to be somewhat linked. To control the data acquisition, the DAQ system sends start/stop/status signals to the read out electronics of the detectors. The monitoring system can be set up to receive such signals by
 its \textit{Run Control Server} before dispatching it to the DQM applications. Thus, starting (stopping) a new run from the DAQ system will automatically start (stop) the DQM applications.
 
-Second coupling to the DAQ system is the \textit{event builder} as depicted in Fig.~\ref{fig:DQMEventBuilder}. Its purposes is to get the raw data collected by the DAQ system (e.g. from a shared memory space) and convert it to an user defined data structure using plugins called {\color{red}\textit{shm processors}}. The reconstructed events are then serialized and sent to event collectors over the network.
+Second coupling to the DAQ system is the \textit{event builder} as depicted in Fig.~\ref{fig:DQMEventBuilder}. Its purposes is to get the raw data collected by the DAQ system (e.g. from a shared memory space) and convert it to an user defined data structure using plugins called \textit{processors}. The reconstructed events are then serialized and sent to event collectors over the network.
 
 \begin{figure}[htbp]
   \begin{center}
     \includegraphics[width=0.95\linewidth]{figs/EventBuilderDiagram_IEEE.pdf}
-    \caption{\label{fig:DQMEventBuilder} {\color{red} Changer les shm processors en Evbuilder processor? shm est specifique au sdhcal}Sketch of the event building process within the framework.}
+    \caption{\label{fig:DQMEventBuilder} Sketch of the event building process within the framework.}
   \end{center}
 \end{figure}
 
@@ -518,52 +505,59 @@ It should be emphasized here that this is the only coupling to the DAQ system, a
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Collectors}
-With the ability of balancing the load over multiple cores and computers comes the need of a common access point for data. Two type of applications serve this process in the framework. The \textit{Event Collector} act as the bridge between the event builder and the various analysis modules. The \textit{Monitor Element Collector} share the same role between the analysis modules and the visualization interfaces.
+With the ability of balancing the load over multiple cores and computers comes the need of a common access point for data. Two types of applications serve this process in the framework. The \textit{event collector} acts as the bridge between the event builder and the various analysis modules. The \textit{monitor element collector} share the same role between the analysis modules and the visualization interfaces.
 
-As can be seen on Fig.~\ref{fig:DQMDataAccess}, data from these collectors can then be accessed either via direct user query (i.e. modules send a query for new data to the collector) or via subscription ({\color{red}push}) system. In the later case, collectors publish newly available data to the modules.
+As it can be seen on Fig.~\ref{fig:DQMDataAccess}, data from these collectors can then be accessed either via direct user query (i.e. modules send a query to the collector to receive the last recorded event) or via permanent subscription (modules are notified when a new event is collected).
 
-Apart from checking the parameters in the configuration files, such as collector names or host machine, no user interaction is needed to setup the collectors.
+To start such an application, only the collector name is needed. This name is passed using command line argument at start-up and will be used to identify the collector over the network for external applications.  
 
 \begin{figure}[htbp]
   \begin{center}
     \includegraphics[width=0.95\linewidth]{figs/EventCollectorDiagram.pdf}
-    \caption{\label{fig:DQMDataAccess} \color{red}Insert fancy shcema here pour que ce soit bien clair}
+    \caption{\label{fig:DQMDataAccess} Schematic view of possible interactions between an event collector and a client application.}
   \end{center}
 \end{figure}
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-\subsection{Data Serialization}
+\subsection{Online data analysis}
+Depending on the data input, two types of applications can be used within the framework. The first one, the analysis module, analyze reconstructed event from the event collectors and thus runs only while the DAQ is taking data. The second type, the standalone module, is independent of the DAQ status and use external data source defined by the user (e.g. environmental data stored in a database).
 
-blahblah
+Both are implemented as user defined plug-ins and aim to analyze and reduce data to a few self-described objects called \emph{monitor elements}. These wrap graphics objects such as histogram or graph, plus some meta data about data quality or run-time information. 
 
+On each monitor element can be run multiple quality tests used to assess the data quality. The quality test results are bound to the monitor elements and sent together to the collector so that user can then be alerted if quality reaches low/dangerous threshold (e.g. high current value, saturation in part of detector, etc.). If deemed necessary, user has the ability to archive monitor elements for off-line checks in ROOT files.
 
-%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-\subsection{Online Data Analysis}
-Depending on the data input, two types of applications can be used within the framework. The first one, the analysis module, use reconstructed event from the event collectors and thus runs only while the DAQ is taking data. The second type, the standalone module, is independent of the DAQ status and use external data source (e.g. Slow Control stored in a mysql data base).
-Both are implemented as user defined plug-ins and aim to analyse and reduce data to a few objects (e.g. histograms, text, etc.) encapsulated in Monitor Elements. Data quality can then be assessed through user defined quality tests. User can then be alerted if quality reaches low/dangerous threshold (e.g. high current value, saturation in part of detector, etc.). If deemed necessary, user has the ability to archive monitor elements for off-line checks.
-Overall framework architecture gives the flexibility to start (stop) any analysis modules at any given time, including during data taking. This important point means that adding, removing, modifying a module even while taking data will never interfere with DAQ system.
-
-{\color{red}Add description of the structure of an analysis module? (COnfiguration, booking, analysis loop, histo filling, etc)}
+The overall framework architecture gives the flexibility to start (stop) any analysis modules at any given time, including during data taking. This important point means that adding, removing, modifying a module even while taking data will never interfere with DAQ system.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Cycle structure for data processing}
-Data taking can be non continuous and there is no need to update visualization after every reconstructed event (case of multiple event per second). For these reasons, data are processed during cycles (e.g. timer, event counter, etc.) and sent only at the end of each cycle. This cycle system is implemented as plug-ins so user can defined their own to suit their needs.
+
+During an acquisition, data taking can be non continuous or with a high rate. For performance reason, there no need to send monitor elements after each processed event. In case of a high rate data taking, this also implies to refresh the visualization too frequently. For these reasons, data in online module application are processed during cycles, during which events are processed sequentially. At the end of cycle, the monitor element are sent to the collector and the visualization interfaces refreshed. Cycles are implemented as plug-ins so user can defined their own to suit their needs. The DQM4HEP framework provides three cycle implementations :
+
+\begin{itemize}
+  \item a \textit{timer cycle}, for which events are processed during \textit{n} seconds,
+  \item an \textit{event counter cycle}, for which \textit{n} events are processed before ending,
+  \item an \textit{event size cycle}, for which \textit{n} bytes of serialized data are processed before ending
+\end{itemize}
+
+Fig.~\ref{fig:DQMCycleSystem} shows the analysis module application workflow where the central part is dedicated to the cycle logic (\textit{start}/\textit{processEvent}/\textit{end}). 
 
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[width=0.65\linewidth]{figs/StandaloneModuleApplicatonWorkflowDiagram.pdf}
-    \caption{\label{fig:DQMCycleSystem} \color{red}Insert fancy cycle system schema?}
+    \includegraphics[width=0.65\linewidth]{figs/AnalysisModuleApplicatonWorkflowDiagram.pdf}
+    \caption{\label{fig:DQMCycleSystem} Analysis module application workflow also showing cycle logic.}
   \end{center}
 \end{figure}
 
 \subsection{Remote control of the framework's application}
-To run the framework, multiple applications needs to be deployed (Collectors, analysis modules, etc.) sometimes over a selection of hosts. There is then a need for an easy way of controlling them. \textit{Job control servers} serves this purpose. They run on every host involved and are listening for start/stop commands from a Graphical User Interface described in the following section. Such commands are then dispatch to the targeted application. The servers are also monitoring the status of every process and relay it to the Graphical User Interface when asked for it.
+To deploy the framework for a target detector setup, multiple applications needs to be run (collectors, analysis modules, etc.) sometimes over a selection of hosts. There is then a need for an easy way of controlling them. \textit{Job control servers} serves this purpose. They are run as Linux daemons on every host involved in the deployment and each managing a set a processes that can be steered remotely from a client interface. Process information, such as process status or environment variables, can be permanently accessed from the client interface for process monitoring purpose.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-\section{Graphical User Interfaces (GUIs)}
+\section{Graphical user interfaces (GUIs)}
 
-Three GUIs are designed into the framework, each one with a dedicated role. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{Monitor Element (ME)} the user selected has of interest at that time. These \textit{ME} can be displayed on the drawing section, multiple drawing section can be set up using a tab system. Every drawn \textit{ME} are interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} for now.)
+\subsection{Monitoring GUI}
+
+This graphical user interface implements a multiple access available monitor element collectors over the network. After the application start-up, the user can browse the monitor element collectors content and build selection of monitor element to draw. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{monitor element (ME)} the user selected has of interest at that time. These \textit{ME} can be displayed on the drawing section where a set of canvases are organized in a tab system. Every drawn \textit{ME} is interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} for now.)
 \begin{figure}[p]
   \begin{center}
     \includegraphics[width=0.8\linewidth]{figs/MaintInterfaceGUI.pdf}
@@ -578,9 +572,10 @@ Three GUIs are designed into the framework, each one with a dedicated role. The 
   \end{center}
 \end{figure}
 
+\subsection{Job control GUI}
 
+This GUI is a graphic implementation of multiple job server clients. Processes can be loaded from a JSON file and added to the central process table as shown on Fig.~\ref{fig:JobControlGUI}. User can start/stop application on the different hosts using the interface but also monitor the process status by querying single process status or starting an automatic timer that refreshes the interface automatically. When starting a process on a host, a log file is created on the job control server and can be accessed at any time form this graphical user interface.
 
-A second GUI, the \textit{job interface} is dedicated to the remote control of applications. This GUI, displayed in Fig.\ref{fig:JobControlGUI}, is in fact controlling the \textit{job control servers} descripted in the previous section. The user can easily start/stop any application, check its status and parameters or open its log file.
 \begin{figure}[p]
   \begin{center}
     \includegraphics[width=0.95\linewidth]{figs/JobControlGui.pdf}
@@ -588,7 +583,9 @@ A second GUI, the \textit{job interface} is dedicated to the remote control of a
   \end{center}
 \end{figure}
 
-The third and last GUI, the \textit{Run Control GUI} helps in checking signals from the DAQ system are properly received and dispatched. When running offline, or when the signals from the DAQ system where not properly received, this GUI can control the starting/stopping of the system.
+\subsection{Run control GUI}
+
+This GUI implements a graphical client interface to a run control server. The run control server application is mostly designed to receive start and stop run signals from the DAQ and dispatch it to all listening DQM applications. Moreover, the GUI implementation can also steers these signals and display the current run status in case the deployment is run without a DAQ, in a test mode.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
