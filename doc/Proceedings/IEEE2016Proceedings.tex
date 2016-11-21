@@ -594,14 +594,17 @@ This GUI implements a graphical client interface to a run control server. The ru
 As the framework was developed within the CALICE-SDHCAL\footnote{Semi Digital Hadronic CALorimeter} Collaboration, a dedicated implementation has been produced in parallel for this prototype. This implementation is based on the LCIO~\cite{LCIO} Event Data Model, and provides interfaces for event type definition and serialization in this format.
 
 
-Concerning the link to the DAQ system, the run control commands are received through HTTP POST and dispatch to the rest of the framework with DIM. The event building is based on \textit{levbdim}, the event builder used by the DAQ system for first level data reconstruction. In the SDHCAL case, the DAQ dumps the raw online data coming from the detector to a shared memory (\textit{shm}) space as data sources buffers. The framework pulls a copy of these buffers and converts them to a LCIO format suitable for analysis with the online event builder implemented as plugins.
+Concerning the link to the DAQ system, the run control commands are received through HTTP POST and dispatch to the rest of the framework with DIM. The event building is based on \textit{levbdim}, the event builder used by the DAQ system for first level data reconstruction. In the SDHCAL case, the DAQ dumps the raw data coming from the detector to a shared memory (\textit{shm}) space as data sources buffers. The framework pulls a copy of these buffers and converts them to a LCIO format suitable for analysis with the online event builder implemented as plugins.
 
 As the LCIO EDM contains multiple data structures for different levels of data reconstruction, converters are provided to pass from one such structure to the other. This gives the ability to use off-line analysis into the monitoring system, leading to a better assessment of the overall data quality.
 
-For testing purposes an offline data reader is also included in this implementation. This allows us to run the framework without a DAQ system running, especially handy to configure it properly in advance of a test beam campaign. To keep conditions as close as possible to a real setup, it can be configured to simulate the timing structure of the raw data.
+For testing purposes, an offline data reader is also included in this implementation. This allows us to run the framework without a DAQ system running, especially handy to configure it properly in advance of a test beam campaign. To keep conditions as close as possible to a real setup, it can be configured to simulate the timing structure of the raw data.
 
-Up until now the development described in this implementaion concerns the DAQ engineer tasks. We are now coming to the physiscit work: coding analysis module. Along with our own development, we gathered already existing analysis code for this experiment and adapted it to plug it in the framework. Some of these modules are briefly discussed hereafter. The \textit{Event Display} module allows for 2D and 3D visualization of the data in the detector, a 70GeV pion interacting in the SDHCAL as seen in the monitoring system is displayed in Fig.~\ref{fig:DQMEventDisplay}. A slow control module monitors the High Voltages and current in every part of the detector together with the ambient temperature and pressure. This module is critical as too high value of current or high voltage can irremediably compromise the detector. A module for efficiency displays various efficiency estimation of the entirety or part of the detector. Another module is in charge of monitoring informations related to the beam configuration such as rates of particles as seen by the detectors. One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. As such we also developed some analysis dedicated to monitoring parts of this prototype.
+At the online analysis level, many analysis and standalone modules were developed. Along with the DQM4HEP framework development, we gathered already existing analysis code for this experiment and adapted it to plug it in the framework. Some of these modules are briefly discussed hereafter. 
 
+The \textit{Event Display} module allows for 2D and 3D visualization of the data in the detector. A 70GeV pion interacting in the SDHCAL as seen in the monitoring system is displayed in Fig.~\ref{fig:DQMEventDisplay}. A slow control module monitors the high voltages and current in every part of the detector together with the ambient temperature and pressure. This module is critical as too high value of current or high voltage can irremediably compromise the detector working order and thus the data quality. A module was in charge of evaluating the efficiency for each of the 50 chambers of the SDHCAL. Another module was developed to monitor informations related to the beam configuration such as rates of incoming particles as seen by the detector. 
+
+One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype, displaying i.e, ADC counter maps for each detector layer.
 
 \begin{figure}[p]
   \begin{center}
@@ -610,10 +613,7 @@ Up until now the development described in this implementaion concerns the DAQ en
   \end{center}
 \end{figure}
 
-{\color{red} Ajouter descriptiion du setup? 4ordi etc...}
-
-
-Shifters were able to quickly spot and correct for multiple problems including, but not limited to, bad gas circulation, undesirably noisy electronics, wrong beam configuration, etc.
+With this deployment, shifters were able to quickly spot and correct for multiple problems including, but not limited to, bad gas circulation, undesirably noisy electronics, wrong beam configuration, etc...
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -623,8 +623,7 @@ In light of the critical importance of a tool to quickly detect problems and ens
 Contrary to most systems available for High Energy Physics up to now, it is not tied to a given Event Data Model. All the tools needed to develop a specific implementation depending on specificities of the experiment, such as DAQ and serialization interface, data format and detector analysis, are provided within the framework.
 The whole system is written in c++11 with Qt~\cite{QT} libraries for the GUI.
 
-The whole framework was tested both with offline and online setup dedicated to the SDHCAL prototype. The online configuration was used during two test beam campaigns at CERN totalling three weeks. One of these campaign was dedicated to a combined test with the CALICE-SiWEcal, for which online analysis were also developed.
-
+The whole framework was tested both with offline and online setup dedicated to the SDHCAL prototype. The online configuration was used during two test beam campaigns at CERN, totalling three weeks. One of these campaign was dedicated to a combined test with the CALICE-SiWEcal, for which online analysis were also developed.
 
 A dedicated implementation for the CALICE SDHCAL and SiWECal prototypes has been developed in parallel. It was tested with success both with online and offline data during two test beam campaigns.
 
