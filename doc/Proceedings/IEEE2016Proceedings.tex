@@ -423,7 +423,9 @@ Email: mirabito@ipnl.in2p3.fr}
 
 
 \begin{abstract}
-With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments use their own Event Data Model (EDM) for data taking and built a dedicated monitoring system on top ofit. This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult. To increase the flexibility and porting of software across experiments, {\color{red} we developed DQM4HEP, a generic online Data Quality Monitoring system specifically targeted to High Energy Physics experiments. The core principle was to make no assumption on the Event Data Model and data type to treat. The result is to provide reusable and flexible tools for scientists to monitor their detectors by focusing only on the analysis part.}
+With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments use their own Event Data Model (EDM) for data taking and built a dedicated monitoring system on top ofit. This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult. 
+
+To increase the flexibility and porting of software across experiments, we developed DQM4HEP, a generic online Data Quality Monitoring system specifically targeted to High Energy Physics experiments. The core principle was to make no assumption on the Event Data Model and data type to treat. The result is to provide reusable and flexible tools for scientists to monitor their detectors by focusing only on the analysis part.
 
 In addition, a dedicated implementation, based on the LCIO~\cite{LCIO} Event Data Model for the Linear Collider Collaboration (LCC), was also developed. It has already been put to real condition testing during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire} with a combined detector setup composed of the CALICE\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes.
 \end{abstract}
@@ -436,7 +438,7 @@ In addition, a dedicated implementation, based on the LCIO~\cite{LCIO} Event Dat
 
 % Note that keywords are not normally used for peerreview papers.
 \begin{IEEEkeywords}
-DQM, High Energy Physics, Detector, DAQ.
+DQM, HEP, Detector, DAQ.
 \end{IEEEkeywords}
 
 
@@ -506,7 +508,7 @@ It should be emphasized here that this is the only coupling to the DAQ system, a
 \subsection{Collectors}
 With the ability of balancing the load over multiple cores and computers comes the need of a common access point for data. Two types of applications serve this process in the framework. The \textit{event collector} acts as the bridge between the event builder and the various analysis modules. The \textit{monitor element collector} share the same role between the analysis modules and the visualization interfaces.
 
-As can be seen on Fig.~\ref{fig:DQMDataAccess}, data from these collectors can then be accessed either via direct user query (i.e. modules send a query to the collector to receive the last recorded event) {\color{red} or via subscription system (collectors notify modules when a new event is collected and send it)}.
+As can be seen on Fig.~\ref{fig:DQMDataAccess}, data from these collectors can then be accessed either via direct user query (i.e. modules send a query to the collector to receive the last recorded event) or via a subscription system (collectors notify modules when a new event is collected and send it).
 
 To start such an application, only the collector name is needed. This name is passed using command line argument at start-up and will be used to identify the collector over the network for external applications.
 
@@ -556,12 +558,12 @@ To deploy the framework for a detector setup, multiple applications needs to run
 
 \subsection{Monitoring GUI}
 
-{\color{red} je suis pas sur de ce que tu voulais mettre dans cette phrase: This graphical user interface implements a multiple access available monitor element collectors over the network.} User can browse the \textit{monitor element collectors} content and build a selection of element to monitor. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{monitor element (ME)} the user just selected. These \textit{ME} can be displayed on the drawing section where a set of canvases are organized in a tab system. Every drawn \textit{ME} is interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} is available for now.)
+This graphical user interface implements a multiple client access to monitor element collectors available over the network. User can browse the \textit{monitor element collectors} content and build a selection of element to monitor. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{monitor element (ME)} the user just selected. These \textit{ME} can be displayed on the drawing section where a set of canvases are organized in a tab system. Every drawn \textit{ME} is interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} is available for now.)
 
 \begin{figure*}[htbp]
   \begin{center}
     \includegraphics[width=.95\textwidth]{figs/MaintInterfaceGUI.pdf}
-    \caption{\label{fig:DQMMainViz} Main graphical interface of the framework.
+    \caption{\label{fig:DQMMainViz} Main window of the monitoring GUI.
     1. Option for manual/auto update.
     2. Monitor Elements (ME) organized in a tree-like structure
     3. List of displayed ME customizable via dedicated GUI with available ME (coming from analysis modules currently loaded)
@@ -578,7 +580,7 @@ This GUI is a graphic implementation of multiple job server clients. Processes t
 \begin{figure*}[htbp]
   \begin{center}
     \includegraphics[width=.95\textwidth]{figs/JobControlInterface.pdf}
-    \caption{\label{fig:JobControlGUI} GUI for the job interface. Applications are ordered by host.}
+    \caption{\label{fig:JobControlGUI} Job interface main window. Applications are ordered by host.}
   \end{center}
 \end{figure*}
 
@@ -619,13 +621,10 @@ The \textit{Event Display} module allows for 2D and 3D visualization of the data
 
 One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype such as ADC counter maps for each detector layer as shown in  Fig.~\ref{fig:DQMEcalDisplay}).
 
-
-
-
 \begin{figure}[htbp]
   \begin{center}
     \includegraphics[width=\linewidth]{figs/DQM_SDHCAL_ECAL_HitMap6_I732891.pdf}
-    \caption{\label{fig:DQMEcalDisplay} Instantaneous value for currents in SDHCAL prototype.}
+    \caption{\label{fig:DQMEcalDisplay} ADC counter map of layer 6 of the CALICE-SiWEcal during data taking in June 2016.}
   \end{center}
 \end{figure}
 
