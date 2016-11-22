@@ -423,7 +423,7 @@ Email: mirabito@ipnl.in2p3.fr}
 
 
 \begin{abstract}
-With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments developed and built a dedicated monitoring system on top of their Event Data Model (EDM). This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult. To increase the flexibility and porting of software across experiments, a generic online Data Quality Monitoring system has been developed without any assumption on the Event Data Model and data type to treat. The aim here, is to provide reusable and flexible tools for scientists to monitor their detectors by focusing on the analysis part.
+With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments use their own Event Data Model (EDM) for data taking and built a dedicated monitoring system on top ofit. This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult. To increase the flexibility and porting of software across experiments, {\color{red} we developed DQM4HEP, a generic online Data Quality Monitoring system specifically targeted to High Energy Physics experiments. The core principle was to make no assumption on the Event Data Model and data type to treat. The result is to provide reusable and flexible tools for scientists to monitor their detectors by focusing only on the analysis part.}
 
 In addition, a dedicated implementation, based on the LCIO~\cite{LCIO} Event Data Model for the Linear Collider Collaboration (LCC), was also developed. It has already been put to real condition testing during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire} with a combined detector setup composed of the CALICE\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes.
 \end{abstract}
@@ -459,7 +459,7 @@ DQM, High Energy Physics, Detector, DAQ.
 %~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 \section{Introduction}
-The purpose of a monitoring system is to help identify problems when the experiment is running. For this, it needs to fulfil two requirements : it must display a quick overview of the status and working order of every detector part and should also evaluate the quality of the data being taken. This implies some key infrastructure points for the monitoring software. First, as it should be running at all times when taking data, it needs to interface with the Data Acquisition (DAQ) system. It must not however interfere with the data taking process (slow down, stop, etc.). It needs a system to distribute data coming from the DAQ to the analysis tools and then to visualization tools. The data analysis and data quality assessment needs to remain user-defined and visualization interfaces accessible from many client PCs.
+The purpose of a monitoring system is to help identify problems when the experiment is running. For this, it needs to fulfil two requirements : it must display a quick overview of the status and working order of every detector part and should also evaluate the quality of the data being taken. This implies some key infrastructure points for the monitoring software. First, as it should be running at all times when taking data, it needs to interface with the Data Acquisition (DAQ) system. It must not however interfere with the data taking process (slow down, stop, etc.). It needs a system to distribute data coming from the DAQ to the analysis tools and then to visualization tools. The data analysis and data quality assessment needs to remain user-defined and visualization interfaces accessible from many client computers.
 
 In computer science, generic programming implies an architecture with algorithms independent of a programming data type. Algorithms can be instantiated when needed, and in different ways to work with multiple data representations. This leads to more flexible and easily reusable software.
 
@@ -467,7 +467,7 @@ The genericity of the framework that is presented here, lies in two core feature
 
 The EDM abstraction gives the ability to the user to define the type of event to use together with its serialization process. The plugin system, permits the inclusion of any user classes via external libraries. One can use plugin abstraction and factories to select the serialization process, online analysis, etc.
 
-The framework is also designed to run each applications as an independent process. They are linked to each other by network communications with either TCP/IP or HTTP protocols using DIM~\cite{DIM} and Mongoose~\cite{MONGOOSE} respectively. This helps distributing the load from the processes over the multiple cores and computers.
+The framework is also designed to run each applications as an independent process. They are linked to each other by network communications with either TCP/IP or HTTP protocols using DIM~\cite{DIM} and Mongoose~\cite{MONGOOSE} respectively. This helps distributing the load from the processes over multiple cores and computers.
 
 To implement this solution for its own experiment, an user has to define the event type to treat and its serialization. An interface, \textit{xdrstream}, is provided within the framework to simplify the later.
 
@@ -481,17 +481,17 @@ Overall framework architecture is displayed on Fig.~\ref{fig:DQM4HEPArchitecture
 \begin{figure}[htbp]
   \begin{center}
     \includegraphics[width=0.95\linewidth]{figs/GlobalArchitectureDiagram.pdf}
-    \caption{\label{fig:DQM4HEPArchitecture} DQM4HEP framework architecture}
+    \caption{\label{fig:DQM4HEPArchitecture} DQM4HEP framework architecture.}
   \end{center}
 \end{figure}
 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Link to DAQ system}
-As explained before, to efficiently run an experiment the monitoring system and the DAQ system needs to be somewhat linked. To control the data acquisition, the DAQ system sends start/stop/status signals to the read out electronics of the detectors. The monitoring system can be set up to receive such signals by
+As explained before, to efficiently run an experiment, the monitoring system and the DAQ system needs to be somewhat linked. To control the data acquisition, the DAQ system sends start/stop/status signals to the read out electronics of the detectors. The monitoring system can be set up to receive such signals by
 its \textit{Run Control Server} before dispatching it to the DQM applications. Thus, starting (stopping) a new run from the DAQ system will automatically start (stop) the DQM applications.
 
-Second coupling to the DAQ system is the \textit{event builder} as depicted in Fig.~\ref{fig:DQMEventBuilder}. Its purposes is to get the raw data collected by the DAQ system (e.g. from a shared memory space) and convert it to an user defined data structure using plugins called \textit{processors}. The reconstructed events are then serialized and sent to event collectors over the network.
+Second coupling to the DAQ system is the \textit{event builder} as depicted in Fig.~\ref{fig:DQMEventBuilder}. Its purposes is to get the raw data collected by the DAQ system (e.g. from a shared memory space) and convert it to an user defined data structure using plugins called \textit{shm processors}. The reconstructed events are then serialized and sent to event collectors over the network.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -507,9 +507,9 @@ It should be emphasized here that this is the only coupling to the DAQ system, a
 \subsection{Collectors}
 With the ability of balancing the load over multiple cores and computers comes the need of a common access point for data. Two types of applications serve this process in the framework. The \textit{event collector} acts as the bridge between the event builder and the various analysis modules. The \textit{monitor element collector} share the same role between the analysis modules and the visualization interfaces.
 
-As it can be seen on Fig.~\ref{fig:DQMDataAccess}, data from these collectors can then be accessed either via direct user query (i.e. modules send a query to the collector to receive the last recorded event) or via permanent subscription (modules are notified when a new event is collected).
+As can be seen on Fig.~\ref{fig:DQMDataAccess}, data from these collectors can then be accessed either via direct user query (i.e. modules send a query to the collector to receive the last recorded event) {\color{red} or via subscription system (collectors notify modules when a new event is collected and send it)}.
 
-To start such an application, only the collector name is needed. This name is passed using command line argument at start-up and will be used to identify the collector over the network for external applications.  
+To start such an application, only the collector name is needed. This name is passed using command line argument at start-up and will be used to identify the collector over the network for external applications.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -520,26 +520,26 @@ To start such an application, only the collector name is needed. This name is pa
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Online data analysis}
-Depending on the data input, two types of applications can be used within the framework. The first one, the analysis module, analyze reconstructed event from the event collectors and thus runs only while the DAQ is taking data. The second type, the standalone module, is independent of the DAQ status and use external data source defined by the user (e.g. environmental data stored in a database).
+Depending on the data input, two types of applications can be used within the framework. The first one, the analysis module, use reconstructed event from the event collectors and thus runs only while the DAQ is taking data. The second type, the standalone module, is independent of the DAQ status and use external data source defined by the user (e.g. environmental data stored in a database). The later runs until the user stop it.
 
-Both are implemented as user defined plug-ins and aim to analyze and reduce data to a few self-described objects called \emph{monitor elements}. These wrap graphics objects such as histogram or graph, plus some meta data about data quality or run-time information. 
+Both are implemented as user defined plug-ins and aim to analyze and reduce data to a few self-described objects called \emph{monitor elements}. They wrap graphics objects such as histogram or graph, plus some meta data about data quality or run-time information.
 
-On each monitor element can be run multiple quality tests used to assess the data quality. The quality test results are bound to the monitor elements and sent together to the collector so that user can then be alerted if quality reaches low/dangerous threshold (e.g. high current value, saturation in part of detector, etc.). If deemed necessary, user has the ability to archive monitor elements for off-line checks in ROOT files.
+Multiple quality tests can run on each monitor element to assess the data quality. Their results are bound to the monitor element and sent together to the collector so that user can then be alerted if quality reaches low/dangerous threshold (e.g. high current value, saturation in part of detector, etc.). If deemed necessary, user has the ability to archive monitor elements for off-line checks in ROOT files.
 
 The overall framework architecture gives the flexibility to start (stop) any analysis modules at any given time, including during data taking. This important point means that adding, removing, modifying a module even while taking data will never interfere with DAQ system.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Cycle structure for data processing}
 
-During an acquisition, data taking can be non continuous or with a high rate. For performance reason, there no need to send monitor elements after each processed event. In case of a high rate data taking, this also implies to refresh the visualization too frequently. For these reasons, data in online module application are processed during cycles, during which events are processed sequentially. At the end of cycle, the monitor element are sent to the collector and the visualization interfaces refreshed. Cycles are implemented as plug-ins so user can defined their own to suit their needs. The DQM4HEP framework provides three cycle implementations :
+During an acquisition, data taking can be non continuous or with a high rate, there is no need to refresh the visualization after each processed event. For these performance reasons, data are processed with a cycle structure, during which events are processed sequentially. At the end of a cycle, the monitor elements are sent to the collectors and the visualization interfaces are refreshed. Cycles are implemented as plug-ins so user can defined their own to suit their needs. The DQM4HEP framework provides three built-in cycle implementations :
 
 \begin{itemize}
   \item a \textit{timer cycle}, for which events are processed during \textit{n} seconds,
   \item an \textit{event counter cycle}, for which \textit{n} events are processed before ending,
-  \item an \textit{event size cycle}, for which \textit{n} bytes of serialized data are processed before ending
+  \item an \textit{event size cycle}, for which \textit{n} bytes of serialized data are processed before ending.
 \end{itemize}
 
-Fig.~\ref{fig:DQMCycleSystem} shows the analysis module application workflow where the central part is dedicated to the cycle logic (\textit{start}/\textit{processEvent}/\textit{end}). 
+Fig.~\ref{fig:DQMCycleSystem} shows the analysis module application workflow where the central part is dedicated to the cycle logic (\textit{start}/\textit{processEvent}/\textit{end}).
 
 \begin{figure}[htbp]
   \begin{center}
@@ -549,7 +549,7 @@ Fig.~\ref{fig:DQMCycleSystem} shows the analysis module application workflow whe
 \end{figure}
 
 \subsection{Remote control of the framework's application}
-To deploy the framework for a target detector setup, multiple applications needs to be run (collectors, analysis modules, etc.) sometimes over a selection of hosts. There is then a need for an easy way of controlling them. \textit{Job control servers} serves this purpose. They are run as Linux daemons on every host involved in the deployment and each managing a set a processes that can be steered remotely from a client interface. Process information, such as process status or environment variables, can be permanently accessed from the client interface for process monitoring purpose.
+To deploy the framework for a detector setup, multiple applications needs to run (collectors, analysis modules, etc.), sometimes over multiple computers to balance the load. There is then a need for an easy way of controlling all of them. \textit{Job control servers} serves this purpose. They run as Linux daemons on every host involved in the deployment. Client interfaces can then control these processes and access information, such as its status or environment variables.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -557,10 +557,11 @@ To deploy the framework for a target detector setup, multiple applications needs
 
 \subsection{Monitoring GUI}
 
-This graphical user interface implements a multiple access available monitor element collectors over the network. After the application start-up, the user can browse the monitor element collectors content and build selection of monitor element to draw. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{monitor element (ME)} the user selected has of interest at that time. These \textit{ME} can be displayed on the drawing section where a set of canvases are organized in a tab system. Every drawn \textit{ME} is interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} for now.)
+{\color{red} je suis pas sur de ce que tu voulais mettre dans cette phrase: This graphical user interface implements a multiple access available monitor element collectors over the network.} User can browse the \textit{monitor element collectors} content and build a selection of element to monitor. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{monitor element (ME)} the user just selected. These \textit{ME} can be displayed on the drawing section where a set of canvases are organized in a tab system. Every drawn \textit{ME} is interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} is available for now.)
+
 \begin{figure}[p]
   \begin{center}
-    \includegraphics[width=0.8\linewidth]{figs/MaintInterfaceGUI.pdf}
+    \includegraphics[width=.8\linewidth]{figs/MaintInterfaceGUI.pdf}
     \caption{\label{fig:DQMMainViz} {\color{red}Put figures in One column page at the end}
     Main graphical interface of the framework.
     1. Option for manual/auto update.
@@ -574,18 +575,18 @@ This graphical user interface implements a multiple access available monitor ele
 
 \subsection{Job control GUI}
 
-This GUI is a graphic implementation of multiple job server clients. Processes can be loaded from a JSON file and added to the central process table as shown on Fig.~\ref{fig:JobControlGUI}. User can start/stop application on the different hosts using the interface but also monitor the process status by querying single process status or starting an automatic timer that refreshes the interface automatically. When starting a process on a host, a log file is created on the job control server and can be accessed at any time form this graphical user interface.
+This GUI is a graphic implementation of multiple job server clients. Processes to run are loaded from a JSON configuration file and listed as shown on Fig.~\ref{fig:JobControlGUI}. User can then start/stop application on the various hosts using the interface but also monitor the process status by querying single process status or starting an automatic timer that refreshes the interface automatically. When starting a process on a host, a log file is created on the job control server and can be accessed at any time form this graphical user interface.
 
 \begin{figure}[p]
   \begin{center}
     \includegraphics[width=0.95\linewidth]{figs/JobControlGui.pdf}
-    \caption{\label{fig:JobControlGUI} GUI for the job interface. Applications are ordered by host}
+    \caption{\label{fig:JobControlGUI} GUI for the job interface. Applications are ordered by host.}
   \end{center}
 \end{figure}
 
 \subsection{Run control GUI}
 
-This GUI implements a graphical client interface to a run control server. The run control server application is mostly designed to receive start and stop run signals from the DAQ and dispatch it to all listening DQM applications. Moreover, the GUI implementation can also steers these signals and display the current run status in case the deployment is run without a DAQ, in a test mode.
+This GUI implements a graphical client interface to a run control server. The run control server application is mostly designed to receive start and stop run signals from the DAQ and dispatch it to all listening DQM applications. Moreover, the GUI implementation can also steers these signals and display the current run status in case the deployment is run without a DAQ, like in an offline test mode.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
@@ -598,18 +599,32 @@ Concerning the link to the DAQ system, the run control commands are received thr
 
 As the LCIO EDM contains multiple data structures for different levels of data reconstruction, converters are provided to pass from one such structure to the other. This gives the ability to use off-line analysis into the monitoring system, leading to a better assessment of the overall data quality.
 
-For testing purposes, an offline data reader is also included in this implementation. This allows us to run the framework without a DAQ system running, especially handy to configure it properly in advance of a test beam campaign. To keep conditions as close as possible to a real setup, it can be configured to simulate the timing structure of the raw data.
+For testing purposes, an offline data reader is also included in this implementation. This allows us to run the framework on previously recorded data stored on disk. It is especially handy to configure the framework properly in advance of a test beam campaign. To keep conditions as close as possible to a real setup, it can be configured to simulate the timing structure of the raw data.
 
-At the online analysis level, many analysis and standalone modules were developed. Along with the DQM4HEP framework development, we gathered already existing analysis code for this experiment and adapted it to plug it in the framework. Some of these modules are briefly discussed hereafter. 
+At the online analysis level, along with our own analysis development, we gathered already existing analysis code for this experiment and adapted it to plug it in the framework. Some of these modules are briefly discussed hereafter.
 
-The \textit{Event Display} module allows for 2D and 3D visualization of the data in the detector. A 70GeV pion interacting in the SDHCAL as seen in the monitoring system is displayed in Fig.~\ref{fig:DQMEventDisplay}. A slow control module monitors the high voltages and current in every part of the detector together with the ambient temperature and pressure. This module is critical as too high value of current or high voltage can irremediably compromise the detector working order and thus the data quality. A module was in charge of evaluating the efficiency for each of the 50 chambers of the SDHCAL. Another module was developed to monitor informations related to the beam configuration such as rates of incoming particles as seen by the detector. 
+The \textit{Event Display} module allows for 2D and 3D visualization of the data in the detector. A 70GeV pion interacting in the SDHCAL as seen in the monitoring system is displayed in Fig.~\ref{fig:DQMEventDisplay}. A slow control module monitors the high voltages and current (see Fig.~\ref{fig:DQMCurrents}) in every part of the detector together with the ambient temperature and pressure. This module is critical as too high value of current or high voltage can irremediably compromise the detector working order and thus the data quality. A module is evaluating the efficiency for each of the 50 chambers of the SDHCAL. Another module gives informations related to the beam configuration such as rates of incoming particles as seen by the detector.
 
-One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype, displaying i.e, ADC counter maps for each detector layer.
+One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype such as ADC counter maps for each detector layer as shown in  Fig.~\ref{fig:DQMEcalDisplay}).
 
-\begin{figure}[p]
+\begin{figure}[htbp]
   \begin{center}
-    \includegraphics[width=0.8\linewidth]{figs/DQM_SDHCAL_Shower_pi-_70GeV_I732792.pdf}
-    \caption{\label{fig:DQMEventDisplay} 2D Transversale view of a 70GeV pion in the SDHCAL prototype}
+    \includegraphics[width=0.95\linewidth]{figs/DQM_SDHCAL_ECAL_HitMap6_I732891.pdf}
+    \caption{\label{fig:DQMEcalDisplay} Instantaneous value for currents in SDHCAL prototype.}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=0.95\linewidth]{figs/DQM_SDHCAL_Current_SC13.pdf}
+    \caption{\label{fig:DQMCurrents} Instantaneous value for currents in SDHCAL prototype.}
+  \end{center}
+\end{figure}
+
+\begin{figure}[htbp]
+  \begin{center}
+    \includegraphics[width=0.95\linewidth]{figs/DQM_SDHCAL_Shower_pi-_70GeV_I732792.pdf}
+    \caption{\label{fig:DQMEventDisplay} 2D Transversale view of a 70GeV pion in the SDHCAL prototype.}
   \end{center}
 \end{figure}
 
@@ -734,10 +749,7 @@ A dedicated implementation for the CALICE SDHCAL and SiWECal prototypes has been
 % \blindtext
 
 % use section* for acknowledgement
-\section*{Acknowledgment}
-
-The authors would like to thank...NO ONE BUT THEMSELVES FOR ALL THIS HAAAAARWORK. Science, Bitch!
-
+% \section*{Acknowledgment}
 
 % Can use something like this to put references on a page
 % by themselves when using endfloat and the captionsoff option.
@@ -751,9 +763,9 @@ The authors would like to thank...NO ONE BUT THEMSELVES FOR ALL THIS HAAAAARWORK
 % number - used to balance the columns on the last page
 % adjust value as needed - may need to be readjusted if
 % the document is modified later
-%\IEEEtriggeratref{8}
+\IEEEtriggeratref{18}
 % The "triggered" command can be changed if desired:
-%\IEEEtriggercmd{\enlargethispage{-5in}}
+\IEEEtriggercmd{\enlargethispage{-15in}}
 
 % references section
 
@@ -762,7 +774,7 @@ The authors would like to thank...NO ONE BUT THEMSELVES FOR ALL THIS HAAAAARWORK
 % http://www.ctan.org/tex-archive/biblio/bibtex/contrib/doc/
 % The IEEEtran BibTeX style support page is at:
 % http://www.michaelshell.org/tex/ieeetran/bibtex/
-%\bibliographystyle{IEEEtran}
+\bibliographystyle{IEEEtran}
 % argument is your BibTeX string definitions and bibliography database(s)
 %\bibliography{IEEEabrv,../bib/paper}
 %
@@ -806,9 +818,9 @@ F. Gaede,  "Marlin and LCCD: Software tools for the ILC", \emph{Nucl. Inst. \& M
 %\begin{biography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{mshell}}]{Michael Shell}
 % or if you just want to reserve a space for a photo:
 
-\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{picture}}]{John Doe}
-\blindtext
-\end{IEEEbiography}
+% \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{picture}}]{John Doe}
+% \blindtext
+% \end{IEEEbiography}
 
 
 
