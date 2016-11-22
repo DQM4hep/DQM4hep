@@ -475,9 +475,8 @@ To implement this solution for its own experiment, an user has to define the eve
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \section{Software architecture}
-{\color{red}Some intro}
 
-Overall framework architecture is displayed on Fig.~\ref{fig:DQM4HEPArchitecture}
+The global framework architecture as seen on Fig.~\ref{fig:DQM4HEPArchitecture} is discussed in the following paragraphs.
 \begin{figure}[htbp]
   \begin{center}
     \includegraphics[width=0.95\linewidth]{figs/GlobalArchitectureDiagram.pdf}
@@ -526,7 +525,7 @@ Both are implemented as user defined plug-ins and aim to analyze and reduce data
 
 Multiple quality tests can run on each monitor element to assess the data quality. Their results are bound to the monitor element and sent together to the collector so that user can then be alerted if quality reaches low/dangerous threshold (e.g. high current value, saturation in part of detector, etc.). If deemed necessary, user has the ability to archive monitor elements for off-line checks in ROOT files.
 
-The overall framework architecture gives the flexibility to start (stop) any analysis modules at any given time, including during data taking. This important point means that adding, removing, modifying a module even while taking data will never interfere with DAQ system.
+The framework architecture gives the flexibility to start (stop) any analysis modules at any given time, including during data taking. This important point means that adding, removing, modifying a module even while taking data will never interfere with DAQ system.
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Cycle structure for data processing}
@@ -543,7 +542,7 @@ Fig.~\ref{fig:DQMCycleSystem} shows the analysis module application workflow whe
 
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[width=0.65\linewidth]{figs/AnalysisModuleApplicatonWorkflowDiagram.pdf}
+    \includegraphics[width=0.7\linewidth]{figs/AnalysisModuleApplicatonWorkflowDiagram.pdf}
     \caption{\label{fig:DQMCycleSystem} Analysis module application workflow also showing cycle logic.}
   \end{center}
 \end{figure}
@@ -559,11 +558,10 @@ To deploy the framework for a detector setup, multiple applications needs to run
 
 {\color{red} je suis pas sur de ce que tu voulais mettre dans cette phrase: This graphical user interface implements a multiple access available monitor element collectors over the network.} User can browse the \textit{monitor element collectors} content and build a selection of element to monitor. The main interface, as shown in Fig.~\ref{fig:DQMMainViz}, displays on the left the list of \textit{monitor element (ME)} the user just selected. These \textit{ME} can be displayed on the drawing section where a set of canvases are organized in a tab system. Every drawn \textit{ME} is interactive and can be manipulated according to the frontend used to display them (only ROOT~\cite{ROOT} is available for now.)
 
-\begin{figure}[p]
+\begin{figure*}[htbp]
   \begin{center}
-    \includegraphics[width=.8\linewidth]{figs/MaintInterfaceGUI.pdf}
-    \caption{\label{fig:DQMMainViz} {\color{red}Put figures in One column page at the end}
-    Main graphical interface of the framework.
+    \includegraphics[width=.95\textwidth]{figs/MaintInterfaceGUI.pdf}
+    \caption{\label{fig:DQMMainViz} Main graphical interface of the framework.
     1. Option for manual/auto update.
     2. Monitor Elements (ME) organized in a tree-like structure
     3. List of displayed ME customizable via dedicated GUI with available ME (coming from analysis modules currently loaded)
@@ -571,18 +569,18 @@ To deploy the framework for a detector setup, multiple applications needs to run
     5. Drawn ME are interactive, here ROOT[3] object that can be manipulated (zoom, change scale, fit, save, etc.)
     }
   \end{center}
-\end{figure}
+\end{figure*}
 
 \subsection{Job control GUI}
 
 This GUI is a graphic implementation of multiple job server clients. Processes to run are loaded from a JSON configuration file and listed as shown on Fig.~\ref{fig:JobControlGUI}. User can then start/stop application on the various hosts using the interface but also monitor the process status by querying single process status or starting an automatic timer that refreshes the interface automatically. When starting a process on a host, a log file is created on the job control server and can be accessed at any time form this graphical user interface.
 
-\begin{figure}[p]
+\begin{figure*}[htbp]
   \begin{center}
-    \includegraphics[width=0.95\linewidth]{figs/JobControlGui.pdf}
+    \includegraphics[width=.95\textwidth]{figs/JobControlInterface.pdf}
     \caption{\label{fig:JobControlGUI} GUI for the job interface. Applications are ordered by host.}
   \end{center}
-\end{figure}
+\end{figure*}
 
 \subsection{Run control GUI}
 
@@ -605,12 +603,10 @@ At the online analysis level, along with our own analysis development, we gather
 
 The \textit{Event Display} module allows for 2D and 3D visualization of the data in the detector. A 70GeV pion interacting in the SDHCAL as seen in the monitoring system is displayed in Fig.~\ref{fig:DQMEventDisplay}. A slow control module monitors the high voltages and current (see Fig.~\ref{fig:DQMCurrents}) in every part of the detector together with the ambient temperature and pressure. This module is critical as too high value of current or high voltage can irremediably compromise the detector working order and thus the data quality. A module is evaluating the efficiency for each of the 50 chambers of the SDHCAL. Another module gives informations related to the beam configuration such as rates of incoming particles as seen by the detector.
 
-One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype such as ADC counter maps for each detector layer as shown in  Fig.~\ref{fig:DQMEcalDisplay}).
-
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[width=0.95\linewidth]{figs/DQM_SDHCAL_ECAL_HitMap6_I732891.pdf}
-    \caption{\label{fig:DQMEcalDisplay} Instantaneous value for currents in SDHCAL prototype.}
+    \includegraphics[width=0.95\linewidth]{figs/DQM_SDHCAL_Shower_pi-_70GeV_I732792.pdf}
+    \caption{\label{fig:DQMEventDisplay} 2D Transversale view of a 70GeV pion in the SDHCAL prototype.}
   \end{center}
 \end{figure}
 
@@ -621,10 +617,15 @@ One of these campaigns was dedicated to testing data taking in combination with 
   \end{center}
 \end{figure}
 
+One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype such as ADC counter maps for each detector layer as shown in  Fig.~\ref{fig:DQMEcalDisplay}).
+
+
+
+
 \begin{figure}[htbp]
   \begin{center}
-    \includegraphics[width=0.95\linewidth]{figs/DQM_SDHCAL_Shower_pi-_70GeV_I732792.pdf}
-    \caption{\label{fig:DQMEventDisplay} 2D Transversale view of a 70GeV pion in the SDHCAL prototype.}
+    \includegraphics[width=\linewidth]{figs/DQM_SDHCAL_ECAL_HitMap6_I732891.pdf}
+    \caption{\label{fig:DQMEcalDisplay} Instantaneous value for currents in SDHCAL prototype.}
   \end{center}
 \end{figure}
 
@@ -753,9 +754,9 @@ A dedicated implementation for the CALICE SDHCAL and SiWECal prototypes has been
 
 % Can use something like this to put references on a page
 % by themselves when using endfloat and the captionsoff option.
-\ifCLASSOPTIONcaptionsoff
-  \newpage
-\fi
+% \ifCLASSOPTIONcaptionsoff
+%   \newpage
+% \fi
 
 
 
@@ -763,9 +764,9 @@ A dedicated implementation for the CALICE SDHCAL and SiWECal prototypes has been
 % number - used to balance the columns on the last page
 % adjust value as needed - may need to be readjusted if
 % the document is modified later
-\IEEEtriggeratref{18}
+\IEEEtriggeratref{2}
 % The "triggered" command can be changed if desired:
-\IEEEtriggercmd{\enlargethispage{-15in}}
+% \IEEEtriggercmd{\enlargethispage{-25cm}}
 
 % references section
 
