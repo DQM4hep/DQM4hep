@@ -425,7 +425,7 @@ Email: mirabito@ipnl.in2p3.fr}
 \begin{abstract}
 With increasingly sophisticated experiment, online Data Quality Monitoring (DQM) is of a significant importance for the detector and operation efficiency. Most experiments use their own Event Data Model (EDM) for data taking and built a dedicated monitoring system on top of it. This leads to a strong dependency to the data format and storage, making the reusability of the system for another experiment difficult.
 
-To increase the flexibility and porting of software across experiments, we developed DQM4HEP, a generic online Data Quality Monitoring system specifically targeted to High Energy Physics experiments. The core principle was to make no assumption on the Event Data Model and data type to treat. The result provides reusable and flexible tools for scientists to monitor their detectors by focusing only on the data analysis part.
+To increase the flexibility and capabilities of software across experiments, we developed DQM4HEP, a generic online Data Quality Monitoring system specifically targeted to High Energy Physics experiments. The core principle was to make no assumption on the Event Data Model and data type to treat. The result provides reusable and flexible tools for scientists to monitor their detectors by focusing only on the data analysis part.
 
 In addition, a dedicated implementation, based on the LCIO~\cite{LCIO} Event Data Model for the Linear Collider Collaboration (LCC), was also developed. It has already been put to real condition testing during test beam campaigns at CERN\footnote{Conseil Européen pour la Recherche Nucléaire} with a combined detector setup composed of the CALICE\footnote{CAlorimeter for LInear Collider Experiment} Semi-Digital Hadronic CALorimeter (SDHCAL) and Silicon Tungsten Electronic Calorimeter (SiWECal) prototypes.
 \end{abstract}
@@ -461,7 +461,7 @@ DQM, HEP, Detector, DAQ.
 %~~~~~~~~~~~~~~~~~~~~~~~~~%
 
 \section{Introduction}
-The purpose of a monitoring system is to help identify problems when the experiment is running. For this, it needs to fulfil two requirements : it must display a quick overview of the status and working order of every detector part and should also evaluate the quality of the data being taken. This implies some key infrastructure points for the monitoring software. First, as it should be running at all times when taking data, it needs to interface with the Data Acquisition (DAQ) system. It must not however interfere with the data taking process (slow down, stop, etc.). It needs a system to distribute data coming from the DAQ to the analysis tools and then to visualization tools. The data analysis and data quality assessment needs to remain user-defined and visualization interfaces accessible from many client computers.
+The purpose of a monitoring system is to help the identification of problems when the experiment is running. For this, it needs to fulfill two requirements : it must display a quick overview of the status and working order of every detector part and should also evaluate the quality of the data being taken. This implies some key architecture points for the monitoring software. First, as it should be running at all times when taking data, it needs to interface with the Data Acquisition (DAQ) system. It must not however interfere with the data taking process (slow down, stop, etc.). It needs a system to distribute data coming from the DAQ to the analysis tools and then to visualization tools. The data analysis and data quality assessment needs to remain user-defined and visualization interfaces accessible from many client computers.
 
 In computer science, generic programming implies an architecture with algorithms independent of a programming data type. Algorithms can be instantiated when needed, and in different ways to work with multiple data representations. This leads to more flexible and easily reusable software.
 
@@ -489,7 +489,7 @@ The global framework architecture as seen on Fig.~\ref{fig:DQM4HEPArchitecture} 
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Link to DAQ system}
-As explained before, to efficiently run an experiment, the monitoring system and the DAQ system needs to be somewhat linked. To control the data acquisition, the DAQ system sends start/stop/status signals to the read out electronics of the detectors. The monitoring system can be set up to receive such signals by
+As explained before, to efficiently run an experiment, the monitoring system and the DAQ system have to be decoupled but the latter must send the data to the former in order to process them. To control the data acquisition, the DAQ system sends start/stop/status signals to the read out electronics of the detectors. The monitoring system can be set up to receive such signals by
 its \textit{Run Control Server} before dispatching it to the DQM applications. Thus, starting (stopping) a new run from the DAQ system will automatically start (stop) the DQM applications.
 
 Second coupling to the DAQ system is the \textit{event builder} as depicted in Fig.~\ref{fig:DQMEventBuilder}. Its purposes is to get the raw data collected by the DAQ system (e.g. from a shared memory space) and convert it to an user defined data structure using plugins called \textit{shm processors}. The reconstructed events are then serialized and sent to event collectors over the network.
@@ -532,7 +532,7 @@ The framework architecture gives the flexibility to start and stop any analysis 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \subsection{Cycle structure for data processing}
 
-During an acquisition, data taking can be non continuous or with a high rate. For performance reasons and logic, there is no need to refresh the visualization after each processed event. Thus, data are processed within a cycle structure, during which events are processed sequentially. At the end of a cycle, the monitor elements are sent to the collectors and the visualization interfaces are refreshed. Cycles are implemented as plug-ins so user can defined their own to suit their needs. The DQM4HEP framework provides three built-in cycle implementations :
+During a run, data taking can be non continuous or with a high rate. For performance reasons and logic, there is no need to refresh the visualization after each processed event. Thus, data are processed within a cycle structure, during which events are processed sequentially. At the end of a cycle, the monitor elements are sent to the collectors and the visualization interfaces are refreshed. Cycles are implemented as plug-ins so user can defined their own to suit their needs. The DQM4HEP framework provides three built-in cycle implementations :
 
 \begin{itemize}
   \item a \textit{timer cycle}, for which events are processed during \textit{n} seconds,
@@ -554,7 +554,7 @@ To deploy the framework for a detector setup, multiple applications needs to run
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
-\section{Graphical user interfaces (GUIs)}
+\section{Qt \cite{QT} graphical user interfaces (GUIs)}
 
 \subsection{Monitoring GUI}
 
@@ -599,7 +599,7 @@ Concerning the link to the DAQ system, the run control commands are received thr
 
 As the LCIO EDM contains multiple data structures for different levels of data reconstruction, converters are provided to pass from one such structure to the other. This gives the ability to use off-line analysis into the monitoring system, leading to a better assessment of the overall data quality.
 
-For testing purposes, an offline data reader is also included in this implementation. This allows us to run the framework on previously recorded data stored on disk. It is especially handy to configure the framework properly in advance of a test beam campaign. To keep conditions as close as possible to a real setup, it can be configured to simulate the timing structure of the raw data.
+For testing purposes, an offline data reader is also included in this implementation. This allows us to run the framework on previously recorded data stored on disk. It is especially handy to configure the framework properly in advance for a test beam campaign. To keep conditions as close as possible to a real setup, it can be configured to simulate the timing structure of the raw data.
 
 At the online analysis level, along with our own analysis development, we gathered already existing analysis code for this experiment and adapted it to plug it into the framework. Some of these modules are briefly discussed hereafter.
 
@@ -619,7 +619,7 @@ The \textit{Event Display} module allows for 2D and 3D visualization of the data
   \end{center}
 \end{figure}
 
-One of these campaigns was dedicated to testing data taking in combination with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype such as ADC counter maps for each detector layer as shown in  Fig.~\ref{fig:DQMEcalDisplay}).
+One of these campaigns was dedicated to make a combined data taking with the CALICE-SiWEcal\footnote{Silicon (W)Tungsten Electronic calorimeter)} experiment. Thus, we also developed some analysis dedicated to monitoring parts of this prototype such as ADC counter maps for each detector layer as shown in  Fig.~\ref{fig:DQMEcalDisplay}).
 
 \begin{figure}[htbp]
   \begin{center}
@@ -628,17 +628,16 @@ One of these campaigns was dedicated to testing data taking in combination with 
   \end{center}
 \end{figure}
 
-With this deployment, shifters were able to quickly spot and correct for multiple problems including, but not limited to, bad gas circulation, undesirably noisy electronics, wrong beam configuration, etc...
+With this deployment, shifters were able to quickly spot and correct problems including, but not limited to, bad gas circulation, undesirably noisy electronics, wrong beam configuration, etc...
 
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 %~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~%
 \section{Conclusion}
-In light of the critical importance of a tool to quickly detect problems and ensure a good data quality, a new generic framework for Data Quality Monitoring called DQM4HEP, has been created, integrating full flexibility across experiment set-up.
+In light of the critical importance of a tool to quickly detect problems and ensure a good data quality, a new generic framework for Data Quality Monitoring called DQM4HEP, was designed, integrating full flexibility across experiment setup.
 
-Contrary to most systems available for High Energy Physics up to now, it is not tied to a given Event Data Model. All the tools needed to develop a specific implementation depending on specificities of the experiment, such as DAQ and serialization interface, data format and detector analysis, are provided within the framework.
-The whole system is written in c++11 with Qt~\cite{QT} libraries for the GUI.
+In contrast with most systems available for High Energy Physics up to now, it is not tied to a given Event Data Model. All the tools needed to develop an experiment specific implementation, such as DAQ and serialization interface, data format and detector analysis, are provided within the framework. The whole system is written in c++11 with Qt~\cite{QT} libraries for the GUI.
 
-The whole framework was tested both with offline and online setup dedicated to the SDHCAL prototype. The online configuration was used during two test beam campaigns at CERN, totalling three weeks. One of these campaign was dedicated to a combined test with the CALICE-SiWEcal, for which online analysis were also developed in parallel and successfully deployed.
+The whole framework was tested both with offline and online setup dedicated to the SDHCAL prototype. The online configuration was used during two test beam campaigns at CERN. One of these campaign was a combined test with the CALICE-SiWEcal, for which online analysis were also developed in parallel and successfully deployed.
 
 
 % needed in second column of first page if using \IEEEpubid
@@ -761,7 +760,7 @@ The whole framework was tested both with offline and online setup dedicated to t
 % number - used to balance the columns on the last page
 % adjust value as needed - may need to be readjusted if
 % the document is modified later
-\IEEEtriggeratref{2}
+\IEEEtriggeratref{3}
 % The "triggered" command can be changed if desired:
 % \IEEEtriggercmd{\enlargethispage{-25cm}}
 
@@ -779,7 +778,7 @@ The whole framework was tested both with offline and online setup dedicated to t
 % <OR> manually copy in the resultant .bbl file
 % set second argument of \begin to the number of references
 % (used to reserve space for the reference number labels box)
-\vspace{1em}
+%\vspace{1em}
 \begin{thebibliography}{6}
 
 \bibitem{LCIO}
