@@ -46,7 +46,9 @@ namespace dqm4hep {
 
   namespace net {
 
-    /** Service class
+    class Server;
+
+    /** Service class (server side component)
      *
      *  Base interface for service. Service is updated whenever
      *  the user calls the update() method. Service content
@@ -56,15 +58,8 @@ namespace dqm4hep {
      */
     class Service
     {
+      friend class Server;
     public:
-      /** Constructor with service type and name
-       */
-      Service(const std::string &type, const std::string &name);
-
-      /** Destructor
-       */
-      virtual ~Service();
-
       /** Update the service, sending its content to listening clients
        */
       void update();
@@ -91,7 +86,23 @@ namespace dqm4hep {
        */
       bool isCompressed() const;
 
+      /** Get the full service name from the service type and name
+       */
+      static std::string getFullServiceName(const std::string &type, const std::string &name);
+
+      /** Get the server in which the service is declared
+       */
+      Server *getServer() const;
+
     protected:
+      /** Constructor with service type and name
+       */
+      Service(Server *pServer, const std::string &type, const std::string &name);
+
+      /** Destructor
+       */
+      virtual ~Service();
+
       /** Write the service content in the json value.
        *  Called whenever update() is called
        */
@@ -108,6 +119,7 @@ namespace dqm4hep {
       std::string           m_serviceContent;   ///< The service string content
       DimService            m_service;          ///< The dim service implementation
       bool                  m_compressed;       ///< Whether the service content will be compressed
+      Server               *m_pServer;          ///< The server in which the service is declared
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -121,20 +133,21 @@ namespace dqm4hep {
      */
     class BinaryService : public Service
     {
+      friend class Server;
     public:
-      /** Constructor with service type and name
-       */
-      BinaryService(const std::string &type, const std::string &name);
-
-      /** Destructor
-       */
-      virtual ~BinaryService();
-
       /** Get the xdrstream buffer device
        */
       xdrstream::BufferDevice *getBufferDevice() const;
 
     protected:
+      /** Constructor with service type and name
+       */
+      BinaryService(Server *pServer, const std::string &type, const std::string &name);
+
+      /** Destructor
+       */
+      virtual ~BinaryService();
+
       /** Write binary data into base64 format in the json value
        */
       virtual void writeContent(Json::Value &value);
@@ -166,11 +179,8 @@ namespace dqm4hep {
     template <typename T>
     class ValueService : public Service
     {
+      friend class Server;
     public:
-      /** Constructor with service type and name
-       */
-      ValueService(const std::string &type, const std::string &name);
-
       /** Set the current value. Use update() to send it
        */
       void setValue(const T &value);
@@ -179,14 +189,18 @@ namespace dqm4hep {
        */
       const T &getValue() const;
 
-    private:
+    protected:
+      /** Constructor with service type and name
+       */
+      ValueService(Server *pServer, const std::string &type, const std::string &name);
+
       /** Write the value into the json value
        */
       virtual void writeContent(Json::Value &value);
 
       /** Get content type (return typeid(val).name())
        */
-      std::string getContentType() const;
+      virtual std::string getContentType() const;
 
     private:
       T             m_value;                   ///< The stored value
@@ -197,8 +211,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline ValueService<T>::ValueService(const std::string &type, const std::string &name) :
-      Service(type, name)
+    inline ValueService<T>::ValueService(Server *pServer, const std::string &type, const std::string &name) :
+      Service(pServer, type, name)
     {
       /* nop */
     }

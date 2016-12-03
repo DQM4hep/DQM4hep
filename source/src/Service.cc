@@ -37,13 +37,14 @@ namespace dqm4hep {
 
   namespace net {
 
-    Service::Service(const std::string &type, const std::string &name) :
+    Service::Service(Server *pServer, const std::string &type, const std::string &name) :
         m_type(type),
         m_name(name),
-        m_fullName("/DQM4HEP/" + m_type + "/" + m_name),
+        m_fullName(getFullServiceName(m_type, m_name)),
         m_serviceContent("{}"),
         m_service(const_cast<char *>(m_fullName.c_str()), const_cast<char *>(m_serviceContent.c_str())),
-        m_compressed(false)
+        m_compressed(false),
+        m_pServer(pServer)
     {
       /* nop */
     }
@@ -120,10 +121,38 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
+
+    Server *Service::getServer() const
+    {
+      return m_pServer;
+    }
+
     //-------------------------------------------------------------------------------------------------
 
-    BinaryService::BinaryService(const std::string &type, const std::string &name) :
-      Service(type, name)
+    void Service::setCompressed(bool compressed)
+    {
+      m_compressed = compressed;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Service::isCompressed() const
+    {
+      return m_compressed;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    std::string Service::getFullServiceName(const std::string &type, const std::string &name)
+    {
+      return ("/DQM4HEP/SVC/" + type + "/" + name);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    BinaryService::BinaryService(Server *pServer, const std::string &type, const std::string &name) :
+      Service(pServer, type, name)
     {
       m_pBufferDevice = new xdrstream::BufferDevice();
     }
