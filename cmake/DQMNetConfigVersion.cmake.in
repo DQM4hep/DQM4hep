@@ -1,0 +1,15 @@
+##############################################################################
+# this file is parsed when FIND_PACKAGE is called with version argument
+#
+# @author Jan Engels, Desy IT
+# Modified for DQMNet use by : R.Ete, IPNL
+##############################################################################
+
+
+SET( ${PACKAGE_FIND_NAME}_VERSION_MAJOR @DQMNet_VERSION_MAJOR@ )
+SET( ${PACKAGE_FIND_NAME}_VERSION_MINOR @DQMNet_VERSION_MINOR@ )
+SET( ${PACKAGE_FIND_NAME}_VERSION_PATCH @DQMNet_VERSION_PATCH@ )
+
+INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroCheckPackageVersion.cmake" )
+CHECK_PACKAGE_VERSION( ${PACKAGE_FIND_NAME} @DQMNet_VERSION@ )
+
