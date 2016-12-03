@@ -206,6 +206,15 @@ namespace dqm4hep {
       T             m_value;                   ///< The stored value
     };
 
+    typedef ValueService<Json::Int>    IntService;
+    typedef ValueService<Json::UInt>   UIntService;
+    typedef ValueService<Json::Int64>  Int64Service;
+    typedef ValueService<Json::UInt64> UInt64Service;
+    typedef ValueService<double>       DoubleService;
+    typedef ValueService<float>        FloatService;
+    typedef ValueService<std::string>  StringService;
+    typedef ValueService<bool>         BoolService;
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------

@@ -59,8 +59,8 @@ int main(int argc, char **argv)
 
   Server *pServer = new Server("TestServer");
 
-  ValueService<int> *pIntService = pServer->createService< ValueService<int> >("test", "int");
-  ValueService<float> *pFloatService = pServer->createService< ValueService<float> >("test", "float");
+  IntService   *pIntService   = pServer->createService<IntService>("test", "int");
+  FloatService *pFloatService = pServer->createService<FloatService>("test", "float");
   RequestHandler *pPrintRequestHandler = pServer->createRequestHandler("test", "print", &printer, &MyPrintClass::print);
 
   pServer->start();
