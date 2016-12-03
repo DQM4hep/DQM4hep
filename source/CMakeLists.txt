@@ -25,7 +25,7 @@ INSTALL(
 
 
 # -------------------------------------------------
-# build start shm driver executable
+# build test-json-binary executable
 
 
 ADD_EXECUTABLE( test-json-binary main/test-json-binary.cc )
@@ -33,6 +33,18 @@ TARGET_LINK_LIBRARIES( test-json-binary ${PROJECT_NAME} )
 
 INSTALL (
     TARGETS test-json-binary
+    RUNTIME DESTINATION bin
+)
+
+# -------------------------------------------------
+# build test-server executable
+
+
+ADD_EXECUTABLE( test-server main/test-server.cc )
+TARGET_LINK_LIBRARIES( test-server ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS test-server
     RUNTIME DESTINATION bin
 )
 
