@@ -81,7 +81,7 @@ namespace dqm4hep {
 
     std::string RequestHandler::getFullRequestHandlerName(const std::string &type, const std::string &name)
     {
-      return ("/DQM4HEP/REQ/" + type + "/" + name);
+      return ("/dqm4hep/" + type + "/" + name);
     }
 
     //-------------------------------------------------------------------------------------------------

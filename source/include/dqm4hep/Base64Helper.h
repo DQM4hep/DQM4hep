@@ -84,18 +84,44 @@
 #ifndef _BASE64_H_
 #define _BASE64_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include "xdrstream/xdrstream.h"
 
-int Base64encode_len(int len);
-int Base64encode(char * coded_dst, const char *plain_src,int len_plain_src);
+namespace dqm4hep {
 
-int Base64decode_len(const char * coded_src);
-int Base64decode(char * plain_dst, const char *coded_src);
+  namespace net {
 
-#ifdef __cplusplus
+    /** Base64 class
+     */
+    class Base64Helper
+    {
+    public:
+      /** Get the base64 buffer length to allocate given a binary buffer length
+       */
+      static int getBase64EncodeLength(int binaryLength);
+
+      /** Encode the binary buffer into a base64 buffer
+       */
+      static int toBase64(char * coded_dst, const char *plain_src, int len_plain_src);
+
+      /** Get the binary buffer length to allocate given a base64 buffer
+       */
+      static int getBase64DecodeLength(const char * coded_src);
+
+      /** Decode the base64 buffer into a binary buffer
+       */
+      static int fromBase64(char * plain_dst, const char *coded_src);
+
+      /** Decode the base64 buffer and assign the decode binary buffer into the target device
+       */
+      static void readFromBase64(xdrstream::BufferDevice *pDevice, const std::string &base64Source);
+
+      /** Encode the binary buffer from the buffer device to a base64 buffer
+       */
+      static void writeToBase64(const xdrstream::BufferDevice *pDevice, std::string &base64Destination);
+    };
+
+  }
+
 }
-#endif
 
 #endif /*_BASE64_H_*/

@@ -27,7 +27,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/Service.h"
-#include "dqm4hep/base64.h"
+#include "dqm4hep/Base64Helper.h"
 
 namespace dqm4hep {
 
@@ -83,7 +83,7 @@ namespace dqm4hep {
 
     std::string Service::getFullServiceName(const std::string &type, const std::string &name)
     {
-      return ("/DQM4HEP/SVC/" + type + "/" + name);
+      return ("/dqm4hep/" + type + "/" + name);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -104,7 +104,6 @@ namespace dqm4hep {
 
     void Service::update(const xdrstream::BufferDevice *pDevice)
     {
-      const char *pBuffer(pDevice->getBuffer());
       xdrstream::xdr_size_t bufferSize(pDevice->getPosition());
       Json::Value content;
 
@@ -116,15 +115,12 @@ namespace dqm4hep {
       }
       else
       {
-        int base64_size(Base64encode_len(bufferSize));
-        char *pBuffer64 = new char[base64_size];
-        Base64encode(pBuffer64, pBuffer, bufferSize);
+        std::string base64BufferStr;
+        Base64Helper::writeToBase64(pDevice, base64BufferStr);
 
-        content["bin"] = pBuffer64;
-        content["size"] = base64_size;
+        content["bin"] = base64BufferStr;
+        content["size"] = base64BufferStr.size();
         content["format"] = "base64";
-
-        delete [] pBuffer64;
       }
 
       this->update<Json::Value>(content);

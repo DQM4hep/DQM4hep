@@ -26,9 +26,11 @@
  */
 
 
-#include "dqm4hep/base64.h"
+#include "dqm4hep/Base64Helper.h"
 #include "json/json.h"
 #include "xdrstream/xdrstream.h"
+
+using namespace dqm4hep::net;
 
 int main(int argc, char **argv)
 {
@@ -45,16 +47,10 @@ int main(int argc, char **argv)
   writeBuffer.write<bool>(&w_b);
   writeBuffer.write(&w_c);
 
-  char *w_buffer(writeBuffer.getBuffer());
-  xdrstream::xdr_size_t w_size(writeBuffer.getPosition());
-  int base64_size(Base64encode_len(w_size));
-  char *w_buffer64 = new char[base64_size];
-  Base64encode(w_buffer64, w_buffer, w_size);
-
+  std::string writeBase64Str;
+  Base64Helper::writeToBase64(&writeBuffer, writeBase64Str);
   jsonValue["type"] = "binary";
-  jsonValue["content"] = w_buffer64;
-
-  delete [] w_buffer64;
+  jsonValue["content"] = writeBase64Str;
 
   Json::StyledWriter jsonWriter;
   std::cout << jsonWriter.write(jsonValue) << std::endl;
@@ -66,13 +62,11 @@ int main(int argc, char **argv)
   std::string r_c;
 
   std::string buffer64Str(jsonValue["content"].asString());
-  const char *r_buffer64(buffer64Str.c_str());
-  int r_size64(buffer64Str.size());
-  int r_size(Base64decode_len(r_buffer64));
-  char *r_buffer = new char[r_size];
-  Base64decode(r_buffer, r_buffer64);
+  char *tmp = new char[1]; tmp[0] = '\0';
+  xdrstream::BufferDevice readBuffer(tmp, 1, false);
 
-  xdrstream::BufferDevice readBuffer(r_buffer, r_size, false);
+  Base64Helper::readFromBase64(&readBuffer, buffer64Str);
+
   readBuffer.read(&r_a);
   readBuffer.read(&r_b);
   readBuffer.read(&r_c);
