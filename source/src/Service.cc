@@ -29,10 +29,6 @@
 #include "dqm4hep/Service.h"
 #include "dqm4hep/base64.h"
 
-// -- std headers
-#include <sys/utsname.h>
-#include <unistd.h>
-
 namespace dqm4hep {
 
   namespace net {
@@ -43,7 +39,6 @@ namespace dqm4hep {
         m_fullName(getFullServiceName(m_type, m_name)),
         m_serviceContent("{}"),
         m_service(const_cast<char *>(m_fullName.c_str()), const_cast<char *>(m_serviceContent.c_str())),
-        m_compressed(false),
         m_pServer(pServer)
     {
       /* nop */
@@ -54,49 +49,6 @@ namespace dqm4hep {
     Service::~Service()
     {
       /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void Service::update()
-    {
-      Json::Value value, content;
-      Json::Value hostInfo, serviceInfo;
-
-      this->writeContent(content);
-
-      if(!m_compressed)
-      {
-        serviceInfo["type"] = m_type;
-        serviceInfo["name"] = m_name;
-        serviceInfo["fullName"] = m_fullName;
-        value["service"] = serviceInfo;
-
-        // uname
-        struct utsname unameStruct;
-        uname(&unameStruct);
-
-        // host name
-        char host[256];
-        gethostname(host, 256);
-
-        hostInfo["name"] = host;
-        hostInfo["system"] = unameStruct.sysname;
-        hostInfo["node"] = unameStruct.nodename;
-        hostInfo["release"] = unameStruct.release;
-        hostInfo["version"] = unameStruct.version;
-        hostInfo["machine"] = unameStruct.machine;
-        value["host"] = hostInfo;
-      }
-
-      value["type"] = this->getContentType();
-      value["compressed"] = m_compressed;
-      value["content"] = content;
-
-      Json::FastWriter writer;
-
-      m_serviceContent = writer.write(value);
-      m_service.updateService(const_cast<char *>(m_serviceContent.c_str()));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -129,78 +81,66 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Service::setCompressed(bool compressed)
-    {
-      m_compressed = compressed;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    bool Service::isCompressed() const
-    {
-      return m_compressed;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     std::string Service::getFullServiceName(const std::string &type, const std::string &name)
     {
       return ("/DQM4HEP/SVC/" + type + "/" + name);
     }
 
     //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
 
-    BinaryService::BinaryService(Server *pServer, const std::string &type, const std::string &name) :
-      Service(pServer, type, name)
+    template <typename T>
+    void Service::update(const T &value)
     {
-      m_pBufferDevice = new xdrstream::BufferDevice();
-    }
+      Json::Value jsonValue;
+      jsonValue["type"] = typeid(value).name();
+      jsonValue["content"] = value;
 
-
-    BinaryService::~BinaryService()
-    {
-      delete m_pBufferDevice;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    xdrstream::BufferDevice *BinaryService::getBufferDevice() const
-    {
-      return m_pBufferDevice;
+      Json::FastWriter writer;
+      m_serviceContent = writer.write(jsonValue);
+      m_service.updateService(const_cast<char *>(m_serviceContent.c_str()));
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void BinaryService::writeContent(Json::Value &value)
+    void Service::update(const xdrstream::BufferDevice *pDevice)
     {
-      char *pBuffer(m_pBufferDevice->getBuffer());
-      xdrstream::xdr_size_t bufferSize(m_pBufferDevice->getPosition());
+      const char *pBuffer(pDevice->getBuffer());
+      xdrstream::xdr_size_t bufferSize(pDevice->getPosition());
+      Json::Value content;
 
       if(bufferSize == 0)
       {
-        value["bin"] = "";
-        return;
+        content["bin"] = "";
+        content["size"] = 0;
+        content["format"] = "base64";
+      }
+      else
+      {
+        int base64_size(Base64encode_len(bufferSize));
+        char *pBuffer64 = new char[base64_size];
+        Base64encode(pBuffer64, pBuffer, bufferSize);
+
+        content["bin"] = pBuffer64;
+        content["size"] = base64_size;
+        content["format"] = "base64";
+
+        delete [] pBuffer64;
       }
 
-      int base64_size(Base64encode_len(bufferSize));
-      char *pBuffer64 = new char[base64_size];
-      Base64encode(pBuffer64, pBuffer, bufferSize);
-
-      value["bin"] = pBuffer64;
-      value["size"] = base64_size;
-      value["format"] = "base64";
-
-      delete [] pBuffer64;
+      this->update<Json::Value>(content);
     }
 
-    //-------------------------------------------------------------------------------------------------
-
-    std::string BinaryService::getContentType() const
-    {
-      return "binary";
-    }
+    template void Service::update<Json::Int>(const Json::Int &value);
+    template void Service::update<Json::UInt>(const Json::UInt &value);
+    template void Service::update<Json::Int64>(const Json::Int64 &value);
+    template void Service::update<Json::UInt64>(const Json::UInt64 &value);
+    template void Service::update<double>(const double &value);
+    template void Service::update<float>(const float &value);
+    template void Service::update<Json::Value>(const Json::Value &value);
+    template void Service::update<std::string>(const std::string &value);
+    template void Service::update<bool>(const bool &value);
 
   }
+
 } 
 

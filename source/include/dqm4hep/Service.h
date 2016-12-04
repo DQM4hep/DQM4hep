@@ -62,7 +62,12 @@ namespace dqm4hep {
     public:
       /** Update the service, sending its content to listening clients
        */
-      void update();
+      template <typename T>
+      void update(const T &value);
+
+      /** Update the service, sending its content to listening clients
+       */
+      void update(const xdrstream::BufferDevice *pDevice);
 
       /** Get the service type
        */
@@ -75,16 +80,6 @@ namespace dqm4hep {
       /** Get the service full name, as it is allocated on the network
        */
       const std::string &getFullName() const;
-
-      /** Whether the content has to be compressed before sending.
-       *  By setting this to false, additional information will be
-       *  written together with the content and sent to the clients
-       */
-      void setCompressed(bool compressed);
-
-      /** Whether the content is compressed (see setCompressed())
-       */
-      bool isCompressed() const;
 
       /** Get the full service name from the service type and name
        */
@@ -103,161 +98,17 @@ namespace dqm4hep {
        */
       virtual ~Service();
 
-      /** Write the service content in the json value.
-       *  Called whenever update() is called
-       */
-      virtual void writeContent(Json::Value &value) = 0;
-
-      /** Get the service content type
-       */
-      virtual std::string getContentType() const = 0;
-
     private:
       std::string           m_type;             ///< The service type
       std::string           m_name;             ///< The service name
       std::string           m_fullName;         ///< The service full name
       std::string           m_serviceContent;   ///< The service string content
       DimService            m_service;          ///< The dim service implementation
-      bool                  m_compressed;       ///< Whether the service content will be compressed
       Server               *m_pServer;          ///< The server in which the service is declared
     };
 
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /** BinaryService class.
-     *
-     *  Concrete service implementation to send binary data.
-     *  The raw binary buffer is handled by the xdrstream::BufferDevice
-     *  that user can access via the getBufferDevice() method.
-     */
-    class BinaryService : public Service
-    {
-      friend class Server;
-    public:
-      /** Get the xdrstream buffer device
-       */
-      xdrstream::BufferDevice *getBufferDevice() const;
-
-    protected:
-      /** Constructor with service type and name
-       */
-      BinaryService(Server *pServer, const std::string &type, const std::string &name);
-
-      /** Destructor
-       */
-      virtual ~BinaryService();
-
-      /** Write binary data into base64 format in the json value
-       */
-      virtual void writeContent(Json::Value &value);
-
-      /** Get the content type ("binary")
-       */
-      virtual std::string getContentType() const;
-
-    private:
-      xdrstream::BufferDevice       *m_pBufferDevice;    ///< The xdrstream buffer device
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /** ValueService class
-     *
-     *  Concrete service implementation for simple types.
-     *  Supported types are the one supported by the json format :
-     *   * int
-     *   * unsigned int
-     *   * unsigned __int64
-     *   * double
-     *   * const char *
-     *   * std::string
-     *   * bool
-     *   * Json::Value
-     */
-    template <typename T>
-    class ValueService : public Service
-    {
-      friend class Server;
-    public:
-      /** Set the current value. Use update() to send it
-       */
-      void setValue(const T &value);
-
-      /** Get the current value
-       */
-      const T &getValue() const;
-
-    protected:
-      /** Constructor with service type and name
-       */
-      ValueService(Server *pServer, const std::string &type, const std::string &name);
-
-      /** Write the value into the json value
-       */
-      virtual void writeContent(Json::Value &value);
-
-      /** Get content type (return typeid(val).name())
-       */
-      virtual std::string getContentType() const;
-
-    private:
-      T             m_value;                   ///< The stored value
-    };
-
-    typedef ValueService<Json::Int>    IntService;
-    typedef ValueService<Json::UInt>   UIntService;
-    typedef ValueService<Json::Int64>  Int64Service;
-    typedef ValueService<Json::UInt64> UInt64Service;
-    typedef ValueService<double>       DoubleService;
-    typedef ValueService<float>        FloatService;
-    typedef ValueService<std::string>  StringService;
-    typedef ValueService<bool>         BoolService;
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline ValueService<T>::ValueService(Server *pServer, const std::string &type, const std::string &name) :
-      Service(pServer, type, name)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void ValueService<T>::writeContent(Json::Value &value)
-    {
-      value["value"] = m_value;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline std::string ValueService<T>::getContentType() const
-    {
-      return typeid(m_value).name();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void ValueService<T>::setValue(const T &value)
-    {
-      m_value = value;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline const T &ValueService<T>::getValue() const
-    {
-      return m_value;
-    }
   }
+
 }
 
 #endif  //  SERVICE_H
