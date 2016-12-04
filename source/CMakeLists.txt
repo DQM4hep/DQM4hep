@@ -48,6 +48,43 @@ INSTALL (
     RUNTIME DESTINATION bin
 )
 
+# -------------------------------------------------
+# build dqm4hep-server-info executable
+
+
+ADD_EXECUTABLE( dqm4hep-server-info main/dqm4hep-server-info.cc )
+TARGET_LINK_LIBRARIES( dqm4hep-server-info ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep-server-info
+    RUNTIME DESTINATION bin
+)
+
+
+# -------------------------------------------------
+# build dqm4hep-send-request executable
+
+
+ADD_EXECUTABLE( dqm4hep-send-request main/dqm4hep-send-request.cc )
+TARGET_LINK_LIBRARIES( dqm4hep-send-request ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep-send-request
+    RUNTIME DESTINATION bin
+)
+
+# -------------------------------------------------
+# build dqm4hep-send-request executable
+
+
+ADD_EXECUTABLE( dqm4hep-send-request-response main/dqm4hep-send-request-response.cc )
+TARGET_LINK_LIBRARIES( dqm4hep-send-request-response ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep-send-request-response
+    RUNTIME DESTINATION bin
+)
+
 
 
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" )
