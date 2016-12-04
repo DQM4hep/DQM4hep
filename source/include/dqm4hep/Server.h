@@ -64,10 +64,9 @@ namespace dqm4hep {
        */
       void clear();
 
-      /** Create a new service of concrete implementation T
+      /** Create a new service
        */
-      template <typename T>
-      T *createService(const std::string &type, const std::string &name);
+      Service *createService(const std::string &type, const std::string &name);
 
       /** Create a new request handler
        */
@@ -102,6 +101,11 @@ namespace dqm4hep {
       static int getDnsPort();
 
     private:
+      /**
+       */
+      void handleServerInfoRequest(const Json::Value &request, Json::Value &response);
+
+    private:
       typedef std::map<std::string, Service *>         ServiceMap;
       typedef std::map<std::string, RequestHandler *>  RequestHandlerMap;
 
@@ -109,43 +113,11 @@ namespace dqm4hep {
       bool                                           m_started;
       ServiceMap                                     m_serviceMap;
       RequestHandlerMap                              m_requestHandlerMap;
+      RequestHandlerT<Server>                        m_serverInfoHandler;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    T *Server::createService(const std::string &type, const std::string &name)
-    {
-      const std::string fullServiceName(Service::getFullServiceName(type, name));
-
-      auto findIter = m_serviceMap.find(fullServiceName);
-
-      if(findIter != m_serviceMap.end())
-      {
-        T *pService = dynamic_cast<T*>(findIter->second);
-
-        if(!pService)
-          throw;
-
-        return pService;
-      }
-
-      // first insert nullptr, then create service
-      std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(fullServiceName, nullptr));
-
-
-      if(inserted.second)
-      {
-        T *pService = new T(this, type, name);
-        inserted.first->second = pService;
-        return pService;
-      }
-      else
-        throw;
-    }
-
     //-------------------------------------------------------------------------------------------------
 
     template <typename T, typename S>

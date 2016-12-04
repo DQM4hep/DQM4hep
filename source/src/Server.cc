@@ -25,8 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
+// -- dqm4hep headers
 #include "dqm4hep/Server.h"
+
+// -- std headers
+#include <sys/utsname.h>
+#include <unistd.h>
 
 namespace dqm4hep {
 
@@ -34,7 +38,8 @@ namespace dqm4hep {
 
     Server::Server(const std::string &name) :
         m_name(name),
-        m_started(false)
+        m_started(false),
+        m_serverInfoHandler(this, m_name, "info", this, &Server::handleServerInfoRequest)
     {
       /* nop */
     }
@@ -81,6 +86,27 @@ namespace dqm4hep {
 
       m_serviceMap.clear();
       m_requestHandlerMap.clear();
+    }
+
+    Service *Server::createService(const std::string &type, const std::string &name)
+    {
+      const std::string fullServiceName(Service::getFullServiceName(type, name));
+
+      auto findIter = m_serviceMap.find(fullServiceName);
+
+      if(findIter != m_serviceMap.end())
+        return findIter->second;
+
+      // first insert nullptr, then create service
+      std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(fullServiceName, nullptr));
+
+      if(inserted.second)
+      {
+        inserted.first->second = new Service(this, type, name);;
+        return inserted.first->second;
+      }
+      else
+        throw;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -133,8 +159,69 @@ namespace dqm4hep {
       return DimServer::getDnsPort();
     }
 
-  }
+    //-------------------------------------------------------------------------------------------------
 
+    void Server::handleServerInfoRequest(const Json::Value &/*request*/, Json::Value &response)
+    {
+      Json::Value serverInfo;
+      serverInfo["name"] = m_name;
+      response["server"] = serverInfo;
+
+      // uname
+      struct utsname unameStruct;
+      uname(&unameStruct);
+
+      // host name
+      char host[256];
+      gethostname(host, 256);
+
+      Json::Value hostInfo;
+      hostInfo["name"] = host;
+      hostInfo["system"] = unameStruct.sysname;
+      hostInfo["node"] = unameStruct.nodename;
+      hostInfo["release"] = unameStruct.release;
+      hostInfo["version"] = unameStruct.version;
+      hostInfo["machine"] = unameStruct.machine;
+      response["host"] = hostInfo;
+
+      Json::Value servicesInfo;
+      unsigned int index(0);
+
+      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
+      {
+        const std::string &type(iter->second->getType());
+        const std::string &name(iter->second->getName());
+
+        Json::Value serviceInfo;
+        serviceInfo["type"] = type;
+        serviceInfo["name"] = name;
+        servicesInfo[index] = serviceInfo;
+
+        ++index;
+      }
+
+      response["services"] = servicesInfo;
+
+      Json::Value requestHandlersInfo;
+      index = 0;
+
+      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        const std::string &type(iter->second->getType());
+        const std::string &name(iter->second->getName());
+
+        Json::Value requestHandlerInfo;
+        requestHandlerInfo["type"] = type;
+        requestHandlerInfo["name"] = name;
+        requestHandlersInfo[index] = requestHandlerInfo;
+
+        ++index;
+      }
+
+      response["requestHandlers"] = requestHandlersInfo;
+    }
+
+  }
 
 } 
 

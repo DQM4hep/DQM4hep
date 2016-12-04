@@ -59,8 +59,8 @@ int main(int argc, char **argv)
 
   Server *pServer = new Server("TestServer");
 
-  IntService   *pIntService   = pServer->createService<IntService>("test", "int");
-  FloatService *pFloatService = pServer->createService<FloatService>("test", "float");
+  Service *pIntService   = pServer->createService("test", "int");
+  Service *pFloatService = pServer->createService("test", "float");
   RequestHandler *pPrintRequestHandler = pServer->createRequestHandler("test", "print", &printer, &MyPrintClass::print);
 
   pServer->start();
@@ -71,12 +71,10 @@ int main(int argc, char **argv)
   while(1)
   {
     intVal = rand();
-    pIntService->setValue(intVal);
-    pIntService->update();
+    pIntService->update(intVal);
 
     floatVal = intVal*0.78;
-    pFloatService->setValue(floatVal);
-    pFloatService->update();
+    pFloatService->update(floatVal);
 
     sleep(5);
   }
