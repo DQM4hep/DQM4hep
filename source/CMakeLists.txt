@@ -85,6 +85,18 @@ INSTALL (
     RUNTIME DESTINATION bin
 )
 
+# -------------------------------------------------
+# build dqm4hep-subscribe-service executable
+
+
+ADD_EXECUTABLE( dqm4hep-subscribe-service main/dqm4hep-subscribe-service.cc )
+TARGET_LINK_LIBRARIES( dqm4hep-subscribe-service ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep-subscribe-service
+    RUNTIME DESTINATION bin
+)
+
 
 
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" )
