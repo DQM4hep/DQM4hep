@@ -31,6 +31,7 @@
 // -- std headers
 #include <sys/utsname.h>
 #include <unistd.h>
+#include "dic.hxx"
 
 namespace dqm4hep {
 
@@ -59,7 +60,8 @@ namespace dqm4hep {
       if(m_started)
         return;
 
-      DimServer::start(const_cast<char*>(m_name.c_str()));
+      std::string dimServerName(Server::getFullServerName(m_name));
+      DimServer::start(const_cast<char*>(dimServerName.c_str()));
       m_started = true;
     }
 
@@ -157,6 +159,58 @@ namespace dqm4hep {
     int Server::getDnsPort()
     {
       return DimServer::getDnsPort();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    std::string Server::getFullServerName(const std::string &serverName)
+    {
+      return ("dqm4hep/" + serverName);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    std::vector<std::string> Server::getRunningServers()
+    {
+      std::vector<std::string> runningServers;
+
+      DimBrowser browser;
+      browser.getServers();
+      char *pServer, *pNode;
+
+      while(browser.getNextServer(pServer, pNode))
+      {
+        std::string server(pServer);
+
+        if(server.substr(0, std::string("dqm4hep/").size()) == "dqm4hep/")
+          runningServers.push_back(server.substr(std::string("dqm4hep/").size()));
+      }
+
+      return runningServers;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Server::isServerRunning(const std::string &serverName)
+    {
+      DimBrowser browser;
+      browser.getServers();
+      char *pServer, *pNode;
+
+      while(browser.getNextServer(pServer, pNode))
+      {
+        std::string server(pServer);
+
+        if(server.substr(0, std::string("dqm4hep/").size()) == "dqm4hep/")
+        {
+          std::string realServerName(server.substr(std::string("dqm4hep/").size()));
+
+          if(realServerName == serverName)
+            return true;
+        }
+      }
+
+      return false;
     }
 
     //-------------------------------------------------------------------------------------------------

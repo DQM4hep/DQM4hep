@@ -43,6 +43,8 @@ BUILD_EXECUTABLE( test-server )
 
 # main binaries
 BUILD_EXECUTABLE( dqm4hep-server-info )
+BUILD_EXECUTABLE( dqm4hep-server-list )
+BUILD_EXECUTABLE( dqm4hep-server-running )
 BUILD_EXECUTABLE( dqm4hep-send-request )
 BUILD_EXECUTABLE( dqm4hep-send-request-response )
 BUILD_EXECUTABLE( dqm4hep-subscribe-service )

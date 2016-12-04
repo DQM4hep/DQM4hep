@@ -100,6 +100,18 @@ namespace dqm4hep {
        */
       static int getDnsPort();
 
+      /** Get the full server name as allocated on the network
+       */
+      static std::string getFullServerName(const std::string &serverName);
+
+      /** Get the list of running servers
+       */
+      static std::vector<std::string> getRunningServers();
+
+      /** Whether the target server is already running on the network
+       */
+      static bool isServerRunning(const std::string &serverName);
+
     private:
       /**
        */
