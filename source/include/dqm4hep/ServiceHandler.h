@@ -61,7 +61,7 @@ namespace dqm4hep {
        */
       Client *getClient() const;
 
-    private:
+    protected:
       /** Constructor
        */
       ServiceHandler(Client *pClient, const std::string &type, const std::string &name);
@@ -124,6 +124,10 @@ namespace dqm4hep {
       ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
           T *pController, Function function);
 
+      /** Destructor
+       */
+      ~ServiceHandlerT();
+
       /**
        */
       void serviceHandler(const Json::Value &serviceValue);
@@ -145,6 +149,12 @@ namespace dqm4hep {
         m_function(function)
     {
       /* nop */
+    }
+
+    template <typename T>
+    inline ServiceHandlerT<T>::~ServiceHandlerT()
+    {
+
     }
 
     //-------------------------------------------------------------------------------------------------
