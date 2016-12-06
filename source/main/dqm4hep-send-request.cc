@@ -48,6 +48,9 @@ int main(int argc, char **argv)
   for(int i=3 ; i<argc ; i++)
     jsonString += argv[i];
 
+  if(jsonString.empty())
+    jsonString = "{}";
+
   Json::Reader reader;
   bool success = reader.parse(jsonString, request);
 
