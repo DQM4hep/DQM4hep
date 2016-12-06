@@ -34,7 +34,7 @@ using namespace dqm4hep::net;
 
 int main(int argc, char **argv)
 {
-  if(argc <= 3)
+  if(argc < 3)
   {
     std::cout << "Usage : dqm4hep-send-request-response type name [content]" << std::endl;
     return 1;
