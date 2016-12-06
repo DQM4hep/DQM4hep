@@ -184,40 +184,6 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    /** GenericEventBase class.
-     *
-     *   Event implementation, wrapping a GenericEvent object
-     */
-    class GenericEventBase : public EventBase<GenericEvent>
-    {
-    public:
-      /** Constructor
-       */
-      GenericEventBase();
-
-      /** Destructor
-       */
-      ~GenericEventBase();
-
-      /** Returns the stored event
-       */
-      GenericEvent *getEvent() const;
-
-      /** Set the handled event
-       */
-      void setEvent(GenericEvent *pGenericEvent);
-
-      /** Clear the handler by deleting the handled event
-       */
-      void clear();
-
-    private:
-      GenericEvent                 *m_pGenericEvent;    ///< The wrapped generic event
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
     /**
      * @brief GenericEventStreamer class
      */

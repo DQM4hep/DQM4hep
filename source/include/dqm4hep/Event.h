@@ -141,11 +141,11 @@ namespace dqm4hep {
 
       /** Write the base event information in the xdrstream device
        */
-      xdrstream::Status write(xdrstream::IODevice *pDevice);
+      xdrstream::Status writeBase(xdrstream::IODevice *pDevice);
 
       /** Read the base event information from the xdrstream device
        */
-      xdrstream::Status read(xdrstream::IODevice *pDevice);
+      xdrstream::Status readBase(xdrstream::IODevice *pDevice);
 
     protected:
       /** Private constructor
@@ -177,16 +177,19 @@ namespace dqm4hep {
 
       /** Returns the real event implementation
        */
-      virtual T *getEvent() const = 0;
+      virtual T *getEvent() const;
 
       /** Set the real event implementation
        */
-      virtual void setEvent(T *pEvent) = 0;
+      virtual void setEvent(T *pEvent);
 
       /** The implementation of this method may delete the real event implementation if needed.
        *  ATTN : do not forget the check the event ownership using the isOwner() method
        */
-      virtual void clear() = 0;
+      virtual void clear();
+
+    protected:
+      T                    *m_pEvent;     ///< The real event implementation
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -335,7 +338,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline xdrstream::Status Event::write(xdrstream::IODevice *pDevice)
+    inline xdrstream::Status Event::writeBase(xdrstream::IODevice *pDevice)
     {
       uint8_t type(static_cast<uint8_t>(m_type));
       int64_t timeStamp = std::chrono::system_clock::to_time_t(m_timeStamp);
@@ -353,7 +356,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline xdrstream::Status Event::read(xdrstream::IODevice *pDevice)
+    inline xdrstream::Status Event::readBase(xdrstream::IODevice *pDevice)
     {
       uint8_t type(0);
       int64_t timeStamp(0);
@@ -370,6 +373,35 @@ namespace dqm4hep {
       this->setTimeStamp(std::chrono::system_clock::from_time_t(timeStamp));
 
       return xdrstream::XDR_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline T *EventBase<T>::getEvent() const
+    {
+        return m_pEvent;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline void EventBase<T>::setEvent(T *pEvent)
+    {
+      this->clear();
+      m_pEvent = pEvent;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline void EventBase<T>::clear()
+    {
+      if(0 != m_pEvent && this->isOwner())
+        delete m_pEvent;
+
+      m_pEvent = nullptr;
     }
 
   }

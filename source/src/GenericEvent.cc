@@ -37,9 +37,9 @@ namespace dqm4hep {
     DQM_PLUGIN_DECL( GenericEventStreamer , "GenericEventStreamer" )
 
     GenericEvent::GenericEvent() :
-    m_eventNumber(0),
-    m_runNumber(0),
-    m_timeStamp(0)
+      m_eventNumber(0),
+      m_runNumber(0),
+      m_timeStamp(0)
     {
       /* nop */
     }
@@ -208,47 +208,6 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    GenericEventBase::GenericEventBase() :
-		    m_pGenericEvent(0)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    GenericEventBase::~GenericEventBase()
-    {
-      this->clear();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    GenericEvent *GenericEventBase::getEvent() const
-    {
-      return m_pGenericEvent;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEventBase::setEvent(GenericEvent *pGenericEvent)
-    {
-      this->clear();
-      m_pGenericEvent = pGenericEvent;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEventBase::clear()
-    {
-      if(0 != m_pGenericEvent && this->isOwner())
-        delete m_pGenericEvent;
-
-      m_pGenericEvent = NULL;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
     GenericEventStreamer::GenericEventStreamer()
     {
       /* nop */
@@ -265,7 +224,7 @@ namespace dqm4hep {
 
     Event *GenericEventStreamer::createEvent() const
     {
-      GenericEventBase *pEventBase = new GenericEventBase();
+      EventBase<GenericEvent> *pEventBase = new EventBase<GenericEvent>();
       pEventBase->setEvent(new GenericEvent());
 
       return pEventBase;
@@ -320,7 +279,7 @@ namespace dqm4hep {
       pEvent = NULL;
 
       GenericEvent *pGenericEvent = new GenericEvent();
-      GenericEventBase *pGenericEventBase = new GenericEventBase();
+      EventBase<GenericEvent> *pGenericEventBase = new EventBase<GenericEvent>();
       pGenericEventBase->setEvent(pGenericEvent);
 
       try
