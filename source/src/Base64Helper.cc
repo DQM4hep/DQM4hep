@@ -244,11 +244,11 @@ namespace dqm4hep {
       xdrstream::xdr_size_t bufferSize(pDevice->getPosition());
 
       int base64_size(Base64Helper::getBase64EncodeLength(bufferSize));
-      char *pBuffer64 = new char[base64_size];
-      Base64Helper::toBase64(pBuffer64, pBuffer, bufferSize);
+      base64Destination.resize(base64_size);
+      char *pBuffer64 = const_cast<char*>(base64Destination.c_str());
 
+      Base64Helper::toBase64(pBuffer64, pBuffer, bufferSize);
       base64Destination = pBuffer64;
-      delete [] pBuffer64;
     }
 
   }
