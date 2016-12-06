@@ -36,30 +36,7 @@ namespace dqm4hep {
 
     DQM_PLUGIN_DECL( GenericEventStreamer , "GenericEventStreamer" )
 
-    GenericEvent::GenericEvent() :
-      m_eventNumber(0),
-      m_runNumber(0),
-      m_timeStamp(0)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    GenericEvent::GenericEvent(int eventNumber) :
-		    m_eventNumber(eventNumber),
-		    m_runNumber(0),
-		    m_timeStamp(0)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    GenericEvent::GenericEvent(int runNumber, int eventNumber) :
-		    m_eventNumber(eventNumber),
-		    m_runNumber(runNumber),
-		    m_timeStamp(0)
+    GenericEvent::GenericEvent()
     {
       /* nop */
     }
@@ -69,76 +46,6 @@ namespace dqm4hep {
     GenericEvent::~GenericEvent()
     {
       /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEvent::setEventNumber(int eventNumber)
-    {
-      m_eventNumber = eventNumber;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    int GenericEvent::getEventNumber() const
-    {
-      return m_eventNumber;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEvent::setRunNumber(int runNumber)
-    {
-      m_runNumber = runNumber;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    int GenericEvent::getRunNumber() const
-    {
-      return m_runNumber;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEvent::setTimeStamp(int64_t timeStamp)
-    {
-      m_timeStamp = timeStamp;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    int64_t GenericEvent::getTimeStamp() const
-    {
-      return m_timeStamp;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEvent::setDetectorName(const std::string &detectorName)
-    {
-      m_detectorName = detectorName;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &GenericEvent::getDetectorName() const
-    {
-      return m_detectorName;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void GenericEvent::setDescription(const std::string &description)
-    {
-      m_description = description;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &GenericEvent::getDescription() const
-    {
-      return m_description;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -239,20 +146,7 @@ namespace dqm4hep {
       if(NULL == pGenericEvent)
         return STATUS_CODE_INVALID_PARAMETER;
 
-      // write event info
-      if( ! XDR_TESTBIT( pDevice->write<int32_t>( & pGenericEvent->m_eventNumber ) , xdrstream::XDR_SUCCESS ) )
-        return STATUS_CODE_FAILURE;
-
-      if( ! XDR_TESTBIT( pDevice->write<int32_t>( & pGenericEvent->m_runNumber ) , xdrstream::XDR_SUCCESS ) )
-        return STATUS_CODE_FAILURE;
-
-      if( ! XDR_TESTBIT( pDevice->write<int64_t>( & pGenericEvent->m_timeStamp ) , xdrstream::XDR_SUCCESS ) )
-        return STATUS_CODE_FAILURE;
-
-      if( ! XDR_TESTBIT( pDevice->write( & pGenericEvent->m_detectorName ) , xdrstream::XDR_SUCCESS ) )
-        return STATUS_CODE_FAILURE;
-
-      if( ! XDR_TESTBIT( pDevice->write( & pGenericEvent->m_description ) , xdrstream::XDR_SUCCESS ) )
+      if( ! XDR_TESTBIT( pEvent->writeBase(pDevice) , xdrstream::XDR_SUCCESS ) )
         return STATUS_CODE_FAILURE;
 
       // write event contents
@@ -284,21 +178,9 @@ namespace dqm4hep {
 
       try
       {
-        // write event info
-        if( ! XDR_TESTBIT( pDevice->read<int32_t>( & pGenericEvent->m_eventNumber ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-
-        if( ! XDR_TESTBIT( pDevice->read<int32_t>( & pGenericEvent->m_runNumber ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-
-        if( ! XDR_TESTBIT( pDevice->read<int64_t>( & pGenericEvent->m_timeStamp ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-
-        if( ! XDR_TESTBIT( pDevice->read( & pGenericEvent->m_detectorName ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-
-        if( ! XDR_TESTBIT( pDevice->read( & pGenericEvent->m_description ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
+        // read event info
+        if( ! XDR_TESTBIT( pGenericEventBase->readBase(pDevice) , xdrstream::XDR_SUCCESS ) )
+          return STATUS_CODE_FAILURE;
 
         // write event contents
         if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_intValues ) , xdrstream::XDR_SUCCESS ) )

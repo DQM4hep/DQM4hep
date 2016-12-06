@@ -72,57 +72,9 @@ namespace dqm4hep {
        */
       GenericEvent();
 
-      /** Constructor
-       */
-      GenericEvent(int eventNumber);
-
-      /** Constructor
-       */
-      GenericEvent(int runNumber, int eventNumber);
-
       /** Destructor
        */
       ~GenericEvent();
-
-      /** Set the event number
-       */
-      void setEventNumber(int eventNumber);
-
-      /** Get the event number
-       */
-      int getEventNumber() const;
-
-      /** Set the run number
-       */
-      void setRunNumber(int runNumber);
-
-      /** Get the run number
-       */
-      int getRunNumber() const;
-
-      /** Set the event time stamp
-       */
-      void setTimeStamp(int64_t timeStamp);
-
-      /** Get the event time stamp
-       */
-      int64_t getTimeStamp() const;
-
-      /** Set the detector name that has generated this event
-       */
-      void setDetectorName(const std::string &detectorName);
-
-      /** Get the detector name that has generated this event
-       */
-      const std::string &getDetectorName() const;
-
-      /** Set the event description
-       */
-      void setDescription(const std::string &description);
-
-      /** Get the event description
-       */
-      const std::string &getDescription() const;
 
       /** Set a vector of values identified by key.
        *
@@ -166,12 +118,6 @@ namespace dqm4hep {
       typedef  std::map<std::string, FloatVector> FloatVectorMap;
       typedef  std::map<std::string, DoubleVector> DoubleVectorMap;
       typedef  std::map<std::string, StringVector> StringVectorMap;
-
-      int                                     m_eventNumber;
-      int                                     m_runNumber;
-      int64_t                                 m_timeStamp;
-      std::string                             m_detectorName;
-      std::string                             m_description;
 
       mutable IntVectorMap                    m_intValues;
       mutable FloatVectorMap                  m_floatValues;
