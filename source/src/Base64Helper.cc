@@ -117,8 +117,8 @@ namespace dqm4hep {
     int Base64Helper::getBase64DecodeLength(const char *bufcoded)
     {
       int nbytesdecoded;
-      register const unsigned char *bufin;
-      register int nprbytes;
+      const unsigned char *bufin;
+      int nprbytes;
 
       bufin = (const unsigned char *) bufcoded;
       while (pr2six[*(bufin++)] <= 63);
@@ -134,9 +134,9 @@ namespace dqm4hep {
     int Base64Helper::fromBase64(char *bufplain, const char *bufcoded)
     {
       int nbytesdecoded;
-      register const unsigned char *bufin;
-      register unsigned char *bufout;
-      register int nprbytes;
+      const unsigned char *bufin;
+      unsigned char *bufout;
+      int nprbytes;
 
       bufin = (const unsigned char *) bufcoded;
       while (pr2six[*(bufin++)] <= 63);
