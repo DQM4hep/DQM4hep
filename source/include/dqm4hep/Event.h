@@ -175,6 +175,10 @@ namespace dqm4hep {
        */
       EventBase();
 
+      /** Constructor with real event
+       */
+      EventBase(T *pEvent);
+
       /** Destructor
        */
       virtual ~EventBase();
@@ -387,6 +391,14 @@ namespace dqm4hep {
       Event()
     {
       /* nop */
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline EventBase<T>::EventBase(T *pEvent)
+    {
+      this->setEvent(pEvent);
     }
 
     //-------------------------------------------------------------------------------------------------

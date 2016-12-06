@@ -131,10 +131,7 @@ namespace dqm4hep {
 
     Event *GenericEventStreamer::createEvent() const
     {
-      EventBase<GenericEvent> *pEventBase = new EventBase<GenericEvent>();
-      pEventBase->setEvent(new GenericEvent());
-
-      return pEventBase;
+      return new EventBase<GenericEvent>(new GenericEvent());
     }
 
     //-------------------------------------------------------------------------------------------------
