@@ -53,6 +53,11 @@ ELSE()
 	SET( Mongoose_version             "master" )
 ENDIF()
 
+    # SET( LOG4CXX_version              "v0_10_0") # Last available release...doesn't compile on all system due to unfixed bug
+    SET( LOG4CXX_version              "trunk")
+    SET( APR_version                  "1.5.2")
+    SET( APRUTIL_version              "1.5.4")
+
 # ----- download settings -----
 SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
 SET( xdrlcio_repository             "https://github.com/DQM4HEP/xdrlcio.git" )
@@ -64,6 +69,10 @@ SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/DQM4HEP/dimjc.git" )
 SET( levbdim_repository             "https://github.com/DQM4HEP/levbdim.git" )
 SET( Mongoose_repository            "https://github.com/DQM4HEP/mongoose-cpp.git" )
+# SET( LOG4CXX_repository             "https://github.com/apache/log4cxx.git" ) # Do not compile on OSX
+SET( LOG4CXX_repository             "https://github.com/DQM4HEP/log4cxx.git" )
+SET( APR_repository                 "https://github.com/apache/apr.git" )
+SET( APRUTIL_repository             "https://github.com/apache/apr-util.git" )
 
 # the external project in used are
 # set gradually along the CMakeLists.txt
@@ -77,6 +86,9 @@ SET( jsoncpp_package_depends "" )
 SET( dim_package_depends "" )
 SET( dimjc_package_depends "" )
 SET( Mongoose_package_depends "" )
+SET( LOG4CXX_package_depends "APR APRUTIL" )
+SET( APR_package_depends "" )
+SET( APRUTIL_package_depends "" )
 
 # ----- additional cmake args -----
 IF ( NOT APPLE )
@@ -234,8 +246,57 @@ ENDIF ()
 FIND_PACKAGE( LOG4CXX REQUIRED )
 
 IF( NOT LOG4CXX_FOUND )
-	MESSAGE( SEND_ERROR "LOG4CXX not found and required !" )
-	MESSAGE( "Please install it (sudo apt-get install liblog4cxx10-dev)" )
+    # ----- apr-util package ----- 
+    FIND_PACKAGE ( APRUTIL REQUIRED )
+    IF( NOT APRUTIL_FOUND )
+        # ----- apr package -----
+        # Force new install of apr to unsure compatibility with apr-util version 
+        # FIND_PACKAGE ( APR REQUIRED )
+        # IF( NOT APR_FOUND )
+            SET ( APR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apr )
+            ExternalProject_Add( APR
+                GIT_REPOSITORY ${APR_repository}
+                GIT_TAG ${APR_version}
+                CMAKE_ARGS ${common_cmake_args}
+                PREFIX apr
+                LIST_SEPARATOR %
+                SOURCE_DIR ${APR_DIR}
+                BINARY_DIR ${APR_DIR}
+                UPDATE_COMMAND ${APR_DIR}/buildconf
+                CONFIGURE_COMMAND ${APR_DIR}/configure --prefix=${APR_DIR}
+            )
+        	SET( APR_package_depends "apr" )
+        # ENDIF( NOT APR_FOUND)
+
+    	SET ( APRUTIL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apr-util )
+    	ExternalProject_Add( APRUTIL
+    	    GIT_REPOSITORY ${APRUTIL_repository}
+    	    GIT_TAG ${APRUTIL_version}
+    	    CMAKE_ARGS ${common_cmake_args}
+    	    PREFIX apr-util
+    	    LIST_SEPARATOR %
+    	    SOURCE_DIR ${APRUTIL_DIR}
+    	    BINARY_DIR ${APRUTIL_DIR}
+            UPDATE_COMMAND ${APRUTIL_DIR}/buildconf
+            CONFIGURE_COMMAND ${APRUTIL_DIR}/configure --prefix=${APRUTIL_DIR} --with-apr=${APR_DIR}
+        )
+        SET( APRUTIL_package_depends "aprutil" )
+    ENDIF( NOT APRUTIL_FOUND)
+
+    SET ( LOG4CXX_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apache-log4cxx )
+    ExternalProject_Add( LOG4CXX
+        GIT_REPOSITORY ${LOG4CXX_repository}
+        GIT_TAG ${LOG4CXX_version}
+        CMAKE_ARGS ${common_cmake_args}
+        PREFIX log4cxx
+        LIST_SEPARATOR %
+        SOURCE_DIR ${LOG4CXX_DIR}
+        BINARY_DIR ${LOG4CXX_DIR}
+        UPDATE_COMMAND ${LOG4CXX_DIR}/autogen.sh
+	    CONFIGURE_COMMAND ${LOG4CXX_DIR}/configure --prefix=${LOG4CXX_DIR} --with-apr=${APR_DIR} --with-apr-util=${APRUTIL_DIR}
+	)
+
+	SET( LOG4CXX_package_depends "log4cxx" )
 ENDIF()
 
 
