@@ -69,8 +69,7 @@ SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
 SET( DIMJC_repository               "https://github.com/DQM4HEP/dimjc.git" )
 SET( levbdim_repository             "https://github.com/DQM4HEP/levbdim.git" )
 SET( Mongoose_repository            "https://github.com/DQM4HEP/mongoose-cpp.git" )
-# SET( LOG4CXX_repository             "https://github.com/apache/log4cxx.git" ) # Do not compile on OSX
-SET( LOG4CXX_repository             "https://github.com/DQM4HEP/log4cxx.git" )
+SET( LOG4CXX_repository             "http://svn.apache.org/repos/asf/incubator/log4cxx/trunk" )
 SET( APR_repository                 "https://github.com/apache/apr.git" )
 SET( APRUTIL_repository             "https://github.com/apache/apr-util.git" )
 
@@ -86,7 +85,7 @@ SET( jsoncpp_package_depends "" )
 SET( dim_package_depends "" )
 SET( dimjc_package_depends "" )
 SET( Mongoose_package_depends "" )
-SET( LOG4CXX_package_depends "APR APRUTIL" )
+SET( LOG4CXX_package_depends "" )
 SET( APR_package_depends "" )
 SET( APRUTIL_package_depends "" )
 
@@ -101,6 +100,7 @@ SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WI
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
 # ----- Also complains about multi-line // comment [-Werror,-Wcomment]
+# ----- Also complains about unusedParameter (found in Marlin package) [-Werror,-Wunused-parameter]
 IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   SET( DQMCore_additional_cmake_args
     ${DQMCore_additional_cmake_args}
@@ -110,6 +110,10 @@ SET( levbdim_additional_cmake_args
     ${levbdim_additional_cmake_args}
     "-DCMAKE_CXX_FLAGS= -Wno-macro-redefined -Wno-format"
   )
+SET( DQM4ILC_additional_cmake_args
+    ${DQM4ILC_additional_cmake_args}
+     "-DCMAKE_CXX_FLAGS=-Wno-unused-parameter"
+    )
 
 ENDIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
@@ -243,60 +247,73 @@ ENDIF ()
 
 
 # ----- LOG4CXX package -----
-FIND_PACKAGE( LOG4CXX REQUIRED )
-
+FIND_PACKAGE( LOG4CXX )
 IF( NOT LOG4CXX_FOUND )
-    # ----- apr-util package ----- 
-    FIND_PACKAGE ( APRUTIL REQUIRED )
-    IF( NOT APRUTIL_FOUND )
-        # ----- apr package -----
-        # Force new install of apr to unsure compatibility with apr-util version 
-        # FIND_PACKAGE ( APR REQUIRED )
-        # IF( NOT APR_FOUND )
-            SET ( APR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apr )
-            ExternalProject_Add( APR
-                GIT_REPOSITORY ${APR_repository}
-                GIT_TAG ${APR_version}
-                CMAKE_ARGS ${common_cmake_args}
-                PREFIX apr
-                LIST_SEPARATOR %
-                SOURCE_DIR ${APR_DIR}
-                BINARY_DIR ${APR_DIR}
-                UPDATE_COMMAND ${APR_DIR}/buildconf
-                CONFIGURE_COMMAND ${APR_DIR}/configure --prefix=${APR_DIR}
-            )
-        	SET( APR_package_depends "apr" )
-        # ENDIF( NOT APR_FOUND)
+    MESSAGE ( STATUS "LOG4CXX not found. Set to build it...")
 
-    	SET ( APRUTIL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apr-util )
-    	ExternalProject_Add( APRUTIL
-    	    GIT_REPOSITORY ${APRUTIL_repository}
-    	    GIT_TAG ${APRUTIL_version}
-    	    CMAKE_ARGS ${common_cmake_args}
-    	    PREFIX apr-util
-    	    LIST_SEPARATOR %
-    	    SOURCE_DIR ${APRUTIL_DIR}
-    	    BINARY_DIR ${APRUTIL_DIR}
+    # ----- apr-util package ----- 
+    SET ( APRUTIL_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apr-util )
+    SET ( APR_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apr )
+    FIND_LIBRARY( APRUTIL NAMES aprutil-1 aprutil-2 HINTS "${APRUTIL_DIR}/lib")
+
+    IF( NOT "${APRUTIL}" STREQUAL "APRUTIL-NOTFOUND" ) #found it
+        ADD_LIBRARY(APRUTIL SHARED IMPORTED)
+        SET_PROPERTY (TARGET APRUTIL PROPERTY IMPORTED_LOCATION ${APRUTIL})
+        # If apr-util is installed, apr is too
+        FIND_LIBRARY( APR NAMES apr-1 HINTS "${APR_DIR}/lib")
+        ADD_LIBRARY(APR SHARED IMPORTED)
+        SET_PROPERTY (TARGET APR PROPERTY IMPORTED_LOCATION ${APR})
+    ELSE() #aprutil not found
+        MESSAGE ( STATUS "apr-util not found. Set to build it with apr package...")
+        # ----- apr package -----
+        # Force new install of apr to ensure compatibility with apr-util version 
+        ExternalProject_Add( APR
+            GIT_REPOSITORY ${APR_repository}
+            GIT_TAG ${APR_version}
+            CMAKE_ARGS ${common_cmake_args}
+            PREFIX apr
+            LIST_SEPARATOR %
+            SOURCE_DIR ${APR_DIR}
+            BINARY_DIR ${APR_DIR}
+            UPDATE_COMMAND ${APR_DIR}/buildconf
+            PATCH_COMMAND ""
+            CONFIGURE_COMMAND ${APR_DIR}/configure --prefix=${APR_DIR}
+            BUILD_COMMAND "make"
+        )
+        SET( APR_package_depends "APR" )
+
+        ExternalProject_Add( APRUTIL
+            DEPENDS ${APR_package_depends}
+            GIT_REPOSITORY ${APRUTIL_repository}
+            GIT_TAG ${APRUTIL_version}
+            CMAKE_ARGS ${common_cmake_args}
+            PREFIX apr-util
+            LIST_SEPARATOR %
+            SOURCE_DIR ${APRUTIL_DIR}
+            BINARY_DIR ${APRUTIL_DIR}
             UPDATE_COMMAND ${APRUTIL_DIR}/buildconf
             CONFIGURE_COMMAND ${APRUTIL_DIR}/configure --prefix=${APRUTIL_DIR} --with-apr=${APR_DIR}
+            BUILD_COMMAND "make"
         )
-        SET( APRUTIL_package_depends "aprutil" )
-    ENDIF( NOT APRUTIL_FOUND)
+        SET( APRUTIL_package_depends "APRUTIL" )
+    ENDIF() #apr-util not found
 
     SET ( LOG4CXX_DIR ${CMAKE_CURRENT_SOURCE_DIR}/apache-log4cxx )
     ExternalProject_Add( LOG4CXX
-        GIT_REPOSITORY ${LOG4CXX_repository}
-        GIT_TAG ${LOG4CXX_version}
+        DEPENDS ${APR_package_depends} ${APRUTIL_package_depends}
+        SVN_REPOSITORY ${LOG4CXX_repository}
         CMAKE_ARGS ${common_cmake_args}
         PREFIX log4cxx
         LIST_SEPARATOR %
         SOURCE_DIR ${LOG4CXX_DIR}
         BINARY_DIR ${LOG4CXX_DIR}
         UPDATE_COMMAND ${LOG4CXX_DIR}/autogen.sh
+        PATCH_COMMAND patch ${LOG4CXX_DIR}/configure.ac < ${CMAKE_CURRENT_SOURCE_DIR}/patch/log4cxx-configPatch.diff
 	    CONFIGURE_COMMAND ${LOG4CXX_DIR}/configure --prefix=${LOG4CXX_DIR} --with-apr=${APR_DIR} --with-apr-util=${APRUTIL_DIR}
+        BUILD_COMMAND "make"
 	)
-
-	SET( LOG4CXX_package_depends "log4cxx" )
+	SET( LOG4CXX_package_depends "LOG4CXX" )
+    SET( common_cmake_args ${common_cmake_args} -DLOG4CXX_ROOT=${LOG4CXX_DIR})
 ENDIF()
 
 
@@ -392,7 +409,7 @@ ENDIF()
 
 # ----- DQMCore package -----
 ExternalProject_Add( DQMCore
-    DEPENDS ${dim_package_depends} ${xdrstream_package_depends} ${jsoncpp_package_depends} ${levbdim_package_depends} ${Mongoose_package_depends}
+    DEPENDS ${dim_package_depends} ${xdrstream_package_depends} ${jsoncpp_package_depends} ${levbdim_package_depends} ${Mongoose_package_depends} ${LOG4CXX_package_depends}
     GIT_REPOSITORY ${DQMCore_repository}
     GIT_TAG ${DQMCore_version}
     CMAKE_ARGS ${common_cmake_args} ${DQMCore_additional_cmake_args}

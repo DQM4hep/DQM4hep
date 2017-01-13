@@ -27,3 +27,7 @@ levbdim/
 xdrlcio/
 xdrstream/
 mongoose-cpp/
+apr/
+apr-util/
+apache-log4cxx/
+jsoncpp/
