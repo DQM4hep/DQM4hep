@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/DQM4HEP/DQM4HEP.svg?branch=master)](https://travis-ci.org/DQM4HEP/DQM4HEP)
 
-# DQM4HEP 
+# DQM4HEP
 # A Data Quality Monitoring for High Energy Physics
 Copyright IPNL/CNRS/IN2P3
 
@@ -53,16 +53,48 @@ cmake [-DOPTIONS=..] -C $ILCSOFT/ILCSoft.cmake ..
 make
 ```
 
+### CVMFS based installation (lxplus, server connected to the cern grid, etc.)
+Most of the dependencies are already available over cvmfs. Only Log4cxx and updated version of apr and apr-util libraries are missing (but will be automatically installed if needed).
+
+First you have to set up an updated version of cmake:
+```bash
+ export PATH=/cvmfs/sft.cern.ch/lcg/contrib/CMake/3.6.0/Linux-x86_64/bin:${PATH}
+```
+and gcc (for c++11 compliance):
+```bash
+GCC_version=4.8
+source /cvmfs/sft.cern.ch/lcg/contrib/gcc/${GCC_version}/x86_64-slc6/setup.sh
+```
+
+A cmake configuration file is available with properly configured version of root6, boost1.59 and qt4.8.4 from the lcg release installation. Depending on the environment you might also have to unset the QTDIR variable prior to compilation.
+```bash
+mkdir build
+cd build
+unset QTDIR
+cmake [-DOPTIONS=..] -C ../cvmfsInstall.cmake ..
+make -jN
+```
+
+If you plan on installing DQM4ILC, you can use the ILCSoft installation available at /cvmfs/ilc.desy.de/sw/. As of this writing the latest version available is v1.17.11 :
+
+```bash
+export ILCSOFT=/cvmfs/ilc.desy.de/sw/x86_64_gcc48_sl6/v01-17-11
+mkdir build
+cd build
+cmake [-DOPTIONS=..] -C $ILCSOFT/ILCSoft.cmake -C ../cvmfsInstall.cmake ..
+make -jN
+```
+
 ### Known bugs
 
 #### On MAC-OSX:
-if you encounter this error when compiling did (dim sub-package) :  
-	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"  
-Check if OpenMotif is installed in /usr/OpenMotif  
-If it’s not change MOTIFINC and MOTIFLIB variables in makefile_did accordingly  
-Eg if using macport:  
-	MOTIFINC = /opt/local/include  
-	MOTIFLIB = /opt/local/lib  
+if you encounter this error when compiling did (dim sub-package) :
+	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"
+Check if OpenMotif is installed in /usr/OpenMotif
+If it’s not change MOTIFINC and MOTIFLIB variables in makefile_did accordingly
+Eg if using macport:
+	MOTIFINC = /opt/local/include
+	MOTIFLIB = /opt/local/lib
 
 ### Bug report
 
