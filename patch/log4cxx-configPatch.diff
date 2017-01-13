@@ -1,0 +1,10 @@
+--- configure.ac	2016-12-16 15:16:07.000000001 +0100
++++ configurePatched.ac	2016-12-16 15:24:22.000000001 +0100
+@@ -44,6 +44,7 @@
+ # Checks for programs
+ # ----------------------------------------------------------------------------
+ 
++m4_pattern_allow([AM_PROG_AR])
+ AM_PROG_AR
+ AM_PROG_LIBTOOL
+ AC_PROG_INSTALL
