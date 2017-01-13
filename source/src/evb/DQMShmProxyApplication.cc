@@ -384,7 +384,7 @@ StatusCode DQMShmProxyApplication::configureProcessors(TiXmlElement *pProcessors
 
     	if( ! pProcessor )
     	{
-    		LOG4CXX_ERROR( dqmMainLogger , "Evb processor plugin '" << plugin << "' not registered in plugin manager !" )
+    		LOG4CXX_ERROR( dqmMainLogger , "Evb processor plugin '" << plugin << "' not registered in plugin manager !" );
     		return STATUS_CODE_NOT_FOUND;
     	}
 
