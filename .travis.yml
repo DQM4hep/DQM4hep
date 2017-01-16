@@ -1,0 +1,36 @@
+language: cpp
+
+sudo: not required
+
+script:
+  - ./.travis.d/install_dependencies.sh ${DIM_OS}
+  - export DIMDIR=$PWD/dim
+  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
+  - mkdir build
+  - cd build
+  - cmake -DDIMDIR=${DIMDIR} ..
+  - make install
+
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    packages:
+    - gcc-4.8
+    - g++-4.8
+    - clang
+    - libjsoncpp-dev
+
+matrix:
+  include:
+    - os: linux
+      compiler: clang
+      env:
+        - DIM_OS=Linux
+    - os: linux
+      compiler: gcc
+      env:
+        - DIM_OS=Linux
+
+notifications:
+  email: false
