@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -42,13 +42,16 @@
 // -- json headers
 #include "json/json.h"
 
+// -- dqm4hep headers
+#include "dqm4hep/DQMNet.h"
+
 namespace dqm4hep {
 
   namespace net {
 
     class Server;
 
-    /** Service class (server side component)
+    /** BaseService class (server side component)
      *
      *  Base interface for service. Service is updated whenever
      *  the user calls the update() method. Service content
@@ -56,56 +59,219 @@ namespace dqm4hep {
      *  on update() call that concrete classes fill via the
      *  writeContent() callback method.
      */
-    class Service
+    class BaseService
     {
       friend class Server;
     public:
-      /** Update the service, sending its content to listening clients
-       */
-      template <typename T>
-      void update(const T &value);
-
-      /** Update the service, sending its content to listening clients
-       */
-      void update(const xdrstream::BufferDevice *pDevice);
-
-      /** Get the service type
+      /**
+       * Get the service type
        */
       const std::string &getType() const;
 
-      /** Get the service name
+      /**
+       * Get the service name
        */
       const std::string &getName() const;
 
-      /** Get the service full name, as it is allocated on the network
+      /**
+       * Get the service full name, as it is allocated on the network
        */
       const std::string &getFullName() const;
 
-      /** Get the full service name from the service type and name
+      /**
+       * Get the full service name from the service type and name
        */
       static std::string getFullServiceName(const std::string &type, const std::string &name);
 
-      /** Get the server in which the service is declared
+      /**
+       * Get the server in which the service is declared
        */
       Server *getServer() const;
 
     protected:
-      /** Constructor with service type and name
+      /**
+       * Constructor with service type and name
        */
-      Service(Server *pServer, const std::string &type, const std::string &name);
+      BaseService(Server *pServer, const std::string &type, const std::string &name);
 
-      /** Destructor
+      /**
+       * Destructor
        */
-      virtual ~Service();
+      virtual ~BaseService();
+
+      virtual void connectService() = 0;
+
+      virtual void disconnectService() = 0;
+
+      virtual bool isServiceConnected() const = 0;
 
     private:
       std::string           m_type;             ///< The service type
       std::string           m_name;             ///< The service name
       std::string           m_fullName;         ///< The service full name
-      std::string           m_serviceContent;   ///< The service string content
-      DimService            m_service;          ///< The dim service implementation
       Server               *m_pServer;          ///< The server in which the service is declared
     };
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    class Service : public BaseService
+    {
+    public:
+      /**
+       * Constructor with service type and name
+       */
+      Service(Server *pServer, const std::string &type, const std::string &name);
+
+      /**
+       * Destructor
+       */
+      virtual ~Service();
+
+      /**
+       * Update the service, sending its content to listening clients
+       */
+      void update(const T &value);
+
+    private:
+      virtual void connectService();
+
+      virtual void disconnectService();
+
+      virtual bool isServiceConnected() const;
+
+    private:
+
+      DimService *               m_pService;
+      T                          m_value;
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Service<T>::Service(Server *pServer, const std::string &type, const std::string &name) :
+      BaseService(pServer, type, name),
+      m_pService(0)
+    {
+      this->connectService();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Service<T>::~Service()
+    {
+      if(this->isServiceConnected())
+        this->disconnectService();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline void Service<T>::update(const T &value)
+    {
+      if(!this->isServiceConnected())
+        throw std::runtime_error("Service::update(): service not connected");
+
+      m_value = value;
+      m_pService->updateService(m_value);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Service<Json::Value>::update(const Json::Value &value)
+    {
+      if(!this->isServiceConnected())
+        throw std::runtime_error("Service::update(): service not connected");
+
+      m_value = value;
+
+      Json::FastWriter writer;
+      char *pString = const_cast<char*>(writer.write(m_value).c_str());
+      m_pService->updateService(pString);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Service<Buffer>::update(const Buffer &value)
+    {
+      if(!this->isServiceConnected())
+        throw std::runtime_error("Service::update(): service not connected");
+
+      m_value.m_bufferSize = value.m_bufferSize;
+      m_value.m_pBuffer = value.m_pBuffer;
+
+      uint32_t structSize(sizeof(uint32_t) + m_value.m_bufferSize);
+      m_pService->updateService((void*) &m_value, structSize);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline void Service<T>::connectService()
+    {
+      if(this->isServiceConnected())
+        return;
+
+      std::string serviceName(this->getFullName());
+      m_pService = new DimService(const_cast<char*>(serviceName.c_str()), m_value);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Service<Buffer>::connectService()
+    {
+      if(this->isServiceConnected())
+        return;
+
+      std::string serviceName(this->getFullName());
+      m_pService = new DimService(const_cast<char*>(serviceName.c_str()), "I:C", (void*)&(m_value.m_pBuffer), sizeof(uint32_t));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Service<Json::Value>::connectService()
+    {
+      if(this->isServiceConnected())
+        return;
+
+      std::string serviceName(this->getFullName());
+      m_pService = new DimService(const_cast<char*>(serviceName.c_str()), (char*)"");
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline void Service<T>::disconnectService()
+    {
+      if(!this->isServiceConnected())
+        return;
+
+        delete m_pService;
+        m_pService = 0;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline bool Service<T>::isServiceConnected() const
+    {
+      return (m_pService != 0);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    typedef Service<int>          IntService;
+    typedef Service<float>        FloatService;
+    typedef Service<double>       DoubleService;
+    typedef Service<std::string>  StringService;
+    typedef Service<Buffer>       BufferService;
+    typedef Service<Json::Value>  JsonService;
 
   }
 

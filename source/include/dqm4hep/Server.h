@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -66,13 +66,14 @@ namespace dqm4hep {
 
       /** Create a new service
        */
-      Service *createService(const std::string &type, const std::string &name);
+      template <typename ServiceType>
+      ServiceType *createService(const std::string &type, const std::string &name);
 
       /** Create a new request handler
        */
-      template <typename T, typename S>
-      RequestHandler *createRequestHandler(const std::string &type, const std::string &name,
-          T *pController, S function);
+      template <typename T, typename S, typename U>
+      BaseRequestHandler *createRequestHandler(const std::string &type, const std::string &name,
+          S *pController, U function);
 
       /**
        */
@@ -84,11 +85,11 @@ namespace dqm4hep {
 
       /**
        */
-      Service *getService(const std::string &type, const std::string &name) const;
+      BaseService *getService(const std::string &type, const std::string &name) const;
 
       /**
        */
-      RequestHandler *getRequestHandler(const std::string &type, const std::string &name) const;
+      BaseRequestHandler *getRequestHandler(const std::string &type, const std::string &name) const;
 
       /** Get the dim dns node.
        *  First look at DimServer::getDnsNode() then
@@ -118,44 +119,71 @@ namespace dqm4hep {
       void handleServerInfoRequest(const Json::Value &request, Json::Value &response);
 
     private:
-      typedef std::map<std::string, Service *>         ServiceMap;
-      typedef std::map<std::string, RequestHandler *>  RequestHandlerMap;
+      typedef std::map<std::string, BaseService *>         ServiceMap;
+      typedef std::map<std::string, BaseRequestHandler *>  RequestHandlerMap;
 
       std::string                                    m_name;
       bool                                           m_started;
       ServiceMap                                     m_serviceMap;
       RequestHandlerMap                              m_requestHandlerMap;
-      RequestHandlerT<Server>                        m_serverInfoHandler;
+      RequestHandlerT<Json::Value, Server>           m_serverInfoHandler;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T, typename S>
-    inline RequestHandler *Server::createRequestHandler(const std::string &type, const std::string &name,
-        T *pController, S function)
+    template <typename ServiceType>
+    inline ServiceType *Server::createService(const std::string &type, const std::string &name)
     {
-      const std::string fullRequestHandlerName(RequestHandler::getFullRequestHandlerName(type, name));
+      const std::string fullServiceName(BaseService::getFullServiceName(type, name));
+
+      auto findIter = m_serviceMap.find(fullServiceName);
+
+      if(findIter != m_serviceMap.end())
+        return dynamic_cast<ServiceType*>(findIter->second);
+
+      // first insert nullptr, then create service
+      std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(fullServiceName, nullptr));
+
+      if(inserted.second)
+      {
+        ServiceType *pService = new ServiceType(this, type, name);
+        inserted.first->second = pService;
+        return pService;
+      }
+      else
+        throw;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S, typename U>
+    inline BaseRequestHandler *Server::createRequestHandler(const std::string &type, const std::string &name,
+        S *pController, U function)
+    {
+      const std::string fullRequestHandlerName(BaseRequestHandler::getFullRequestHandlerName(type, name));
 
       auto findIter = m_requestHandlerMap.find(fullRequestHandlerName);
 
       if(findIter != m_requestHandlerMap.end())
-      {
-        RequestHandlerT<T> *pRequestHandler = dynamic_cast<RequestHandlerT<T>*>(findIter->second);
+        return findIter->second;
 
-        if(!pRequestHandler)
-          throw;
-
-        return pRequestHandler;
-      }
+      // {
+      //   RequestHandlerT<T,S> *pRequestHandler = dynamic_cast<RequestHandlerT<T,S>*>(findIter->second);
+      //
+      //   if(!pRequestHandler)
+      //     throw;
+      //
+      //   return pRequestHandler;
+      // }
 
       // first insert nullptr, then create service
       std::pair<RequestHandlerMap::iterator, bool> inserted = m_requestHandlerMap.insert(RequestHandlerMap::value_type(fullRequestHandlerName, nullptr));
 
       if(inserted.second)
       {
-        RequestHandlerT<T> *pRequestHandler = new RequestHandlerT<T>(this, type, name, pController, function);
+        RequestHandlerT<T,S> *pRequestHandler = new RequestHandlerT<T,S>(this, type, name, pController, function);
         inserted.first->second = pRequestHandler;
         return pRequestHandler;
       }
@@ -164,6 +192,6 @@ namespace dqm4hep {
     }
   }
 
-} 
+}
 
 #endif  //  SERVER_H

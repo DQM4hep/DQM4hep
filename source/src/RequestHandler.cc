@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -32,11 +32,10 @@ namespace dqm4hep {
 
   namespace net {
 
-    RequestHandler::RequestHandler(Server *pServer, const std::string &type, const std::string &name) :
+    BaseRequestHandler::BaseRequestHandler(Server *pServer, const std::string &type, const std::string &name) :
         m_type(type),
         m_name(name),
         m_fullName(getFullRequestHandlerName(m_type, m_name)),
-        m_rpc(this),
         m_pServer(pServer)
     {
       /* nop */
@@ -44,98 +43,49 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    RequestHandler::~RequestHandler()
+    BaseRequestHandler::~BaseRequestHandler()
     {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &RequestHandler::getType() const
+    const std::string &BaseRequestHandler::getType() const
     {
       return m_type;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &RequestHandler::getName() const
+    const std::string &BaseRequestHandler::getName() const
     {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &RequestHandler::getFullName() const
+    const std::string &BaseRequestHandler::getFullName() const
     {
       return m_fullName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Server *RequestHandler::getServer() const
+    Server *BaseRequestHandler::getServer() const
     {
       return m_pServer;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    std::string RequestHandler::getFullRequestHandlerName(const std::string &type, const std::string &name)
+    std::string BaseRequestHandler::getFullRequestHandlerName(const std::string &type, const std::string &name)
     {
       return ("/dqm4hep/" + type + "/" + name);
     }
 
     //-------------------------------------------------------------------------------------------------
-
-    void RequestHandler::processRequest(Rpc *pRpc)
-    {
-      char *pContentStr = pRpc->getString();
-
-      if(!pContentStr)
-        return;
-
-      Json::Reader reader;
-      Json::Value message;
-
-      bool parsingSuccessful = reader.parse(pContentStr, message);
-
-      if(!parsingSuccessful)
-        return;
-
-      bool requireResponse(message.get("response", false).asBool());
-      const Json::Value request(message.get("request", Json::Value()));
-      Json::Value response;
-
-      this->processRequest(request, response);
-
-      if(requireResponse)
-      {
-        Json::FastWriter writer;
-        std::string responseStr = writer.write(response);
-
-        pRpc->setData(const_cast<char*>(responseStr.c_str()));
-      }
-    }
-
     //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    RequestHandler::Rpc::Rpc(RequestHandler *pHandler) :
-        DimRpc(pHandler->getFullName().c_str(), "C", "C"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void RequestHandler::Rpc::rpcHandler()
-    {
-      m_pHandler->processRequest(this);
-    }
-
-
 
   }
 
-} 
-
+}

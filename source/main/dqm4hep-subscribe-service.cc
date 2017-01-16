@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -35,32 +35,53 @@ using namespace dqm4hep::net;
 class ServicePrinter
 {
 public:
-  void print(const Json::Value &value)
-  {
-    Json::StyledWriter writer;
-    std::cout << writer.write(value) << std::endl;
-  }
+  template <typename T>
+  void print(const T &value);
 };
+
+template <typename T>
+inline void ServicePrinter::print(const T &value)
+{
+  // Json::StyledWriter writer;
+  // std::cout << writer.write(value) << std::endl;
+  std::cout << value << std::endl;
+}
+
+template <>
+inline void ServicePrinter::print(const Json::Value &value)
+{
+  Json::StyledWriter writer;
+  std::cout << writer.write(value) << std::endl;
+}
 
 int main(int argc, char **argv)
 {
-  if(argc != 3)
+  if(argc != 4)
   {
-    std::cout << "Usage : dqm4hep-subscribe-service type name" << std::endl;
+    std::cout << "Usage : dqm4hep-subscribe-service serviceType type name" << std::endl;
     return 1;
   }
 
-  std::string type(argv[1]);
-  std::string name(argv[2]);
+  std::string serviceType(argv[1]);
+  std::string type(argv[2]);
+  std::string name(argv[3]);
 
   ServicePrinter printer;
-
   Client client;
-  client.subscribe(type, name, &printer, &ServicePrinter::print);
+
+  if(serviceType == "int")
+    client.subscribe<int>(type, name, &printer, &ServicePrinter::print<int>);
+  else if(serviceType == "float")
+    client.subscribe<float>(type, name, &printer, &ServicePrinter::print<float>);
+  else if(serviceType == "double")
+    client.subscribe<double>(type, name, &printer, &ServicePrinter::print<double>);
+  else if(serviceType == "string")
+    client.subscribe<std::string>(type, name, &printer, &ServicePrinter::print<std::string>);
+  else if(serviceType == "json")
+    client.subscribe<Json::Value>(type, name, &printer, &ServicePrinter::print<Json::Value>);
 
   while(1)
     sleep(1);
 
   return 0;
 }
-

@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -33,110 +33,60 @@ namespace dqm4hep {
 
   namespace net {
 
-    Service::Service(Server *pServer, const std::string &type, const std::string &name) :
+    BaseService::BaseService(Server *pServer, const std::string &type, const std::string &name) :
         m_type(type),
         m_name(name),
         m_fullName(getFullServiceName(m_type, m_name)),
-        m_serviceContent("{}"),
-        m_service(const_cast<char *>(m_fullName.c_str()), const_cast<char *>(m_serviceContent.c_str())),
         m_pServer(pServer)
+
     {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Service::~Service()
+    BaseService::~BaseService()
     {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Service::getType() const
+    const std::string &BaseService::getType() const
     {
       return m_type;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Service::getName() const
+    const std::string &BaseService::getName() const
     {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Service::getFullName() const
+    const std::string &BaseService::getFullName() const
     {
       return m_fullName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Server *Service::getServer() const
+    Server *BaseService::getServer() const
     {
       return m_pServer;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    std::string Service::getFullServiceName(const std::string &type, const std::string &name)
+    std::string BaseService::getFullServiceName(const std::string &type, const std::string &name)
     {
       return ("/dqm4hep/" + type + "/" + name);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T>
-    void Service::update(const T &value)
-    {
-      Json::Value jsonValue;
-      jsonValue["type"] = typeid(value).name();
-      jsonValue["content"] = value;
-
-      Json::FastWriter writer;
-      m_serviceContent = writer.write(jsonValue);
-      m_service.updateService(const_cast<char *>(m_serviceContent.c_str()));
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void Service::update(const xdrstream::BufferDevice *pDevice)
-    {
-      xdrstream::xdr_size_t bufferSize(pDevice->getPosition());
-      Json::Value content;
-
-      if(bufferSize == 0)
-      {
-        content["bin"] = "";
-        content["size"] = 0;
-        content["format"] = "base64";
-      }
-      else
-      {
-        std::string base64BufferStr;
-        Base64Helper::writeToBase64(pDevice, base64BufferStr);
-
-        content["bin"] = base64BufferStr;
-        content["size"] = base64BufferStr.size();
-        content["format"] = "base64";
-      }
-
-      this->update<Json::Value>(content);
-    }
-
-    template void Service::update<Json::Int>(const Json::Int &value);
-    template void Service::update<Json::UInt>(const Json::UInt &value);
-    template void Service::update<Json::Int64>(const Json::Int64 &value);
-    template void Service::update<Json::UInt64>(const Json::UInt64 &value);
-    template void Service::update<double>(const double &value);
-    template void Service::update<float>(const float &value);
-    template void Service::update<Json::Value>(const Json::Value &value);
-    template void Service::update<std::string>(const std::string &value);
-    template void Service::update<bool>(const bool &value);
-
   }
 
-} 
-
+}

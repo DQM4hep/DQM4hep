@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -90,54 +90,33 @@ namespace dqm4hep {
       m_requestHandlerMap.clear();
     }
 
-    Service *Server::createService(const std::string &type, const std::string &name)
-    {
-      const std::string fullServiceName(Service::getFullServiceName(type, name));
-
-      auto findIter = m_serviceMap.find(fullServiceName);
-
-      if(findIter != m_serviceMap.end())
-        return findIter->second;
-
-      // first insert nullptr, then create service
-      std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(fullServiceName, nullptr));
-
-      if(inserted.second)
-      {
-        inserted.first->second = new Service(this, type, name);;
-        return inserted.first->second;
-      }
-      else
-        throw;
-    }
-
     //-------------------------------------------------------------------------------------------------
 
     bool Server::isServiceRegistered(const std::string &type, const std::string &name) const
     {
-      return (m_serviceMap.find(Service::getFullServiceName(type, name)) != m_serviceMap.end());
+      return (m_serviceMap.find(BaseService::getFullServiceName(type, name)) != m_serviceMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
     bool Server::isRequestHandlerRegistered(const std::string &type, const std::string &name) const
     {
-      return (m_requestHandlerMap.find(RequestHandler::getFullRequestHandlerName(type, name)) != m_requestHandlerMap.end());
+      return (m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name)) != m_requestHandlerMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Service *Server::getService(const std::string &type, const std::string &name) const
+    BaseService *Server::getService(const std::string &type, const std::string &name) const
     {
-      auto findIter = m_serviceMap.find(Service::getFullServiceName(type, name));
+      auto findIter = m_serviceMap.find(BaseService::getFullServiceName(type, name));
       return (findIter == m_serviceMap.end() ? nullptr : findIter->second);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    RequestHandler *Server::getRequestHandler(const std::string &type, const std::string &name) const
+    BaseRequestHandler *Server::getRequestHandler(const std::string &type, const std::string &name) const
     {
-      auto findIter = m_requestHandlerMap.find(RequestHandler::getFullRequestHandlerName(type, name));
+      auto findIter = m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name));
       return (findIter == m_requestHandlerMap.end() ? nullptr : findIter->second);
     }
 
@@ -245,10 +224,12 @@ namespace dqm4hep {
       {
         const std::string &type(iter->second->getType());
         const std::string &name(iter->second->getName());
+        const std::string &fullName(iter->second->getFullName());
 
         Json::Value serviceInfo;
         serviceInfo["type"] = type;
         serviceInfo["name"] = name;
+        serviceInfo["fullName"] = fullName;
         servicesInfo[index] = serviceInfo;
 
         ++index;
@@ -277,5 +258,4 @@ namespace dqm4hep {
 
   }
 
-} 
-
+}
