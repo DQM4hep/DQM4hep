@@ -23,22 +23,21 @@ INSTALL(
         LIBRARY DESTINATION lib
 )
 
-# add executable macro 
+# add executable macro
 MACRO(BUILD_EXECUTABLE _name)
 
 	ADD_EXECUTABLE( ${_name} main/${_name}.cc )
-	
+
 	TARGET_LINK_LIBRARIES( ${_name} ${PROJECT_NAME} )
-	
+
 	INSTALL (
 	    TARGETS ${_name}
 	    RUNTIME DESTINATION bin
 	)
-	
+
 ENDMACRO()
 
 # tests
-BUILD_EXECUTABLE( test-json-binary )
 BUILD_EXECUTABLE( test-server )
 
 # main binaries
@@ -50,4 +49,3 @@ BUILD_EXECUTABLE( dqm4hep-send-request-response )
 BUILD_EXECUTABLE( dqm4hep-subscribe-service )
 
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" )
-

@@ -41,14 +41,11 @@ FIND_PACKAGE( Threads REQUIRED )
 # ----- Find DIM package -----
 FIND_PACKAGE( DIM REQUIRED SHARED )
 
-# ----- Find xdrstream package -----
-FIND_PACKAGE( xdrstream REQUIRED )
-
 # ----- Find json cpp package -----
 FIND_PACKAGE( JSONCPP REQUIRED )
 
 # ----- Include package properties -----
-FOREACH( pkg DIM xdrstream JSONCPP )
+FOREACH( pkg DIM JSONCPP )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
@@ -89,4 +86,3 @@ DISPLAY_STD_VARIABLES()
 ###############################
 # generate and install following configuration files
 GENERATE_PACKAGE_CONFIGURATION_FILES( ${PROJECT_NAME}Config.cmake ${PROJECT_NAME}ConfigVersion.cmake ${PROJECT_NAME}LibDeps.cmake )
-
