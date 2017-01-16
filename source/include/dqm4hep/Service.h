@@ -36,9 +36,6 @@
 // -- dim headers
 #include "dis.hxx"
 
-// -- xdrstream headers
-#include "xdrstream/xdrstream.h"
-
 // -- json headers
 #include "json/json.h"
 

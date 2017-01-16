@@ -27,7 +27,6 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/Service.h"
-#include "dqm4hep/Base64Helper.h"
 
 namespace dqm4hep {
 
