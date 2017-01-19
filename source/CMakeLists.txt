@@ -25,16 +25,12 @@ INSTALL(
 
 # add executable macro
 MACRO(BUILD_EXECUTABLE _dir _name _install_loc)
-
 	ADD_EXECUTABLE( ${_name} ${_dir}/${_name}.cc )
-
 	TARGET_LINK_LIBRARIES( ${_name} ${PROJECT_NAME} )
-
 	INSTALL (
 	    TARGETS ${_name}
 	    RUNTIME DESTINATION ${_install_loc}
 	)
-
 ENDMACRO()
 
 # tests
