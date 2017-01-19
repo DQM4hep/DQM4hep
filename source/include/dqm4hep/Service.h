@@ -77,6 +77,9 @@ namespace dqm4hep {
 
       /**
        * Get the full service name from the service type and name
+       *
+       * @param type the service type
+       * @param name the service name
        */
       static std::string getFullServiceName(const std::string &type, const std::string &name);
 
@@ -88,6 +91,10 @@ namespace dqm4hep {
     protected:
       /**
        * Constructor with service type and name
+       *
+       * @param pServer the server that owns the service instance
+       * @param type the service type
+       * @param name the service name
        */
       BaseService(Server *pServer, const std::string &type, const std::string &name);
 
@@ -96,10 +103,19 @@ namespace dqm4hep {
        */
       virtual ~BaseService();
 
+      /**
+       * Create the actual service connection
+       */
       virtual void connectService() = 0;
 
+      /**
+       * Remove the actual service connection
+       */
       virtual void disconnectService() = 0;
 
+      /**
+       * Whether the service is connected
+       */
       virtual bool isServiceConnected() const = 0;
 
     private:
@@ -112,12 +128,36 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     * Service template class
+     *
+     * The template concrete implementation of the service class.
+     * A service can only be created from a server instance
+     *
+     * Example :
+     * @code
+     * Server *pServer = new Server("server-name");
+     * pServer->createService<int>("service-type", "service-name");
+     * @endcode
+     *
+     * Supported service types :
+     *  - int
+     *  - float
+     *  - double
+     *  - std::string
+     *  - Json::Value
+     *  - Buffer (see Buffer struct)
+     */
     template <typename T>
     class Service : public BaseService
     {
     public:
       /**
        * Constructor with service type and name
+       *
+       * @param pServer the server that owns the service instance
+       * @param type the service type
+       * @param name the service name
        */
       Service(Server *pServer, const std::string &type, const std::string &name);
 
@@ -128,20 +168,19 @@ namespace dqm4hep {
 
       /**
        * Update the service, sending its content to listening clients
+       *
+       * @param value the value to send through the service
        */
       void update(const T &value);
 
     private:
       virtual void connectService();
-
       virtual void disconnectService();
-
       virtual bool isServiceConnected() const;
 
     private:
-
-      DimService *               m_pService;
-      T                          m_value;
+      DimService *               m_pService;        ///< The underlying dim service implementation
+      T                          m_value;           ///< The value to servce through the dim service
     };
 
     //-------------------------------------------------------------------------------------------------
