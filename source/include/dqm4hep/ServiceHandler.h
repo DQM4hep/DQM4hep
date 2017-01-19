@@ -29,10 +29,13 @@
 #ifndef SERVICEHANDLER_H
 #define SERVICEHANDLER_H
 
+// -- json headers
 #include "json/json.h"
 
+// -- dim headers
 #include "dic.hxx"
 
+// -- dqm4hep headers
 #include "dqm4hep/DQMNet.h"
 
 namespace dqm4hep {
@@ -43,34 +46,45 @@ namespace dqm4hep {
     template <typename S, typename U>
     class ServiceHandlerT;
 
-    /** BaseServiceHandler class
+    /**
+     * BaseServiceHandler class
      */
     class BaseServiceHandler
     {
       friend class Client;
     public:
-      /** Get the request type
+      /**
+       * Get the service type
        */
       const std::string &getType() const;
 
-      /** Get the request name
+      /**
+       * Get the service name
        */
       const std::string &getName() const;
 
-      /** Get the request full name, as it is allocated on the network
+      /**
+       * Get the service full name, as it is allocated on the network
        */
       const std::string &getFullName() const;
 
-      /** Get the client interface
+      /**
+       * Get the client interface
        */
       Client *getClient() const;
 
     protected:
-      /** Constructor
+      /**
+       * Constructor
+       *
+       * @param pClient the client that owns the service handler
+       * @param type the service type
+       * @param name the service name
        */
       BaseServiceHandler(Client *pClient, const std::string &type, const std::string &name);
 
-      /** Destructor
+      /**
+       * Destructor
        */
       virtual ~BaseServiceHandler();
 
@@ -78,12 +92,23 @@ namespace dqm4hep {
       std::string                    m_type;             ///< The request handler type
       std::string                    m_name;             ///< The request handler name
       std::string                    m_fullName;         ///< The request handler full name
-      Client                        *m_pClient;
+      Client                        *m_pClient;          ///< The client manager
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     * ServiceHandler template class
+     *
+     * Supported service types :
+     *  - int
+     *  - float
+     *  - double
+     *  - std::string
+     *  - Json::Value
+     *  - Buffer (see Buffer struct)
+     */
     template <typename T>
     class ServiceHandler : public BaseServiceHandler
     {
@@ -125,6 +150,91 @@ namespace dqm4hep {
     private:
       ServiceInfo                    m_serviceInfo;
     };
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    /**
+     * ServiceHandlerT template class
+     *
+     * Final concrete service handler implementation. Service handlers
+     * can only be created from a client instance.
+     * Example :
+     *
+     * @code
+     *
+     * void MyClass::myfunction(const int &value) { ... do something ... }
+     *
+     * Client *pClient = new Client();
+     * pClient->subscribe("service-type", "service-name", pMyClassInstance, &MyClass::myfunction);
+     * @endcode
+     */
+    template <typename T, typename S>
+    class ServiceHandlerT : public ServiceHandler<T>
+    {
+      friend class Client;
+    public:
+      typedef void (S::*Function)(const T &value);
+
+    private:
+      /**
+       * Constructor
+       *
+       * @param pClient the client that owns the service handler
+       * @param type the service type
+       * @param name the service name
+       * @param pController the class instance receving the service update
+       * @param function the class method receving the service update
+       */
+      ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
+          S *pController, Function function);
+
+      /**
+       * Destructor
+       */
+      ~ServiceHandlerT();
+
+      /**
+       * Handle the service update. Callback the user function
+       *
+       * @param value the received value from the service update
+       */
+      void serviceHandler(const T &value);
+
+    private:
+      S            *m_pController;            ///< The user controller instance
+      Function      m_function;               ///< The user controller method
+    };
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline ServiceHandlerT<T,S>::ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
+        S *pController, Function function) :
+        ServiceHandler<T>(pClient, type, name),
+        m_pController(pController),
+        m_function(function)
+    {
+      /* nop */
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline ServiceHandlerT<T,S>::~ServiceHandlerT()
+    {
+      /* nop */
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline void ServiceHandlerT<T,S>::serviceHandler(const T &value)
+    {
+      (m_pController->*m_function)(value);
+    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
@@ -187,7 +297,6 @@ namespace dqm4hep {
       /* nop */
     }
 
-    //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -280,65 +389,6 @@ namespace dqm4hep {
 
       reader.parse(pInfo->getString(), serviceValue);
       this->serviceHandler(serviceValue);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /**
-     */
-    template <typename T, typename S>
-    class ServiceHandlerT : public ServiceHandler<T>
-    {
-      friend class Client;
-    public:
-      typedef void (S::*Function)(const T &value);
-
-    private:
-      /**
-       */
-      ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
-          S *pController, Function function);
-
-      /** Destructor
-       */
-      ~ServiceHandlerT();
-
-      /**
-       */
-      void serviceHandler(const T &value);
-
-    private:
-      S            *m_pController;
-      Function      m_function;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline ServiceHandlerT<T,S>::ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
-        S *pController, Function function) :
-        ServiceHandler<T>(pClient, type, name),
-        m_pController(pController),
-        m_function(function)
-    {
-      /* nop */
-    }
-
-    template <typename T, typename S>
-    inline ServiceHandlerT<T,S>::~ServiceHandlerT()
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline void ServiceHandlerT<T,S>::serviceHandler(const T &value)
-    {
-      (m_pController->*m_function)(value);
     }
 
   }
