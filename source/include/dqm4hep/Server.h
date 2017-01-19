@@ -29,92 +29,153 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+// -- dqm4hep headers
 #include "dqm4hep/Service.h"
 #include "dqm4hep/RequestHandler.h"
 
+// -- dim headers
 #include "dis.hxx"
 
 namespace dqm4hep {
 
   namespace net {
 
-    /** Server class
+    /**
+     * Server class
+     *
+     * Main interface for service and request handler registration.
+     * User can create services using the createService() method.
+     * Request from client side can be handled by registering a
+     * request handler by providing a class method to handle the
+     * request and fill a reponse.
+     *
+     * All created services and request handlers are started after
+     * server startup.
      */
     class Server
     {
     public:
-      /** Constructor
+      /**
+       * Constructor
+       *
+       * @param name the server name
        */
       Server(const std::string &name);
 
-      /** Destructor
+      /**
+       * Destructor
        */
       ~Server();
 
-      /** Start serving services and handling requests
+      /**
+       * Start serving services and handling requests
        */
       void start();
 
-      /** Stop serving services and handling requests
+      /**
+       * Stop serving services and handling requests
        */
       void stop();
 
-      /** Close all service and request handlers.
-       *  Called from destructor
+      /**
+       * Close all service and request handlers.
+       * Called from destructor
        */
       void clear();
 
-      /** Create a new service
+      /**
+       * Create a new service.
+       * The template parameter T corresponds to the data type handled
+       * by the service. Available types :
+       *  - int
+       *  - float
+       *  - double
+       *  - std::string
+       *  - Json::Value
+       *  - Buffer (see Buffer struct)
+       *
+       * @param type the service type
+       * @param name the service name
        */
-      template <typename ServiceType>
-      ServiceType *createService(const std::string &type, const std::string &name);
+      template <typename T>
+      Service<T> *createService(const std::string &type, const std::string &name);
 
-      /** Create a new request handler
+      /**
+       * Create a new request handler
        */
       template <typename T, typename S, typename U>
       BaseRequestHandler *createRequestHandler(const std::string &type, const std::string &name,
           S *pController, U function);
 
       /**
+       * Whether the target service is registered in this server
+       *
+       * @param type the service type
+       * @param name the service name
        */
       bool isServiceRegistered(const std::string &type, const std::string &name) const;
 
       /**
+       * Whether the request handler is registered in this server
+       *
+       * @param type the request handler type
+       * @param name the request handler name
        */
       bool isRequestHandlerRegistered(const std::string &type, const std::string &name) const;
 
       /**
+       * Get a created service in this server
+       *
+       * @param type the service type
+       * @param name the service name
        */
       BaseService *getService(const std::string &type, const std::string &name) const;
 
       /**
+      * Get a created request handler in this server
+      *
+      * @param type the request handler type
+      * @param name the request handler name
        */
       BaseRequestHandler *getRequestHandler(const std::string &type, const std::string &name) const;
 
-      /** Get the dim dns node.
+      /**
+       * Get the dim dns node.
        *  First look at DimServer::getDnsNode() then
        *  environment variable "DIM_DNS_NODE"
        */
       static std::string getDnsNode();
 
-      /** Get the dim dns port
+      /**
+       * Get the dim dns port
        */
       static int getDnsPort();
 
-      /** Get the full server name as allocated on the network
+      /**
+       * Get the full server name as allocated on the network
+       *
+       * @param serverName the 'short' server name as provided in the constructor
        */
       static std::string getFullServerName(const std::string &serverName);
 
-      /** Get the list of running servers
+      /**
+       * Get the list of running servers
        */
       static std::vector<std::string> getRunningServers();
 
-      /** Whether the target server is already running on the network
+      /**
+       * Whether the target server is already running on the network
+       *
+       * @param serverName the 'short' server name
        */
       static bool isServerRunning(const std::string &serverName);
 
     private:
       /**
+       * Callback function to treat the server info request
+       *
+       * @param request the json value describing the request
+       * @param response the json value descring the response to receive
        */
       void handleServerInfoRequest(const Json::Value &request, Json::Value &response);
 
@@ -122,33 +183,33 @@ namespace dqm4hep {
       typedef std::map<std::string, BaseService *>         ServiceMap;
       typedef std::map<std::string, BaseRequestHandler *>  RequestHandlerMap;
 
-      std::string                                    m_name;
-      bool                                           m_started;
-      ServiceMap                                     m_serviceMap;
-      RequestHandlerMap                              m_requestHandlerMap;
-      RequestHandlerT<Json::Value, Server>           m_serverInfoHandler;
+      std::string                                    m_name;                 ///< The short server name
+      bool                                           m_started;              ///< Whether the server has been started
+      ServiceMap                                     m_serviceMap;           ///< The map of registered services
+      RequestHandlerMap                              m_requestHandlerMap;    ///< The map of registered request handlers
+      RequestHandlerT<Json::Value, Server>           m_serverInfoHandler;    ///< The built-in request handler for server info
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename ServiceType>
-    inline ServiceType *Server::createService(const std::string &type, const std::string &name)
+    template <typename T>
+    inline Service<T> *Server::createService(const std::string &type, const std::string &name)
     {
       const std::string fullServiceName(BaseService::getFullServiceName(type, name));
 
       auto findIter = m_serviceMap.find(fullServiceName);
 
       if(findIter != m_serviceMap.end())
-        return dynamic_cast<ServiceType*>(findIter->second);
+        return dynamic_cast<Service<T>*>(findIter->second);
 
-      // first insert nullptr, then create service
+      // first insert nullptr, then create the service
       std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(fullServiceName, nullptr));
 
       if(inserted.second)
       {
-        ServiceType *pService = new ServiceType(this, type, name);
+        Service<T> *pService = new Service<T>(this, type, name);
         inserted.first->second = pService;
         return pService;
       }
@@ -168,15 +229,6 @@ namespace dqm4hep {
 
       if(findIter != m_requestHandlerMap.end())
         return findIter->second;
-
-      // {
-      //   RequestHandlerT<T,S> *pRequestHandler = dynamic_cast<RequestHandlerT<T,S>*>(findIter->second);
-      //
-      //   if(!pRequestHandler)
-      //     throw;
-      //
-      //   return pRequestHandler;
-      // }
 
       // first insert nullptr, then create service
       std::pair<RequestHandlerMap::iterator, bool> inserted = m_requestHandlerMap.insert(RequestHandlerMap::value_type(fullRequestHandlerName, nullptr));
