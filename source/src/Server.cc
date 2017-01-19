@@ -256,6 +256,62 @@ namespace dqm4hep {
       response["requestHandlers"] = requestHandlersInfo;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
+    bool Server::serviceAlreadyRunning(const std::string &type, const std::string &name)
+    {
+      DimBrowser browser;
+      const std::string fullServiceName(BaseService::getFullServiceName(type, name));
+      int nServices = browser.getServices(fullServiceName.c_str());
+
+      if(nServices == 0)
+        return false;
+
+      int serviceType;
+      char *serviceName, *format;
+
+      while(1)
+      {
+        serviceType = browser.getNextService(serviceName, format);
+
+        if(serviceType == 0)
+          break;
+
+        if(serviceType == DimSERVICE)
+          return true;
+      }
+
+      return false;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Server::requestHandlerAlreadyRunning(const std::string &type, const std::string &name)
+    {
+      DimBrowser browser;
+      const std::string fullServiceName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+      int nServices = browser.getServices(fullServiceName.c_str());
+
+      if(nServices == 0)
+        return false;
+
+      int serviceType;
+      char *serviceName, *format;
+
+      while(1)
+      {
+        serviceType = browser.getNextService(serviceName, format);
+
+        if(serviceType == 0)
+          break;
+
+        if(serviceType == DimRPC)
+          return true;
+      }
+
+      return false;
+    }
+
   }
 
 }
