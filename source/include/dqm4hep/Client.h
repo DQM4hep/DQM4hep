@@ -44,44 +44,93 @@ namespace dqm4hep {
 
   namespace net {
 
-    /** Client class
+    /**
+     * Client class
+     *
+     * Main interface to server. User can send request to
+     * a server with or without expecting a response using
+     * the sendRequest() function. User can also subscribe to
+     * a particular service run on a server by using the
+     * subscribe() method and by providing a callback function.
      */
     class Client
     {
     public:
-      /** Constructor
+      /**
+       * Constructor
        */
       Client();
 
-      /** Destructor
+      /**
+       * Destructor
        */
       ~Client();
 
-      /** Query server information
+      /**
+       * Query server information
+       *
+       * @param serverName the 'short' server name
+       * @param serverInfo the json value describing the server information
        */
       void queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const;
 
-      /** Send a request. Do not wait for any response
+      /**
+       * Send a request. Do not wait for any response
+       *
+       * @param type the request type
+       * @param name the request name
+       * @param request the json value describing the request to send
        */
       void sendRequest(const std::string &type, const std::string &name, const Json::Value &request) const;
 
-      /** Send a request. Wait for the server response
+      /**
+       * Send a request. Wait for the server response
+       * The template parameter Reponse corresponds to the
+       * expected response type. Supported types are :
+       *  - int
+       *  - float
+       *  - double
+       *  - std::string
+       *  - Buffer (see Buffer struct)
+       *  - Json::Value
+       *
+       * @param type the request type
+       * @param name the request name
+       * @param request the json value describing the request to send
+       * @param response the response to receive from the server
        */
       template <typename Response>
       void sendRequest(const std::string &type, const std::string &name, const Json::Value &request, Response &response) const;
 
-      /** Subscribe to target service
+      /**
+       * Subscribe to target service
+       *
+       * @param serviceType the service type
+       * @param serviceName the service name
+       * @param pController the class instance that will receive the service updates
+       * @param function the class method that will receive the service update
+       *
+       * @code{.cpp}
+       * // the class callback method
+       * void MyClass::myfunction(const int &integer) { ... }
+       * Client *pClient = new Client();
+       * pClient->subscribe<int>("service-type", "service-name", pMyClassInstance, &MyClass::myfunction)
+       * @endcode
        */
-      template <typename T, typename S, typename U>
-      void subscribe(const std::string &serviceType, const std::string &serviceName, S *pController, U function);
+      template <typename T, typename S>
+      void subscribe(const std::string &serviceType, const std::string &serviceName, S *pController, void (S::*function)(const T &value));
 
-      /** Whether this client already registered a service subscription
+      /**
+       * Whether this client already registered a service subscription
+       *
+       * @param serviceType the service type
+       * @param serviceName the service name
        */
       bool hasSubscribed(const std::string &serviceType, const std::string &serviceName) const;
 
     private:
       typedef std::map<std::string, BaseServiceHandler *>      ServiceHandlerMap;
-      ServiceHandlerMap            m_serviceHandlerMap;
+      ServiceHandlerMap            m_serviceHandlerMap;        ///< The service map
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -93,6 +142,8 @@ namespace dqm4hep {
     {
       throw std::runtime_error("Client::sendRequest(): response type not supported !");
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request, int &response) const
@@ -111,6 +162,8 @@ namespace dqm4hep {
       response = rpcInfo.getInt();
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <>
     inline void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request, float &response) const
     {
@@ -127,6 +180,8 @@ namespace dqm4hep {
       rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
       response = rpcInfo.getFloat();
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request, double &response) const
@@ -145,6 +200,8 @@ namespace dqm4hep {
       response = rpcInfo.getDouble();
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <>
     inline void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request, std::string &response) const
     {
@@ -161,6 +218,8 @@ namespace dqm4hep {
       rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
       response = rpcInfo.getString();
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request, Buffer &response) const
@@ -184,6 +243,8 @@ namespace dqm4hep {
       response.m_pBuffer = pBuffer->m_pBuffer;
       response.m_bufferSize = pBuffer->m_bufferSize;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request, Json::Value &response) const
@@ -210,8 +271,8 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T, typename S, typename U>
-    inline void Client::subscribe(const std::string &type, const std::string &name, S *pController, U function)
+    template <typename T, typename S>
+    inline void Client::subscribe(const std::string &type, const std::string &name, S *pController, void (S::*function)(const T &value))
     {
       const std::string fullName(BaseService::getFullServiceName(type, name));
       auto findIter = m_serviceHandlerMap.find(fullName);
