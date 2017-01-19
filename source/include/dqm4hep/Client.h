@@ -29,12 +29,15 @@
 #ifndef CLIENT_H
 #define CLIENT_H
 
+// -- dqm4hep headers
 #include "dqm4hep/RequestHandler.h"
 #include "dqm4hep/ServiceHandler.h"
 #include "dqm4hep/Service.h"
 
+// -- json headers
 #include "json/json.h"
 
+// -- dim headers
 #include "dic.hxx"
 
 namespace dqm4hep {
