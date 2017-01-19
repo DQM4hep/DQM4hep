@@ -86,7 +86,7 @@ namespace dqm4hep {
       /**
        * Create a new service.
        * The template parameter T corresponds to the data type handled
-       * by the service. Available types :
+       * by the service. Supported types :
        *  - int
        *  - float
        *  - double
@@ -106,7 +106,7 @@ namespace dqm4hep {
        * @param type the request handler type
        * @param name the request handler name
        * @param pController the class instance that will handle the request
-       * @param function the class method that will treat the request and provide a response  
+       * @param function the class method that will treat the request and provide a response
        */
       template <typename T, typename S>
       BaseRequestHandler *createRequestHandler(const std::string &type, const std::string &name,
