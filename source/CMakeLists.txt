@@ -24,28 +24,28 @@ INSTALL(
 )
 
 # add executable macro
-MACRO(BUILD_EXECUTABLE _name)
+MACRO(BUILD_EXECUTABLE _dir _name _install_loc)
 
-	ADD_EXECUTABLE( ${_name} main/${_name}.cc )
+	ADD_EXECUTABLE( ${_name} ${_dir}/${_name}.cc )
 
 	TARGET_LINK_LIBRARIES( ${_name} ${PROJECT_NAME} )
 
 	INSTALL (
 	    TARGETS ${_name}
-	    RUNTIME DESTINATION bin
+	    RUNTIME DESTINATION ${_install_loc}
 	)
 
 ENDMACRO()
 
 # tests
-BUILD_EXECUTABLE( test-server )
+BUILD_EXECUTABLE( main test-server bin/tests )
 
 # main binaries
-BUILD_EXECUTABLE( dqm4hep-server-info )
-BUILD_EXECUTABLE( dqm4hep-server-list )
-BUILD_EXECUTABLE( dqm4hep-server-running )
-BUILD_EXECUTABLE( dqm4hep-send-request )
-BUILD_EXECUTABLE( dqm4hep-send-request-response )
-BUILD_EXECUTABLE( dqm4hep-subscribe-service )
+BUILD_EXECUTABLE( main dqm4hep-server-info bin )
+BUILD_EXECUTABLE( main dqm4hep-server-list bin )
+BUILD_EXECUTABLE( main dqm4hep-server-running bin )
+BUILD_EXECUTABLE( main dqm4hep-send-request bin )
+BUILD_EXECUTABLE( main dqm4hep-send-request-response bin )
+BUILD_EXECUTABLE( main dqm4hep-subscribe-service bin )
 
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" )
