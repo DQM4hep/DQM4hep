@@ -102,10 +102,15 @@ namespace dqm4hep {
 
       /**
        * Create a new request handler
+       *
+       * @param type the request handler type
+       * @param name the request handler name
+       * @param pController the class instance that will handle the request
+       * @param function the class method that will treat the request and provide a response  
        */
-      template <typename T, typename S, typename U>
+      template <typename T, typename S>
       BaseRequestHandler *createRequestHandler(const std::string &type, const std::string &name,
-          S *pController, U function);
+          S *pController, void (S::*function)(const Json::Value &request, T &response));
 
       /**
        * Whether the target service is registered in this server
@@ -219,9 +224,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T, typename S, typename U>
+    template <typename T, typename S>
     inline BaseRequestHandler *Server::createRequestHandler(const std::string &type, const std::string &name,
-        S *pController, U function)
+        S *pController, void (S::*function)(const Json::Value &request, T &response))
     {
       const std::string fullRequestHandlerName(BaseRequestHandler::getFullRequestHandlerName(type, name));
 
