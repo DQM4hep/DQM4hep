@@ -33,10 +33,15 @@ namespace dqm4hep {
 
   namespace net {
 
+    /**
+     * Buffer struct.
+     *
+     * Simple structure to handle a buffer
+     */
     struct Buffer
     {
-      uint32_t        m_bufferSize;
-      char *          m_pBuffer;
+      uint32_t        m_bufferSize;       ///< The buffer size
+      char *          m_pBuffer;          ///< The raw buffer as a char array
     };
 
   }
