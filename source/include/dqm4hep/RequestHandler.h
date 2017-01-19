@@ -29,12 +29,16 @@
 #ifndef REQUESTHANDLER_H
 #define REQUESTHANDLER_H
 
+// -- std headers
 #include <string>
 
+// -- json headers
 #include "json/json.h"
 
+// -- dim headers
 #include "dis.hxx"
 
+// -- dqm4hep headers
 #include "dqm4hep/DQMNet.h"
 
 namespace dqm4hep {
@@ -45,38 +49,55 @@ namespace dqm4hep {
     template <typename T, typename S>
     class RequestHandlerT;
 
-    /** BaseRequestHandler class
+    /**
+     * BaseRequestHandler class
+     *
+     * Base class for request handlers
      */
     class BaseRequestHandler
     {
       friend class Server;
     public:
-      /** Get the request type
+      /**
+       * Get the request type
        */
       const std::string &getType() const;
 
-      /** Get the request name
+      /**
+       * Get the request name
        */
       const std::string &getName() const;
 
-      /** Get the request full name, as it is allocated on the network
+      /**
+       * Get the request full name, as it is allocated on the network
        */
       const std::string &getFullName() const;
 
-      /** Get the server in which the request handler is declared
+      /**
+       * Get the server in which the request handler is declared
        */
       Server *getServer() const;
 
-      /** Get the full request handle name from the request handler type and name
+      /**
+       * Get the full request handle name from the request handler type and name
+       *
+       * @param type the request handler type
+       * @param name the request handler name
        */
       static std::string getFullRequestHandlerName(const std::string &type, const std::string &name);
 
     protected:
-      /** Constructor
+      /**
+       * Constructor
+       *
+       * @param pServer the server managing the request handler
+       * @param type the request handler type
+       * @param name the request handler name
        */
       BaseRequestHandler(Server *pServer, const std::string &type, const std::string &name);
 
-      /** Destructor
+      /**
+       * Destructor
        */
       virtual ~BaseRequestHandler();
 
@@ -90,21 +111,44 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     * RequestHandler template class
+     *
+     * Base template class for request handlers. Can only by create by a Server
+     * using the Server::createRequestHandler() method
+     */
     template <typename T>
     class RequestHandler : public BaseRequestHandler
     {
       friend class Server;
       template <typename S, typename U> friend class RequestHandlerT;
     public:
-      /** Constructor
+      /**
+       * Constructor
+       *
+       * @param pServer the server managing the request handler
+       * @param type the request handler type
+       * @param name the request handler name
        */
       RequestHandler(Server *pServer, const std::string &type, const std::string &name);
 
-      /** Destructor
+      /**
+       * Destructor
        */
       virtual ~RequestHandler();
 
-      /** Process the request and fill the response
+      /**
+       * Process the request and fill the response
+       * Supported response types are :
+       *  - int
+       *  - float
+       *  - double
+       *  - std::string
+       *  - Json::Value
+       *  - Buffer (see Buffer struct)
+       *
+       * @param request the json value describing the request to process
+       * @param response the reponse the send back
        */
       virtual void processRequest(const Json::Value &request, T &response) = 0;
 
@@ -116,19 +160,24 @@ namespace dqm4hep {
       class Rpc : public DimRpc
       {
       public:
-        /** Contructor
+        /**
+         * Contructor
          */
         Rpc(RequestHandler<T> *pHandler);
 
-        /** The dim rpc handler
+        /**
+         * The dim rpc handler
          */
         void rpcHandler();
 
       private:
-        RequestHandler<T>        *m_pHandler;
+        RequestHandler<T>        *m_pHandler;     ///< The request handler owner instance
       };
 
-      /** Process the dim rpc request
+      /**
+       * Process the dim rpc request
+       *
+       * @param pRpc the rpc pointer to process
        */
       void processRequest(Rpc *pRpc);
 
@@ -139,7 +188,19 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    /** RequestHandler class
+    /**
+     * RequestHandlerT template class
+     *
+     * Final implementation for handling requests
+     * Supported response T types are :
+     *  - int
+     *  - float
+     *  - double
+     *  - std::string
+     *  - Json::Value
+     *  - Buffer (see Buffer struct)
+     *
+     *  The template argument S can be any class.
      */
     template <typename T, typename S>
     class RequestHandlerT : public RequestHandler<T>
@@ -148,13 +209,21 @@ namespace dqm4hep {
     public:
       typedef void (S::*RequestFunction)(const Json::Value &request, T &response);
 
-      /** Process the request and fill the response
-       *  Forward the request processing to the controller
+      /**
+       * Process the request and fill the response.
+       * Forward the request processing to the controller.
        */
       void processRequest(const Json::Value &request, T &response);
 
     private:
-      /** Constructor with request type and name
+      /**
+       * Constructor with request type and name
+       *
+       * @param pServer the server owning the request handler
+       * @param type the request handler type
+       * @param name the request handler name
+       * @param pController the class instance that will handle the request
+       * @param function the class method that will treat the request and provide a response
        */
       RequestHandlerT(Server *pServer, const std::string &type, const std::string &name,
           S *controller, RequestFunction callback);
@@ -176,6 +245,8 @@ namespace dqm4hep {
       /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <>
     inline RequestHandler<int>::Rpc::Rpc(RequestHandler<int> *pHandler) :
         DimRpc(pHandler->getFullName().c_str(), "C", "I"),
@@ -183,6 +254,8 @@ namespace dqm4hep {
     {
       /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline RequestHandler<float>::Rpc::Rpc(RequestHandler<float> *pHandler) :
@@ -192,6 +265,8 @@ namespace dqm4hep {
       /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <>
     inline RequestHandler<double>::Rpc::Rpc(RequestHandler<double> *pHandler) :
         DimRpc(pHandler->getFullName().c_str(), "C", "D"),
@@ -199,6 +274,8 @@ namespace dqm4hep {
     {
       /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline RequestHandler<Buffer>::Rpc::Rpc(RequestHandler<Buffer> *pHandler) :
@@ -216,9 +293,7 @@ namespace dqm4hep {
       m_pHandler->processRequest(this);
     }
 
-
-
-
+    //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline RequestHandler<T>::RequestHandler(Server *pServer, const std::string &type, const std::string &name) :
@@ -228,12 +303,15 @@ namespace dqm4hep {
       /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline RequestHandler<T>::~RequestHandler()
     {
       /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline void RequestHandler<T>::processRequest(Rpc *pRpc)
@@ -260,6 +338,8 @@ namespace dqm4hep {
       if(requireResponse)
         pRpc->setData(response);
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void RequestHandler<Json::Value>::processRequest(Rpc *pRpc)
@@ -291,6 +371,8 @@ namespace dqm4hep {
       }
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <>
     inline void RequestHandler<Buffer>::processRequest(Rpc *pRpc)
     {
@@ -317,6 +399,7 @@ namespace dqm4hep {
         pRpc->setData((void*)&response, sizeof(uint32_t) + response.m_bufferSize);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void RequestHandler<std::string>::processRequest(Rpc *pRpc)
@@ -343,7 +426,6 @@ namespace dqm4hep {
       if(requireResponse)
         pRpc->setData(const_cast<char*>(response.c_str()));
     }
-
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
