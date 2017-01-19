@@ -7,8 +7,6 @@
 #define DQMNet_PATCH_LEVEL @DQMNet_VERSION_PATCH@
 
 #define DQMNet_VERSION_STR "@DQMNet_VERSION_MAJOR@.@DQMNet_VERSION_MINOR@.@DQMNet_VERSION_PATCH@"
-// for backward compatibility
-#define DQM4HEP_VERSION_STR "@DQMNet_VERSION_MAJOR@.@DQMNet_VERSION_MINOR@.@DQMNet_VERSION_PATCH@"
 
 #define DQMNet_VERSION_GE( MAJV , MINV , PLEV )  \
      ( (DQMNet_MAJOR_VERSION > MAJV) || ( (DQMNet_MAJOR_VERSION == MAJV) && (DQMNet_MINOR_VERSION > MINV) ) \
@@ -16,6 +14,5 @@
 
 // project source dir
 #define DQMNet_DIR "@CMAKE_INSTALL_PREFIX@"
-
 
 #endif // DQMNetConfig_H
