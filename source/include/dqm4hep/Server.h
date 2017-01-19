@@ -175,6 +175,22 @@ namespace dqm4hep {
        */
       static bool isServerRunning(const std::string &serverName);
 
+      /**
+       * Whether the service is already running on the network
+       *
+       * @param type the service type
+       * @param name the service name
+       */
+      static bool serviceAlreadyRunning(const std::string &type, const std::string &name);
+
+      /**
+       * Whether the request handler is already running on the network
+       *
+       * @param type the request handler type
+       * @param name the request handler name
+       */
+      static bool requestHandlerAlreadyRunning(const std::string &type, const std::string &name);
+
     private:
       /**
        * Callback function to treat the server info request
@@ -209,6 +225,9 @@ namespace dqm4hep {
       if(findIter != m_serviceMap.end())
         return dynamic_cast<Service<T>*>(findIter->second);
 
+      if(Server::serviceAlreadyRunning(type, name))
+        throw std::runtime_error("Server::createService(): service '" + fullServiceName + "' already running on network");
+
       // first insert nullptr, then create the service
       std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(fullServiceName, nullptr));
 
@@ -234,6 +253,9 @@ namespace dqm4hep {
 
       if(findIter != m_requestHandlerMap.end())
         return findIter->second;
+
+      if(Server::requestHandlerAlreadyRunning(type, name))
+        throw std::runtime_error("Server::createRequestHandler(): request handler '" + fullRequestHandlerName + "' already running on network");
 
       // first insert nullptr, then create service
       std::pair<RequestHandlerMap::iterator, bool> inserted = m_requestHandlerMap.insert(RequestHandlerMap::value_type(fullRequestHandlerName, nullptr));
