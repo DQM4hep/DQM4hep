@@ -41,6 +41,7 @@ BUILD_EXECUTABLE( main dqm4hep-server-info bin )
 BUILD_EXECUTABLE( main dqm4hep-server-list bin )
 BUILD_EXECUTABLE( main dqm4hep-server-running bin )
 BUILD_EXECUTABLE( main dqm4hep-send-request bin )
+BUILD_EXECUTABLE( main dqm4hep-send-command bin )
 BUILD_EXECUTABLE( main dqm4hep-send-request-response bin )
 BUILD_EXECUTABLE( main dqm4hep-subscribe-service bin )
 
