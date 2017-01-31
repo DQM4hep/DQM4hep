@@ -79,6 +79,15 @@ namespace dqm4hep {
           iter->second->startHandlingRequest();
       }
 
+      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        if(!iter->second->isHandlingRequest())
+          iter->second->startHandlingRequest();
+      }
+
+      if(!m_serverInfoHandler.isHandlingRequest())
+        m_serverInfoHandler.startHandlingRequest();
+
       std::string dimServerName(Server::getFullServerName(m_name));
       DimServer::start(const_cast<char*>(dimServerName.c_str()));
       m_started = true;
@@ -103,6 +112,15 @@ namespace dqm4hep {
           iter->second->stopHandlingRequest();
       }
 
+      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        if(iter->second->isHandlingRequest())
+          iter->second->stopHandlingRequest();
+      }
+
+      if(m_serverInfoHandler.isHandlingRequest())
+        m_serverInfoHandler.stopHandlingRequest();
+
       DimServer::stop();
       m_started = false;
     }
@@ -124,8 +142,12 @@ namespace dqm4hep {
       for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
         delete iter->second;
 
+      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
+        delete iter->second;
+
       m_serviceMap.clear();
       m_requestHandlerMap.clear();
+      m_commandHandlerMap.clear();
       DimServer::stop();
       m_started = false;
     }
@@ -148,7 +170,7 @@ namespace dqm4hep {
 
     bool Server::isCommandHandlerRegistered(const std::string &type, const std::string &name) const
     {
-      return (m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name)) != m_commandHandlerMap.end());
+      return (m_commandHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name)) != m_commandHandlerMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -359,16 +381,38 @@ namespace dqm4hep {
       {
         const std::string &type(iter->second->getType());
         const std::string &name(iter->second->getName());
+        const std::string &fullName(iter->second->getFullName());
 
         Json::Value requestHandlerInfo;
         requestHandlerInfo["type"] = type;
         requestHandlerInfo["name"] = name;
+        requestHandlerInfo["fullName"] = fullName;
         requestHandlersInfo[index] = requestHandlerInfo;
 
         ++index;
       }
 
       response["requestHandlers"] = requestHandlersInfo;
+
+      Json::Value commandHandlersInfo;
+      index = 0;
+
+      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        const std::string &type(iter->second->getType());
+        const std::string &name(iter->second->getName());
+        const std::string &fullName(iter->second->getFullName());
+
+        Json::Value commandHandlerInfo;
+        commandHandlerInfo["type"] = type;
+        commandHandlerInfo["name"] = name;
+        commandHandlerInfo["fullName"] = fullName;
+        commandHandlersInfo[index] = commandHandlerInfo;
+
+        ++index;
+      }
+
+      response["commandHandlers"] = commandHandlersInfo;
     }
 
     //-------------------------------------------------------------------------------------------------
