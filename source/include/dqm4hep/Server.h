@@ -68,6 +68,11 @@ namespace dqm4hep {
       ~Server();
 
       /**
+       * Get the server name
+       */
+      const std::string &getName() const;
+
+      /**
        * Start serving services and handling requests
        */
       void start();
@@ -76,6 +81,11 @@ namespace dqm4hep {
        * Stop serving services and handling requests
        */
       void stop();
+
+      /**
+       *
+       */
+      bool isRunning() const;
 
       /**
        * Close all service and request handlers.
@@ -113,6 +123,18 @@ namespace dqm4hep {
           S *pController, void (S::*function)(const Json::Value &request, T &response));
 
       /**
+       * Create a new command handler
+       *
+       * @param type the command handler type
+       * @param name the command handler name
+       * @param pController the class instance that will handle the command
+       * @param function the class method that will treat the command
+       */
+      template <typename T, typename S>
+      BaseRequestHandler *createCommandHandler(const std::string &type, const std::string &name,
+          S *pController, void (S::*function)(const T &command));
+
+      /**
        * Whether the target service is registered in this server
        *
        * @param type the service type
@@ -129,6 +151,62 @@ namespace dqm4hep {
       bool isRequestHandlerRegistered(const std::string &type, const std::string &name) const;
 
       /**
+       * Whether the command handler is registered in this server
+       *
+       * @param type the command handler type
+       * @param name the command handler name
+       */
+      bool isCommandHandlerRegistered(const std::string &type, const std::string &name) const;
+
+      /**
+       * Start a target service
+       *
+       * @param type the service type
+       * @param name the service name
+       */
+      void startService(const std::string &type, const std::string &name);
+
+      /**
+       * Stop a target service
+       *
+       * @param type the service type
+       * @param name the service name
+       */
+      void stopService(const std::string &type, const std::string &name);
+
+      /**
+       * Start a target request handler
+       *
+       * @param type the request handler type
+       * @param name the request handler name
+       */
+      void startRequestHandler(const std::string &type, const std::string &name);
+
+      /**
+       * Stop a target request handler
+       *
+       * @param type the request handler type
+       * @param name the request handler name
+       */
+      void stopRequestHandler(const std::string &type, const std::string &name);
+
+      /**
+       * Start a target request handler
+       *
+       * @param type the command type
+       * @param name the command name
+       */
+      void startCommandHandler(const std::string &type, const std::string &name);
+
+      /**
+       * Stop a target command handler
+       *
+       * @param type the command handler type
+       * @param name the command handler name
+       */
+      void stopCommandHandler(const std::string &type, const std::string &name);
+
+      /**
        * Get a created service in this server
        *
        * @param type the service type
@@ -143,6 +221,14 @@ namespace dqm4hep {
       * @param name the request handler name
        */
       BaseRequestHandler *getRequestHandler(const std::string &type, const std::string &name) const;
+
+      /**
+      * Get a created command handler in this server
+      *
+      * @param type the command handler type
+      * @param name the command handler name
+       */
+      BaseRequestHandler *getCommandHandler(const std::string &type, const std::string &name) const;
 
       /**
        * Get the dim dns node.
@@ -191,6 +277,14 @@ namespace dqm4hep {
        */
       static bool requestHandlerAlreadyRunning(const std::string &type, const std::string &name);
 
+      /**
+       * Whether the command handler is already running on the network
+       *
+       * @param type the command handler type
+       * @param name the command handler name
+       */
+      static bool commandHandlerAlreadyRunning(const std::string &type, const std::string &name);
+
     private:
       /**
        * Callback function to treat the server info request
@@ -208,6 +302,7 @@ namespace dqm4hep {
       bool                                           m_started;              ///< Whether the server has been started
       ServiceMap                                     m_serviceMap;           ///< The map of registered services
       RequestHandlerMap                              m_requestHandlerMap;    ///< The map of registered request handlers
+      RequestHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
       RequestHandlerT<Json::Value, Server>           m_serverInfoHandler;    ///< The built-in request handler for server info
     };
 
@@ -257,7 +352,7 @@ namespace dqm4hep {
       if(Server::requestHandlerAlreadyRunning(type, name))
         throw std::runtime_error("Server::createRequestHandler(): request handler '" + fullRequestHandlerName + "' already running on network");
 
-      // first insert nullptr, then create service
+      // first insert nullptr, then create request handler
       std::pair<RequestHandlerMap::iterator, bool> inserted = m_requestHandlerMap.insert(RequestHandlerMap::value_type(fullRequestHandlerName, nullptr));
 
       if(inserted.second)
@@ -265,6 +360,35 @@ namespace dqm4hep {
         RequestHandlerT<T,S> *pRequestHandler = new RequestHandlerT<T,S>(this, type, name, pController, function);
         inserted.first->second = pRequestHandler;
         return pRequestHandler;
+      }
+      else
+        throw;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline BaseRequestHandler *Server::createCommandHandler(const std::string &type, const std::string &name,
+        S *pController, void (S::*function)(const T &command))
+    {
+      const std::string fullRequestHandlerName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+
+      auto findIter = m_commandHandlerMap.find(fullRequestHandlerName);
+
+      if(findIter != m_commandHandlerMap.end())
+        return findIter->second;
+
+      if(Server::commandHandlerAlreadyRunning(type, name))
+        throw std::runtime_error("Server::createCommandHandler(): command handler '" + fullRequestHandlerName + "' already running on network");
+
+      // first insert nullptr, then create command handler
+      std::pair<RequestHandlerMap::iterator, bool> inserted = m_commandHandlerMap.insert(RequestHandlerMap::value_type(fullRequestHandlerName, nullptr));
+
+      if(inserted.second)
+      {
+        CommandHandlerT<T,S> *pCommandHandler = new CommandHandlerT<T,S>(this, type, name, pController, function);
+        inserted.first->second = pCommandHandler;
+        return pCommandHandler;
       }
       else
         throw;

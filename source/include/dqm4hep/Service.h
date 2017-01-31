@@ -190,7 +190,7 @@ namespace dqm4hep {
       BaseService(pServer, type, name),
       m_pService(0)
     {
-      this->connectService();
+      /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -198,8 +198,7 @@ namespace dqm4hep {
     template <typename T>
     inline Service<T>::~Service()
     {
-      if(this->isServiceConnected())
-        this->disconnectService();
+      /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------

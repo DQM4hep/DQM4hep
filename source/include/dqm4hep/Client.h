@@ -103,6 +103,25 @@ namespace dqm4hep {
       void sendRequest(const std::string &type, const std::string &name, const Json::Value &request, Response &response) const;
 
       /**
+       * Send a command.
+       * The template parameter Reponse corresponds to the
+       * command type. Supported types are :
+       *  - int
+       *  - float
+       *  - double
+       *  - std::string
+       *  - Buffer (see Buffer struct)
+       *  - Json::Value
+       *
+       * @param type the command type
+       * @param name the command name
+       * @param command the command to send
+       * @param blocking whether to wait for command reception on server side
+       */
+      template <typename Command>
+      void sendCommand(const std::string &type, const std::string &name, const Command &command, bool blocking = false) const;
+
+      /**
        * Subscribe to target service
        *
        * @param serviceType the service type
@@ -267,6 +286,77 @@ namespace dqm4hep {
 
       Json::Reader reader;
       reader.parse(jsonStr, response);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Command>
+    void Client::sendCommand(const std::string &type, const std::string &name, const Command &command, bool blocking) const
+    {
+      std::string commandName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(commandName.c_str()), command);
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(commandName.c_str()), command);
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    void Client::sendCommand(const std::string &type, const std::string &name, const std::string &command, bool blocking) const
+    {
+      std::string commandName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(commandName.c_str()), const_cast<char*>(command.c_str()));
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(commandName.c_str()), const_cast<char*>(command.c_str()));
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    void Client::sendCommand(const std::string &type, const std::string &name, const Buffer &command, bool blocking) const
+    {
+      std::string commandName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(commandName.c_str()), (void*)command.m_pBuffer, command.m_bufferSize + sizeof(command.m_bufferSize));
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(commandName.c_str()), (void*)command.m_pBuffer, command.m_bufferSize + sizeof(command.m_bufferSize));
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    void Client::sendCommand(const std::string &type, const std::string &name, const Json::Value &command, bool blocking) const
+    {
+      std::string commandName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+
+      Json::FastWriter writer;
+      std::string commandStr(writer.write(command));
+
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(commandName.c_str()), const_cast<char*>(commandStr.c_str()));
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(commandName.c_str()), const_cast<char*>(commandStr.c_str()));
+      }
     }
 
     //-------------------------------------------------------------------------------------------------

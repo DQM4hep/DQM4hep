@@ -55,10 +55,29 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    const std::string &Server::getName() const
+    {
+      return m_name;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     void Server::start()
     {
       if(m_started)
         return;
+
+      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
+      {
+        if(!iter->second->isServiceConnected())
+          iter->second->connectService();
+      }
+
+      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        if(!iter->second->isHandlingRequest())
+          iter->second->startHandlingRequest();
+      }
 
       std::string dimServerName(Server::getFullServerName(m_name));
       DimServer::start(const_cast<char*>(dimServerName.c_str()));
@@ -72,8 +91,27 @@ namespace dqm4hep {
       if(!m_started)
         return;
 
+      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
+      {
+        if(iter->second->isServiceConnected())
+          iter->second->disconnectService();
+      }
+
+      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        if(iter->second->isHandlingRequest())
+          iter->second->stopHandlingRequest();
+      }
+
       DimServer::stop();
       m_started = false;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Server::isRunning() const
+    {
+      return m_started;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -88,6 +126,8 @@ namespace dqm4hep {
 
       m_serviceMap.clear();
       m_requestHandlerMap.clear();
+      DimServer::stop();
+      m_started = false;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -106,6 +146,73 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    bool Server::isCommandHandlerRegistered(const std::string &type, const std::string &name) const
+    {
+      return (m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name)) != m_commandHandlerMap.end());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Server::startService(const std::string &type, const std::string &name)
+    {
+      BaseService *pService = this->getService(type, name);
+
+      if(nullptr != pService && !pService->isServiceConnected())
+        pService->connectService();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Server::stopService(const std::string &type, const std::string &name)
+    {
+      BaseService *pService = this->getService(type, name);
+
+      if(nullptr != pService && pService->isServiceConnected())
+        pService->disconnectService();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Server::startRequestHandler(const std::string &type, const std::string &name)
+    {
+      BaseRequestHandler *pRequestHandler = this->getRequestHandler(type, name);
+
+      if(nullptr != pRequestHandler && !pRequestHandler->isHandlingRequest())
+        pRequestHandler->startHandlingRequest();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Server::stopRequestHandler(const std::string &type, const std::string &name)
+    {
+      BaseRequestHandler *pRequestHandler = this->getRequestHandler(type, name);
+
+      if(nullptr != pRequestHandler && pRequestHandler->isHandlingRequest())
+        pRequestHandler->stopHandlingRequest();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Server::startCommandHandler(const std::string &type, const std::string &name)
+    {
+      BaseRequestHandler *pCommandHandler = this->getCommandHandler(type, name);
+
+      if(nullptr != pCommandHandler && !pCommandHandler->isHandlingRequest())
+        pCommandHandler->startHandlingRequest();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Server::stopCommandHandler(const std::string &type, const std::string &name)
+    {
+      BaseRequestHandler *pCommandHandler = this->getCommandHandler(type, name);
+
+      if(nullptr != pCommandHandler && pCommandHandler->isHandlingRequest())
+        pCommandHandler->stopHandlingRequest();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     BaseService *Server::getService(const std::string &type, const std::string &name) const
     {
       auto findIter = m_serviceMap.find(BaseService::getFullServiceName(type, name));
@@ -118,6 +225,14 @@ namespace dqm4hep {
     {
       auto findIter = m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name));
       return (findIter == m_requestHandlerMap.end() ? nullptr : findIter->second);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    BaseRequestHandler *Server::getCommandHandler(const std::string &type, const std::string &name) const
+    {
+      auto findIter = m_commandHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name));
+      return (findIter == m_commandHandlerMap.end() ? nullptr : findIter->second);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -306,6 +421,34 @@ namespace dqm4hep {
           break;
 
         if(serviceType == DimRPC)
+          return true;
+      }
+
+      return false;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Server::commandHandlerAlreadyRunning(const std::string &type, const std::string &name)
+    {
+      DimBrowser browser;
+      const std::string fullServiceName(BaseRequestHandler::getFullRequestHandlerName(type, name));
+      int nServices = browser.getServices(fullServiceName.c_str());
+
+      if(nServices == 0)
+        return false;
+
+      int serviceType;
+      char *serviceName, *format;
+
+      while(1)
+      {
+        serviceType = browser.getNextService(serviceName, format);
+
+        if(serviceType == 0)
+          break;
+
+        if(serviceType == DimCOMMAND)
           return true;
       }
 
