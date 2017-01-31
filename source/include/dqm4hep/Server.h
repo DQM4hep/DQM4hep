@@ -83,7 +83,7 @@ namespace dqm4hep {
       void stop();
 
       /**
-       *
+       * Whether the server is running
        */
       bool isRunning() const;
 
@@ -330,6 +330,10 @@ namespace dqm4hep {
       {
         Service<T> *pService = new Service<T>(this, type, name);
         inserted.first->second = pService;
+
+        if(this->isRunning())
+          pService->connectService();
+
         return pService;
       }
       else
@@ -359,6 +363,10 @@ namespace dqm4hep {
       {
         RequestHandlerT<T,S> *pRequestHandler = new RequestHandlerT<T,S>(this, type, name, pController, function);
         inserted.first->second = pRequestHandler;
+
+        if(this->isRunning())
+          pRequestHandler->startHandlingRequest();
+
         return pRequestHandler;
       }
       else
@@ -388,6 +396,10 @@ namespace dqm4hep {
       {
         CommandHandlerT<T,S> *pCommandHandler = new CommandHandlerT<T,S>(this, type, name, pController, function);
         inserted.first->second = pCommandHandler;
+
+        if(this->isRunning())
+          pCommandHandler->startHandlingRequest();
+
         return pCommandHandler;
       }
       else
