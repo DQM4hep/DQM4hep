@@ -66,27 +66,33 @@ int main(int argc, char **argv)
       return 1;
     }
 
-    client.sendCommand(type, name, command);
+    client.sendCommand(type, name, command, true);
   }
   else if(commandType == "int")
   {
     int integer = atoi(argv[4]);
-    client.sendCommand(type, name, integer);
+    client.sendCommand(type, name, integer, true);
   }
   else if(commandType == "float")
   {
     float floatNumber = atof(argv[4]);
-    client.sendCommand(type, name, floatNumber);
+    client.sendCommand(type, name, floatNumber, true);
   }
   else if(commandType == "double")
   {
     double doubleNumber = atof(argv[4]);
-    client.sendCommand(type, name, doubleNumber);
+    client.sendCommand(type, name, doubleNumber, true);
   }
   else if(commandType == "string")
   {
-    std::string str(argv[4]);
-    client.sendCommand(type, name, str);
+    std::string str;
+
+    for(int i=4 ; i<argc ; i++)
+      str += argv[i] + std::string(" ");
+
+    str.pop_back();
+
+    client.sendCommand(type, name, str, true);
   }
 
   return 0;
