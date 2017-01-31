@@ -151,6 +151,7 @@ namespace dqm4hep {
     template <typename T>
     class Service : public BaseService
     {
+      friend class Server;
     public:
       /**
        * Constructor with service type and name
