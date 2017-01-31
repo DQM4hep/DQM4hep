@@ -51,6 +51,11 @@ public:
 
     response = "Printed !!";
   }
+
+  void printCommand(const std::string &command)
+  {
+    std::cout << "Received command : " << command << std::endl;
+  }
 };
 
 int main(int argc, char **argv)
@@ -61,7 +66,8 @@ int main(int argc, char **argv)
 
   IntService   *pIntService   = pServer->createService<int>("test", "int");
   FloatService *pFloatService = pServer->createService<float>("test", "float");
-  BaseRequestHandler *pPrintRequestHandler = pServer->createRequestHandler<Json::Value>("test", "print", &printer, &MyPrintClass::print);
+  pServer->createRequestHandler<Json::Value>("test", "print", &printer, &MyPrintClass::print);
+  pServer->createCommandHandler<std::string>("test", "printCommand", &printer, &MyPrintClass::printCommand);
 
   pServer->start();
 
