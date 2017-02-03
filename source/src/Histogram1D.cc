@@ -39,12 +39,12 @@ namespace dqm4hep {
       m_max(std::max(maxValue, minValue)),
       m_binWidth((m_max-m_min)/m_nBins)
     {
-      /* nop */
+      m_pHistogramBins = new float[m_nBins];
     }
 
     Histogram1D::~Histogram1D()
     {
-      /* nop */
+      delete [] m_pHistogramBins;
     }
 
     void Histogram1D::setTitle(const std::string &title)
