@@ -60,10 +60,18 @@ namespace dqm4hep {
 
     void PieChart::setTitle(const std::string &title)
     {
+      bool updated(false);
+
       if(m_title != title)
+      {
         m_updateCache.set(TITLE, true);
+        updated = true;
+      }
 
       m_title = title;
+
+      if(updated)
+        this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -77,10 +85,18 @@ namespace dqm4hep {
 
     void PieChart::setDrawLegend(bool draw)
     {
+      bool updated(false);
+
       if(draw != m_drawLegend)
+      {
         m_updateCache.set(DRAW_LEGEND, true);
+        updated = true;
+      }
 
       m_drawLegend = draw;
+
+      if(updated)
+        this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -103,6 +119,7 @@ namespace dqm4hep {
 
         this->normalize();
         m_updateCache.set(ENTRIES);
+        this->updated();
 
         return;
       }
@@ -116,6 +133,7 @@ namespace dqm4hep {
 
       this->normalize();
       m_updateCache.set(ENTRIES);
+      this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -129,6 +147,7 @@ namespace dqm4hep {
 
       findIter->second.m_color = color;
       m_updateCache.set(ENTRIES);
+      this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -143,6 +162,7 @@ namespace dqm4hep {
       findIter->second.m_value = value;
       this->normalize();
       m_updateCache.set(ENTRIES);
+      this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -157,24 +177,39 @@ namespace dqm4hep {
       m_entries.erase(findIter);
       this->normalize();
       m_updateCache.set(ENTRIES);
+      this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     void PieChart::clear()
     {
+      bool updated(false);
+
       if(!m_entries.empty())
+      {
         m_updateCache.set(ENTRIES);
+        updated = false;
+      }
 
       if(!m_title.empty())
+      {
         m_updateCache.set(TITLE);
+        updated = false;
+      }
 
       if(!m_drawLegend)
+      {
         m_updateCache.set(DRAW_LEGEND);
+        updated = false;
+      }
 
       m_entries.clear();
       m_title.clear();
       m_drawLegend = true;
+
+      if(updated)
+        this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
