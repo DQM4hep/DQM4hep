@@ -36,7 +36,8 @@ namespace dqm4hep {
       MonitorObject(),
       m_drawLegend(true)
     {
-      /* nop */
+      if(this->useUpdateCache())
+        m_updateCache.set();
     }
 
     PieChart::~PieChart()
@@ -45,8 +46,20 @@ namespace dqm4hep {
     }
 
 
+    PieChart *PieChart::create(const Json::Value &value)
+    {
+      PieChart * pPieChart = new PieChart();
+      pPieChart->fromJson(value);
+
+      return pPieChart;
+    }
+
+
     void PieChart::setTitle(const std::string &title)
     {
+      if(this->useUpdateCache() && m_title != title)
+        m_updateCache.set(TITLE, true);
+
       m_title = title;
     }
 
@@ -57,6 +70,9 @@ namespace dqm4hep {
 
     void PieChart::setDrawLegend(bool draw)
     {
+      if(this->useUpdateCache() && draw != m_drawLegend)
+        m_updateCache.set(DRAW_LEGEND, true);
+
       m_drawLegend = draw;
     }
 
@@ -70,7 +86,17 @@ namespace dqm4hep {
       auto findIter = m_entries.find(name);
 
       if(findIter != m_entries.end())
+      {
+        findIter->second.m_color = color;
+        findIter->second.m_value = value;
+
+        this->normalize();
+
+        if(m_useUpdateCache)
+          m_updateCache.set(ENTRIES);
+
         return;
+      }
 
       EntryMetadata metadata;
       metadata.m_color = color;
@@ -80,6 +106,9 @@ namespace dqm4hep {
       m_entries[name] = metadata;
 
       this->normalize();
+
+      if(this->useUpdateCache())
+        m_updateCache.set(ENTRIES);
     }
 
 
@@ -91,6 +120,9 @@ namespace dqm4hep {
         return;
 
       findIter->second.m_color = color;
+
+      if(this->useUpdateCache())
+        m_updateCache.set(ENTRIES);
     }
 
 
@@ -103,6 +135,9 @@ namespace dqm4hep {
 
       findIter->second.m_value = value;
       this->normalize();
+
+      if(this->useUpdateCache())
+        m_updateCache.set(ENTRIES);
     }
 
 
@@ -115,12 +150,92 @@ namespace dqm4hep {
 
       m_entries.erase(findIter);
       this->normalize();
+
+      if(this->useUpdateCache())
+        m_updateCache.set(ENTRIES);
     }
 
 
     void PieChart::clear()
     {
+      if(this->useUpdateCache() && !m_entries.empty())
+        m_updateCache.set(ENTRIES);
+
+      if(this->useUpdateCache() && !m_title.empty())
+        m_updateCache.set(TITLE);
+
+      if(this->useUpdateCache() && !m_drawLegend)
+        m_updateCache.set(DRAW_LEGEND);
+
       m_entries.clear();
+      m_title.clear();
+      m_drawLegend = true;
+    }
+
+
+    void PieChart::fromJson(const Json::Value &value)
+    {
+      const std::string readMode(value.get("mode", "full").asString());
+
+      if(readMode == "full")
+        this->clear();
+
+      m_drawLegend = value.get("leg", m_drawLegend).asBool();
+      m_title = value.get("title", m_title).asString();
+
+      Json::Value entryValues(value.get("entries", Json::Value()));
+
+      for(unsigned int e=0 ; e<entryValues.size() ; e++)
+      {
+        Json::Value entryValue(entryValues[e]);
+
+        const std::string name(entryValue.get("name", "").asString());
+        const float value(entryValue.get("value", 0.f).asFloat());
+        const Color color(static_cast<Color>(entryValue.get("color", Black).asInt()));
+
+        if(name.empty())
+          continue;
+
+        this->addEntry(name, color, value);
+      }
+
+      if(this->useUpdateCache())
+        this->resetCache();
+    }
+
+
+    void PieChart::toJson(Json::Value &value, bool full)
+    {
+      value["mode"] = (full || !this->useUpdateCache()) ? "full" : "update";
+
+      if( full || (this->useUpdateCache() && m_updateCache.test(DRAW_LEGEND)) )
+        value["leg"] = m_drawLegend;
+
+      if( full || (this->useUpdateCache() && m_updateCache.test(TITLE)) )
+        value["title"] = m_title;
+
+      if( full || (this->useUpdateCache() && m_updateCache.test(ENTRIES)) )
+      {
+        Json::Value entryValues(Json::arrayValue);
+        unsigned int index(0);
+
+        for(auto iter = m_entries.begin(), endIter = m_entries.end() ; endIter != iter ; ++iter)
+        {
+          Json::Value entryValue;
+
+          entryValue["name"] = iter->first;
+          entryValue["color"] = iter->second.m_color;
+          entryValue["value"] = iter->second.m_value;
+
+          entryValues[index] = entryValue;
+          ++index;
+        }
+
+        value["entries"] = entryValues;
+      }
+
+      if(this->useUpdateCache())
+        this->resetCache();
     }
 
 
@@ -133,6 +248,12 @@ namespace dqm4hep {
 
       for(auto iter = m_entries.begin(), endIter = m_entries.end() ; endIter != iter ; ++iter)
         iter->second.m_percentage = (iter->second.m_value*sum)/100.f;
+    }
+
+
+    void PieChart::resetCache()
+    {
+      m_updateCache.reset();
     }
 
   }

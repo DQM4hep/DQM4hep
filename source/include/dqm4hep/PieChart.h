@@ -29,8 +29,12 @@
 #ifndef PIECHART_H
 #define PIECHART_H
 
+// -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/MonitorObject.h"
+
+// -- std headers
+#include <bitset>
 
 namespace dqm4hep {
 
@@ -51,6 +55,13 @@ namespace dqm4hep {
       * Destructor
       */
      ~PieChart();
+
+     /**
+      * [create description]
+      * @param  value [description]
+      * @return       [description]
+      */
+     static PieChart *create(const Json::Value &value);
 
      /**
       * [setTitle description]
@@ -115,21 +126,33 @@ namespace dqm4hep {
      void normalize();
 
    private:
-    /**
-     * EntryMetadata struct
-     */
-     struct EntryMetadata
-     {
-       Color                  m_color;
-       float                  m_value;
-       float                  m_percentage;
-     };
+     void fromJson(const Json::Value &value);
+     void toJson(Json::Value &value, bool full = true);
+     void resetCache();
 
-     typedef std::map<std::string, EntryMetadata>   EntryMap;
+      /**
+       * EntryMetadata struct
+       */
+      struct EntryMetadata
+      {
+        Color                  m_color;
+        float                  m_value;
+        float                  m_percentage;
+      };
 
-     std::string                                    m_title;        ///< The pie chart title
-     EntryMap                                       m_entries;      ///< The pie chart entries
-     bool                                           m_drawLegend;   ///< Whether to draw the legend
+      enum Cache
+      {
+        TITLE = 0,
+        DRAW_LEGEND = 1,
+        ENTRIES = 2
+      };
+
+      typedef std::map<std::string, EntryMetadata>   EntryMap;
+
+      std::bitset<3>                                 m_updateCache;
+      std::string                                    m_title;        ///< The pie chart title
+      EntryMap                                       m_entries;      ///< The pie chart entries
+      bool                                           m_drawLegend;   ///< Whether to draw the legend
     };
 
   }
