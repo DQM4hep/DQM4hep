@@ -32,7 +32,8 @@ namespace dqm4hep {
 
   namespace core {
 
-    MonitorObject::MonitorObject()
+    MonitorObject::MonitorObject() :
+      m_useUpdateCache(false)
     {
 
     }
@@ -40,6 +41,16 @@ namespace dqm4hep {
     MonitorObject::~MonitorObject()
     {
 
+    }
+
+    void MonitorObject::setUseUpdateCache(bool updateCache)
+    {
+      m_useUpdateCache = updateCache;
+    }
+
+    bool MonitorObject::useUpdateCache() const
+    {
+      return m_useUpdateCache;
     }
 
   }

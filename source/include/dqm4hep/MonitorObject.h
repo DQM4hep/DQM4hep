@@ -29,7 +29,11 @@
 #ifndef MONITOROBJECT_H
 #define MONITOROBJECT_H
 
+// -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+
+// -- json headers
+#include "json/json.h"
 
 namespace dqm4hep {
 
@@ -140,8 +144,33 @@ namespace dqm4hep {
       */
      virtual ~MonitorObject();
 
-    protected:
+     /**
+      * [setUseUpdateCache description]
+      * @param updateCache [description]
+      */
+     void setUseUpdateCache(bool updateCache);
 
+     /**
+      * [useUpdateCache description]
+      * @return [description]
+      */
+     bool useUpdateCache() const;
+
+     /**
+      * [fromJson description]
+      * @param value [description]
+      */
+     virtual void fromJson(const Json::Value &value) = 0;
+
+     /**
+      * [toJson description]
+      * @param value [description]
+      * @param full  [description]
+      */
+     virtual void toJson(Json::Value &value, bool full = true) = 0;
+
+    protected:
+      bool                                           m_useUpdateCache;
     };
 
   }
