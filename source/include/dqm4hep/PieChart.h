@@ -125,9 +125,12 @@ namespace dqm4hep {
       */
      void normalize();
 
-   private:
+     // from monitor object
+     bool isUpToDate() const;
      void fromJson(const Json::Value &value);
-     void toJson(Json::Value &value, bool full = true);
+     void toJson(Json::Value &value, bool full = true, bool resetCache = true);
+
+   private:
      void resetCache();
 
       /**

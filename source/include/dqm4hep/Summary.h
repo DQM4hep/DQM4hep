@@ -58,6 +58,13 @@ namespace dqm4hep {
      ~Summary();
 
      /**
+      * [create description]
+      * @param  value [description]
+      * @return       [description]
+      */
+     static Summary *create(const Json::Value &value);
+
+     /**
       * [setHeader description]
       * @param header [description]
       */
@@ -87,7 +94,21 @@ namespace dqm4hep {
       */
      void clear();
 
-    protected:
+     // from monitor object
+     bool isUpToDate() const;
+     void fromJson(const Json::Value &value);
+     void toJson(Json::Value &value, bool full = true, bool resetCache = true);
+
+   private:
+     void resetCache();
+
+     enum Cache
+     {
+       HEADER = 0,
+       ENTRIES = 1
+     };
+
+      std::bitset<2>                          m_updateCache;
       std::string                             m_header;
       std::map<std::string, std::string>      m_entries;
     };

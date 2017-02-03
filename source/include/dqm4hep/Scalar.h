@@ -59,6 +59,11 @@ namespace dqm4hep {
      ~Scalar();
 
      /**
+      *
+      */
+     static Scalar<T> *create(const Json::Value &value);
+
+     /**
       * [setValue description]
       * @param value [description]
       */
@@ -76,24 +81,38 @@ namespace dqm4hep {
       */
      std::string toString() const;
 
-    protected:
+   private:
+     void fromJson(const Json::Value &value);
+     void toJson(Json::Value &value, bool full = true);
+     bool isUpToDate() const;
+
+   private:
+      bool                       m_updated;
       ScalarType                 m_value;
     };
 
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     template <typename ScalarType>
     inline Scalar<ScalarType>::Scalar() :
+      m_updated(true),
       m_value(0)
     {
       /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <typename ScalarType>
     inline Scalar<ScalarType>::Scalar(const ScalarType &value) :
+      m_updated(true),
       m_value(value)
     {
       /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <typename ScalarType>
     inline Scalar<ScalarType>::~Scalar()
@@ -101,11 +120,27 @@ namespace dqm4hep {
       /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename ScalarType>
+    inline Scalar<T> *Scalar<T>::create(const Json::Value &value)
+    {
+      Scalar<T> *pScalar = new Scalar<T>();
+      pScalar->fromJson(value);
+
+      return pScalar;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     template <typename ScalarType>
     inline void Scalar<ScalarType>::setValue(const ScalarType &value)
     {
+      m_updated = true;
       m_value = value;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     template <typename ScalarType>
     inline const ScalarType &Scalar<ScalarType>::getValue() const
@@ -113,10 +148,55 @@ namespace dqm4hep {
       return m_value;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     template <typename ScalarType>
     inline std::string Scalar<ScalarType>::toString() const
     {
       return std::move(DQM4HEP:::typeToString(m_value));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename ScalarType>
+    inline bool Scalar<ScalarType>::isUpToDate() const
+    {
+      return (!m_updated);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename ScalarType>
+    inline void Scalar<ScalarType>::fromJson(const Json::Value &value)
+    {
+      value["value"] = DQM4HEP::typeToString(m_value);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename ScalarType>
+    inline void Scalar<ScalarType>::toJson(Json::Value &value, bool /*full*/, bool /*resetCache*/)
+    {
+      DQM4HEP::stringToType(value.get("value", "").asString(), m_value);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline Scalar<std::string>::Scalar() :
+      m_update(true),
+      m_value("")
+    {
+      /* nop */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline std::string Scalar<std::string>::toString() const
+    {
+      return m_value;
     }
 
   }

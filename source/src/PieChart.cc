@@ -36,15 +36,17 @@ namespace dqm4hep {
       MonitorObject(),
       m_drawLegend(true)
     {
-      if(this->useUpdateCache())
-        m_updateCache.set();
+      /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     PieChart::~PieChart()
     {
       this->clear();
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     PieChart *PieChart::create(const Json::Value &value)
     {
@@ -54,32 +56,41 @@ namespace dqm4hep {
       return pPieChart;
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::setTitle(const std::string &title)
     {
-      if(this->useUpdateCache() && m_title != title)
+      if(m_title != title)
         m_updateCache.set(TITLE, true);
 
       m_title = title;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     const std::string &PieChart::getTitle() const
     {
       return m_title;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     void PieChart::setDrawLegend(bool draw)
     {
-      if(this->useUpdateCache() && draw != m_drawLegend)
+      if(draw != m_drawLegend)
         m_updateCache.set(DRAW_LEGEND, true);
 
       m_drawLegend = draw;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     bool PieChart::shouldDrawLegend() const
     {
       return m_drawLegend;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::addEntry(const std::string &name, Color color, const float &value)
     {
@@ -91,9 +102,7 @@ namespace dqm4hep {
         findIter->second.m_value = value;
 
         this->normalize();
-
-        if(m_useUpdateCache)
-          m_updateCache.set(ENTRIES);
+        m_updateCache.set(ENTRIES);
 
         return;
       }
@@ -106,11 +115,10 @@ namespace dqm4hep {
       m_entries[name] = metadata;
 
       this->normalize();
-
-      if(this->useUpdateCache())
-        m_updateCache.set(ENTRIES);
+      m_updateCache.set(ENTRIES);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::setEntryColor(const std::string &name, Color color)
     {
@@ -120,11 +128,10 @@ namespace dqm4hep {
         return;
 
       findIter->second.m_color = color;
-
-      if(this->useUpdateCache())
-        m_updateCache.set(ENTRIES);
+      m_updateCache.set(ENTRIES);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::setEntryValue(const std::string &name, const float &value)
     {
@@ -135,11 +142,10 @@ namespace dqm4hep {
 
       findIter->second.m_value = value;
       this->normalize();
-
-      if(this->useUpdateCache())
-        m_updateCache.set(ENTRIES);
+      m_updateCache.set(ENTRIES);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::removeEntry(const std::string &name)
     {
@@ -150,21 +156,20 @@ namespace dqm4hep {
 
       m_entries.erase(findIter);
       this->normalize();
-
-      if(this->useUpdateCache())
-        m_updateCache.set(ENTRIES);
+      m_updateCache.set(ENTRIES);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::clear()
     {
-      if(this->useUpdateCache() && !m_entries.empty())
+      if(!m_entries.empty())
         m_updateCache.set(ENTRIES);
 
-      if(this->useUpdateCache() && !m_title.empty())
+      if(!m_title.empty())
         m_updateCache.set(TITLE);
 
-      if(this->useUpdateCache() && !m_drawLegend)
+      if(!m_drawLegend)
         m_updateCache.set(DRAW_LEGEND);
 
       m_entries.clear();
@@ -172,6 +177,14 @@ namespace dqm4hep {
       m_drawLegend = true;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
+    bool PieChart::isUpToDate() const
+    {
+      return m_updateCache.none();
+    }
+
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::fromJson(const Json::Value &value)
     {
@@ -199,22 +212,22 @@ namespace dqm4hep {
         this->addEntry(name, color, value);
       }
 
-      if(this->useUpdateCache())
-        this->resetCache();
+      this->resetCache();
     }
 
+    //-------------------------------------------------------------------------------------------------
 
-    void PieChart::toJson(Json::Value &value, bool full)
+    void PieChart::toJson(Json::Value &value, bool full, bool resetCache)
     {
-      value["mode"] = (full || !this->useUpdateCache()) ? "full" : "update";
+      value["mode"] = full ? "full" : "update";
 
-      if( full || (this->useUpdateCache() && m_updateCache.test(DRAW_LEGEND)) )
+      if( full || m_updateCache.test(DRAW_LEGEND))
         value["leg"] = m_drawLegend;
 
-      if( full || (this->useUpdateCache() && m_updateCache.test(TITLE)) )
+      if( full || m_updateCache.test(TITLE))
         value["title"] = m_title;
 
-      if( full || (this->useUpdateCache() && m_updateCache.test(ENTRIES)) )
+      if( full || m_updateCache.test(ENTRIES))
       {
         Json::Value entryValues(Json::arrayValue);
         unsigned int index(0);
@@ -234,10 +247,11 @@ namespace dqm4hep {
         value["entries"] = entryValues;
       }
 
-      if(this->useUpdateCache())
+      if(resetCache)
         this->resetCache();
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::normalize()
     {
@@ -250,6 +264,7 @@ namespace dqm4hep {
         iter->second.m_percentage = (iter->second.m_value*sum)/100.f;
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     void PieChart::resetCache()
     {

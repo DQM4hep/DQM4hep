@@ -31,9 +31,13 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/Signal.h"
 
 // -- json headers
 #include "json/json.h"
+
+// -- std headers
+#include <bitset>
 
 namespace dqm4hep {
 
@@ -85,7 +89,6 @@ namespace dqm4hep {
 
     /**
      * LineStyle enum
-     * Same line style enum as ROOT
      */
     enum LineStyle
     {
@@ -145,16 +148,9 @@ namespace dqm4hep {
      virtual ~MonitorObject();
 
      /**
-      * [setUseUpdateCache description]
-      * @param updateCache [description]
+      *
       */
-     void setUseUpdateCache(bool updateCache);
-
-     /**
-      * [useUpdateCache description]
-      * @return [description]
-      */
-     bool useUpdateCache() const;
+     Signal<void> &onUpdate();
 
      /**
       * [fromJson description]
@@ -167,10 +163,23 @@ namespace dqm4hep {
       * @param value [description]
       * @param full  [description]
       */
-     virtual void toJson(Json::Value &value, bool full = true) = 0;
+     virtual void toJson(Json::Value &value, bool full = true, bool resetCache = true) = 0;
 
-    protected:
-      bool                                           m_useUpdateCache;
+     /**
+      * [isUpToDate description]
+      * @return [description]
+      */
+     virtual bool isUpToDate() const = 0;
+
+   protected:
+
+     /**
+      * [updated description]
+      */
+     void updated();
+
+   private:
+      Signal<void>                                   m_updateSignal;
     };
 
   }

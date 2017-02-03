@@ -56,8 +56,21 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    Summary *Summary::create(const Json::Value &value)
+    {
+      Summary *pSummary = new Summary();
+      pSummary->fromJson(value);
+
+      return pSummary;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     void Summary::setHeader(const std::string &header)
     {
+      if(m_header != header)
+        m_updateCache.set(HEADER, true);
+
       m_header = header;
     }
 
@@ -72,6 +85,7 @@ namespace dqm4hep {
 
     void Summary::setEntry(const std::string &entry, const std::string &text)
     {
+      m_updateCache.set(ENTRIES, true);
       m_entries[entry] = text;
     }
 
@@ -82,15 +96,99 @@ namespace dqm4hep {
       auto findIter = m_entries.find(entry);
 
       if(findIter != m_entries.end())
+      {
         m_entries.erase(findIter);
+        m_updateCache.set(ENTRIES, true);
+      }
     }
 
     //-------------------------------------------------------------------------------------------------
 
     void Summary::clear()
     {
+      if(!m_header.empty())
+        m_updateCache.set(HEADER, true);
+
+      if(!m_entries.empty())
+        m_updateCache.set(ENTRIES, true);
+
       m_entries.clear();
       m_header.clear();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Summary::isUpToDate() const
+    {
+      return m_updateCache.none();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Summary::fromJson(const Json::Value &value)
+    {
+      const std::string readMode(value.get("mode", "full").asString());
+
+      if(readMode == "full")
+        this->clear();
+
+      m_header = value.get("header", m_header).asString();
+
+      Json::Value entryValues(value.get("entries", Json::Value()));
+
+      for(unsigned int e=0 ; e<entryValues.size() ; e++)
+      {
+        Json::Value entryValue(entryValues[e]);
+
+        const std::string name(entryValue.get("name", "").asString());
+        const std::string text(entryValue.get("text", 0.f).asString());
+
+        if(name.empty() || text.empty())
+          continue;
+
+        this->setEntry(name, text);
+      }
+
+      this->resetCache();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Summary::toJson(Json::Value &value, bool full, bool resetCache)
+    {
+      value["mode"] = full ? "full" : "update";
+
+      if( full || m_updateCache.test(HEADER))
+        value["header"] = m_header;
+
+      if( full || m_updateCache.test(ENTRIES))
+      {
+        Json::Value entryValues(Json::arrayValue);
+        unsigned int index(0);
+
+        for(auto iter = m_entries.begin(), endIter = m_entries.end() ; endIter != iter ; ++iter)
+        {
+          Json::Value entryValue;
+
+          entryValue["name"] = iter->first;
+          entryValue["text"] = iter->second;
+
+          entryValues[index] = entryValue;
+          ++index;
+        }
+
+        value["entries"] = entryValues;
+      }
+
+      if(resetCache)
+        this->resetCache();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Summary::resetCache()
+    {
+      m_updateCache.reset();
     }
 
   }
