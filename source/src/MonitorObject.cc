@@ -47,9 +47,9 @@ namespace dqm4hep {
       return m_updateSignal;
     }
 
-    void MonitorObject::updated()
+    void MonitorObject::updated(int index)
     {
-      m_updateSignal.process();
+      m_updateSignal.process(index);
     }
 
   }

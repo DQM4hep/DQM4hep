@@ -115,6 +115,14 @@ namespace dqm4hep {
     {
       Axis();
 
+      void clear()
+      {
+        m_titleSize = 0.04;
+        m_titleColor = Black;
+        m_labelSize = 0.04;
+        m_labelColor = Black;
+      }
+
       std::string               m_title;
       float                     m_titleSize;
       Color                     m_titleColor;
@@ -122,13 +130,9 @@ namespace dqm4hep {
       Color                     m_labelColor;
     };
 
-    inline Axis::Axis() :
-      m_titleSize(0.04),
-      m_titleColor(Black),
-      m_labelSize(0.04),
-      m_labelColor(Black)
+    inline Axis::Axis()
     {
-      /* nop */
+      this->clear();
     }
 
     /**
@@ -150,7 +154,7 @@ namespace dqm4hep {
      /**
       *
       */
-     Signal<void> &onUpdate();
+     Signal<int> &onUpdate();
 
      /**
       * [fromJson description]
@@ -176,10 +180,10 @@ namespace dqm4hep {
      /**
       * [updated description]
       */
-     void updated();
+     void updated(int index);
 
    private:
-      Signal<void>                                   m_updateSignal;
+      Signal<int>                                   m_updateSignal;
     };
 
   }
