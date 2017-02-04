@@ -42,7 +42,7 @@ namespace dqm4hep {
       /**/
     }
 
-    Signal<void> &MonitorObject::onUpdate()
+    Signal<int> &MonitorObject::onUpdate()
     {
       return m_updateSignal;
     }
