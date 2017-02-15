@@ -71,7 +71,7 @@ namespace dqm4hep {
       m_title = title;
 
       if(updated)
-        this->updated();
+        this->updated(TITLE);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ namespace dqm4hep {
       m_drawLegend = draw;
 
       if(updated)
-        this->updated();
+        this->updated(DRAW_LEGEND);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ namespace dqm4hep {
 
         this->normalize();
         m_updateCache.set(ENTRIES);
-        this->updated();
+        this->updated(ENTRIES);
 
         return;
       }
@@ -133,7 +133,7 @@ namespace dqm4hep {
 
       this->normalize();
       m_updateCache.set(ENTRIES);
-      this->updated();
+      this->updated(ENTRIES);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ namespace dqm4hep {
 
       findIter->second.m_color = color;
       m_updateCache.set(ENTRIES);
-      this->updated();
+      this->updated(ENTRIES);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -162,7 +162,7 @@ namespace dqm4hep {
       findIter->second.m_value = value;
       this->normalize();
       m_updateCache.set(ENTRIES);
-      this->updated();
+      this->updated(ENTRIES);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -177,39 +177,33 @@ namespace dqm4hep {
       m_entries.erase(findIter);
       this->normalize();
       m_updateCache.set(ENTRIES);
-      this->updated();
+      this->updated(ENTRIES);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     void PieChart::clear()
     {
-      bool updated(false);
-
       if(!m_entries.empty())
       {
         m_updateCache.set(ENTRIES);
-        updated = false;
+        m_entries.clear();
+        this->updated(ENTRIES);
       }
 
       if(!m_title.empty())
       {
         m_updateCache.set(TITLE);
-        updated = false;
+        m_title.clear();
+        this->updated(TITLE);
       }
 
       if(!m_drawLegend)
       {
         m_updateCache.set(DRAW_LEGEND);
-        updated = false;
+        m_drawLegend = true;
+        this->updated(DRAW_LEGEND);
       }
-
-      m_entries.clear();
-      m_title.clear();
-      m_drawLegend = true;
-
-      if(updated)
-        this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -304,6 +298,13 @@ namespace dqm4hep {
     void PieChart::resetCache()
     {
       m_updateCache.reset();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorObjectType PieChart::getType() const
+    {
+      return PIE_CHART;
     }
 
   }

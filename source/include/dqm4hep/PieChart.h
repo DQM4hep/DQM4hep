@@ -32,6 +32,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/MonitorObject.h"
+#include "dqm4hep/DrawAttributes.h"
 
 // -- std headers
 #include <bitset>
@@ -46,6 +47,17 @@ namespace dqm4hep {
     class PieChart final : public MonitorObject
     {
     public:
+      /**
+       * Property enum
+       */
+      enum Property
+      {
+        TITLE = 0,
+        DRAW_LEGEND,
+        ENTRIES,
+        N_PROPERTIES
+      };
+      
      /**
       * Constructor
       */
@@ -129,6 +141,7 @@ namespace dqm4hep {
      bool isUpToDate() const;
      void fromJson(const Json::Value &value);
      void toJson(Json::Value &value, bool full = true, bool resetCache = true);
+     MonitorObjectType getType() const;
 
    private:
      void resetCache();
@@ -143,16 +156,9 @@ namespace dqm4hep {
         float                  m_percentage;
       };
 
-      enum Cache
-      {
-        TITLE = 0,
-        DRAW_LEGEND = 1,
-        ENTRIES = 2
-      };
-
       typedef std::map<std::string, EntryMetadata>   EntryMap;
 
-      std::bitset<3>                                 m_updateCache;
+      std::bitset<N_PROPERTIES>                      m_updateCache;
       std::string                                    m_title;        ///< The pie chart title
       EntryMap                                       m_entries;      ///< The pie chart entries
       bool                                           m_drawLegend;   ///< Whether to draw the legend
