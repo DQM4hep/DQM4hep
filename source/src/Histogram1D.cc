@@ -28,6 +28,9 @@
 
 #include "dqm4hep/Histogram1D.h"
 
+#include <cstring>
+#include <cmath>
+
 namespace dqm4hep {
 
   namespace core {
@@ -37,48 +40,588 @@ namespace dqm4hep {
       m_nBins(nBins),
       m_min(std::min(minValue, maxValue)),
       m_max(std::max(maxValue, minValue)),
-      m_binWidth((m_max-m_min)/m_nBins)
+      m_binWidth((m_max-m_min) / m_nBins),
+      m_cumulativeSum(0.f),
+      m_cumulativeSumX(0.f),
+      m_cumulativeSumXX(0.f),
+      m_maximumBin(-1),
+      m_maximumValue(0.f)
     {
+      if(0 == m_nBins)
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+
       m_pHistogramBins = new float[m_nBins];
+      memset(m_pHistogramBins, 0, m_nBins*sizeof(float));
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    Histogram1D::Histogram1D() :
+      MonitorObject(),
+      m_nBins(0),
+      m_min(0.f),
+      m_max(0.f),
+      m_binWidth(0.f),
+      m_cumulativeSum(0.f),
+      m_cumulativeSumX(0.f),
+      m_cumulativeSumXX(0.f),
+      m_maximumBin(-1),
+      m_maximumValue(0.f)
+    {
+      m_pHistogramBins = nullptr;
+    }
+
+    //-------------------------------------------------------------------------------------------------
 
     Histogram1D::~Histogram1D()
     {
-      delete [] m_pHistogramBins;
+      if(nullptr != m_pHistogramBins)
+        delete [] m_pHistogramBins;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     void Histogram1D::setTitle(const std::string &title)
     {
+      bool updated(false);
+
+      if(title != m_title)
+      {
+        m_updateCache.set(TITLE, true);
+        updated = true;
+      }
+
       m_title = title;
+
+      if(updated)
+        this->updated(TITLE);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     const std::string &Histogram1D::getTitle() const
     {
       return m_title;
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     unsigned int Histogram1D::getNBins() const
     {
       return m_nBins;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     float Histogram1D::getMin() const
     {
       return m_min;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     float Histogram1D::getMax() const
     {
       return m_max;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     float Histogram1D::getBinWidth() const
     {
       return m_binWidth;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getBinContent(const unsigned int bin) const
+    {
+      if(bin >= m_nBins)
+        return 0.f;
+
+      return m_pHistogramBins[bin];
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    int Histogram1D::getBinNumber(const float value) const
+    {
+      if(value < m_min || value > m_max)
+        return -1;
+
+      return static_cast<int>((value - m_min) / m_binWidth);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    unsigned int Histogram1D::getMinBinNumber() const
+    {
+      return 0;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    unsigned int Histogram1D::getMaxBinNumber() const
+    {
+      return (m_nBins-1);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getCumulativeSum() const
+    {
+      return m_cumulativeSum;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getCumulativeSum(const unsigned int lowBin, const unsigned int highBin) const
+    {
+      float cumulativeSum(0.f);
+
+      for(unsigned int bin = lowBin ; bin <= std::min(this->getMaxBinNumber(), highBin) ; bin++)
+        cumulativeSum += m_pHistogramBins[bin];
+
+      return cumulativeSum;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::getMaximum(const unsigned int lowBin, const unsigned int highBin, float &maximumValue, int &maximumBin) const
+    {
+      maximumValue = 0.f;
+      maximumBin = -1;
+
+      for(unsigned int bin = lowBin ; bin <= std::min(this->getMaxBinNumber(), highBin) ; bin++)
+      {
+        if(m_pHistogramBins[bin] > maximumValue)
+        {
+          maximumValue = m_pHistogramBins[bin];
+          maximumBin = bin;
+        }
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::getMaximum(float &maximumValue, int &maximumBin) const
+    {
+      maximumValue = m_maximumValue;
+      maximumBin = m_maximumBin;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getMean(const unsigned int lowBin, const unsigned int highBin) const
+    {
+      float cumulativeSum(0.f);
+      float cumulativeSumX(0.f);
+
+      for(unsigned int bin = lowBin ; bin <= std::min(this->getMaxBinNumber(), highBin) ; bin++)
+      {
+        const float binCenter((m_min + this->getBinWidth()*bin + this->getBinWidth()/2.f));
+
+        cumulativeSum += m_pHistogramBins[bin];
+        cumulativeSumX += m_pHistogramBins[bin] * binCenter;
+      }
+
+      if (std::fabs(cumulativeSum) < std::numeric_limits<float>::epsilon())
+          return 0.f;
+
+      return (cumulativeSumX / cumulativeSum);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getMean() const
+    {
+      return (m_cumulativeSumX / m_cumulativeSum);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getStdDeviation(const unsigned int lowBin, const unsigned int highBin) const
+    {
+      float cumulativeSum(0.f);
+      float cumulativeSumX(0.f);
+      float cumulativeSumXX(0.f);
+
+      for(unsigned int bin = lowBin ; bin <= std::min(this->getMaxBinNumber(), highBin) ; bin++)
+      {
+        const float binCenter((m_min + this->getBinWidth()*bin + this->getBinWidth()/2.f));
+
+        cumulativeSum += m_pHistogramBins[bin];
+        cumulativeSumX += m_pHistogramBins[bin] * binCenter;
+        cumulativeSumXX += m_pHistogramBins[bin] * binCenter * binCenter;
+      }
+
+      if (std::fabs(cumulativeSum) < std::numeric_limits<float>::epsilon())
+          return 0.f;
+
+      const float meanX(cumulativeSumX / cumulativeSum);
+      const float meanXX(cumulativeSumXX / cumulativeSum);
+
+      return std::sqrt(meanXX - (meanX * meanX));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float Histogram1D::getStdDeviation() const
+    {
+      return std::sqrt(m_cumulativeSumXX / m_cumulativeSum - ( (m_cumulativeSumX / m_cumulativeSum) * (m_cumulativeSumX / m_cumulativeSum) ) );
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::setBinContent(const unsigned int bin, const float value)
+    {
+      if(bin < this->getMinBinNumber() || bin > this->getMaxBinNumber())
+        return;
+
+      // calculte bin difference to update cache values
+      const float diffValue(m_pHistogramBins[bin]-value);
+      m_pHistogramBins[bin] = value;
+
+      // update cache values
+      m_cumulativeSum -= diffValue;
+
+      if(m_pHistogramBins[m_maximumBin] < value)
+      {
+        m_maximumBin = bin;
+        m_maximumValue = value;
+      }
+
+      const float binCenter((m_min + this->getBinWidth()*bin + this->getBinWidth()/2.f));
+
+      m_cumulativeSumX += diffValue * binCenter;
+      m_cumulativeSumXX += diffValue * binCenter * binCenter;
+
+      m_updateCache.set(BINS, true);
+      this->updated(BINS);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::fill(const float value, const float weight)
+    {
+      const int bin(this->getBinNumber(value));
+
+      if(bin < 0)
+        return;
+
+      // calculte bin difference to update cache values
+      const float diffValue(weight);
+      m_pHistogramBins[bin] += weight;
+      const float newValue(m_pHistogramBins[bin]);
+
+      // update cache values
+      m_cumulativeSum -= diffValue;
+
+      if(m_pHistogramBins[m_maximumBin] < newValue)
+      {
+        m_maximumBin = bin;
+        m_maximumValue = newValue;
+      }
+
+      const float binCenter((m_min + this->getBinWidth()*bin + this->getBinWidth()/2.f));
+
+      m_cumulativeSumX += diffValue * binCenter;
+      m_cumulativeSumXX += diffValue * binCenter * binCenter;
+
+      m_updateCache.set(BINS, true);
+      this->updated(BINS);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::scale(const float scaleFactor)
+    {
+      float cumulativeSum(0.f), cumulativeSumX(0.f), cumulativeSumXX(0.f);
+
+      for(unsigned int bin = this->getMinBinNumber() ; bin <= this->getMaxBinNumber() ; bin++)
+      {
+        m_pHistogramBins[bin] *= scaleFactor;
+
+        const float binCenter((m_min + this->getBinWidth()*bin + this->getBinWidth()/2.f));
+
+        cumulativeSum += m_pHistogramBins[bin];
+        cumulativeSumX += m_pHistogramBins[bin] * binCenter;
+        cumulativeSumXX += m_pHistogramBins[bin] * binCenter * binCenter;
+      }
+
+      if(m_maximumBin >= 0)
+        m_maximumValue = m_pHistogramBins[m_maximumBin];
+
+      m_cumulativeSum = cumulativeSum;
+      m_cumulativeSumX = cumulativeSumX;
+      m_cumulativeSumXX = cumulativeSumXX;
+
+      m_updateCache.set(BINS, true);
+      this->updated(BINS);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::clear()
+    {
+      // reset contents
+      if(nullptr != m_pHistogramBins)
+        memset(m_pHistogramBins, 0, m_nBins*sizeof(float));
+
+      m_xAxisAttributes.reset();
+      m_yAxisAttributes.reset();
+      m_title.clear();
+
+      m_markerAttributes.reset();
+      m_lineAttributes.reset();
+      m_fillAttributes.reset();
+
+      // set up cache for next streaming
+      m_updateCache.set(BINS, true); this->updated(BINS);
+      m_updateCache.set(AXIS_X, true); this->updated(AXIS_X);
+      m_updateCache.set(AXIS_Y, true); this->updated(AXIS_Y);
+      m_updateCache.set(FILL, true); this->updated(FILL);
+      m_updateCache.set(MARKER, true); this->updated(MARKER);
+      m_updateCache.set(LINE, true); this->updated(LINE);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::setLineAttributes(const LineAttributes &attributes)
+    {
+      m_updateCache.set(LINE, true);
+      m_lineAttributes = attributes;
+      this->updated(LINE);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const LineAttributes &Histogram1D::getLineAttributes() const
+    {
+      return m_lineAttributes;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::setMarkerAttributes(const MarkerAttributes &attributes)
+    {
+      m_updateCache.set(MARKER, true);
+      m_markerAttributes = attributes;
+      this->updated(MARKER);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const MarkerAttributes &Histogram1D::getMarkerAttributes() const
+    {
+      return m_markerAttributes;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::setFillAttributes(const FillAttributes &attributes)
+    {
+      m_updateCache.set(FILL, true);
+      m_fillAttributes = attributes;
+      this->updated(FILL);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const FillAttributes &Histogram1D::getFillAttributes() const
+    {
+      return m_fillAttributes;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::setXAxisAttributes(const AxisAttributes &attributes)
+    {
+      m_xAxisAttributes = attributes;
+      m_updateCache.set(AXIS_X, true);
+      this->updated(AXIS_X);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const AxisAttributes &Histogram1D::getXAxisAttributes() const
+    {
+      return m_xAxisAttributes;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::setYAxisAttributes(const AxisAttributes &attributes)
+    {
+      m_yAxisAttributes = attributes;
+      m_updateCache.set(AXIS_Y, true);
+      this->updated(AXIS_Y);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const AxisAttributes &Histogram1D::getYAxisAttributes() const
+    {
+      return m_yAxisAttributes;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::fromJson(const Json::Value &value)
+    {
+      const std::string readMode(value.get("mode", "full").asString());
+      Json::Value bins = value.get("bins", Json::Value());
+
+      // get histogram size
+      unsigned int nBins(bins.size());
+
+      if(readMode == "full")
+      {
+        if(nBins == 0)
+          return;
+
+        float min(0.f), max(0.f);
+
+        try
+        {
+          min = value["min"].asFloat();
+          max = value["min"].asFloat();
+
+          if(min > max)
+            return;
+        }
+        catch(...)
+        {
+          return;
+        }
+
+        m_nBins = nBins;
+        m_min = min;
+        m_max = max;
+        m_binWidth = (max-min)/m_nBins;
+
+        // clear histogram
+        this->clear();
+
+        if(nullptr != m_pHistogramBins)
+        {
+          delete [] m_pHistogramBins;
+          m_pHistogramBins = nullptr;
+        }
+
+        // and re-alloc histogram
+        m_pHistogramBins = new float[nBins];
+      }
+      else
+      {
+        if(nBins != m_nBins)
+          return;
+      }
+
+      m_title = value.get("title", m_title).asString();
+
+      // axis, marker, line and fill attributes
+      Json::Value xAxis = value.get("xaxis", Json::Value());
+      Json::Value yAxis = value.get("yaxis", Json::Value());
+      Json::Value marker = value.get("marker", Json::Value());
+      Json::Value line = value.get("line", Json::Value());
+      Json::Value fill = value.get("fill", Json::Value());
+
+      if(!xAxis.empty())
+        m_xAxisAttributes.fromJson(xAxis);
+
+      if(!yAxis.empty())
+        m_yAxisAttributes.fromJson(yAxis);
+
+      if(!marker.empty())
+        m_markerAttributes.fromJson(marker);
+
+      if(!line.empty())
+        m_lineAttributes.fromJson(line);
+
+      if(!fill.empty())
+        m_fillAttributes.fromJson(fill);
+
+      for(unsigned int i=0 ; i<bins.size() ; i++)
+        this->setBinContent(i, bins[i].asFloat());
+
+      m_updateCache.reset();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Histogram1D::toJson(Json::Value &value, bool full, bool resetCache)
+    {
+      value["mode"] = full ? "full" : "update";
+
+      if(full || m_updateCache.test(TITLE))
+        value["title"] = m_title;
+
+      if(full)
+      {
+        value["min"] = m_min;
+        value["max"] = m_max;
+      }
+
+      if(full || m_updateCache.test(AXIS_X))
+      {
+        Json::Value axis;
+        m_xAxisAttributes.toJson(axis);
+        value["xaxis"] = axis;
+      }
+
+      if(full || m_updateCache.test(AXIS_Y))
+      {
+        Json::Value axis;
+        m_yAxisAttributes.toJson(axis);
+        value["yaxis"] = axis;
+      }
+
+      if(full || m_updateCache.test(MARKER))
+      {
+        Json::Value marker;
+        m_markerAttributes.toJson(marker);
+        value["marker"] = marker;
+      }
+
+      if(full || m_updateCache.test(LINE))
+      {
+        Json::Value line;
+        m_lineAttributes.toJson(line);
+        value["line"] = line;
+      }
+
+      if(full || m_updateCache.test(FILL))
+      {
+        Json::Value fill;
+        m_fillAttributes.toJson(fill);
+        value["fill"] = fill;
+      }
+
+      if( (full || m_updateCache.test(MARKER)) && nullptr != m_pHistogramBins)
+      {
+        Json::Value bins(Json::arrayValue);
+
+        for(unsigned int bin = this->getMinBinNumber() ; bin <= this->getMaxBinNumber() ; bin++)
+          bins[bin] = m_pHistogramBins[bin];
+      }
+
+      m_updateCache.reset();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool Histogram1D::isUpToDate() const
+    {
+      return m_updateCache.none();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorObjectType Histogram1D::getType() const
+    {
+      return HISTOGRAM_1D;
+    }
 
   }
 

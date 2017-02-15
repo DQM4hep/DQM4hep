@@ -31,10 +31,20 @@
 
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/MonitorObject.h"
+#include "dqm4hep/DrawAttributes.h"
 
 namespace dqm4hep {
 
   namespace core {
+
+    // TODO :
+    // Add a comparison measurement between two histograms
+    // http://docs.opencv.org/2.4/doc/tutorials/imgproc/histograms/histogram_comparison/histogram_comparison.html
+    // Implements these four tests.
+    //
+    // From https://en.wikipedia.org/wiki/Statistical_distance :
+    // Kullback–Leibler divergence : https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+    // Hellinger distance : https://en.wikipedia.org/wiki/Hellinger_distance
 
     /**
     * Histogram1D class
@@ -43,6 +53,28 @@ namespace dqm4hep {
     {
     public:
       typedef std::map<unsigned int, float>  HistogramMap;
+
+      enum DrawOption
+      {
+        ERROR_BARS,       ///< Draw error bars on bins
+        SMOOTH_CURVE,     ///< Draw a smooth curve through the histogram bins
+        MARKER_BIN        ///< Draw marker at each bin
+      };
+
+      /**
+       * Property enum
+       */
+      enum Property
+      {
+        TITLE = 0,
+        BINS,
+        AXIS_X,
+        AXIS_Y,
+        MARKER,
+        LINE,
+        FILL,
+        N_PROPERTIES
+      };
 
       /**
       * Constructor
@@ -102,7 +134,7 @@ namespace dqm4hep {
       * @param  value [description]
       * @return       [description]
       */
-      unsigned int getBinNumber(const float value) const;
+      int getBinNumber(const float value) const;
 
       /**
       * [getMinBinNumber description]
@@ -137,30 +169,14 @@ namespace dqm4hep {
        * @param maximumValue [description]
        * @param maximumBin   [description]
        */
-      void getMaximum(const unsigned int lowBin, const unsigned int highBin, float &maximumValue, unsigned int &maximumBin) const;
+      void getMaximum(const unsigned int lowBin, const unsigned int highBin, float &maximumValue, int &maximumBin) const;
 
       /**
        * [getMaximum description]
        * @param maximumValue [description]
        * @param maximumBin   [description]
        */
-      void getMaximum(float &maximumValue, unsigned int &maximumBin) const;
-
-      /**
-       * [getMinimum description]
-       * @param lowBin       [description]
-       * @param highBin      [description]
-       * @param minimumValue [description]
-       * @param minimumBin   [description]
-       */
-      void getMinimum(const unsigned int lowBin, const unsigned int highBin, float &minimumValue, unsigned int &minimumBin) const;
-
-      /**
-       * [getMinimum description]
-       * @param minimumValue [description]
-       * @param minimumBin   [description]
-       */
-      void getMinimum(float &minimumValue, unsigned int &minimumBin) const;
+      void getMaximum(float &maximumValue, int &maximumBin) const;
 
       /**
        * [getMean description]
@@ -191,35 +207,6 @@ namespace dqm4hep {
       float getStdDeviation() const;
 
       /**
-       * [getRms description]
-       * @param  lowBin  [description]
-       * @param  highBin [description]
-       * @return         [description]
-       */
-      float getRms(const unsigned int lowBin, const unsigned int highBin) const;
-
-      /**
-       * [getRms description]
-       * @return [description]
-       */
-      float getRms() const;
-
-      /**
-       * [getSkewness description]
-       * @param  lowBin  [description]
-       * @param  highBin [description]
-       * @return         [description]
-       */
-      float getSkewness(const unsigned int lowBin, const unsigned int highBin) const;
-
-      /**
-       * [getSkewness description]
-       * @return [description]
-       */
-      float getSkewness() const;
-
-
-      /**
        * [setBinContent description]
        * @param bin   [description]
        * @param value [description]
@@ -245,133 +232,97 @@ namespace dqm4hep {
       void clear();
 
       /**
-       * [setLineWidth description]
-       * @param width [description]
-       */
-      void setLineWidth(int width);
-
-      /**
-       * [setLineColor description]
-       * @param color [description]
-       */
-      void setLineColor(Color color);
-
-      /**
-       * [setLineStyle description]
-       * @param style [description]
-       */
-      void setLineStyle(LineStyle style);
-
-      /**
        * [setLineAttributes description]
-       * @param width [description]
-       * @param color [description]
-       * @param style [description]
+       * @param attributes [description]
        */
-      void setLineAttributes(int width, Color color, LineStyle style);
+      void setLineAttributes(const LineAttributes &attributes);
 
       /**
        * [getLineAttributes description]
-       * @param width [description]
-       * @param color [description]
-       * @param style [description]
+       * @return [description]
        */
-      void getLineAttributes(int &width, Color &color, LineStyle &style) const;
-
-      /**
-       * [setMarkerSize description]
-       * @param size [description]
-       */
-      void setMarkerSize(int size);
-
-      /**
-       * [setMarkerColor description]
-       * @param color [description]
-       */
-      void setMarkerColor(Color color);
-
-      /**
-       * [setMarkerColor description]
-       * @param style [description]
-       */
-      void setMarkerColor(MarkerStyle style);
+      const LineAttributes &getLineAttributes() const;
 
       /**
        * [setMarkerAttributes description]
-       * @param size  [description]
-       * @param color [description]
-       * @param style [description]
+       * @param attributes [description]
        */
-      void setMarkerAttributes(int size, Color color, MarkerStyle style);
+      void setMarkerAttributes(const MarkerAttributes &attributes);
 
       /**
        * [getMarkerAttributes description]
-       * @param size  [description]
-       * @param color [description]
-       * @param style [description]
        */
-      void getMarkerAttributes(int &size, Color &color, MarkerStyle &style) const;
-
-      /**
-       * [setFillColor description]
-       * @param color [description]
-       */
-      void setFillColor(Color color);
-
-      /**
-       * [setFillStyle description]
-       * @param style [description]
-       */
-      void setFillStyle(FillStyle style);
+      const MarkerAttributes &getMarkerAttributes() const;
 
       /**
        * [setFillAttributes description]
-       * @param color [description]
-       * @param style [description]
+       * @param attributes [description]
        */
-      void setFillAttributes(Color color, FillStyle style);
+      void setFillAttributes(const FillAttributes &attributes);
 
       /**
        * [getFillAttributes description]
-       * @param color [description]
-       * @param style [description]
        */
-      void getFillAttributes(Color &color, FillStyle &style);
+      const FillAttributes &getFillAttributes() const;
 
       /**
-       * [getXAxis description]
-       * @return [description]
+       * [setXAxisAttributes description]
+       * @param axis [description]
        */
-      const Axis &getXAxis() const;
+      void setXAxisAttributes(const AxisAttributes &attributes);
 
       /**
-       * [getXAxis description]
+       * [getXAxisAttributes description]
        * @return [description]
        */
-      Axis &getXAxis();
+      const AxisAttributes &getXAxisAttributes() const;
 
       /**
-       * [getYAxis description]
-       * @return [description]
+       * [setYAxis description]
+       * @param axis [description]
        */
-      const Axis &getYAxis() const;
+      void setYAxisAttributes(const AxisAttributes &attributes);
 
       /**
-       * [getYAxis description]
+       * [getYAxisAttributes description]
        * @return [description]
        */
-      Axis &getYAxis();
+      const AxisAttributes &getYAxisAttributes() const;
+
+      void fromJson(const Json::Value &value);
+      void toJson(Json::Value &value, bool full = true, bool resetCache = true);
+      bool isUpToDate() const;
+      MonitorObjectType getType() const;
 
     private:
-      const unsigned int          m_nBins;
-      const float                 m_min;
-      const float                 m_max;
-      const float                 m_binWidth;
-      float                      *m_pHistogramBins;
+      /**
+       * Constructor
+       */
+      Histogram1D();
+
+    private:
+      unsigned int                m_nBins;
+      float                       m_min;
+      float                       m_max;
+      float                       m_binWidth;
 
       std::string                 m_title;
-      Axis                        m_xAxis;
-      Axis                        m_yAxis;
+      float                      *m_pHistogramBins;
+      float                       m_cumulativeSum;
+      float                       m_cumulativeSumX;
+      float                       m_cumulativeSumXX;
+      int                         m_maximumBin;
+      float                       m_maximumValue;
+
+      // axis, marker, line and fill attributes
+      AxisAttributes              m_xAxisAttributes;
+      AxisAttributes              m_yAxisAttributes;
+      LineAttributes              m_lineAttributes;
+      MarkerAttributes            m_markerAttributes;
+      FillAttributes              m_fillAttributes;
+
+      // internal stuff
+      std::bitset<N_PROPERTIES>   m_updateCache;
     };
 
   }
