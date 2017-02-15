@@ -44,115 +44,51 @@ namespace dqm4hep {
   namespace core {
 
     /**
-     * Color enum.
-     * Same color enum as ROOT
+     * MonitorObjectType enum
      */
-    enum Color
+    enum MonitorObjectType
     {
-      White   = 0,
-      Black   = 1,
-      Gray    = 920,
-      Red     = 632,
-      Green   = 416,
-      Blue    = 600,
-      Yellow  = 400,
-      Magenta = 616,
-      Cyan    = 432,
-      Orange  = 800,
-      Spring  = 820,
-      Teal    = 840,
-      Azure   = 860,
-      Violet  = 880,
-      Pink    = 900
+      UNKNOWN_MONITOR_OBJECT = 0,
+      HISTOGRAM_1D,
+      HISTOGRAM_2D,
+      GRAPH_1D,
+      PIE_CHART,
+      SUMMARY,
+      INTEGER_OBJECT,
+      UNSIGNED_INTEGER_OBJECT,
+      FLOAT_OBJECT,
+      DOUBLE_OBJECT,
+      STRING_OBJECT,
+      LONG_INTEGER_OBJECT,
+      SHORT_INTEGER_OBJECT
     };
 
-    /**
-     * MarkerStyle enum
-     * Same marker style enum as ROOT
-     */
-    enum MarkerStyle
-    {
-      Point = 7,
-      FullCircle = 20,
-      FullSquare = 21,
-      FullTriangle = 22,
-      FullDiamond = 33,
-      FullCross = 34,
-      FullStar = 29,
-      Circle = 24,
-      Square = 25,
-      Triangle = 26,
-      Diamond = 27,
-      Cross = 28,
-      Star = 30
-    };
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     /**
-     * LineStyle enum
-     */
-    enum LineStyle
-    {
-      SolidLine,                  ///< solid line
-      DashLine,                   ///< dash line
-      DotLine,                    ///< dot line
-      DashDotLine,                ///< alternate dashes and dots
-      DashDotDotLine              ///< alternate dashes and double dots
-    };
-
-    /**
-     * FillStyle enum
-     */
-    enum FillStyle
-    {
-      Transparent = 0,
-      Solid
-    };
-
-    /**
-     * Axis struct
-     */
-    struct Axis
-    {
-      Axis();
-
-      void clear()
-      {
-        m_titleSize = 0.04;
-        m_titleColor = Black;
-        m_labelSize = 0.04;
-        m_labelColor = Black;
-      }
-
-      std::string               m_title;
-      float                     m_titleSize;
-      Color                     m_titleColor;
-      float                     m_labelSize;
-      Color                     m_labelColor;
-    };
-
-    inline Axis::Axis()
-    {
-      this->clear();
-    }
-
-    /**
-     * @brief MonitorObject class
+     * MonitorObject class
      */
     class MonitorObject
     {
     public:
      /**
-      * @brief Ctor
+      * Constructor
       */
      MonitorObject();
 
      /**
-      * @brief Dtor
+      * Destructor
       */
      virtual ~MonitorObject();
 
      /**
+      * Get the update signal.
+      * May be use like this :
       *
+      * @code
+      * monitorObject->onUpdate().connect(myClass, &MyClass::handler);
+      * @endcode
       */
      Signal<int> &onUpdate();
 
@@ -175,12 +111,17 @@ namespace dqm4hep {
       */
      virtual bool isUpToDate() const = 0;
 
-   protected:
+     /**
+      * Get the monitor object type
+      */
+     virtual MonitorObjectType getType() const;
 
+   protected:
      /**
       * [updated description]
+      * @param property [description]
       */
-     void updated(int index);
+     void updated(int property);
 
    private:
       Signal<int>                                   m_updateSignal;

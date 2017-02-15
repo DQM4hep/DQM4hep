@@ -34,22 +34,35 @@ namespace dqm4hep {
 
     MonitorObject::MonitorObject()
     {
-      /**/
+      /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     MonitorObject::~MonitorObject()
     {
-      /**/
+      /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     Signal<int> &MonitorObject::onUpdate()
     {
       return m_updateSignal;
     }
 
-    void MonitorObject::updated(int index)
+    //-------------------------------------------------------------------------------------------------
+
+    void MonitorObject::updated(int property)
     {
-      m_updateSignal.process(index);
+      m_updateSignal.process(property);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorObjectType MonitorObject::getType() const
+    {
+      return UNKNOWN_MONITOR_OBJECT;
     }
 
   }
