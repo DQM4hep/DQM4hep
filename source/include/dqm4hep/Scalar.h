@@ -81,10 +81,10 @@ namespace dqm4hep {
       */
      std::string toString() const;
 
-   private:
      void fromJson(const Json::Value &value);
      void toJson(Json::Value &value, bool full = true);
      bool isUpToDate() const;
+     MonitorObjectType getType() const;
 
    private:
       bool                       m_updated;
@@ -138,7 +138,7 @@ namespace dqm4hep {
     {
       m_updated = true;
       m_value = value;
-      this->updated();
+      this->updated(0);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -182,6 +182,14 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
+
+    template <typename ScalarType>
+    inline MonitorObjectType Scalar<ScalarType>::getType()
+    {
+      return UNKNOWN_MONITOR_OBJECT;
+    }
+
+    //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <>
@@ -200,6 +208,15 @@ namespace dqm4hep {
       return m_value;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
+    template <> inline MonitorObjectType Scalar<int>::getType()          { return INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<unsigned int>::getType() { return UNSIGNED_INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<float>::getType()        { return FLOAT_OBJECT; }
+    template <> inline MonitorObjectType Scalar<double>::getType()       { return DOUBLE_OBJECT; }
+    template <> inline MonitorObjectType Scalar<long>::getType()         { return LONG_INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<short>::getType()        { return SHORT_INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<std::string>::getType()  { return STRING_OBJECT; }
   }
 
 }
