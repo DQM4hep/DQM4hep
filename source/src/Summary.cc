@@ -79,7 +79,7 @@ namespace dqm4hep {
       m_header = header;
 
       if(updated)
-        this->updated();
+        this->updated(HEADER);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ namespace dqm4hep {
     {
       m_updateCache.set(ENTRIES, true);
       m_entries[entry] = text;
-      this->updated();
+      this->updated(ENTRIES);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -108,7 +108,7 @@ namespace dqm4hep {
       {
         m_entries.erase(findIter);
         m_updateCache.set(ENTRIES, true);
-        this->updated();
+        this->updated(ENTRIES);
       }
     }
 
@@ -116,25 +116,19 @@ namespace dqm4hep {
 
     void Summary::clear()
     {
-      bool updated(false);
-
       if(!m_header.empty())
       {
         m_updateCache.set(HEADER, true);
-        updated = true;
+        m_header.clear();
+        this->updated(HEADER);
       }
 
       if(!m_entries.empty())
       {
         m_updateCache.set(ENTRIES, true);
-        updated = true;
+        m_entries.clear();
+        this->updated(ENTRIES);
       }
-
-      m_entries.clear();
-      m_header.clear();
-
-      if(updated)
-        this->updated();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -210,6 +204,13 @@ namespace dqm4hep {
     void Summary::resetCache()
     {
       m_updateCache.reset();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorObjectType Summary::getType() const
+    {
+      return SUMMARY;
     }
 
   }
