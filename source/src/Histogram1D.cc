@@ -598,7 +598,7 @@ namespace dqm4hep {
         value["fill"] = fill;
       }
 
-      if( (full || m_updateCache.test(MARKER)) && nullptr != m_pHistogramBins)
+      if( (full || m_updateCache.test(BINS)) && nullptr != m_pHistogramBins)
       {
         Json::Value bins(Json::arrayValue);
 
