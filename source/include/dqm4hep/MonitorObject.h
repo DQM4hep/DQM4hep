@@ -50,7 +50,7 @@ namespace dqm4hep {
     {
       UNKNOWN_MONITOR_OBJECT = 0,
       HISTOGRAM_1D,
-      HISTOGRAM_2D,
+      SCATTER_PLOT,
       GRAPH_1D,
       PIE_CHART,
       SUMMARY,
