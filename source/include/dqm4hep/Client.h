@@ -145,7 +145,7 @@ namespace dqm4hep {
       void unsubscribe(Controller *pController, void (Controller::*function)(const T &value));
 
       /**
-       * 
+       *
        */
       template <typename Controller, typename T>
       void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const T &value));
@@ -303,7 +303,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Command>
-    void Client::sendCommand(const std::string &name, const Command &command, bool blocking) const
+    inline void Client::sendCommand(const std::string &name, const Command &command, bool blocking) const
     {
       if(blocking)
       {
@@ -318,7 +318,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    void Client::sendCommand(const std::string &name, const std::string &command, bool blocking) const
+    inline void Client::sendCommand(const std::string &name, const std::string &command, bool blocking) const
     {
       if(blocking)
       {
@@ -333,7 +333,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    void Client::sendCommand(const std::string &name, const Buffer &command, bool blocking) const
+    inline void Client::sendCommand(const std::string &name, const Buffer &command, bool blocking) const
     {
       if(blocking)
       {
@@ -348,7 +348,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    void Client::sendCommand(const std::string &name, const Json::Value &command, bool blocking) const
+    inline void Client::sendCommand(const std::string &name, const Json::Value &command, bool blocking) const
     {
       Json::FastWriter writer;
       std::string commandStr(writer.write(command));
