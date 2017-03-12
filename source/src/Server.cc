@@ -55,7 +55,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Server::getName() const
+    const std::string &Server::name() const
     {
       return m_name;
     }
@@ -176,7 +176,7 @@ namespace dqm4hep {
 
     void Server::startService(const std::string &name)
     {
-      BaseService *pService = this->getService(name);
+      BaseService *pService = this->service(name);
 
       if(nullptr != pService && !pService->isServiceConnected())
         pService->connectService();
@@ -186,7 +186,7 @@ namespace dqm4hep {
 
     void Server::stopService(const std::string &name)
     {
-      BaseService *pService = this->getService(name);
+      BaseService *pService = this->service(name);
 
       if(nullptr != pService && pService->isServiceConnected())
         pService->disconnectService();
@@ -196,7 +196,7 @@ namespace dqm4hep {
 
     void Server::startRequestHandler(const std::string &name)
     {
-      BaseRequestHandler *pRequestHandler = this->getRequestHandler(name);
+      BaseRequestHandler *pRequestHandler = this->requestHandler(name);
 
       if(nullptr != pRequestHandler && !pRequestHandler->isHandlingRequest())
         pRequestHandler->startHandlingRequest();
@@ -206,7 +206,7 @@ namespace dqm4hep {
 
     void Server::stopRequestHandler(const std::string &name)
     {
-      BaseRequestHandler *pRequestHandler = this->getRequestHandler(name);
+      BaseRequestHandler *pRequestHandler = this->requestHandler(name);
 
       if(nullptr != pRequestHandler && pRequestHandler->isHandlingRequest())
         pRequestHandler->stopHandlingRequest();
@@ -216,7 +216,7 @@ namespace dqm4hep {
 
     void Server::startCommandHandler(const std::string &name)
     {
-      BaseRequestHandler *pCommandHandler = this->getCommandHandler(name);
+      BaseRequestHandler *pCommandHandler = this->commandHandler(name);
 
       if(nullptr != pCommandHandler && !pCommandHandler->isHandlingRequest())
         pCommandHandler->startHandlingRequest();
@@ -226,7 +226,7 @@ namespace dqm4hep {
 
     void Server::stopCommandHandler( const std::string &name)
     {
-      BaseRequestHandler *pCommandHandler = this->getCommandHandler(name);
+      BaseRequestHandler *pCommandHandler = this->commandHandler(name);
 
       if(nullptr != pCommandHandler && pCommandHandler->isHandlingRequest())
         pCommandHandler->stopHandlingRequest();
@@ -234,7 +234,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseService *Server::getService(const std::string &name) const
+    BaseService *Server::service(const std::string &name) const
     {
       auto findIter = m_serviceMap.find(name);
       return (findIter == m_serviceMap.end() ? nullptr : findIter->second);
@@ -242,7 +242,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseRequestHandler *Server::getRequestHandler(const std::string &name) const
+    BaseRequestHandler *Server::requestHandler(const std::string &name) const
     {
       auto findIter = m_requestHandlerMap.find(name);
       return (findIter == m_requestHandlerMap.end() ? nullptr : findIter->second);
@@ -250,7 +250,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseRequestHandler *Server::getCommandHandler(const std::string &name) const
+    BaseRequestHandler *Server::commandHandler(const std::string &name) const
     {
       auto findIter = m_commandHandlerMap.find(name);
       return (findIter == m_commandHandlerMap.end() ? nullptr : findIter->second);
@@ -258,7 +258,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    std::string Server::getDnsNode()
+    std::string Server::dnsNode()
     {
       char *pDnsNode = DimServer::getDnsNode();
 
@@ -271,14 +271,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    int Server::getDnsPort()
+    int Server::dnsPort()
     {
       return DimServer::getDnsPort();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    std::vector<std::string> Server::getRunningServers()
+    std::vector<std::string> Server::runningServers()
     {
       std::vector<std::string> runningServers;
 

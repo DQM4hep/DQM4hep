@@ -70,7 +70,7 @@ namespace dqm4hep {
       /**
        * Get the server name
        */
-      const std::string &getName() const;
+      const std::string &name() const;
 
       /**
        * Start serving services and handling requests
@@ -205,7 +205,7 @@ namespace dqm4hep {
        *
        * @param name the service name
        */
-      BaseService *getService(const std::string &name) const;
+      BaseService *service(const std::string &name) const;
 
       /**
       * Get a created request handler in this server
@@ -213,7 +213,7 @@ namespace dqm4hep {
       * @param type the request handler type
       * @param name the request handler name
        */
-      BaseRequestHandler *getRequestHandler(const std::string &name) const;
+      BaseRequestHandler *requestHandler(const std::string &name) const;
 
       /**
       * Get a created command handler in this server
@@ -221,24 +221,24 @@ namespace dqm4hep {
       * @param type the command handler type
       * @param name the command handler name
        */
-      BaseRequestHandler *getCommandHandler(const std::string &name) const;
+      BaseRequestHandler *commandHandler(const std::string &name) const;
 
       /**
        * Get the dim dns node.
        *  First look at DimServer::getDnsNode() then
        *  environment variable "DIM_DNS_NODE"
        */
-      static std::string getDnsNode();
+      static std::string dnsNode();
 
       /**
        * Get the dim dns port
        */
-      static int getDnsPort();
+      static int dnsPort();
 
       /**
        * Get the list of running servers
        */
-      static std::vector<std::string> getRunningServers();
+      static std::vector<std::string> runningServers();
 
       /**
        * Whether the target server is already running on the network
