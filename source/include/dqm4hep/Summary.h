@@ -43,6 +43,8 @@ namespace dqm4hep {
     class Summary final : public MonitorObject
     {
     public:
+      typedef std::map<std::string, std::string> EntryMap;
+
       /**
       * Property enum
       */
@@ -62,7 +64,7 @@ namespace dqm4hep {
       * Constructor
       */
       Summary(const std::string &header);
-      
+
       /**
       * Destructor
       */
@@ -101,6 +103,12 @@ namespace dqm4hep {
       void removeEntry(const std::string &entry);
 
       /**
+       * [getEntries description]
+       * @return [description]
+       */
+      const EntryMap &getEntries() const;
+
+      /**
       * [clear description]
       */
       void clear();
@@ -116,7 +124,7 @@ namespace dqm4hep {
 
       std::bitset<N_PROPERTIES>               m_updateCache;
       std::string                             m_header;
-      std::map<std::string, std::string>      m_entries;
+      EntryMap                                m_entries;
     };
 
   }
