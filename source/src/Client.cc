@@ -79,6 +79,13 @@ namespace dqm4hep {
       return (m_serviceHandlerMap.end() != m_serviceHandlerMap.find(name));
     }
 
+    //-------------------------------------------------------------------------------------------------
+
+    unsigned int Client::numberOfSubscriptions(const std::string &serviceName) const
+    {
+      return m_serviceHandlerMap.count(serviceName);
+    }
+
   }
 
 }

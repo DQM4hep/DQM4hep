@@ -40,6 +40,9 @@
 // -- dim headers
 #include "dic.hxx"
 
+// -- std headers
+#include <algorithm>
+
 namespace dqm4hep {
 
   namespace net {
@@ -138,13 +141,19 @@ namespace dqm4hep {
       /**
        * Whether this client already registered a service subscription
        *
-       * @param serviceType the service type
        * @param serviceName the service name
        */
       bool hasSubscribed(const std::string &serviceName) const;
 
+      /**
+       * [numberOfSubscriptions description]
+       * @param  serviceName [description]
+       * @return             [description]
+       */
+      unsigned int numberOfSubscriptions(const std::string &serviceName) const;
+
     private:
-      typedef std::map<std::string, BaseServiceHandler *>      ServiceHandlerMap;
+      typedef std::multimap<std::string, BaseServiceHandler *>      ServiceHandlerMap;
       ServiceHandlerMap            m_serviceHandlerMap;        ///< The service map
     };
 
@@ -346,19 +355,27 @@ namespace dqm4hep {
     template <typename T, typename S>
     inline void Client::subscribe(const std::string &name, S *pController, void (S::*function)(const T &value))
     {
-      auto findIter = m_serviceHandlerMap.find(name);
+      auto findIter = std::find_if(
+        m_serviceHandlerMap.begin(), m_serviceHandlerMap.end(),
+        [&name, &pController, &function](const ServiceHandlerMap::value_type &value) {
+
+        if(value.first != name)
+          return false;
+
+        ServiceHandlerT<T,S> *pHandler = dynamic_cast<ServiceHandlerT<T,S> *>(value.second);
+
+        if(pHandler && pHandler->controller() == pController && pHandler->function() == function)
+          return true;
+
+        return false;
+      });
 
       if(findIter != m_serviceHandlerMap.end())
         return;
 
-      auto inserted = m_serviceHandlerMap.insert(ServiceHandlerMap::value_type(name, nullptr));
-
-      if(inserted.second)
-      {
-        inserted.first->second = new ServiceHandlerT<T,S>(this, name, pController, function);
-      }
-      else
-        throw;
+      m_serviceHandlerMap.insert(
+        ServiceHandlerMap::value_type(name, new ServiceHandlerT<T,S>(this, name, pController, function))
+      );
     }
 
   }
