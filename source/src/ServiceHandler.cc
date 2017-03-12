@@ -49,14 +49,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &BaseServiceHandler::getName() const
+    const std::string &BaseServiceHandler::name() const
     {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Client *BaseServiceHandler::getClient() const
+    Client *BaseServiceHandler::client() const
     {
       return m_pClient;
     }

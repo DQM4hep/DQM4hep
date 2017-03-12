@@ -56,12 +56,12 @@ namespace dqm4hep {
       /**
        * Get the service name
        */
-      const std::string &getName() const;
+      const std::string &name() const;
 
       /**
        * Get the client interface
        */
-      Client *getClient() const;
+      Client *client() const;
 
     protected:
       /**
@@ -255,7 +255,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline ServiceHandler<T>::ServiceInfo::ServiceInfo(ServiceHandler<T> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), const_cast<char*>(std::string("{}").c_str())),
+        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), const_cast<char*>(std::string("{}").c_str())),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -265,7 +265,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<int>::ServiceInfo::ServiceInfo(ServiceHandler<int> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), int(0)),
+        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), int(0)),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -275,7 +275,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<double>::ServiceInfo::ServiceInfo(ServiceHandler<double> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), double(0.)),
+        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), double(0.)),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -285,7 +285,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<float>::ServiceInfo::ServiceInfo(ServiceHandler<float> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), float(0.)),
+        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), float(0.)),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -295,7 +295,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<std::string>::ServiceInfo::ServiceInfo(ServiceHandler<std::string> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), (char*)""),
+        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), (char*)""),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -305,7 +305,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<Json::Value>::ServiceInfo::ServiceInfo(ServiceHandler<Json::Value> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), (char*)""),
+        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), (char*)""),
         m_pHandler(pHandler)
     {
       /* nop */
