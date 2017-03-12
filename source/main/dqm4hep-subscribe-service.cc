@@ -56,7 +56,7 @@ inline void ServicePrinter::print(const Json::Value &value)
 
 int main(int argc, char **argv)
 {
-  if(argc != 4)
+  if(argc != 3)
   {
     std::cout << "Usage : dqm4hep-subscribe-service serviceType type name" << std::endl;
     return 1;

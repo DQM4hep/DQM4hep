@@ -34,7 +34,7 @@ using namespace dqm4hep::net;
 
 int main(int argc, char **argv)
 {
-  if(argc < 5)
+  if(argc < 4)
   {
     std::cout << "Usage : dqm4hep-send-command commandType name command" << std::endl;
     return 1;
