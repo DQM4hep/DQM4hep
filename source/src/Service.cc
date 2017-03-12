@@ -48,14 +48,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &BaseService::getName() const
+    const std::string &BaseService::name() const
     {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Server *BaseService::getServer() const
+    Server *BaseService::server() const
     {
       return m_pServer;
     }

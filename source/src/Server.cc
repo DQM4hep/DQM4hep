@@ -344,7 +344,7 @@ namespace dqm4hep {
 
       for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
       {
-        const std::string &name(iter->second->getName());
+        const std::string &name(iter->second->name());
         serviceList[index] = name;
         ++index;
       }

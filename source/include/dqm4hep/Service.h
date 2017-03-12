@@ -63,12 +63,12 @@ namespace dqm4hep {
       /**
        * Get the service name
        */
-      const std::string &getName() const;
+      const std::string &name() const;
 
       /**
        * Get the server in which the service is declared
        */
-      Server *getServer() const;
+      Server *server() const;
 
     protected:
       /**
@@ -230,7 +230,7 @@ namespace dqm4hep {
       if(this->isServiceConnected())
         return;
 
-      std::string serviceName(this->getName());
+      std::string serviceName(this->name());
       m_pService = new DimService(const_cast<char*>(serviceName.c_str()), m_value);
     }
 
@@ -242,7 +242,7 @@ namespace dqm4hep {
       if(this->isServiceConnected())
         return;
 
-      std::string serviceName(this->getName());
+      std::string serviceName(this->name());
       m_pService = new DimService(const_cast<char*>(serviceName.c_str()), "I:C", (void*)&(m_value.m_pBuffer), sizeof(uint32_t));
     }
 
@@ -254,7 +254,7 @@ namespace dqm4hep {
       if(this->isServiceConnected())
         return;
 
-      std::string serviceName(this->getName());
+      std::string serviceName(this->name());
       m_pService = new DimService(const_cast<char*>(serviceName.c_str()), (char*)"");
     }
 
