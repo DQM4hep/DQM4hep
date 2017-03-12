@@ -356,7 +356,7 @@ namespace dqm4hep {
 
       for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
       {
-        const std::string &name(iter->second->getName());
+        const std::string &name(iter->second->name());
         requestHandlerList[index] = name;
         ++index;
       }
@@ -368,7 +368,7 @@ namespace dqm4hep {
 
       for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
       {
-        const std::string &name(iter->second->getName());
+        const std::string &name(iter->second->name());
         commandHandlerList[index] = name;
 
         ++index;

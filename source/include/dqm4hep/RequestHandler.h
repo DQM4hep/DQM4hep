@@ -61,12 +61,12 @@ namespace dqm4hep {
       /**
        * Get the request name
        */
-      const std::string &getName() const;
+      const std::string &name() const;
 
       /**
        * Get the server in which the request handler is declared
        */
-      Server *getServer() const;
+      Server *server() const;
 
     protected:
       /**
@@ -339,6 +339,18 @@ namespace dqm4hep {
        */
       void processRequest(const Json::Value &request, T &response);
 
+      /**
+       * [controller description]
+       * @return [description]
+       */
+      const S *controller() const;
+
+      /**
+       * [function description]
+       * @return [description]
+       */
+      const RequestFunction function() const;
+
     private:
       /**
        * Constructor with request type and name
@@ -362,7 +374,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline CommandHandler<T>::Command::Command(CommandHandler<T> *pHandler) :
-        DimCommand(pHandler->getName().c_str(), "C"),
+        DimCommand(pHandler->name().c_str(), "C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -372,7 +384,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<int>::Command::Command(CommandHandler<int> *pHandler) :
-        DimCommand(pHandler->getName().c_str(), "I"),
+        DimCommand(pHandler->name().c_str(), "I"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -382,7 +394,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<float>::Command::Command(CommandHandler<float> *pHandler) :
-        DimCommand(pHandler->getName().c_str(), "F"),
+        DimCommand(pHandler->name().c_str(), "F"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -392,7 +404,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<double>::Command::Command(CommandHandler<double> *pHandler) :
-        DimCommand(pHandler->getName().c_str(), "D"),
+        DimCommand(pHandler->name().c_str(), "D"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -402,7 +414,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<Buffer>::Command::Command(CommandHandler<Buffer> *pHandler) :
-        DimCommand(pHandler->getName().c_str(), "I:C"),
+        DimCommand(pHandler->name().c_str(), "I:C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -421,7 +433,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline RequestHandler<T>::Rpc::Rpc(RequestHandler<T> *pHandler) :
-        DimRpc(pHandler->getName().c_str(), "C", "C"),
+        DimRpc(pHandler->name().c_str(), "C", "C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -431,7 +443,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<int>::Rpc::Rpc(RequestHandler<int> *pHandler) :
-        DimRpc(pHandler->getName().c_str(), "C", "I"),
+        DimRpc(pHandler->name().c_str(), "C", "I"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -441,7 +453,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<float>::Rpc::Rpc(RequestHandler<float> *pHandler) :
-        DimRpc(pHandler->getName().c_str(), "C", "F"),
+        DimRpc(pHandler->name().c_str(), "C", "F"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -451,7 +463,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<double>::Rpc::Rpc(RequestHandler<double> *pHandler) :
-        DimRpc(pHandler->getName().c_str(), "C", "D"),
+        DimRpc(pHandler->name().c_str(), "C", "D"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -461,7 +473,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<Buffer>::Rpc::Rpc(RequestHandler<Buffer> *pHandler) :
-        DimRpc(pHandler->getName().c_str(), "C", "I:C"),
+        DimRpc(pHandler->name().c_str(), "C", "I:C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -786,6 +798,22 @@ namespace dqm4hep {
     inline void RequestHandlerT<T,S>::processRequest(const Json::Value &request, T &response)
     {
       (m_pController->*m_function)(request, response);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline const S *RequestHandlerT<T,S>::controller() const
+    {
+      return m_pController;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline const typename RequestHandlerT<T,S>::RequestFunction RequestHandlerT<T,S>::function() const
+    {
+      return m_function;
     }
 
     //-------------------------------------------------------------------------------------------------
