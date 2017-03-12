@@ -139,6 +139,18 @@ namespace dqm4hep {
       void subscribe(const std::string &serviceName, S *pController, void (S::*function)(const T &value));
 
       /**
+       *
+       */
+      template <typename Controller, typename T>
+      void unsubscribe(Controller *pController, void (Controller::*function)(const T &value));
+
+      /**
+       * 
+       */
+      template <typename Controller, typename T>
+      void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const T &value));
+
+      /**
        * Whether this client already registered a service subscription
        *
        * @param serviceName the service name
@@ -154,6 +166,7 @@ namespace dqm4hep {
 
     private:
       typedef std::multimap<std::string, BaseServiceHandler *>      ServiceHandlerMap;
+      typedef std::vector<BaseServiceHandler *>                     ServiceHandlerList;
       ServiceHandlerMap            m_serviceHandlerMap;        ///< The service map
     };
 
@@ -376,6 +389,45 @@ namespace dqm4hep {
       m_serviceHandlerMap.insert(
         ServiceHandlerMap::value_type(name, new ServiceHandlerT<T,S>(this, name, pController, function))
       );
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Controller, typename T>
+    inline void Client::unsubscribe(Controller *pController, void (Controller::*function)(const T &value))
+    {
+      for(auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        ServiceHandlerT<T,Controller> *pHandler = dynamic_cast<ServiceHandlerT<T,Controller> *>(iter->second);
+
+        if(pHandler && pHandler->controller() == pController && pHandler->function() == function)
+        {
+          delete iter->second;
+          m_serviceHandlerMap.erase(iter);
+          --iter;
+        }
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Controller, typename T>
+    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const T &value))
+    {
+      for(auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end() ; endIter != iter ; ++iter)
+      {
+        if(serviceName != iter->first)
+          continue;
+
+        ServiceHandlerT<T,Controller> *pHandler = dynamic_cast<ServiceHandlerT<T,Controller> *>(iter->second);
+
+        if(pHandler && pHandler->controller() == pController && pHandler->function() == function)
+        {
+          delete iter->second;
+          m_serviceHandlerMap.erase(iter);
+          --iter;
+        }
+      }
     }
 
   }
