@@ -22,7 +22,7 @@ CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 IF( COMPILER_SUPPORTS_CXX11 )
   SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 ELSE()
-	MESSAGE( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
+	MESSAGE( SEND_ERROR "DQMNet requires C++11 support. Please upgrade your compiler !" )
 ENDIF()
 
 ###############################
