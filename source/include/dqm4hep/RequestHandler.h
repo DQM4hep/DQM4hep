@@ -59,42 +59,23 @@ namespace dqm4hep {
       friend class Server;
     public:
       /**
-       * Get the request type
-       */
-      const std::string &getType() const;
-
-      /**
        * Get the request name
        */
       const std::string &getName() const;
-
-      /**
-       * Get the request full name, as it is allocated on the network
-       */
-      const std::string &getFullName() const;
 
       /**
        * Get the server in which the request handler is declared
        */
       Server *getServer() const;
 
-      /**
-       * Get the full request handle name from the request handler type and name
-       *
-       * @param type the request handler type
-       * @param name the request handler name
-       */
-      static std::string getFullRequestHandlerName(const std::string &type, const std::string &name);
-
     protected:
       /**
        * Constructor
        *
        * @param pServer the server managing the request handler
-       * @param type the request handler type
        * @param name the request handler name
        */
-      BaseRequestHandler(Server *pServer, const std::string &type, const std::string &name);
+      BaseRequestHandler(Server *pServer, const std::string &name);
 
       /**
        * Destructor
@@ -117,9 +98,7 @@ namespace dqm4hep {
       virtual bool isHandlingRequest() const = 0;
 
     private:
-      std::string           m_type;             ///< The request handler type
       std::string           m_name;             ///< The request handler name
-      std::string           m_fullName;         ///< The request handler full name
       Server               *m_pServer;          ///< The server in which the request handler is declared
     };
 
@@ -142,10 +121,9 @@ namespace dqm4hep {
        * Constructor
        *
        * @param pServer the server managing the command handler
-       * @param type the command handler type
        * @param name the command handler name
        */
-      CommandHandler(Server *pServer, const std::string &type, const std::string &name);
+      CommandHandler(Server *pServer, const std::string &name);
 
       /**
        * Destructor
@@ -243,7 +221,7 @@ namespace dqm4hep {
        * @param pController the class instance that will handle the command
        * @param function the class method that will treat the command
        */
-      CommandHandlerT(Server *pServer, const std::string &type, const std::string &name,
+      CommandHandlerT(Server *pServer, const std::string &name,
           S *controller, CommandFunction callback);
 
     private:
@@ -270,10 +248,9 @@ namespace dqm4hep {
        * Constructor
        *
        * @param pServer the server managing the request handler
-       * @param type the request handler type
        * @param name the request handler name
        */
-      RequestHandler(Server *pServer, const std::string &type, const std::string &name);
+      RequestHandler(Server *pServer, const std::string &name);
 
       /**
        * Destructor
@@ -367,12 +344,11 @@ namespace dqm4hep {
        * Constructor with request type and name
        *
        * @param pServer the server owning the request handler
-       * @param type the request handler type
        * @param name the request handler name
        * @param pController the class instance that will handle the request
        * @param function the class method that will treat the request and provide a response
        */
-      RequestHandlerT(Server *pServer, const std::string &type, const std::string &name,
+      RequestHandlerT(Server *pServer, const std::string &name,
           S *controller, RequestFunction callback);
 
     private:
@@ -386,7 +362,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline CommandHandler<T>::Command::Command(CommandHandler<T> *pHandler) :
-        DimCommand(pHandler->getFullName().c_str(), "C"),
+        DimCommand(pHandler->getName().c_str(), "C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -396,7 +372,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<int>::Command::Command(CommandHandler<int> *pHandler) :
-        DimCommand(pHandler->getFullName().c_str(), "I"),
+        DimCommand(pHandler->getName().c_str(), "I"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -406,7 +382,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<float>::Command::Command(CommandHandler<float> *pHandler) :
-        DimCommand(pHandler->getFullName().c_str(), "F"),
+        DimCommand(pHandler->getName().c_str(), "F"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -416,7 +392,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<double>::Command::Command(CommandHandler<double> *pHandler) :
-        DimCommand(pHandler->getFullName().c_str(), "D"),
+        DimCommand(pHandler->getName().c_str(), "D"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -426,7 +402,7 @@ namespace dqm4hep {
 
     template <>
     inline CommandHandler<Buffer>::Command::Command(CommandHandler<Buffer> *pHandler) :
-        DimCommand(pHandler->getFullName().c_str(), "I:C"),
+        DimCommand(pHandler->getName().c_str(), "I:C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -445,7 +421,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline RequestHandler<T>::Rpc::Rpc(RequestHandler<T> *pHandler) :
-        DimRpc(pHandler->getFullName().c_str(), "C", "C"),
+        DimRpc(pHandler->getName().c_str(), "C", "C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -455,7 +431,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<int>::Rpc::Rpc(RequestHandler<int> *pHandler) :
-        DimRpc(pHandler->getFullName().c_str(), "C", "I"),
+        DimRpc(pHandler->getName().c_str(), "C", "I"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -465,7 +441,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<float>::Rpc::Rpc(RequestHandler<float> *pHandler) :
-        DimRpc(pHandler->getFullName().c_str(), "C", "F"),
+        DimRpc(pHandler->getName().c_str(), "C", "F"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -475,7 +451,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<double>::Rpc::Rpc(RequestHandler<double> *pHandler) :
-        DimRpc(pHandler->getFullName().c_str(), "C", "D"),
+        DimRpc(pHandler->getName().c_str(), "C", "D"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -485,7 +461,7 @@ namespace dqm4hep {
 
     template <>
     inline RequestHandler<Buffer>::Rpc::Rpc(RequestHandler<Buffer> *pHandler) :
-        DimRpc(pHandler->getFullName().c_str(), "C", "I:C"),
+        DimRpc(pHandler->getName().c_str(), "C", "I:C"),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -503,8 +479,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline CommandHandler<T>::CommandHandler(Server *pServer, const std::string &type, const std::string &name) :
-      BaseRequestHandler(pServer, type, name),
+    inline CommandHandler<T>::CommandHandler(Server *pServer, const std::string &name) :
+      BaseRequestHandler(pServer, name),
       m_pCommand(nullptr)
     {
       /* nop */
@@ -629,8 +605,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline RequestHandler<T>::RequestHandler(Server *pServer, const std::string &type, const std::string &name) :
-      BaseRequestHandler(pServer, type, name),
+    inline RequestHandler<T>::RequestHandler(Server *pServer, const std::string &name) :
+      BaseRequestHandler(pServer, name),
       m_pRpc(nullptr)
     {
       /* nop */
@@ -796,8 +772,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T, typename S>
-    inline RequestHandlerT<T,S>::RequestHandlerT(Server *pServer, const std::string &type, const std::string &name, S *pController, RequestFunction function) :
-        RequestHandler<T>(pServer, type, name),
+    inline RequestHandlerT<T,S>::RequestHandlerT(Server *pServer, const std::string &name, S *pController, RequestFunction function) :
+        RequestHandler<T>(pServer, name),
         m_pController(pController),
         m_function(function)
     {
@@ -816,8 +792,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T, typename S>
-    inline CommandHandlerT<T,S>::CommandHandlerT(Server *pServer, const std::string &type, const std::string &name, S *pController, CommandFunction function) :
-        CommandHandler<T>(pServer, type, name),
+    inline CommandHandlerT<T,S>::CommandHandlerT(Server *pServer, const std::string &name, S *pController, CommandFunction function) :
+        CommandHandler<T>(pServer, name),
         m_pController(pController),
         m_function(function)
     {

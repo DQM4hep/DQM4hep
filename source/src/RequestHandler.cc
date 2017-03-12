@@ -32,10 +32,8 @@ namespace dqm4hep {
 
   namespace net {
 
-    BaseRequestHandler::BaseRequestHandler(Server *pServer, const std::string &type, const std::string &name) :
-        m_type(type),
+    BaseRequestHandler::BaseRequestHandler(Server *pServer, const std::string &name) :
         m_name(name),
-        m_fullName(getFullRequestHandlerName(m_type, m_name)),
         m_pServer(pServer)
     {
       /* nop */
@@ -50,23 +48,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &BaseRequestHandler::getType() const
-    {
-      return m_type;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     const std::string &BaseRequestHandler::getName() const
     {
       return m_name;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &BaseRequestHandler::getFullName() const
-    {
-      return m_fullName;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -76,14 +60,6 @@ namespace dqm4hep {
       return m_pServer;
     }
 
-    //-------------------------------------------------------------------------------------------------
-
-    std::string BaseRequestHandler::getFullRequestHandlerName(const std::string &type, const std::string &name)
-    {
-      return ("/dqm4hep/" + type + "/" + name);
-    }
-
-    //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
   }

@@ -61,27 +61,9 @@ namespace dqm4hep {
       friend class Server;
     public:
       /**
-       * Get the service type
-       */
-      const std::string &getType() const;
-
-      /**
        * Get the service name
        */
       const std::string &getName() const;
-
-      /**
-       * Get the service full name, as it is allocated on the network
-       */
-      const std::string &getFullName() const;
-
-      /**
-       * Get the full service name from the service type and name
-       *
-       * @param type the service type
-       * @param name the service name
-       */
-      static std::string getFullServiceName(const std::string &type, const std::string &name);
 
       /**
        * Get the server in which the service is declared
@@ -90,13 +72,12 @@ namespace dqm4hep {
 
     protected:
       /**
-       * Constructor with service type and name
+       * Constructor with service name
        *
        * @param pServer the server that owns the service instance
-       * @param type the service type
        * @param name the service name
        */
-      BaseService(Server *pServer, const std::string &type, const std::string &name);
+      BaseService(Server *pServer, const std::string &name);
 
       /**
        * Destructor
@@ -119,9 +100,7 @@ namespace dqm4hep {
       virtual bool isServiceConnected() const = 0;
 
     private:
-      std::string           m_type;             ///< The service type
       std::string           m_name;             ///< The service name
-      std::string           m_fullName;         ///< The service full name
       Server               *m_pServer;          ///< The server in which the service is declared
     };
 
@@ -157,10 +136,9 @@ namespace dqm4hep {
        * Constructor with service type and name
        *
        * @param pServer the server that owns the service instance
-       * @param type the service type
        * @param name the service name
        */
-      Service(Server *pServer, const std::string &type, const std::string &name);
+      Service(Server *pServer, const std::string &name);
 
       /**
        * Destructor
@@ -187,8 +165,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Service<T>::Service(Server *pServer, const std::string &type, const std::string &name) :
-      BaseService(pServer, type, name),
+    inline Service<T>::Service(Server *pServer, const std::string &name) :
+      BaseService(pServer, name),
       m_pService(0)
     {
       /* nop */
@@ -252,7 +230,7 @@ namespace dqm4hep {
       if(this->isServiceConnected())
         return;
 
-      std::string serviceName(this->getFullName());
+      std::string serviceName(this->getName());
       m_pService = new DimService(const_cast<char*>(serviceName.c_str()), m_value);
     }
 
@@ -264,7 +242,7 @@ namespace dqm4hep {
       if(this->isServiceConnected())
         return;
 
-      std::string serviceName(this->getFullName());
+      std::string serviceName(this->getName());
       m_pService = new DimService(const_cast<char*>(serviceName.c_str()), "I:C", (void*)&(m_value.m_pBuffer), sizeof(uint32_t));
     }
 
@@ -276,7 +254,7 @@ namespace dqm4hep {
       if(this->isServiceConnected())
         return;
 
-      std::string serviceName(this->getFullName());
+      std::string serviceName(this->getName());
       m_pService = new DimService(const_cast<char*>(serviceName.c_str()), (char*)"");
     }
 

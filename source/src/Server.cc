@@ -40,7 +40,7 @@ namespace dqm4hep {
     Server::Server(const std::string &name) :
         m_name(name),
         m_started(false),
-        m_serverInfoHandler(this, m_name, "info", this, &Server::handleServerInfoRequest)
+        m_serverInfoHandler(this, "/" + m_name + "/info", this, &Server::handleServerInfoRequest)
     {
       /* nop */
     }
@@ -88,8 +88,7 @@ namespace dqm4hep {
       if(!m_serverInfoHandler.isHandlingRequest())
         m_serverInfoHandler.startHandlingRequest();
 
-      std::string dimServerName(Server::getFullServerName(m_name));
-      DimServer::start(const_cast<char*>(dimServerName.c_str()));
+      DimServer::start(const_cast<char*>(m_name.c_str()));
       m_started = true;
     }
 
@@ -154,30 +153,30 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isServiceRegistered(const std::string &type, const std::string &name) const
+    bool Server::isServiceRegistered(const std::string &name) const
     {
-      return (m_serviceMap.find(BaseService::getFullServiceName(type, name)) != m_serviceMap.end());
+      return (m_serviceMap.find(name) != m_serviceMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isRequestHandlerRegistered(const std::string &type, const std::string &name) const
+    bool Server::isRequestHandlerRegistered(const std::string &name) const
     {
-      return (m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name)) != m_requestHandlerMap.end());
+      return (m_requestHandlerMap.find(name) != m_requestHandlerMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isCommandHandlerRegistered(const std::string &type, const std::string &name) const
+    bool Server::isCommandHandlerRegistered(const std::string &name) const
     {
-      return (m_commandHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name)) != m_commandHandlerMap.end());
+      return (m_commandHandlerMap.find(name) != m_commandHandlerMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::startService(const std::string &type, const std::string &name)
+    void Server::startService(const std::string &name)
     {
-      BaseService *pService = this->getService(type, name);
+      BaseService *pService = this->getService(name);
 
       if(nullptr != pService && !pService->isServiceConnected())
         pService->connectService();
@@ -185,9 +184,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stopService(const std::string &type, const std::string &name)
+    void Server::stopService(const std::string &name)
     {
-      BaseService *pService = this->getService(type, name);
+      BaseService *pService = this->getService(name);
 
       if(nullptr != pService && pService->isServiceConnected())
         pService->disconnectService();
@@ -195,9 +194,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::startRequestHandler(const std::string &type, const std::string &name)
+    void Server::startRequestHandler(const std::string &name)
     {
-      BaseRequestHandler *pRequestHandler = this->getRequestHandler(type, name);
+      BaseRequestHandler *pRequestHandler = this->getRequestHandler(name);
 
       if(nullptr != pRequestHandler && !pRequestHandler->isHandlingRequest())
         pRequestHandler->startHandlingRequest();
@@ -205,9 +204,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stopRequestHandler(const std::string &type, const std::string &name)
+    void Server::stopRequestHandler(const std::string &name)
     {
-      BaseRequestHandler *pRequestHandler = this->getRequestHandler(type, name);
+      BaseRequestHandler *pRequestHandler = this->getRequestHandler(name);
 
       if(nullptr != pRequestHandler && pRequestHandler->isHandlingRequest())
         pRequestHandler->stopHandlingRequest();
@@ -215,9 +214,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::startCommandHandler(const std::string &type, const std::string &name)
+    void Server::startCommandHandler(const std::string &name)
     {
-      BaseRequestHandler *pCommandHandler = this->getCommandHandler(type, name);
+      BaseRequestHandler *pCommandHandler = this->getCommandHandler(name);
 
       if(nullptr != pCommandHandler && !pCommandHandler->isHandlingRequest())
         pCommandHandler->startHandlingRequest();
@@ -225,9 +224,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stopCommandHandler(const std::string &type, const std::string &name)
+    void Server::stopCommandHandler( const std::string &name)
     {
-      BaseRequestHandler *pCommandHandler = this->getCommandHandler(type, name);
+      BaseRequestHandler *pCommandHandler = this->getCommandHandler(name);
 
       if(nullptr != pCommandHandler && pCommandHandler->isHandlingRequest())
         pCommandHandler->stopHandlingRequest();
@@ -235,25 +234,25 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseService *Server::getService(const std::string &type, const std::string &name) const
+    BaseService *Server::getService(const std::string &name) const
     {
-      auto findIter = m_serviceMap.find(BaseService::getFullServiceName(type, name));
+      auto findIter = m_serviceMap.find(name);
       return (findIter == m_serviceMap.end() ? nullptr : findIter->second);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseRequestHandler *Server::getRequestHandler(const std::string &type, const std::string &name) const
+    BaseRequestHandler *Server::getRequestHandler(const std::string &name) const
     {
-      auto findIter = m_requestHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name));
+      auto findIter = m_requestHandlerMap.find(name);
       return (findIter == m_requestHandlerMap.end() ? nullptr : findIter->second);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseRequestHandler *Server::getCommandHandler(const std::string &type, const std::string &name) const
+    BaseRequestHandler *Server::getCommandHandler(const std::string &name) const
     {
-      auto findIter = m_commandHandlerMap.find(BaseRequestHandler::getFullRequestHandlerName(type, name));
+      auto findIter = m_commandHandlerMap.find(name);
       return (findIter == m_commandHandlerMap.end() ? nullptr : findIter->second);
     }
 
@@ -279,13 +278,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    std::string Server::getFullServerName(const std::string &serverName)
-    {
-      return ("dqm4hep/" + serverName);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     std::vector<std::string> Server::getRunningServers()
     {
       std::vector<std::string> runningServers;
@@ -297,9 +289,7 @@ namespace dqm4hep {
       while(browser.getNextServer(pServer, pNode))
       {
         std::string server(pServer);
-
-        if(server.substr(0, std::string("dqm4hep/").size()) == "dqm4hep/")
-          runningServers.push_back(server.substr(std::string("dqm4hep/").size()));
+        runningServers.push_back(server);
       }
 
       return runningServers;
@@ -317,13 +307,8 @@ namespace dqm4hep {
       {
         std::string server(pServer);
 
-        if(server.substr(0, std::string("dqm4hep/").size()) == "dqm4hep/")
-        {
-          std::string realServerName(server.substr(std::string("dqm4hep/").size()));
-
-          if(realServerName == serverName)
-            return true;
-        }
+        if(server == serverName)
+          return true;
       }
 
       return false;
@@ -354,74 +339,50 @@ namespace dqm4hep {
       hostInfo["machine"] = unameStruct.machine;
       response["host"] = hostInfo;
 
-      Json::Value servicesInfo;
+      Json::Value serviceList(Json::arrayValue);
       unsigned int index(0);
 
       for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
       {
-        const std::string &type(iter->second->getType());
         const std::string &name(iter->second->getName());
-        const std::string &fullName(iter->second->getFullName());
-
-        Json::Value serviceInfo;
-        serviceInfo["type"] = type;
-        serviceInfo["name"] = name;
-        serviceInfo["fullName"] = fullName;
-        servicesInfo[index] = serviceInfo;
-
+        serviceList[index] = name;
         ++index;
       }
 
-      response["services"] = servicesInfo;
+      response["services"] = serviceList;
 
-      Json::Value requestHandlersInfo;
+      Json::Value requestHandlerList;
       index = 0;
 
       for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
       {
-        const std::string &type(iter->second->getType());
         const std::string &name(iter->second->getName());
-        const std::string &fullName(iter->second->getFullName());
-
-        Json::Value requestHandlerInfo;
-        requestHandlerInfo["type"] = type;
-        requestHandlerInfo["name"] = name;
-        requestHandlerInfo["fullName"] = fullName;
-        requestHandlersInfo[index] = requestHandlerInfo;
-
+        requestHandlerList[index] = name;
         ++index;
       }
 
-      response["requestHandlers"] = requestHandlersInfo;
+      response["requestHandlers"] = requestHandlerList;
 
-      Json::Value commandHandlersInfo;
+      Json::Value commandHandlerList;
       index = 0;
 
       for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
       {
-        const std::string &type(iter->second->getType());
         const std::string &name(iter->second->getName());
-        const std::string &fullName(iter->second->getFullName());
-
-        Json::Value commandHandlerInfo;
-        commandHandlerInfo["type"] = type;
-        commandHandlerInfo["name"] = name;
-        commandHandlerInfo["fullName"] = fullName;
-        commandHandlersInfo[index] = commandHandlerInfo;
+        commandHandlerList[index] = name;
 
         ++index;
       }
 
-      response["commandHandlers"] = commandHandlersInfo;
+      response["commandHandlers"] = commandHandlerList;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::serviceAlreadyRunning(const std::string &type, const std::string &name)
+    bool Server::serviceAlreadyRunning(const std::string &name)
     {
       DimBrowser browser;
-      const std::string fullServiceName(BaseService::getFullServiceName(type, name));
-      int nServices = browser.getServices(fullServiceName.c_str());
+      int nServices = browser.getServices(name.c_str());
 
       if(nServices == 0)
         return false;
@@ -445,11 +406,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::requestHandlerAlreadyRunning(const std::string &type, const std::string &name)
+    bool Server::requestHandlerAlreadyRunning(const std::string &name)
     {
       DimBrowser browser;
-      const std::string fullServiceName(BaseRequestHandler::getFullRequestHandlerName(type, name));
-      int nServices = browser.getServices(fullServiceName.c_str());
+      int nServices = browser.getServices(name.c_str());
 
       if(nServices == 0)
         return false;
@@ -473,11 +433,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::commandHandlerAlreadyRunning(const std::string &type, const std::string &name)
+    bool Server::commandHandlerAlreadyRunning(const std::string &name)
     {
       DimBrowser browser;
-      const std::string fullServiceName(BaseRequestHandler::getFullRequestHandlerName(type, name));
-      int nServices = browser.getServices(fullServiceName.c_str());
+      int nServices = browser.getServices(name.c_str());
 
       if(nServices == 0)
         return false;

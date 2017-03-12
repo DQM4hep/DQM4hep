@@ -52,16 +52,15 @@ namespace dqm4hep {
 
     void Client::queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const
     {
-      this->sendRequest(serverName, "info", Json::Value(), serverInfo);
+      this->sendRequest("/" + serverName + "/info", Json::Value(), serverInfo);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Client::sendRequest(const std::string &type, const std::string &name, const Json::Value &request) const
+    void Client::sendRequest(const std::string &name, const Json::Value &request) const
     {
-      std::string rpcName(BaseRequestHandler::getFullRequestHandlerName(type, name));
       std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(rpcName.c_str()), const_cast<char*>(emptyJson.c_str()));
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), const_cast<char*>(emptyJson.c_str()));
 
       // Json::Value message;
       Json::Value message;
@@ -75,10 +74,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Client::hasSubscribed(const std::string &type, const std::string &name) const
+    bool Client::hasSubscribed(const std::string &name) const
     {
-      const std::string fullName(BaseService::getFullServiceName(type, name));
-      return (m_serviceHandlerMap.end() != m_serviceHandlerMap.find(fullName));
+      return (m_serviceHandlerMap.end() != m_serviceHandlerMap.find(name));
     }
 
   }

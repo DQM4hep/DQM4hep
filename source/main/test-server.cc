@@ -64,10 +64,10 @@ int main(int argc, char **argv)
 
   Server *pServer = new Server("TestServer");
 
-  IntService   *pIntService   = pServer->createService<int>("test", "int");
-  FloatService *pFloatService = pServer->createService<float>("test", "float");
-  pServer->createRequestHandler<Json::Value>("test", "print", &printer, &MyPrintClass::print);
-  pServer->createCommandHandler<std::string>("test", "printCommand", &printer, &MyPrintClass::printCommand);
+  IntService   *pIntService   = pServer->createService<int>("/test/int");
+  FloatService *pFloatService = pServer->createService<float>("/test/float");
+  pServer->createRequestHandler<Json::Value>("/test/print", &printer, &MyPrintClass::print);
+  pServer->createCommandHandler<std::string>("/test/printCommand", &printer, &MyPrintClass::printCommand);
 
   pServer->start();
 

@@ -63,22 +63,21 @@ int main(int argc, char **argv)
   }
 
   std::string serviceType(argv[1]);
-  std::string type(argv[2]);
-  std::string name(argv[3]);
+  std::string name(argv[2]);
 
   ServicePrinter printer;
   Client client;
 
   if(serviceType == "int")
-    client.subscribe<int>(type, name, &printer, &ServicePrinter::print<int>);
+    client.subscribe<int>(name, &printer, &ServicePrinter::print<int>);
   else if(serviceType == "float")
-    client.subscribe<float>(type, name, &printer, &ServicePrinter::print<float>);
+    client.subscribe<float>(name, &printer, &ServicePrinter::print<float>);
   else if(serviceType == "double")
-    client.subscribe<double>(type, name, &printer, &ServicePrinter::print<double>);
+    client.subscribe<double>(name, &printer, &ServicePrinter::print<double>);
   else if(serviceType == "string")
-    client.subscribe<std::string>(type, name, &printer, &ServicePrinter::print<std::string>);
+    client.subscribe<std::string>(name, &printer, &ServicePrinter::print<std::string>);
   else if(serviceType == "json")
-    client.subscribe<Json::Value>(type, name, &printer, &ServicePrinter::print<Json::Value>);
+    client.subscribe<Json::Value>(name, &printer, &ServicePrinter::print<Json::Value>);
 
   while(1)
     sleep(1);

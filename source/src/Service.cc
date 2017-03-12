@@ -32,12 +32,9 @@ namespace dqm4hep {
 
   namespace net {
 
-    BaseService::BaseService(Server *pServer, const std::string &type, const std::string &name) :
-        m_type(type),
+    BaseService::BaseService(Server *pServer, const std::string &name) :
         m_name(name),
-        m_fullName(getFullServiceName(m_type, m_name)),
         m_pServer(pServer)
-
     {
       /* nop */
     }
@@ -51,13 +48,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &BaseService::getType() const
-    {
-      return m_type;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     const std::string &BaseService::getName() const
     {
       return m_name;
@@ -65,23 +55,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &BaseService::getFullName() const
-    {
-      return m_fullName;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     Server *BaseService::getServer() const
     {
       return m_pServer;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    std::string BaseService::getFullServiceName(const std::string &type, const std::string &name)
-    {
-      return ("/dqm4hep/" + type + "/" + name);
     }
 
     //-------------------------------------------------------------------------------------------------

@@ -54,19 +54,9 @@ namespace dqm4hep {
       friend class Client;
     public:
       /**
-       * Get the service type
-       */
-      const std::string &getType() const;
-
-      /**
        * Get the service name
        */
       const std::string &getName() const;
-
-      /**
-       * Get the service full name, as it is allocated on the network
-       */
-      const std::string &getFullName() const;
 
       /**
        * Get the client interface
@@ -78,10 +68,9 @@ namespace dqm4hep {
        * Constructor
        *
        * @param pClient the client that owns the service handler
-       * @param type the service type
        * @param name the service name
        */
-      BaseServiceHandler(Client *pClient, const std::string &type, const std::string &name);
+      BaseServiceHandler(Client *pClient, const std::string &name);
 
       /**
        * Destructor
@@ -89,9 +78,7 @@ namespace dqm4hep {
       virtual ~BaseServiceHandler();
 
     private:
-      std::string                    m_type;             ///< The request handler type
       std::string                    m_name;             ///< The request handler name
-      std::string                    m_fullName;         ///< The request handler full name
       Client                        *m_pClient;          ///< The client manager
     };
 
@@ -144,7 +131,7 @@ namespace dqm4hep {
       void processService(ServiceInfo *pInfo);
 
     private:
-      ServiceHandler(Client *pClient, const std::string &type, const std::string &name);
+      ServiceHandler(Client *pClient, const std::string &name);
       virtual ~ServiceHandler();
 
     private:
@@ -166,7 +153,7 @@ namespace dqm4hep {
      * void MyClass::myfunction(const int &value) { ... do something ... }
      *
      * Client *pClient = new Client();
-     * pClient->subscribe("service-type", "service-name", pMyClassInstance, &MyClass::myfunction);
+     * pClient->subscribe("service-name", pMyClassInstance, &MyClass::myfunction);
      * @endcode
      */
     template <typename T, typename S>
@@ -181,12 +168,11 @@ namespace dqm4hep {
        * Constructor
        *
        * @param pClient the client that owns the service handler
-       * @param type the service type
        * @param name the service name
        * @param pController the class instance receving the service update
        * @param function the class method receving the service update
        */
-      ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
+      ServiceHandlerT(Client *pClient, const std::string &name,
           S *pController, Function function);
 
       /**
@@ -211,9 +197,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T, typename S>
-    inline ServiceHandlerT<T,S>::ServiceHandlerT(Client *pClient, const std::string &type, const std::string &name,
+    inline ServiceHandlerT<T,S>::ServiceHandlerT(Client *pClient, const std::string &name,
         S *pController, Function function) :
-        ServiceHandler<T>(pClient, type, name),
+        ServiceHandler<T>(pClient, name),
         m_pController(pController),
         m_function(function)
     {
@@ -241,7 +227,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline ServiceHandler<T>::ServiceInfo::ServiceInfo(ServiceHandler<T> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getFullName().c_str()), const_cast<char*>(std::string("{}").c_str())),
+        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), const_cast<char*>(std::string("{}").c_str())),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -251,7 +237,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<int>::ServiceInfo::ServiceInfo(ServiceHandler<int> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getFullName().c_str()), int(0)),
+        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), int(0)),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -261,7 +247,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<double>::ServiceInfo::ServiceInfo(ServiceHandler<double> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getFullName().c_str()), double(0.)),
+        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), double(0.)),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -271,7 +257,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<float>::ServiceInfo::ServiceInfo(ServiceHandler<float> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getFullName().c_str()), float(0.)),
+        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), float(0.)),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -281,7 +267,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<std::string>::ServiceInfo::ServiceInfo(ServiceHandler<std::string> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getFullName().c_str()), (char*)""),
+        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), (char*)""),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -291,7 +277,7 @@ namespace dqm4hep {
 
     template <>
     inline ServiceHandler<Json::Value>::ServiceInfo::ServiceInfo(ServiceHandler<Json::Value> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->getFullName().c_str()), (char*)""),
+        DimUpdatedInfo(const_cast<char*>(pHandler->getName().c_str()), (char*)""),
         m_pHandler(pHandler)
     {
       /* nop */
@@ -300,8 +286,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline ServiceHandler<T>::ServiceHandler(Client *pClient, const std::string &type, const std::string &name) :
-      BaseServiceHandler(pClient, type, name),
+    inline ServiceHandler<T>::ServiceHandler(Client *pClient,  const std::string &name) :
+      BaseServiceHandler(pClient, name),
       m_serviceInfo(this)
     {
       /* nop */
