@@ -48,6 +48,18 @@ namespace dqm4hep {
     {
     public:
       /**
+       * EntryMetadata struct
+       */
+      struct EntryMetadata
+      {
+        Color                  m_color;
+        float                  m_value;
+        float                  m_percentage;
+      };
+
+      typedef std::map<std::string, EntryMetadata>   EntryMap;
+
+      /**
        * Property enum
        */
       enum Property
@@ -57,7 +69,7 @@ namespace dqm4hep {
         ENTRIES,
         N_PROPERTIES
       };
-      
+
      /**
       * Constructor
       */
@@ -108,6 +120,18 @@ namespace dqm4hep {
      void addEntry(const std::string &name, Color color, const float &value);
 
      /**
+      * [getNEntries description]
+      * @return [description]
+      */
+     unsigned int getNEntries() const;
+
+     /**
+      * [getEntries description]
+      * @return [description]
+      */
+     const EntryMap &getEntries() const;
+
+     /**
       * [setEntryColor description]
       * @param name  [description]
       * @param color [description]
@@ -145,18 +169,6 @@ namespace dqm4hep {
 
    private:
      void resetCache();
-
-      /**
-       * EntryMetadata struct
-       */
-      struct EntryMetadata
-      {
-        Color                  m_color;
-        float                  m_value;
-        float                  m_percentage;
-      };
-
-      typedef std::map<std::string, EntryMetadata>   EntryMap;
 
       std::bitset<N_PROPERTIES>                      m_updateCache;
       std::string                                    m_title;        ///< The pie chart title

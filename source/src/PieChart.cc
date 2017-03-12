@@ -138,6 +138,20 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    unsigned int PieChart::getNEntries() const
+    {
+      return m_entries.size();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const PieChart::EntryMap &PieChart::getEntries() const
+    {
+      return m_entries;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     void PieChart::setEntryColor(const std::string &name, Color color)
     {
       auto findIter = m_entries.find(name);
