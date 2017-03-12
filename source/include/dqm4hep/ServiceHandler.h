@@ -187,6 +187,18 @@ namespace dqm4hep {
        */
       void serviceHandler(const T &value);
 
+      /**
+       * [controller description]
+       * @return [description]
+       */
+      const S *controller() const;
+
+      /**
+       * [function description]
+       * @return [description]
+       */
+      const Function function() const;
+
     private:
       S            *m_pController;            ///< The user controller instance
       Function      m_function;               ///< The user controller method
@@ -220,6 +232,22 @@ namespace dqm4hep {
     inline void ServiceHandlerT<T,S>::serviceHandler(const T &value)
     {
       (m_pController->*m_function)(value);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline const S *ServiceHandlerT<T,S>::controller() const
+    {
+      return m_pController;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename S>
+    inline const typename ServiceHandlerT<T,S>::Function ServiceHandlerT<T,S>::function() const
+    {
+      return m_function;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -376,6 +404,8 @@ namespace dqm4hep {
       reader.parse(pInfo->getString(), serviceValue);
       this->serviceHandler(serviceValue);
     }
+
+    //-------------------------------------------------------------------------------------------------
 
   }
 
