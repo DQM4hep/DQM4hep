@@ -61,7 +61,7 @@ namespace dqm4hep {
      /**
       *
       */
-     static Scalar<T> *create(const Json::Value &value);
+     static Scalar<ScalarType> *create(const Json::Value &value);
 
      /**
       * [setValue description]
@@ -82,7 +82,7 @@ namespace dqm4hep {
      std::string toString() const;
 
      void fromJson(const Json::Value &value);
-     void toJson(Json::Value &value, bool full = true);
+     void toJson(Json::Value &value, bool full = true, bool resetCache = true);
      bool isUpToDate() const;
      MonitorObjectType getType() const;
 
@@ -123,9 +123,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename ScalarType>
-    inline Scalar<T> *Scalar<T>::create(const Json::Value &value)
+    inline Scalar<ScalarType> *Scalar<ScalarType>::create(const Json::Value &value)
     {
-      Scalar<T> *pScalar = new Scalar<T>();
+      Scalar<ScalarType> *pScalar = new Scalar<ScalarType>();
       pScalar->fromJson(value);
 
       return pScalar;
@@ -154,7 +154,7 @@ namespace dqm4hep {
     template <typename ScalarType>
     inline std::string Scalar<ScalarType>::toString() const
     {
-      return std::move(DQM4HEP:::typeToString(m_value));
+      return std::move(DQM4HEP::typeToString(m_value));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -170,7 +170,7 @@ namespace dqm4hep {
     template <typename ScalarType>
     inline void Scalar<ScalarType>::fromJson(const Json::Value &value)
     {
-      value["value"] = DQM4HEP::typeToString(m_value);
+      DQM4HEP::stringToType(value.get("value", "").asString(), m_value);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -178,13 +178,13 @@ namespace dqm4hep {
     template <typename ScalarType>
     inline void Scalar<ScalarType>::toJson(Json::Value &value, bool /*full*/, bool /*resetCache*/)
     {
-      DQM4HEP::stringToType(value.get("value", "").asString(), m_value);
+      value["value"] = DQM4HEP::typeToString(m_value);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename ScalarType>
-    inline MonitorObjectType Scalar<ScalarType>::getType()
+    inline MonitorObjectType Scalar<ScalarType>::getType() const
     {
       return UNKNOWN_MONITOR_OBJECT;
     }
@@ -194,7 +194,7 @@ namespace dqm4hep {
 
     template <>
     inline Scalar<std::string>::Scalar() :
-      m_update(true),
+      m_updated(true),
       m_value("")
     {
       /* nop */
@@ -210,13 +210,13 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    template <> inline MonitorObjectType Scalar<int>::getType()          { return INTEGER_OBJECT; }
-    template <> inline MonitorObjectType Scalar<unsigned int>::getType() { return UNSIGNED_INTEGER_OBJECT; }
-    template <> inline MonitorObjectType Scalar<float>::getType()        { return FLOAT_OBJECT; }
-    template <> inline MonitorObjectType Scalar<double>::getType()       { return DOUBLE_OBJECT; }
-    template <> inline MonitorObjectType Scalar<long>::getType()         { return LONG_INTEGER_OBJECT; }
-    template <> inline MonitorObjectType Scalar<short>::getType()        { return SHORT_INTEGER_OBJECT; }
-    template <> inline MonitorObjectType Scalar<std::string>::getType()  { return STRING_OBJECT; }
+    template <> inline MonitorObjectType Scalar<int>::getType() const          { return INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<unsigned int>::getType() const { return UNSIGNED_INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<float>::getType() const        { return FLOAT_OBJECT; }
+    template <> inline MonitorObjectType Scalar<double>::getType() const       { return DOUBLE_OBJECT; }
+    template <> inline MonitorObjectType Scalar<long>::getType() const         { return LONG_INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<short>::getType() const        { return SHORT_INTEGER_OBJECT; }
+    template <> inline MonitorObjectType Scalar<std::string>::getType() const  { return STRING_OBJECT; }
   }
 
 }
