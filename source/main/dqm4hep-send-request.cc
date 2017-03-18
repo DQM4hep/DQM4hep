@@ -41,23 +41,10 @@ int main(int argc, char **argv)
   }
 
   std::string name(argv[1]);
-  Json::Value request;
-  std::string jsonString;
+  std::string request;
 
   for(int i=2 ; i<argc ; i++)
-    jsonString += argv[i];
-
-  if(jsonString.empty())
-    jsonString = "{}";
-
-  Json::Reader reader;
-  bool success = reader.parse(jsonString, request);
-
-  if(!success)
-  {
-    std::cout << "Invalid json string !" << std::endl;
-    return 1;
-  }
+    request += argv[i];
 
   Client client;
   client.sendRequest(name, request);

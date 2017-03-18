@@ -41,29 +41,15 @@ int main(int argc, char **argv)
   }
 
   std::string name(argv[1]);
-  Json::Value request, response;
-  std::string jsonString;
+  std::string request, response;
 
   for(int i=2 ; i<argc ; i++)
-    jsonString += argv[i];
-
-  if(jsonString.empty())
-    jsonString = "{}";
-
-  Json::Reader reader;
-  bool success = reader.parse(jsonString, request);
-
-  if(!success)
-  {
-    std::cout << "Invalid json string !" << std::endl;
-    return 1;
-  }
+    request += argv[i] + std::string(" ");
 
   Client client;
   client.sendRequest(name, request, response);
 
-  Json::StyledWriter writer;
-  std::cout << writer.write(response) << std::endl;
+  std::cout << response << std::endl;
 
   return 0;
 }

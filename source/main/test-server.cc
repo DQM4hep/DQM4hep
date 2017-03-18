@@ -34,22 +34,11 @@ using namespace dqm4hep::net;
 class MyPrintClass
 {
 public:
-  void print(const Json::Value &request, Json::Value &response)
+  void print(const std::string &request, std::string &response)
   {
-    bool styled = request.get("styled", false).asBool();
-
-    if(styled)
-    {
-      Json::StyledWriter writer;
-      std::cout << writer.write(request) << std::endl;
-    }
-    else
-    {
-      Json::FastWriter writer;
-      std::cout << writer.write(request) << std::endl;
-    }
-
-    response = "Printed !!";
+    response = "Hello world !";
+    std::cout << "Received : " << request << std::endl;
+    std::cout << "Sending : " << response << std::endl;
   }
 
   void printCommand(const std::string &command)
@@ -64,10 +53,10 @@ int main(int argc, char **argv)
 
   Server *pServer = new Server("TestServer");
 
-  IntService   *pIntService   = pServer->createService<int>("/test/int");
-  FloatService *pFloatService = pServer->createService<float>("/test/float");
-  pServer->createRequestHandler<Json::Value>("/test/print", &printer, &MyPrintClass::print);
-  pServer->createCommandHandler<std::string>("/test/printCommand", &printer, &MyPrintClass::printCommand);
+  Service *pIntService   = pServer->createService("/test/int");
+  Service *pFloatService = pServer->createService("/test/float");
+  pServer->createRequestHandler("/test/print", &printer, &MyPrintClass::print);
+  pServer->createCommandHandler("/test/printCommand", &printer, &MyPrintClass::printCommand);
 
   pServer->start();
 

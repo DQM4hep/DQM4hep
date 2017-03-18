@@ -34,65 +34,24 @@ using namespace dqm4hep::net;
 
 int main(int argc, char **argv)
 {
-  if(argc < 4)
+  if(argc < 2)
   {
-    std::cout << "Usage : dqm4hep-send-command commandType name command" << std::endl;
+    std::cout << "Usage : dqm4hep-send-command command data" << std::endl;
     return 1;
   }
 
-  std::string commandType(argv[1]);
-  std::string name(argv[2]);
+  std::string name(argv[1]);
 
   Client client;
 
-  if(commandType == "json")
-  {
-    Json::Value command;
-    std::string jsonString;
+  std::string str;
 
-    for(int i=3 ; i<argc ; i++)
-      jsonString += argv[i];
+  for(int i=2 ; i<argc ; i++)
+    str += argv[i] + std::string(" ");
 
-    if(jsonString.empty())
-      jsonString = "{}";
+  str.pop_back();
 
-    Json::Reader reader;
-    bool success = reader.parse(jsonString, command);
-
-    if(!success)
-    {
-      std::cout << "Invalid json string !" << std::endl;
-      return 1;
-    }
-
-    client.sendCommand(name, command, true);
-  }
-  else if(commandType == "int")
-  {
-    int integer = atoi(argv[3]);
-    client.sendCommand(name, integer, true);
-  }
-  else if(commandType == "float")
-  {
-    float floatNumber = atof(argv[3]);
-    client.sendCommand(name, floatNumber, true);
-  }
-  else if(commandType == "double")
-  {
-    double doubleNumber = atof(argv[3]);
-    client.sendCommand(name, doubleNumber, true);
-  }
-  else if(commandType == "string")
-  {
-    std::string str;
-
-    for(int i=3 ; i<argc ; i++)
-      str += argv[i] + std::string(" ");
-
-    str.pop_back();
-
-    client.sendCommand(name, str, true);
-  }
+  client.sendCommand(name, str, true);
 
   return 0;
 }

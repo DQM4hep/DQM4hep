@@ -35,49 +35,28 @@ using namespace dqm4hep::net;
 class ServicePrinter
 {
 public:
-  template <typename T>
-  void print(const T &value);
+  void print(const std::string &value);
 };
 
-template <typename T>
-inline void ServicePrinter::print(const T &value)
+inline void ServicePrinter::print(const std::string &value)
 {
-  // Json::StyledWriter writer;
-  // std::cout << writer.write(value) << std::endl;
   std::cout << value << std::endl;
 }
 
-template <>
-inline void ServicePrinter::print(const Json::Value &value)
-{
-  Json::StyledWriter writer;
-  std::cout << writer.write(value) << std::endl;
-}
 
 int main(int argc, char **argv)
 {
-  if(argc != 3)
+  if(argc != 2)
   {
-    std::cout << "Usage : dqm4hep-subscribe-service serviceType type name" << std::endl;
+    std::cout << "Usage : dqm4hep-subscribe-service name" << std::endl;
     return 1;
   }
 
-  std::string serviceType(argv[1]);
-  std::string name(argv[2]);
+  std::string name(argv[1]);
 
   ServicePrinter printer;
   Client client;
-
-  if(serviceType == "int")
-    client.subscribe<int>(name, &printer, &ServicePrinter::print<int>);
-  else if(serviceType == "float")
-    client.subscribe<float>(name, &printer, &ServicePrinter::print<float>);
-  else if(serviceType == "double")
-    client.subscribe<double>(name, &printer, &ServicePrinter::print<double>);
-  else if(serviceType == "string")
-    client.subscribe<std::string>(name, &printer, &ServicePrinter::print<std::string>);
-  else if(serviceType == "json")
-    client.subscribe<Json::Value>(name, &printer, &ServicePrinter::print<Json::Value>);
+  client.subscribe(name, &printer, &ServicePrinter::print);
 
   while(1)
     sleep(1);
