@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <iostream>
 #include <typeinfo>
+#include <cstring>
 
 namespace dqm4hep {
 
@@ -48,8 +49,49 @@ namespace dqm4hep {
      */
     struct Buffer
     {
+      Buffer() :
+        m_bufferSize(0),
+        m_pBuffer(nullptr),
+        m_owner(false)
+      {
+        /* nop */
+      }
+
+      ~Buffer()
+      {
+        if(nullptr != m_pBuffer && m_owner)
+          delete [] m_pBuffer;
+      }
+
+      void setBuffer(char *data, uint32_t size, bool owner = false)
+      {
+        if(nullptr == data || 0 == size)
+          return;
+
+        if(nullptr != m_pBuffer && m_owner)
+        {
+          delete [] m_pBuffer;
+          m_pBuffer = nullptr;
+        }
+
+        if(owner)
+        {
+          m_pBuffer = new char[size];
+          m_bufferSize = size;
+          memcpy(m_pBuffer, data, size);
+        }
+        else
+        {
+          m_pBuffer = data;
+          m_bufferSize = size;
+        }
+
+        m_owner = owner;
+      }
+
       uint32_t        m_bufferSize;       ///< The buffer size
       char *          m_pBuffer;          ///< The raw buffer as a char array
+      bool            m_owner;
     };
 
     inline std::string &tolower(std::string& str) {
@@ -74,6 +116,49 @@ namespace dqm4hep {
         return input == ".nan" || input == ".NaN" || input == ".NAN";
       }
     }
+
+    // Buffer spec
+    template <>
+    struct convert<Buffer>
+    {
+      static bool encode(std::string &lhs, const Buffer &rhs)
+      {
+        lhs.clear();
+
+        if(nullptr == rhs.m_pBuffer || 0 == rhs.m_bufferSize)
+          return false;
+
+        lhs.assign(rhs.m_pBuffer, rhs.m_bufferSize);
+        return true;
+      }
+
+      static bool decode(const std::string &lhs, Buffer &rhs)
+      {
+        char *data = const_cast<char*>(lhs.c_str());
+        size_t size = lhs.size();
+
+        rhs.setBuffer(data, size, true);
+
+        return true;
+      }
+    };
+
+    // std::string spec
+    template <>
+    struct convert<std::string>
+    {
+      static bool encode(std::string &lhs, const std::string &rhs)
+      {
+        lhs = rhs;
+        return true;
+      }
+
+      static bool decode(const std::string &lhs, std::string &rhs)
+      {
+        rhs = lhs;
+        return true;
+      }
+    };
 
     // C-strings can only be encoded
     template <>
