@@ -61,37 +61,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Client::sendRequest(const std::string &name, const std::string &request) const
-    {
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (char*)"");
-      rpcInfo.setData(const_cast<char*>(request.c_str()));
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void Client::sendRequest(const std::string &name, const std::string &request, std::string &response) const
-    {
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (char*)"");
-      rpcInfo.setData(const_cast<char*>(request.c_str()));
-      response = rpcInfo.getString();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void Client::sendCommand(const std::string &name, const std::string &command, bool blocking) const
-    {
-      if(blocking)
-      {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), (char*)command.c_str());
-      }
-      else
-      {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (char*)command.c_str());
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     bool Client::hasSubscribed(const std::string &name) const
     {
       return (m_serviceHandlerMap.end() != m_serviceHandlerMap.find(name));

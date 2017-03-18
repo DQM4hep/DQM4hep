@@ -30,6 +30,7 @@
 #define CLIENT_H
 
 // -- dqm4hep headers
+#include "dqm4hep/DQMNet.h"
 #include "dqm4hep/RequestHandler.h"
 #include "dqm4hep/ServiceHandler.h"
 #include "dqm4hep/Service.h"
@@ -83,7 +84,8 @@ namespace dqm4hep {
        * @param name the request name
        * @param command the request content
        */
-      void sendRequest(const std::string &name, const std::string &request) const;
+      template <typename Request>
+      void sendRequest(const std::string &name, const Request &request) const;
 
       /**
        * Send a request. Wait for the server response (blocking)
@@ -92,7 +94,8 @@ namespace dqm4hep {
        * @param request the request to send
        * @param response the response to receive from the server
        */
-      void sendRequest(const std::string &name, const std::string &request, std::string &response) const;
+      template <typename Request, typename Response>
+      void sendRequest(const std::string &name, const Request &request, Response &response) const;
 
       /**
        * Send a command.
@@ -101,7 +104,8 @@ namespace dqm4hep {
        * @param command the command to send
        * @param blocking whether to wait for command reception on server side
        */
-      void sendCommand(const std::string &name, const std::string &command, bool blocking = false) const;
+      template <typename Command>
+      void sendCommand(const std::string &name, const Command &command, bool blocking = false) const;
 
       /**
        * Subscribe to target service
@@ -148,6 +152,65 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Request>
+    inline void Client::sendRequest(const std::string &name, const Request &request) const
+    {
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
+      std::string contents;
+
+      if(!convert<Request>::encode(contents, request))
+        throw; // TODO implement exceptions
+
+      rpcInfo.setData((void*)request.c_str(), contents.size());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Request, typename Response>
+    inline void Client::sendRequest(const std::string &name, const Request &request, Response &response) const
+    {
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
+      std::string contents;
+
+      if(!convert<Request>::encode(contents, request))
+        throw; // TODO implement exceptions
+
+      rpcInfo.setData((void*)contents.c_str(), contents.size());
+
+      char *data = (char*)rpcInfo.getData();
+      int size = rpcInfo.getSize();
+
+      if(nullptr == data || size == 0)
+        return;
+
+      contents.assign(data, size);
+
+      if(!convert<Response>::decode(contents, response))
+        throw; // TODO implement exceptions
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Command>
+    inline void Client::sendCommand(const std::string &name, const Command &command, bool blocking) const
+    {
+      std::string contents;
+
+      if(!convert<Command>::encode(contents, command))
+        throw; // TODO implement exceptions
+
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)command.c_str(), contents.size());
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)command.c_str(), contents.size());
+      }
+    }
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>

@@ -32,88 +32,54 @@ namespace dqm4hep {
 
   namespace net {
 
-    // namespace experimental {
+    Service::Service(Server *pServer, const std::string &name) :
+      m_pService(nullptr),
+      m_name(name),
+      m_pServer(pServer),
+      m_charContent((char*)m_content.c_str())
+    {
+      /* nop */
+    }
 
-      Service::Service(Server *pServer, const std::string &name) :
-        m_pService(nullptr),
-        m_name(name),
-        m_pServer(pServer),
-        m_charContent((char*)m_content.c_str())
+    Service::~Service()
+    {
+      this->disconnectService();
+    }
+
+    const std::string &Service::name() const
+    {
+      return m_name;
+    }
+
+    Server *Service::server() const
+    {
+      return m_pServer;
+    }
+
+    void Service::connectService()
+    {
+      if(!this->isServiceConnected())
       {
-
+        m_content.clear();
+        m_charContent = (char*)m_content.c_str();
+        m_pService = new DimService((char*)m_name.c_str(), "C", (char*)m_charContent, m_content.size());
       }
+    }
 
-
-      Service::~Service()
+    void Service::disconnectService()
+    {
+      if(this->isServiceConnected())
       {
-        this->disconnectService();
+        delete m_pService;
+        m_pService = nullptr;
       }
+    }
 
-      const std::string &Service::name() const
-      {
-        return m_name;
-      }
+    bool Service::isServiceConnected() const
+    {
+      return (m_pService != nullptr);
+    }
 
-
-      Server *Service::server() const
-      {
-        return m_pServer;
-      }
-
-      void Service::connectService()
-      {
-        if(!this->isServiceConnected())
-        {
-          m_pService = new DimService((char*)m_name.c_str(), (char*)m_charContent);
-        }
-      }
-
-      void Service::disconnectService()
-      {
-        if(this->isServiceConnected())
-        {
-          delete m_pService;
-          m_pService = nullptr;
-        }
-      }
-
-      bool Service::isServiceConnected() const
-      {
-        return (m_pService != nullptr);
-      }
-
-    // }
-
-  //   BaseService::BaseService(Server *pServer, const std::string &name) :
-  //       m_name(name),
-  //       m_pServer(pServer)
-  //   {
-  //     /* nop */
-  //   }
-  //
-  //   //-------------------------------------------------------------------------------------------------
-  //
-  //   BaseService::~BaseService()
-  //   {
-  //     /* nop */
-  //   }
-  //
-  //   //-------------------------------------------------------------------------------------------------
-  //
-  //   const std::string &BaseService::name() const
-  //   {
-  //     return m_name;
-  //   }
-  //
-  //   //-------------------------------------------------------------------------------------------------
-  //
-  //   Server *BaseService::server() const
-  //   {
-  //     return m_pServer;
-  //   }
-  //
-  //   //-------------------------------------------------------------------------------------------------
-  //
   }
 
 }

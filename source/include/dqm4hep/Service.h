@@ -146,7 +146,7 @@ namespace dqm4hep {
 
       if(clientIds.empty())
       {
-        m_pService->updateService(m_charContent);
+        m_pService->updateService((void*)m_charContent, m_content.size());
       }
       else
       {
@@ -156,7 +156,7 @@ namespace dqm4hep {
           clientIdList.push_back(0);
 
         int *clientIdsArray = &clientIdList[0];
-        m_pService->selectiveUpdateService(m_charContent, clientIdsArray);
+        m_pService->selectiveUpdateService((void*)m_charContent, m_content.size(), clientIdsArray);
       }
 
     }

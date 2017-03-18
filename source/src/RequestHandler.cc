@@ -109,7 +109,13 @@ namespace dqm4hep {
 
       void RequestHandler::Rpc::rpcHandler()
       {
-        std::string request = this->getString();
+        char *data = (char*)this->getData();
+        int size = this->getSize();
+
+        if(nullptr == data || size == 0)
+          return;
+
+        std::string request(data, size);
         std::string response;
         m_pHandler->handleRequest(request, response);
         this->setData((char*)response.c_str());

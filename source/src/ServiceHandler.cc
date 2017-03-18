@@ -70,7 +70,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     ServiceHandler::ServiceInfo::ServiceInfo(ServiceHandler *pHandler) :
-      DimUpdatedInfo((char*)pHandler->name().c_str(), (char*)""),
+      DimUpdatedInfo((char*)pHandler->name().c_str(), (void*)nullptr, 0),
       m_pHandler(pHandler)
     {
       /* nop */
@@ -80,7 +80,14 @@ namespace dqm4hep {
 
     void ServiceHandler::ServiceInfo::infoHandler()
     {
-      m_pHandler->receiveServiceUpdated(this->getString());
+      char *data = (char*)this->getData();
+      int size = this->getSize();
+
+      if(nullptr == data || size == 0)
+        return;
+
+      std::string contents(data, size);
+      m_pHandler->receiveServiceUpdated(contents);
     }
 
   }
