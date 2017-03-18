@@ -32,36 +32,88 @@ namespace dqm4hep {
 
   namespace net {
 
-    BaseService::BaseService(Server *pServer, const std::string &name) :
+    // namespace experimental {
+
+      Service::Service(Server *pServer, const std::string &name) :
+        m_pService(nullptr),
         m_name(name),
-        m_pServer(pServer)
-    {
-      /* nop */
-    }
+        m_pServer(pServer),
+        m_charContent((char*)m_content.c_str())
+      {
 
-    //-------------------------------------------------------------------------------------------------
+      }
 
-    BaseService::~BaseService()
-    {
-      /* nop */
-    }
 
-    //-------------------------------------------------------------------------------------------------
+      Service::~Service()
+      {
+        this->disconnectService();
+      }
 
-    const std::string &BaseService::name() const
-    {
-      return m_name;
-    }
+      const std::string &Service::name() const
+      {
+        return m_name;
+      }
 
-    //-------------------------------------------------------------------------------------------------
 
-    Server *BaseService::server() const
-    {
-      return m_pServer;
-    }
+      Server *Service::server() const
+      {
+        return m_pServer;
+      }
 
-    //-------------------------------------------------------------------------------------------------
+      void Service::connectService()
+      {
+        if(!this->isServiceConnected())
+        {
+          m_pService = new DimService((char*)m_name.c_str(), (char*)m_charContent);
+        }
+      }
 
+      void Service::disconnectService()
+      {
+        if(this->isServiceConnected())
+        {
+          delete m_pService;
+          m_pService = nullptr;
+        }
+      }
+
+      bool Service::isServiceConnected() const
+      {
+        return (m_pService != nullptr);
+      }
+
+    // }
+
+  //   BaseService::BaseService(Server *pServer, const std::string &name) :
+  //       m_name(name),
+  //       m_pServer(pServer)
+  //   {
+  //     /* nop */
+  //   }
+  //
+  //   //-------------------------------------------------------------------------------------------------
+  //
+  //   BaseService::~BaseService()
+  //   {
+  //     /* nop */
+  //   }
+  //
+  //   //-------------------------------------------------------------------------------------------------
+  //
+  //   const std::string &BaseService::name() const
+  //   {
+  //     return m_name;
+  //   }
+  //
+  //   //-------------------------------------------------------------------------------------------------
+  //
+  //   Server *BaseService::server() const
+  //   {
+  //     return m_pServer;
+  //   }
+  //
+  //   //-------------------------------------------------------------------------------------------------
+  //
   }
 
 }

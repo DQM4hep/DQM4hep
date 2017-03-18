@@ -32,35 +32,180 @@ namespace dqm4hep {
 
   namespace net {
 
-    BaseRequestHandler::BaseRequestHandler(Server *pServer, const std::string &name) :
+    // namespace experimental {
+
+      RequestHandler::~RequestHandler()
+      {
+        this->stopHandlingRequest();
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &RequestHandler::name() const
+      {
+        return m_name;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      Server *RequestHandler::server() const
+      {
+        return m_pServer;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void RequestHandler::startHandlingRequest()
+      {
+        if(!this->isHandlingRequest())
+        {
+          m_pRpc = new Rpc(this);
+        }
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void RequestHandler::stopHandlingRequest()
+      {
+        if(this->isHandlingRequest())
+        {
+          delete m_pRpc;
+          m_pRpc = nullptr;
+        }
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      bool RequestHandler::isHandlingRequest() const
+      {
+        return (m_pRpc != nullptr);
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      RequestHandler::RequestSignal &RequestHandler::onRequest()
+      {
+        return m_requestSignal;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void RequestHandler::handleRequest(const std::string &request, std::string &response)
+      {
+        m_requestSignal.process(request, response);
+      }
+
+      //-------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------
+
+      RequestHandler::Rpc::Rpc(RequestHandler *pHandler) :
+        DimRpc((char*)pHandler->name().c_str(), "C", "C"),
+        m_pHandler(pHandler)
+      {
+        /* nop */
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void RequestHandler::Rpc::rpcHandler()
+      {
+        std::string request = this->getString();
+        std::string response;
+        m_pHandler->handleRequest(request, response);
+        this->setData((char*)response.c_str());
+      }
+
+      //-------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------
+
+      CommandHandler::CommandHandler(Server *pServer, const std::string &name) :
         m_name(name),
-        m_pServer(pServer)
-    {
-      /* nop */
-    }
+        m_pServer(pServer),
+        m_pCommand(nullptr)
+      {
 
-    //-------------------------------------------------------------------------------------------------
+      }
 
-    BaseRequestHandler::~BaseRequestHandler()
-    {
-      /* nop */
-    }
+      //-------------------------------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------------------------------
+      CommandHandler::~CommandHandler()
+      {
+        this->stopHandlingCommands();
+      }
 
-    const std::string &BaseRequestHandler::name() const
-    {
-      return m_name;
-    }
+      //-------------------------------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------------------------------
+      const std::string &CommandHandler::name() const
+      {
+        return m_name;
+      }
 
-    Server *BaseRequestHandler::server() const
-    {
-      return m_pServer;
-    }
+      //-------------------------------------------------------------------------------------------------
 
-    //-------------------------------------------------------------------------------------------------
+      Server *CommandHandler::server() const
+      {
+        return m_pServer;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void CommandHandler::startHandlingCommands()
+      {
+        if(!this->isHandlingCommands())
+        {
+          m_pCommand = new Command(this);
+        }
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void CommandHandler::stopHandlingCommands()
+      {
+        if(this->isHandlingCommands())
+        {
+          delete m_pCommand;
+          m_pCommand = nullptr;
+        }
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      bool CommandHandler::isHandlingCommands() const
+      {
+        return (m_pCommand != nullptr);
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      CommandHandler::CommandSignal &CommandHandler::onCommand()
+      {
+        return m_commandSignal;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void CommandHandler::handleCommand(const std::string &command)
+      {
+        m_commandSignal.process(command);
+      }
+
+      //------------------------------------------------------------------------------------------------
+      //--------------------------------------------------------------------------------------------------
+
+      CommandHandler::Command::Command(CommandHandler *pHandler) :
+        DimCommand((char*)pHandler->name().c_str(), "C"),
+        m_pHandler(pHandler)
+      {
+        /* nop */
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void CommandHandler::Command::commandHandler()
+      {
+        std::string command = this->getString();
+        m_pHandler->handleCommand(command);
+      }
 
   }
 

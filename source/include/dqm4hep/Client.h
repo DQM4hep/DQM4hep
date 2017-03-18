@@ -78,48 +78,30 @@ namespace dqm4hep {
       void queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const;
 
       /**
-       * Send a request. Do not wait for any response
+       * Send a command. Do not wait for any acknowledgment
        *
        * @param name the request name
-       * @param request the json value describing the request to send
+       * @param command the request content
        */
-      void sendRequest(const std::string &name, const Json::Value &request) const;
+      void sendRequest(const std::string &name, const std::string &request) const;
 
       /**
-       * Send a request. Wait for the server response
-       * The template parameter Reponse corresponds to the
-       * expected response type. Supported types are :
-       *  - int
-       *  - float
-       *  - double
-       *  - std::string
-       *  - Buffer (see Buffer struct)
-       *  - Json::Value
-       *
+       * Send a request. Wait for the server response (blocking)
+
        * @param name the request name
-       * @param request the json value describing the request to send
+       * @param request the request to send
        * @param response the response to receive from the server
        */
-      template <typename Response>
-      void sendRequest(const std::string &name, const Json::Value &request, Response &response) const;
+      void sendRequest(const std::string &name, const std::string &request, std::string &response) const;
 
       /**
        * Send a command.
-       * The template parameter Reponse corresponds to the
-       * command type. Supported types are :
-       *  - int
-       *  - float
-       *  - double
-       *  - std::string
-       *  - Buffer (see Buffer struct)
-       *  - Json::Value
        *
        * @param name the command name
        * @param command the command to send
        * @param blocking whether to wait for command reception on server side
        */
-      template <typename Command>
-      void sendCommand(const std::string &name, const Command &command, bool blocking = false) const;
+      void sendCommand(const std::string &name, const std::string &command, bool blocking = false) const;
 
       /**
        * Subscribe to target service
@@ -135,20 +117,14 @@ namespace dqm4hep {
        * pClient->subscribe<int>("service-type", "service-name", pMyClassInstance, &MyClass::myfunction)
        * @endcode
        */
-      template <typename T, typename S>
-      void subscribe(const std::string &serviceName, S *pController, void (S::*function)(const T &value));
+      template <typename Controller>
+      void subscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const std::string &value));
 
       /**
        *
        */
-      template <typename Controller, typename T>
-      void unsubscribe(Controller *pController, void (Controller::*function)(const T &value));
-
-      /**
-       *
-       */
-      template <typename Controller, typename T>
-      void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const T &value));
+      template <typename Controller>
+      void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const std::string &value));
 
       /**
        * Whether this client already registered a service subscription
@@ -165,8 +141,8 @@ namespace dqm4hep {
       unsigned int numberOfSubscriptions(const std::string &serviceName) const;
 
     private:
-      typedef std::multimap<std::string, BaseServiceHandler *>      ServiceHandlerMap;
-      typedef std::vector<BaseServiceHandler *>                     ServiceHandlerList;
+      typedef std::map<std::string, ServiceHandler *>      ServiceHandlerMap;
+      typedef std::vector<ServiceHandler *>                     ServiceHandlerList;
       ServiceHandlerMap            m_serviceHandlerMap;        ///< The service map
     };
 
@@ -174,259 +150,34 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename Response>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, Response &response) const
+    template <typename Controller>
+    inline void Client::subscribe(const std::string &name, Controller *pController, void (Controller::*function)(const std::string &value))
     {
-      throw std::runtime_error("Client::sendRequest(): response type not supported !");
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, int &response) const
-    {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), response);
-
-      Json::Value message;
-      message["response"] = true;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
-
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
-      response = rpcInfo.getInt();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, float &response) const
-    {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), response);
-
-      Json::Value message;
-      message["response"] = true;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
-
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
-      response = rpcInfo.getFloat();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, double &response) const
-    {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), response);
-
-      Json::Value message;
-      message["response"] = true;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
-
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
-      response = rpcInfo.getDouble();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, std::string &response) const
-    {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (char*)"");
-
-      Json::Value message;
-      message["response"] = true;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
-
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
-      response = rpcInfo.getString();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, Buffer &response) const
-    {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-
-      Json::Value message;
-      message["response"] = true;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
-
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
-      Buffer *pBuffer = (Buffer*)rpcInfo.getData();
-
-      if(!pBuffer || !pBuffer->m_pBuffer || pBuffer->m_bufferSize == 0)
-        return;
-
-      response.m_pBuffer = pBuffer->m_pBuffer;
-      response.m_bufferSize = pBuffer->m_bufferSize;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Json::Value &request, Json::Value &response) const
-    {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), const_cast<char*>(emptyJson.c_str()));
-
-      Json::Value message;
-      message["response"] = true;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
-
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
-      char *jsonStr = rpcInfo.getString();
-
-      if(!jsonStr)
-        return;
-
-      Json::Reader reader;
-      reader.parse(jsonStr, response);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename Command>
-    inline void Client::sendCommand(const std::string &name, const Command &command, bool blocking) const
-    {
-      if(blocking)
-      {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), command);
-      }
-      else
-      {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), command);
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendCommand(const std::string &name, const std::string &command, bool blocking) const
-    {
-      if(blocking)
-      {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), const_cast<char*>(command.c_str()));
-      }
-      else
-      {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), const_cast<char*>(command.c_str()));
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendCommand(const std::string &name, const Buffer &command, bool blocking) const
-    {
-      if(blocking)
-      {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)command.m_pBuffer, command.m_bufferSize + sizeof(command.m_bufferSize));
-      }
-      else
-      {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)command.m_pBuffer, command.m_bufferSize + sizeof(command.m_bufferSize));
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void Client::sendCommand(const std::string &name, const Json::Value &command, bool blocking) const
-    {
-      Json::FastWriter writer;
-      std::string commandStr(writer.write(command));
-
-      if(blocking)
-      {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), const_cast<char*>(commandStr.c_str()));
-      }
-      else
-      {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), const_cast<char*>(commandStr.c_str()));
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline void Client::subscribe(const std::string &name, S *pController, void (S::*function)(const T &value))
-    {
-      auto findIter = std::find_if(
-        m_serviceHandlerMap.begin(), m_serviceHandlerMap.end(),
-        [&name, &pController, &function](const ServiceHandlerMap::value_type &value) {
-
-        if(value.first != name)
-          return false;
-
-        ServiceHandlerT<T,S> *pHandler = dynamic_cast<ServiceHandlerT<T,S> *>(value.second);
-
-        if(pHandler && pHandler->controller() == pController && pHandler->function() == function)
-          return true;
-
-        return false;
-      });
+      auto findIter = m_serviceHandlerMap.find(name);
 
       if(findIter != m_serviceHandlerMap.end())
+      {
+        findIter->second->onServiceUpdate().connect(pController, function);
         return;
+      }
 
       m_serviceHandlerMap.insert(
-        ServiceHandlerMap::value_type(name, new ServiceHandlerT<T,S>(this, name, pController, function))
+        ServiceHandlerMap::value_type(name, new ServiceHandler(this, name, pController, function))
       );
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename Controller, typename T>
-    inline void Client::unsubscribe(Controller *pController, void (Controller::*function)(const T &value))
-    {
-      for(auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        ServiceHandlerT<T,Controller> *pHandler = dynamic_cast<ServiceHandlerT<T,Controller> *>(iter->second);
-
-        if(pHandler && pHandler->controller() == pController && pHandler->function() == function)
-        {
-          delete iter->second;
-          m_serviceHandlerMap.erase(iter);
-          --iter;
-        }
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename Controller, typename T>
-    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const T &value))
+    template <typename Controller>
+    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const std::string &value))
     {
       for(auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end() ; endIter != iter ; ++iter)
       {
         if(serviceName != iter->first)
           continue;
 
-        ServiceHandlerT<T,Controller> *pHandler = dynamic_cast<ServiceHandlerT<T,Controller> *>(iter->second);
-
-        if(pHandler && pHandler->controller() == pController && pHandler->function() == function)
-        {
-          delete iter->second;
-          m_serviceHandlerMap.erase(iter);
-          --iter;
-        }
+        if(iter->second->onServiceUpdate().disconnect(pController, function))
+          break;
       }
     }
 

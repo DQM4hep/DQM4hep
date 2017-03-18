@@ -95,19 +95,9 @@ namespace dqm4hep {
 
       /**
        * Create a new service.
-       * The template parameter T corresponds to the data type handled
-       * by the service. Supported types :
-       *  - int
-       *  - float
-       *  - double
-       *  - std::string
-       *  - Json::Value
-       *  - Buffer (see Buffer struct)
-       *
        * @param name the service name
        */
-      template <typename T>
-      Service<T> *createService(const std::string &name);
+      Service *createService(const std::string &name);
 
       /**
        * Create a new request handler
@@ -116,9 +106,9 @@ namespace dqm4hep {
        * @param pController the class instance that will handle the request
        * @param function the class method that will treat the request and provide a response
        */
-      template <typename T, typename S>
-      BaseRequestHandler *createRequestHandler(const std::string &name,
-          S *pController, void (S::*function)(const Json::Value &request, T &response));
+      template <typename Controller >
+      void createRequestHandler(const std::string &name,
+          Controller *pController, void (Controller::*function)(const std::string &request, std::string &response));
 
       /**
        * Create a new command handler
@@ -127,9 +117,9 @@ namespace dqm4hep {
        * @param pController the class instance that will handle the command
        * @param function the class method that will treat the command
        */
-      template <typename T, typename S>
-      BaseRequestHandler *createCommandHandler(const std::string &name,
-          S *pController, void (S::*function)(const T &command));
+      template <typename Controller>
+      void createCommandHandler(const std::string &name,
+          Controller *pController, void (Controller::*function)(const std::string &command));
 
       /**
        * Whether the target service is registered in this server
@@ -200,28 +190,18 @@ namespace dqm4hep {
        */
       void stopCommandHandler(const std::string &name);
 
+      template <typename Controller>
+      void stopCommandHandler(const std::string &name, Controller *pController);
+
+      template <typename Controller>
+      void stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command));
+
       /**
        * Get a created service in this server
        *
        * @param name the service name
        */
-      BaseService *service(const std::string &name) const;
-
-      /**
-      * Get a created request handler in this server
-      *
-      * @param type the request handler type
-      * @param name the request handler name
-       */
-      BaseRequestHandler *requestHandler(const std::string &name) const;
-
-      /**
-      * Get a created command handler in this server
-      *
-      * @param type the command handler type
-      * @param name the command handler name
-       */
-      BaseRequestHandler *commandHandler(const std::string &name) const;
+      Service *service(const std::string &name) const;
 
       /**
        * Get the dim dns node.
@@ -274,68 +254,40 @@ namespace dqm4hep {
       /**
        * Callback function to treat the server info request
        *
-       * @param request the json value describing the request
-       * @param response the json value descring the response to receive
+       * @param request the request
+       * @param response the response to receive
        */
-      void handleServerInfoRequest(const Json::Value &request, Json::Value &response);
+      void handleServerInfoRequest(const std::string &request, std::string &response);
+
+      RequestHandler *requestHandler(const std::string &name) const;
+
+      CommandHandler *commandHandler(const std::string &name) const;
 
     private:
-      typedef std::map<std::string, BaseService *>         ServiceMap;
-      typedef std::map<std::string, BaseRequestHandler *>  RequestHandlerMap;
+      typedef std::map<std::string, Service *>         ServiceMap;
+      typedef std::map<std::string, RequestHandler *>  RequestHandlerMap;
+      typedef std::map<std::string, CommandHandler *>  CommandHandlerMap;
 
       std::string                                    m_name;                 ///< The short server name
       bool                                           m_started;              ///< Whether the server has been started
       ServiceMap                                     m_serviceMap;           ///< The map of registered services
       RequestHandlerMap                              m_requestHandlerMap;    ///< The map of registered request handlers
-      RequestHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
-      RequestHandlerT<Json::Value, Server>           m_serverInfoHandler;    ///< The built-in request handler for server info
+      CommandHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
+      RequestHandler                                 m_serverInfoHandler;    ///< The built-in request handler for server info
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T>
-    inline Service<T> *Server::createService(const std::string &name)
-    {
-      if(name.empty())
-        throw std::runtime_error("Server::createService(): service name is invalid");
-
-      auto findIter = m_serviceMap.find(name);
-
-      if(findIter != m_serviceMap.end())
-        return dynamic_cast<Service<T>*>(findIter->second);
-
-      if(Server::serviceAlreadyRunning(name))
-        throw std::runtime_error("Server::createService(): service '" + name + "' already running on network");
-
-      // first insert nullptr, then create the service
-      std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(name, nullptr));
-
-      if(inserted.second)
-      {
-        Service<T> *pService = new Service<T>(this, name);
-        inserted.first->second = pService;
-
-        if(this->isRunning())
-          pService->connectService();
-
-        return pService;
-      }
-      else
-        throw;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline BaseRequestHandler *Server::createRequestHandler(const std::string &name,
-        S *pController, void (S::*function)(const Json::Value &request, T &response))
+    template <typename Controller>
+    inline void Server::createRequestHandler(const std::string &name,
+        Controller *pController, void (Controller::*function)(const std::string &request, std::string &response))
     {
       auto findIter = m_requestHandlerMap.find(name);
 
       if(findIter != m_requestHandlerMap.end())
-        return findIter->second;
+        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name + "' already exists in this client");
 
       if(Server::requestHandlerAlreadyRunning(name))
         throw std::runtime_error("Server::createRequestHandler(): request handler '" + name + "' already running on network");
@@ -345,13 +297,11 @@ namespace dqm4hep {
 
       if(inserted.second)
       {
-        RequestHandlerT<T,S> *pRequestHandler = new RequestHandlerT<T,S>(this, name, pController, function);
+        RequestHandler *pRequestHandler = new RequestHandler(this, name, pController, function);
         inserted.first->second = pRequestHandler;
 
         if(this->isRunning())
           pRequestHandler->startHandlingRequest();
-
-        return pRequestHandler;
       }
       else
         throw;
@@ -359,34 +309,72 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T, typename S>
-    inline BaseRequestHandler *Server::createCommandHandler(const std::string &name,
-        S *pController, void (S::*function)(const T &command))
+    template <typename Controller>
+    inline void Server::createCommandHandler(const std::string &name,
+        Controller *pController, void (Controller::*function)(const std::string &command))
     {
       auto findIter = m_commandHandlerMap.find(name);
 
       if(findIter != m_commandHandlerMap.end())
-        return findIter->second;
+      {
+        findIter->second->onCommand().connect(pController, function);
+
+        if(this->isRunning())
+          findIter->second->startHandlingCommands();
+
+        return;
+      }
 
       if(Server::commandHandlerAlreadyRunning(name))
         throw std::runtime_error("Server::createCommandHandler(): command handler '" + name + "' already running on network");
 
       // first insert nullptr, then create command handler
-      std::pair<RequestHandlerMap::iterator, bool> inserted = m_commandHandlerMap.insert(RequestHandlerMap::value_type(name, nullptr));
+      std::pair<CommandHandlerMap::iterator, bool> inserted = m_commandHandlerMap.insert(CommandHandlerMap::value_type(name, nullptr));
 
       if(inserted.second)
       {
-        CommandHandlerT<T,S> *pCommandHandler = new CommandHandlerT<T,S>(this, name, pController, function);
+        CommandHandler *pCommandHandler = new CommandHandler(this, name, pController, function);
         inserted.first->second = pCommandHandler;
 
         if(this->isRunning())
-          pCommandHandler->startHandlingRequest();
-
-        return pCommandHandler;
+          pCommandHandler->startHandlingCommands();
       }
       else
         throw;
     }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Controller>
+    inline void Server::stopCommandHandler(const std::string &name, Controller *pController)
+    {
+      auto findIter = m_commandHandlerMap.find(name);
+
+      if(findIter != m_commandHandlerMap.end())
+      {
+        findIter->second->onCommand().disconnect(pController);
+
+        if(!findIter->second->onCommand().hasConnection())
+          m_commandHandlerMap.erase(findIter);
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Controller>
+    inline void Server::stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command))
+    {
+      auto findIter = m_commandHandlerMap.find(name);
+
+      if(findIter != m_commandHandlerMap.end())
+      {
+        findIter->second->onCommand().disconnect(pController, function);
+
+        if(!findIter->second->onCommand().hasConnection())
+          m_commandHandlerMap.erase(findIter);
+      }
+    }
+    
   }
 
 }

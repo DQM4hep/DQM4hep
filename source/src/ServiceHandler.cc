@@ -33,32 +33,54 @@ namespace dqm4hep {
 
   namespace net {
 
-    BaseServiceHandler::BaseServiceHandler(Client *pClient, const std::string &name) :
-        m_pClient(pClient),
-        m_name(name)
+    ServiceHandler::~ServiceHandler()
     {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseServiceHandler::~BaseServiceHandler()
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &BaseServiceHandler::name() const
+    const std::string &ServiceHandler::name() const
     {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Client *BaseServiceHandler::client() const
+    Client *ServiceHandler::client() const
     {
       return m_pClient;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    ServiceHandler::UpdateSignal &ServiceHandler::onServiceUpdate()
+    {
+      return m_updateSignal;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void ServiceHandler::receiveServiceUpdated(const std::string &contents)
+    {
+      m_updateSignal.process(contents);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    ServiceHandler::ServiceInfo::ServiceInfo(ServiceHandler *pHandler) :
+      DimUpdatedInfo((char*)pHandler->name().c_str(), (char*)""),
+      m_pHandler(pHandler)
+    {
+      /* nop */
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void ServiceHandler::ServiceInfo::infoHandler()
+    {
+      m_pHandler->receiveServiceUpdated(this->getString());
     }
 
   }

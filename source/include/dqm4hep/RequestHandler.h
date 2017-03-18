@@ -46,18 +46,13 @@ namespace dqm4hep {
   namespace net {
 
     class Server;
-    template <typename T, typename S>
-    class RequestHandlerT;
 
-    /**
-     * BaseRequestHandler class
-     *
-     * Base class for request handlers
-     */
-    class BaseRequestHandler
+    class RequestHandler
     {
       friend class Server;
     public:
+      typedef Signal<const std::string &, std::string &> RequestSignal;
+
       /**
        * Get the request name
        */
@@ -68,772 +63,208 @@ namespace dqm4hep {
        */
       Server *server() const;
 
-    protected:
+    private:
       /**
        * Constructor
        *
        * @param pServer the server managing the request handler
        * @param name the request handler name
        */
-      BaseRequestHandler(Server *pServer, const std::string &name);
+      template <typename Controller>
+      RequestHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &request, std::string &response));
 
       /**
        * Destructor
        */
-      virtual ~BaseRequestHandler();
+      ~RequestHandler();
 
       /**
        * Create the actual request handler connection
        */
-      virtual void startHandlingRequest() = 0;
+      void startHandlingRequest();
 
       /**
        * Remove the actual request handler connection
        */
-      virtual void stopHandlingRequest() = 0;
+      void stopHandlingRequest();
 
       /**
        * Whether the request handler is connected
        */
-      virtual bool isHandlingRequest() const = 0;
+      bool isHandlingRequest() const;
+
+      /**
+       * [onRequest description]
+       * @return [description]
+       */
+      RequestSignal &onRequest();
 
     private:
-      std::string           m_name;             ///< The request handler name
-      Server               *m_pServer;          ///< The server in which the request handler is declared
+     /** Rpc class.
+     *
+     *  The concrete dim rpc implementation
+     */
+     class Rpc : public DimRpc
+     {
+     public:
+       /**
+        * Contructor
+        */
+       Rpc(RequestHandler *pHandler);
+
+       /**
+        * The dim rpc handler
+        */
+       void rpcHandler();
+
+     private:
+       RequestHandler        *m_pHandler;     ///< The request handler owner instance
+     };
+
+     friend class Rpc;
+
+    private:
+      /**
+       * [handleRequest description]
+       * @param request  [description]
+       * @param response [description]
+       */
+      void handleRequest(const std::string &request, std::string &response);
+
+    private:
+      std::string                     m_name;             ///< The request handler name
+      Server                         *m_pServer;          ///< The server in which the request handler is declared
+      RequestSignal                   m_requestSignal;
+      Rpc                            *m_pRpc;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
-    /**
-     * CommandHandler template class
-     *
-     * Base template class for request handlers. Can only by create by a Server
-     * using the Server::createRequestHandler() method
-     */
-    template <typename T>
-    class CommandHandler : public BaseRequestHandler
+    template <typename Controller>
+    inline RequestHandler::RequestHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &request, std::string &response)) :
+      m_name(name),
+      m_pServer(pServer),
+      m_pRpc(nullptr)
+    {
+      m_requestSignal.connect(pController, function);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    class CommandHandler
     {
       friend class Server;
-      template <typename S, typename U> friend class CommandHandlerT;
     public:
+      typedef Signal<const std::string &> CommandSignal;
+
+      /**
+       * Get the request name
+       */
+      const std::string &name() const;
+
+      /**
+       * Get the server in which the request handler is declared
+       */
+      Server *server() const;
+
+    private:
       /**
        * Constructor
        *
-       * @param pServer the server managing the command handler
-       * @param name the command handler name
+       * @param pServer the server managing the request handler
+       * @param name the request handler name
+       */
+      template <typename Controller>
+      CommandHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command));
+
+      /**
+       * Constructor
+       *
+       * @param pServer the server managing the request handler
+       * @param name the request handler name
        */
       CommandHandler(Server *pServer, const std::string &name);
 
       /**
        * Destructor
        */
-      virtual ~CommandHandler();
+      ~CommandHandler();
 
       /**
-       * Process the command.
-       * Supported response types are :
-       *  - int
-       *  - float
-       *  - double
-       *  - std::string
-       *  - Json::Value
-       *  - Buffer (see Buffer struct)
-       *
-       * @param command the command to process
+       * Create the actual request handler connection
        */
-      virtual void processCommand(const T &command) = 0;
-
-     private:
-      /** Command class.
-      *
-      *  The concrete dim command implementation
-      */
-      class Command : public DimCommand
-      {
-      public:
-        /**
-         * Contructor
-         */
-        Command(CommandHandler<T> *pHandler);
-
-        /**
-         * The dim rpc handler
-         */
-        void commandHandler();
-
-      private:
-        CommandHandler<T>        *m_pHandler;     ///< The command handler owner instance
-      };
+      void startHandlingCommands();
 
       /**
-       * Process the dim command request
-       *
-       * @param pCommand the command pointer to process
+       * Remove the actual request handler connection
        */
-      void processCommand(Command *pCommand);
-
-      void startHandlingRequest();
-      void stopHandlingRequest();
-      bool isHandlingRequest() const;
-
-    private:
-      Command                   *m_pCommand;           ///< The concrete dim command implementation
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /**
-     * CommandHandlerT template class
-     *
-     * Final implementation for handling commands
-     * Supported response T types are :
-     *  - int
-     *  - float
-     *  - double
-     *  - std::string
-     *  - Json::Value
-     *  - Buffer (see Buffer struct)
-     *
-     *  The template argument S can be any class.
-     */
-    template <typename T, typename S>
-    class CommandHandlerT : public CommandHandler<T>
-    {
-      friend class Server;
-    public:
-      typedef void (S::*CommandFunction)(const T &command);
+      void stopHandlingCommands();
 
       /**
-       * Process the command.
-       * Forward the command processing to the controller.
+       * Whether the request handler is connected
        */
-      void processCommand(const T &response);
-
-    private:
-      /**
-       * Constructor with command type and name
-       *
-       * @param pServer the server owning the command handler
-       * @param type the command handler type
-       * @param name the command handler name
-       * @param pController the class instance that will handle the command
-       * @param function the class method that will treat the command
-       */
-      CommandHandlerT(Server *pServer, const std::string &name,
-          S *controller, CommandFunction callback);
-
-    private:
-      S                    *m_pController;         ///< The command controller
-      CommandFunction       m_function;            ///< The controller callback function
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /**
-     * RequestHandler template class
-     *
-     * Base template class for request handlers. Can only by create by a Server
-     * using the Server::createRequestHandler() method
-     */
-    template <typename T>
-    class RequestHandler : public BaseRequestHandler
-    {
-      friend class Server;
-      template <typename S, typename U> friend class RequestHandlerT;
-    public:
-      /**
-       * Constructor
-       *
-       * @param pServer the server managing the request handler
-       * @param name the request handler name
-       */
-      RequestHandler(Server *pServer, const std::string &name);
+      bool isHandlingCommands() const;
 
       /**
-       * Destructor
-       */
-      virtual ~RequestHandler();
-
-      /**
-       * Process the request and fill the response
-       * Supported response types are :
-       *  - int
-       *  - float
-       *  - double
-       *  - std::string
-       *  - Json::Value
-       *  - Buffer (see Buffer struct)
-       *
-       * @param request the json value describing the request to process
-       * @param response the reponse the send back
-       */
-      virtual void processRequest(const Json::Value &request, T &response) = 0;
-
-     private:
-      /** Rpc class.
-      *
-      *  The concrete dim rpc implementation
-      */
-      class Rpc : public DimRpc
-      {
-      public:
-        /**
-         * Contructor
-         */
-        Rpc(RequestHandler<T> *pHandler);
-
-        /**
-         * The dim rpc handler
-         */
-        void rpcHandler();
-
-      private:
-        RequestHandler<T>        *m_pHandler;     ///< The request handler owner instance
-      };
-
-      /**
-       * Process the dim rpc request
-       *
-       * @param pRpc the rpc pointer to process
-       */
-      void processRequest(Rpc *pRpc);
-
-      void startHandlingRequest();
-      void stopHandlingRequest();
-      bool isHandlingRequest() const;
-
-    private:
-      Rpc                   *m_pRpc;              ///< The concrete dim rpc implementation
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /**
-     * RequestHandlerT template class
-     *
-     * Final implementation for handling requests
-     * Supported response T types are :
-     *  - int
-     *  - float
-     *  - double
-     *  - std::string
-     *  - Json::Value
-     *  - Buffer (see Buffer struct)
-     *
-     *  The template argument S can be any class.
-     */
-    template <typename T, typename S>
-    class RequestHandlerT : public RequestHandler<T>
-    {
-      friend class Server;
-    public:
-      typedef void (S::*RequestFunction)(const Json::Value &request, T &response);
-
-      /**
-       * Process the request and fill the response.
-       * Forward the request processing to the controller.
-       */
-      void processRequest(const Json::Value &request, T &response);
-
-      /**
-       * [controller description]
+       * [onRequest description]
        * @return [description]
        */
-      const S *controller() const;
+      CommandSignal &onCommand();
 
-      /**
-       * [function description]
-       * @return [description]
-       */
-      const RequestFunction function() const;
+    private:
+     /** Command class.
+     *
+     *  The concrete dim command implementation
+     */
+     class Command : public DimCommand
+     {
+     public:
+       /**
+        * Contructor
+        */
+       Command(CommandHandler *pHandler);
+
+       /**
+        * The dim command handler
+        */
+       void commandHandler();
+
+     private:
+       CommandHandler        *m_pHandler;     ///< The request handler owner instance
+     };
+
+     friend class Command;
 
     private:
       /**
-       * Constructor with request type and name
-       *
-       * @param pServer the server owning the request handler
-       * @param name the request handler name
-       * @param pController the class instance that will handle the request
-       * @param function the class method that will treat the request and provide a response
+       * [handleCommand description]
+       * @param request  [description]
+       * @param response [description]
        */
-      RequestHandlerT(Server *pServer, const std::string &name,
-          S *controller, RequestFunction callback);
+      void handleCommand(const std::string &command);
 
     private:
-      S                    *m_pController;         ///< The request controller
-      RequestFunction       m_function;            ///< The controller callback function
+      std::string                     m_name;             ///< The command handler name
+      Server                         *m_pServer;          ///< The server in which the command handler is declared
+      CommandSignal                   m_commandSignal;
+      Command                         *m_pCommand;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T>
-    inline CommandHandler<T>::Command::Command(CommandHandler<T> *pHandler) :
-        DimCommand(pHandler->name().c_str(), "C"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline CommandHandler<int>::Command::Command(CommandHandler<int> *pHandler) :
-        DimCommand(pHandler->name().c_str(), "I"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline CommandHandler<float>::Command::Command(CommandHandler<float> *pHandler) :
-        DimCommand(pHandler->name().c_str(), "F"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline CommandHandler<double>::Command::Command(CommandHandler<double> *pHandler) :
-        DimCommand(pHandler->name().c_str(), "D"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline CommandHandler<Buffer>::Command::Command(CommandHandler<Buffer> *pHandler) :
-        DimCommand(pHandler->name().c_str(), "I:C"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void CommandHandler<T>::Command::commandHandler()
-    {
-      m_pHandler->processCommand(this);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline RequestHandler<T>::Rpc::Rpc(RequestHandler<T> *pHandler) :
-        DimRpc(pHandler->name().c_str(), "C", "C"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline RequestHandler<int>::Rpc::Rpc(RequestHandler<int> *pHandler) :
-        DimRpc(pHandler->name().c_str(), "C", "I"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline RequestHandler<float>::Rpc::Rpc(RequestHandler<float> *pHandler) :
-        DimRpc(pHandler->name().c_str(), "C", "F"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline RequestHandler<double>::Rpc::Rpc(RequestHandler<double> *pHandler) :
-        DimRpc(pHandler->name().c_str(), "C", "D"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline RequestHandler<Buffer>::Rpc::Rpc(RequestHandler<Buffer> *pHandler) :
-        DimRpc(pHandler->name().c_str(), "C", "I:C"),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void RequestHandler<T>::Rpc::rpcHandler()
-    {
-      m_pHandler->processRequest(this);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline CommandHandler<T>::CommandHandler(Server *pServer, const std::string &name) :
-      BaseRequestHandler(pServer, name),
+    template <typename Controller>
+    inline CommandHandler::CommandHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command)) :
+      m_name(name),
+      m_pServer(pServer),
       m_pCommand(nullptr)
     {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline CommandHandler<T>::~CommandHandler()
-    {
-      if(this->isHandlingRequest())
-        this->stopHandlingRequest();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void CommandHandler<T>::processCommand(Command *pCommand)
-    {
-      char *pContentStr = pCommand->getString();
-
-      if(!pContentStr)
-        return;
-
-      std::string command(pContentStr);
-      this->processCommand(command);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void CommandHandler<Json::Value>::processCommand(Command *pCommand)
-    {
-      char *pContentStr = pCommand->getString();
-
-      if(!pContentStr)
-        return;
-
-      Json::Reader reader;
-      Json::Value command;
-
-      bool parsingSuccessful = reader.parse(pContentStr, command);
-
-      if(!parsingSuccessful)
-        return;
-
-      this->processCommand(command);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void CommandHandler<Buffer>::processCommand(Command *pCommand)
-    {
-      const Buffer *pBuffer = (Buffer*) pCommand->getData();
-
-      if(!pBuffer)
-        return;
-
-      if(!pBuffer->m_pBuffer || pBuffer->m_bufferSize == 0)
-        return;
-
-      this->processCommand(*pBuffer);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void CommandHandler<int>::processCommand(Command *pCommand)
-    {
-      this->processCommand(pCommand->getInt());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void CommandHandler<float>::processCommand(Command *pCommand)
-    {
-      this->processCommand(pCommand->getFloat());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void CommandHandler<double>::processCommand(Command *pCommand)
-    {
-      this->processCommand(pCommand->getDouble());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void CommandHandler<T>::startHandlingRequest()
-    {
-      if(this->isHandlingRequest())
-        return;
-
-      m_pCommand = new Command(this);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void CommandHandler<T>::stopHandlingRequest()
-    {
-      if(!this->isHandlingRequest())
-        return;
-
-      delete m_pCommand;
-      m_pCommand = nullptr;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline bool CommandHandler<T>::isHandlingRequest() const
-    {
-      return (m_pCommand != nullptr);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline RequestHandler<T>::RequestHandler(Server *pServer, const std::string &name) :
-      BaseRequestHandler(pServer, name),
-      m_pRpc(nullptr)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline RequestHandler<T>::~RequestHandler()
-    {
-      if(this->isHandlingRequest())
-        this->stopHandlingRequest();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void RequestHandler<T>::processRequest(Rpc *pRpc)
-    {
-      char *pContentStr = pRpc->getString();
-
-      if(!pContentStr)
-        return;
-
-      Json::Reader reader;
-      Json::Value request;
-
-      bool parsingSuccessful = reader.parse(pContentStr, request);
-
-      if(!parsingSuccessful)
-        return;
-
-      bool requireResponse(request.get("response", true).asBool());
-      Json::Value userRequest(request.get("request", Json::Value()));
-      T response;
-
-      this->processRequest(userRequest, response);
-
-      if(requireResponse)
-        pRpc->setData(response);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void RequestHandler<Json::Value>::processRequest(Rpc *pRpc)
-    {
-      char *pContentStr = pRpc->getString();
-
-      if(!pContentStr)
-        return;
-
-      Json::Reader reader;
-      Json::Value request;
-
-      bool parsingSuccessful = reader.parse(pContentStr, request);
-
-      if(!parsingSuccessful)
-        return;
-
-      bool requireResponse(request.get("response", true).asBool());
-      Json::Value userRequest(request.get("request", Json::Value()));
-      Json::Value response;
-
-      this->processRequest(userRequest, response);
-
-      if(requireResponse)
-      {
-        Json::FastWriter writer;
-        std::string responseStr = writer.write(response);
-        pRpc->setData(const_cast<char*>(responseStr.c_str()));
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void RequestHandler<Buffer>::processRequest(Rpc *pRpc)
-    {
-      char *pContentStr = pRpc->getString();
-
-      if(!pContentStr)
-        return;
-
-      Json::Reader reader;
-      Json::Value request;
-
-      bool parsingSuccessful = reader.parse(pContentStr, request);
-
-      if(!parsingSuccessful)
-        return;
-
-      bool requireResponse(request.get("response", true).asBool());
-      Json::Value userRequest(request.get("request", Json::Value()));
-      Buffer response;
-
-      this->processRequest(userRequest, response);
-
-      if(requireResponse)
-        pRpc->setData((void*)&response, sizeof(uint32_t) + response.m_bufferSize);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void RequestHandler<std::string>::processRequest(Rpc *pRpc)
-    {
-      char *pContentStr = pRpc->getString();
-
-      if(!pContentStr)
-        return;
-
-      Json::Reader reader;
-      Json::Value request;
-
-      bool parsingSuccessful = reader.parse(pContentStr, request);
-
-      if(!parsingSuccessful)
-        return;
-
-      bool requireResponse(request.get("response", true).asBool());
-      Json::Value userRequest(request.get("request", Json::Value()));
-      std::string response;
-
-      this->processRequest(userRequest, response);
-
-      if(requireResponse)
-        pRpc->setData(const_cast<char*>(response.c_str()));
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void RequestHandler<T>::startHandlingRequest()
-    {
-      if(this->isHandlingRequest())
-        return;
-
-      m_pRpc = new Rpc(this);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void RequestHandler<T>::stopHandlingRequest()
-    {
-      if(!this->isHandlingRequest())
-        return;
-
-      delete m_pRpc;
-      m_pRpc = nullptr;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline bool RequestHandler<T>::isHandlingRequest() const
-    {
-      return (m_pRpc != nullptr);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline RequestHandlerT<T,S>::RequestHandlerT(Server *pServer, const std::string &name, S *pController, RequestFunction function) :
-        RequestHandler<T>(pServer, name),
-        m_pController(pController),
-        m_function(function)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline void RequestHandlerT<T,S>::processRequest(const Json::Value &request, T &response)
-    {
-      (m_pController->*m_function)(request, response);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline const S *RequestHandlerT<T,S>::controller() const
-    {
-      return m_pController;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline const typename RequestHandlerT<T,S>::RequestFunction RequestHandlerT<T,S>::function() const
-    {
-      return m_function;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline CommandHandlerT<T,S>::CommandHandlerT(Server *pServer, const std::string &name, S *pController, CommandFunction function) :
-        CommandHandler<T>(pServer, name),
-        m_pController(pController),
-        m_function(function)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline void CommandHandlerT<T,S>::processCommand(const T &command)
-    {
-      (m_pController->*m_function)(command);
+      m_commandSignal.connect(pController, function);
     }
 
   }

@@ -43,16 +43,16 @@ namespace dqm4hep {
   namespace net {
 
     class Client;
-    template <typename S, typename U>
-    class ServiceHandlerT;
 
     /**
-     * BaseServiceHandler class
+     * 
      */
-    class BaseServiceHandler
+    class ServiceHandler
     {
       friend class Client;
     public:
+      typedef Signal<const std::string &> UpdateSignal;
+
       /**
        * Get the service name
        */
@@ -63,48 +63,26 @@ namespace dqm4hep {
        */
       Client *client() const;
 
-    protected:
+      /**
+       * [onServiceUpdate description]
+       * @return [description]
+       */
+      UpdateSignal &onServiceUpdate();
+
+    private:
       /**
        * Constructor
        *
        * @param pClient the client that owns the service handler
        * @param name the service name
        */
-      BaseServiceHandler(Client *pClient, const std::string &name);
+      template <typename Controller>
+      ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &contents));
 
       /**
        * Destructor
        */
-      virtual ~BaseServiceHandler();
-
-    private:
-      std::string                    m_name;             ///< The request handler name
-      Client                        *m_pClient;          ///< The client manager
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /**
-     * ServiceHandler template class
-     *
-     * Supported service types :
-     *  - int
-     *  - float
-     *  - double
-     *  - std::string
-     *  - Json::Value
-     *  - Buffer (see Buffer struct)
-     */
-    template <typename T>
-    class ServiceHandler : public BaseServiceHandler
-    {
-      friend class Client;
-      template <typename S, typename U> friend class ServiceHandlerT;
-    public:
-      /**
-       */
-      virtual void serviceHandler(const T &value) = 0;
+      ~ServiceHandler();
 
     private:
       /** ServiceInfo class.
@@ -123,289 +101,33 @@ namespace dqm4hep {
         void infoHandler();
 
       private:
-        ServiceHandler<T>        *m_pHandler;
+        ServiceHandler        *m_pHandler;
       };
 
-      /** Process the dim rpc request
+      /**
+       * [receiveServiceUpdated description]
+       * @param contents [description]
        */
-      void processService(ServiceInfo *pInfo);
+      void receiveServiceUpdated(const std::string &contents);
 
     private:
-      ServiceHandler(Client *pClient, const std::string &name);
-      virtual ~ServiceHandler();
-
-    private:
+      std::string                    m_name;             ///< The request handler name
+      Client                        *m_pClient;          ///< The client manager
       ServiceInfo                    m_serviceInfo;
+      UpdateSignal                   m_updateSignal;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    /**
-     * ServiceHandlerT template class
-     *
-     * Final concrete service handler implementation. Service handlers
-     * can only be created from a client instance.
-     * Example :
-     *
-     * @code
-     *
-     * void MyClass::myfunction(const int &value) { ... do something ... }
-     *
-     * Client *pClient = new Client();
-     * pClient->subscribe("service-name", pMyClassInstance, &MyClass::myfunction);
-     * @endcode
-     */
-    template <typename T, typename S>
-    class ServiceHandlerT : public ServiceHandler<T>
-    {
-      friend class Client;
-    public:
-      typedef void (S::*Function)(const T &value);
-
-    private:
-      /**
-       * Constructor
-       *
-       * @param pClient the client that owns the service handler
-       * @param name the service name
-       * @param pController the class instance receving the service update
-       * @param function the class method receving the service update
-       */
-      ServiceHandlerT(Client *pClient, const std::string &name,
-          S *pController, Function function);
-
-      /**
-       * Destructor
-       */
-      ~ServiceHandlerT();
-
-      /**
-       * Handle the service update. Callback the user function
-       *
-       * @param value the received value from the service update
-       */
-      void serviceHandler(const T &value);
-
-      /**
-       * [controller description]
-       * @return [description]
-       */
-      const S *controller() const;
-
-      /**
-       * [function description]
-       * @return [description]
-       */
-      const Function function() const;
-
-    private:
-      S            *m_pController;            ///< The user controller instance
-      Function      m_function;               ///< The user controller method
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline ServiceHandlerT<T,S>::ServiceHandlerT(Client *pClient, const std::string &name,
-        S *pController, Function function) :
-        ServiceHandler<T>(pClient, name),
-        m_pController(pController),
-        m_function(function)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline ServiceHandlerT<T,S>::~ServiceHandlerT()
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline void ServiceHandlerT<T,S>::serviceHandler(const T &value)
-    {
-      (m_pController->*m_function)(value);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline const S *ServiceHandlerT<T,S>::controller() const
-    {
-      return m_pController;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline const typename ServiceHandlerT<T,S>::Function ServiceHandlerT<T,S>::function() const
-    {
-      return m_function;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline ServiceHandler<T>::ServiceInfo::ServiceInfo(ServiceHandler<T> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), const_cast<char*>(std::string("{}").c_str())),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline ServiceHandler<int>::ServiceInfo::ServiceInfo(ServiceHandler<int> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), int(0)),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline ServiceHandler<double>::ServiceInfo::ServiceInfo(ServiceHandler<double> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), double(0.)),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline ServiceHandler<float>::ServiceInfo::ServiceInfo(ServiceHandler<float> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), float(0.)),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline ServiceHandler<std::string>::ServiceInfo::ServiceInfo(ServiceHandler<std::string> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), (char*)""),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline ServiceHandler<Json::Value>::ServiceInfo::ServiceInfo(ServiceHandler<Json::Value> *pHandler) :
-        DimUpdatedInfo(const_cast<char*>(pHandler->name().c_str()), (char*)""),
-        m_pHandler(pHandler)
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline ServiceHandler<T>::ServiceHandler(Client *pClient,  const std::string &name) :
-      BaseServiceHandler(pClient, name),
+    template <typename Controller>
+    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &contents)) :
+      m_name(name),
+      m_pClient(pClient),
       m_serviceInfo(this)
     {
-      /* nop */
+      m_updateSignal.connect(pController, function);
     }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline ServiceHandler<T>::~ServiceHandler()
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void ServiceHandler<T>::ServiceInfo::infoHandler()
-    {
-      m_pHandler->processService(this);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline void ServiceHandler<T>::processService(ServiceInfo *pInfo)
-    {
-      throw std::runtime_error("ServiceHandler<T>::processService(): unknown service type");
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void ServiceHandler<int>::processService(ServiceInfo *pInfo)
-    {
-      this->serviceHandler(pInfo->getInt());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void ServiceHandler<float>::processService(ServiceInfo *pInfo)
-    {
-      this->serviceHandler(pInfo->getFloat());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void ServiceHandler<double>::processService(ServiceInfo *pInfo)
-    {
-      this->serviceHandler(pInfo->getDouble());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void ServiceHandler<std::string>::processService(ServiceInfo *pInfo)
-    {
-      this->serviceHandler(pInfo->getString());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void ServiceHandler<Buffer>::processService(ServiceInfo *pInfo)
-    {
-      Buffer *buffer = (Buffer*) pInfo->getData();
-
-      if(!buffer)
-        return;
-
-      if(buffer->m_bufferSize == 0 || buffer->m_pBuffer == 0)
-        return;
-
-      this->serviceHandler(*buffer);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void ServiceHandler<Json::Value>::processService(ServiceInfo *pInfo)
-    {
-      Json::Reader reader;
-      Json::Value serviceValue;
-
-      reader.parse(pInfo->getString(), serviceValue);
-      this->serviceHandler(serviceValue);
-    }
-
-    //-------------------------------------------------------------------------------------------------
 
   }
 

@@ -52,24 +52,42 @@ namespace dqm4hep {
 
     void Client::queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const
     {
-      this->sendRequest("/" + serverName + "/info", Json::Value(), serverInfo);
+      std::string value;
+      this->sendRequest("/" + serverName + "/info", "", value);
+
+      Json::Reader reader;
+      reader.parse(value, serverInfo);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Client::sendRequest(const std::string &name, const Json::Value &request) const
+    void Client::sendRequest(const std::string &name, const std::string &request) const
     {
-      std::string emptyJson("{}");
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), const_cast<char*>(emptyJson.c_str()));
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (char*)"");
+      rpcInfo.setData(const_cast<char*>(request.c_str()));
+    }
 
-      // Json::Value message;
-      Json::Value message;
-      message["response"] = false;
-      message["request"] = request;
-      Json::FastWriter writer;
-      std::string messageStr(writer.write(message));
+    //-------------------------------------------------------------------------------------------------
 
-      rpcInfo.setData(const_cast<char*>(messageStr.c_str()));
+    void Client::sendRequest(const std::string &name, const std::string &request, std::string &response) const
+    {
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (char*)"");
+      rpcInfo.setData(const_cast<char*>(request.c_str()));
+      response = rpcInfo.getString();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Client::sendCommand(const std::string &name, const std::string &command, bool blocking) const
+    {
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(name.c_str()), (char*)command.c_str());
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (char*)command.c_str());
+      }
     }
 
     //-------------------------------------------------------------------------------------------------

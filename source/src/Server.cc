@@ -81,8 +81,8 @@ namespace dqm4hep {
 
       for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
       {
-        if(!iter->second->isHandlingRequest())
-          iter->second->startHandlingRequest();
+        if(!iter->second->isHandlingCommands())
+          iter->second->startHandlingCommands();
       }
 
       if(!m_serverInfoHandler.isHandlingRequest())
@@ -113,8 +113,8 @@ namespace dqm4hep {
 
       for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
       {
-        if(iter->second->isHandlingRequest())
-          iter->second->stopHandlingRequest();
+        if(iter->second->isHandlingCommands())
+          iter->second->stopHandlingCommands();
       }
 
       if(m_serverInfoHandler.isHandlingRequest())
@@ -153,6 +153,38 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    Service *Server::createService(const std::string &name)
+    {
+      if(name.empty())
+        throw std::runtime_error("Server::createService(): service name is invalid");
+
+      auto findIter = m_serviceMap.find(name);
+
+      if(findIter != m_serviceMap.end())
+        return findIter->second;
+
+      if(Server::serviceAlreadyRunning(name))
+        throw std::runtime_error("Server::createService(): service '" + name + "' already running on network");
+
+      // first insert nullptr, then create the service
+      std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(name, nullptr));
+
+      if(inserted.second)
+      {
+        Service *pService = new Service(this, name);
+        inserted.first->second = pService;
+
+        if(this->isRunning())
+          pService->connectService();
+
+        return pService;
+      }
+      else
+        throw;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     bool Server::isServiceRegistered(const std::string &name) const
     {
       return (m_serviceMap.find(name) != m_serviceMap.end());
@@ -176,7 +208,7 @@ namespace dqm4hep {
 
     void Server::startService(const std::string &name)
     {
-      BaseService *pService = this->service(name);
+      Service *pService = this->service(name);
 
       if(nullptr != pService && !pService->isServiceConnected())
         pService->connectService();
@@ -186,7 +218,7 @@ namespace dqm4hep {
 
     void Server::stopService(const std::string &name)
     {
-      BaseService *pService = this->service(name);
+      Service *pService = this->service(name);
 
       if(nullptr != pService && pService->isServiceConnected())
         pService->disconnectService();
@@ -196,7 +228,7 @@ namespace dqm4hep {
 
     void Server::startRequestHandler(const std::string &name)
     {
-      BaseRequestHandler *pRequestHandler = this->requestHandler(name);
+      RequestHandler *pRequestHandler = this->requestHandler(name);
 
       if(nullptr != pRequestHandler && !pRequestHandler->isHandlingRequest())
         pRequestHandler->startHandlingRequest();
@@ -206,7 +238,7 @@ namespace dqm4hep {
 
     void Server::stopRequestHandler(const std::string &name)
     {
-      BaseRequestHandler *pRequestHandler = this->requestHandler(name);
+      RequestHandler *pRequestHandler = this->requestHandler(name);
 
       if(nullptr != pRequestHandler && pRequestHandler->isHandlingRequest())
         pRequestHandler->stopHandlingRequest();
@@ -216,25 +248,25 @@ namespace dqm4hep {
 
     void Server::startCommandHandler(const std::string &name)
     {
-      BaseRequestHandler *pCommandHandler = this->commandHandler(name);
+      CommandHandler *pCommandHandler = this->commandHandler(name);
 
-      if(nullptr != pCommandHandler && !pCommandHandler->isHandlingRequest())
-        pCommandHandler->startHandlingRequest();
+      if(nullptr != pCommandHandler && !pCommandHandler->isHandlingCommands())
+        pCommandHandler->startHandlingCommands();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     void Server::stopCommandHandler( const std::string &name)
     {
-      BaseRequestHandler *pCommandHandler = this->commandHandler(name);
+      CommandHandler *pCommandHandler = this->commandHandler(name);
 
-      if(nullptr != pCommandHandler && pCommandHandler->isHandlingRequest())
-        pCommandHandler->stopHandlingRequest();
+      if(nullptr != pCommandHandler && pCommandHandler->isHandlingCommands())
+        pCommandHandler->stopHandlingCommands();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseService *Server::service(const std::string &name) const
+    Service *Server::service(const std::string &name) const
     {
       auto findIter = m_serviceMap.find(name);
       return (findIter == m_serviceMap.end() ? nullptr : findIter->second);
@@ -242,7 +274,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseRequestHandler *Server::requestHandler(const std::string &name) const
+    RequestHandler *Server::requestHandler(const std::string &name) const
     {
       auto findIter = m_requestHandlerMap.find(name);
       return (findIter == m_requestHandlerMap.end() ? nullptr : findIter->second);
@@ -250,7 +282,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    BaseRequestHandler *Server::commandHandler(const std::string &name) const
+    CommandHandler *Server::commandHandler(const std::string &name) const
     {
       auto findIter = m_commandHandlerMap.find(name);
       return (findIter == m_commandHandlerMap.end() ? nullptr : findIter->second);
@@ -316,11 +348,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::handleServerInfoRequest(const Json::Value &/*request*/, Json::Value &response)
+    void Server::handleServerInfoRequest(const std::string &/*request*/, std::string &response)
     {
-      Json::Value serverInfo;
+      Json::Value responseValue, serverInfo;
       serverInfo["name"] = m_name;
-      response["server"] = serverInfo;
+      responseValue["server"] = serverInfo;
 
       // uname
       struct utsname unameStruct;
@@ -337,7 +369,7 @@ namespace dqm4hep {
       hostInfo["release"] = unameStruct.release;
       hostInfo["version"] = unameStruct.version;
       hostInfo["machine"] = unameStruct.machine;
-      response["host"] = hostInfo;
+      responseValue["host"] = hostInfo;
 
       Json::Value serviceList(Json::arrayValue);
       unsigned int index(0);
@@ -349,7 +381,7 @@ namespace dqm4hep {
         ++index;
       }
 
-      response["services"] = serviceList;
+      responseValue["services"] = serviceList;
 
       Json::Value requestHandlerList;
       index = 0;
@@ -361,7 +393,7 @@ namespace dqm4hep {
         ++index;
       }
 
-      response["requestHandlers"] = requestHandlerList;
+      responseValue["requestHandlers"] = requestHandlerList;
 
       Json::Value commandHandlerList;
       index = 0;
@@ -374,7 +406,10 @@ namespace dqm4hep {
         ++index;
       }
 
-      response["commandHandlers"] = commandHandlerList;
+      responseValue["commandHandlers"] = commandHandlerList;
+
+      Json::FastWriter writer;
+      response = writer.write(responseValue);
     }
 
     //-------------------------------------------------------------------------------------------------
