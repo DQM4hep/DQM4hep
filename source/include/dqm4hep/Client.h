@@ -172,7 +172,7 @@ namespace dqm4hep {
     inline void Client::sendRequest(const std::string &name, const Request &request, Response &response) const
     {
       DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      std::string contents;
+      std::string contents, contentResponse;
 
       if(!convert<Request>::encode(contents, request))
         throw; // TODO implement exceptions
@@ -182,12 +182,10 @@ namespace dqm4hep {
       char *data = (char*)rpcInfo.getData();
       int size = rpcInfo.getSize();
 
-      if(nullptr == data || size == 0)
-        return;
+      if(nullptr != data && size != 0)
+        contentResponse.assign(data, size);
 
-      contents.assign(data, size);
-
-      if(!convert<Response>::decode(contents, response))
+      if(!convert<Response>::decode(contentResponse, response))
         throw; // TODO implement exceptions
     }
 
@@ -203,11 +201,11 @@ namespace dqm4hep {
 
       if(blocking)
       {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)command.c_str(), contents.size());
+        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)contents.c_str(), contents.size());
       }
       else
       {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)command.c_str(), contents.size());
+        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)contents.c_str(), contents.size());
       }
     }
 

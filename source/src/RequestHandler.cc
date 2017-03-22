@@ -111,14 +111,14 @@ namespace dqm4hep {
       {
         char *data = (char*)this->getData();
         int size = this->getSize();
+        std::string request;
 
-        if(nullptr == data || size == 0)
-          return;
+        if(nullptr != data && size != 0)
+          request.assign(data, size);
 
-        std::string request(data, size);
         std::string response;
         m_pHandler->handleRequest(request, response);
-        this->setData((char*)response.c_str());
+        this->setData((void*)response.c_str(), response.size());
       }
 
       //-------------------------------------------------------------------------------------------------
@@ -209,7 +209,13 @@ namespace dqm4hep {
 
       void CommandHandler::Command::commandHandler()
       {
-        std::string command = this->getString();
+        char *data = (char*)this->getData();
+        int size = this->getSize();
+
+        if(nullptr == data || size == 0)
+          return;
+
+        std::string command(data, size);
         m_pHandler->handleCommand(command);
       }
 
