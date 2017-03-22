@@ -38,6 +38,8 @@
 #include <typeinfo>
 #include <cstring>
 
+#include "json/json.h"
+
 namespace dqm4hep {
 
   namespace net {
@@ -116,6 +118,24 @@ namespace dqm4hep {
         return input == ".nan" || input == ".NaN" || input == ".NAN";
       }
     }
+
+    // Json::Value spec
+    template <>
+    struct convert<Json::Value>
+    {
+      static bool encode(std::string &lhs, const Json::Value &rhs)
+      {
+        Json::FastWriter writer;
+        lhs = writer.write(rhs);
+        return true;
+      }
+
+      static bool decode(const std::string &lhs, Json::Value &rhs)
+      {
+        Json::Reader reader;
+        return reader.parse(lhs, rhs);
+      }
+    };
 
     // Buffer spec
     template <>
