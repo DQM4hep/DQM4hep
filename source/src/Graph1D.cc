@@ -380,12 +380,6 @@ namespace dqm4hep {
       if(full || m_updateCache.test(TITLE))
         value["title"] = m_title;
 
-      if(full)
-      {
-        value["min"] = m_minimum;
-        value["max"] = m_maximum;
-      }
-
       if(full || m_updateCache.test(AXIS_X))
       {
         Json::Value axis;
