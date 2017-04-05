@@ -156,6 +156,17 @@ INSTALL (
     RUNTIME DESTINATION bin
 )
 
+# -------------------------------------------------
+# build run control server executable
+
+ADD_EXECUTABLE( dqm4hep-start-log-collector main/dqm4hep-start-log-collector.cc )
+TARGET_LINK_LIBRARIES( dqm4hep-start-log-collector ${PROJECT_NAME} )
+
+INSTALL (
+    TARGETS dqm4hep-start-log-collector
+    RUNTIME DESTINATION bin
+)
+
 
 # -------------------------------------------------
 # build start shm driver executable
@@ -164,7 +175,7 @@ IF( BUILD_EVB )
 
 	ADD_EXECUTABLE( dqm4hep_start_shm_driver main/dqm4hep_start_shm_driver.cc )
 	TARGET_LINK_LIBRARIES( dqm4hep_start_shm_driver ${PROJECT_NAME} )
-	
+
 	INSTALL (
 	    TARGETS dqm4hep_start_shm_driver
 	    RUNTIME DESTINATION bin
@@ -186,8 +197,8 @@ IF( BUILD_EXAMPLES )
         TARGETS RandomModuleExample
         LIBRARY DESTINATION lib
     )
-    
-    
+
+
     ADD_SHARED_LIBRARY( StandaloneRandomModuleExample examples/module/standaloneRandom/StandaloneRandomModule.cc )
     TARGET_LINK_LIBRARIES( StandaloneRandomModuleExample ${PROJECT_NAME} )
 
@@ -195,9 +206,7 @@ IF( BUILD_EXAMPLES )
         TARGETS StandaloneRandomModuleExample
         LIBRARY DESTINATION lib
     )
-  
+
 ENDIF()
 
-INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" )
-
-
+INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )

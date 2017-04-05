@@ -71,6 +71,9 @@ FIND_PACKAGE( LOG4CXX REQUIRED )
 # ----- Find JSONCPP package -----
 FIND_PACKAGE( JSONCPP REQUIRED )
 
+# ----- Find DQMNet package -----
+FIND_PACKAGE( DQMNet REQUIRED )
+
 # ----- Find Mongoose package -----
 FIND_PACKAGE( Mongoose QUIET )
 
@@ -91,7 +94,7 @@ ENDIF()
 
 
 # ----- Include package properties -----
-FOREACH( pkg ROOT DIM MySQL xdrstream LOG4CXX JSONCPP )
+FOREACH( pkg ROOT DIM MySQL xdrstream LOG4CXX DQMNet JSONCPP )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
