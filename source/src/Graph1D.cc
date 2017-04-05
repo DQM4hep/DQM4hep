@@ -43,6 +43,8 @@ namespace dqm4hep {
       /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     Graph1D::Point::Point(float x, float y) :
       m_x(x),
       m_xErrLow(0.f),
@@ -51,9 +53,10 @@ namespace dqm4hep {
       m_yErrLow(0.f),
       m_yErrUp(0.f)
     {
-
+      /* nop */
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     Graph1D::Point::Point(float x, float y, float ex, float ey) :
       m_x(x),
@@ -63,8 +66,10 @@ namespace dqm4hep {
       m_yErrLow(ey),
       m_yErrUp(ey)
     {
-
+      /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     Graph1D::Point::Point(float x, float y, float exl, float exu, float eyl, float eyu) :
       m_x(x),
@@ -74,7 +79,7 @@ namespace dqm4hep {
       m_yErrLow(eyl),
       m_yErrUp(eyu)
     {
-
+      /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
