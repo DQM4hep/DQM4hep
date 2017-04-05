@@ -436,6 +436,8 @@ namespace dqm4hep {
         value["points"] = pointsValue;
       }
 
+      if(resetCache)
+        m_updateCache.reset();
     }
 
     //-------------------------------------------------------------------------------------------------
