@@ -48,6 +48,9 @@ namespace dqm4hep {
       struct Point
       {
         Point();
+        Point(float x, float y);
+        Point(float x, float y, float ex, float ey);
+        Point(float x, float y, float exl, float exu, float eyl, float eyu);
 
         float m_x;
         float m_xErrLow;
