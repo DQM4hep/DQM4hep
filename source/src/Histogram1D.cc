@@ -604,6 +604,8 @@ namespace dqm4hep {
 
         for(unsigned int bin = this->getMinBinNumber() ; bin <= this->getMaxBinNumber() ; bin++)
           bins[bin] = m_pHistogramBins[bin];
+
+        value["bins"] = bins;
       }
 
       m_updateCache.reset();
