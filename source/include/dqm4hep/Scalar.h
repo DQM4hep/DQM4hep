@@ -94,6 +94,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
+    typedef Scalar<int>            ScalarInt;
+    typedef Scalar<unsigned int>   ScalarUInt;
+    typedef Scalar<float>          ScalarFloat;
+    typedef Scalar<double>         ScalarDouble;
+    typedef Scalar<long>           ScalarLong;
+    typedef Scalar<short>          ScalarShort;
+    typedef Scalar<std::string>    ScalarString;
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
     template <typename ScalarType>
     inline Scalar<ScalarType>::Scalar() :
       m_updated(true),
