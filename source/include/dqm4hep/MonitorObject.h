@@ -72,6 +72,13 @@ namespace dqm4hep {
     class MonitorObject
     {
     public:
+      /**
+       *
+       */
+      template <typename Type>
+      static MonitorObject *create(const Json::Value &value);
+
+    public:
      /**
       * Constructor
       */
@@ -81,6 +88,12 @@ namespace dqm4hep {
       * Destructor
       */
      virtual ~MonitorObject();
+
+     /**
+      * [clear description]
+      * @return [description]
+      */
+     virtual void clear() = 0;
 
      /**
       * Get the update signal.
@@ -126,6 +139,15 @@ namespace dqm4hep {
    private:
       Signal<int>                                   m_updateSignal;
     };
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename Type>
+    inline MonitorObject *MonitorObject::create(const Json::Value &value)
+    {
+      return Type::create(value);
+    }
 
   }
 

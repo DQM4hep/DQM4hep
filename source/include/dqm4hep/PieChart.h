@@ -152,11 +152,6 @@ namespace dqm4hep {
      void removeEntry(const std::string &name);
 
      /**
-      * [clear description]
-      */
-     void clear();
-
-     /**
       * [normalize description]
       */
      void normalize();
@@ -166,7 +161,8 @@ namespace dqm4hep {
      void fromJson(const Json::Value &value);
      void toJson(Json::Value &value, bool full = true, bool resetCache = true);
      MonitorObjectType getType() const;
-
+     void clear();
+     
    private:
      void resetCache();
 

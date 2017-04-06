@@ -85,6 +85,7 @@ namespace dqm4hep {
      void toJson(Json::Value &value, bool full = true, bool resetCache = true);
      bool isUpToDate() const;
      MonitorObjectType getType() const;
+     void clear();
 
    private:
       bool                       m_updated;
@@ -195,6 +196,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename ScalarType>
+    inline void Scalar<ScalarType>::clear()
+    {
+      m_value = 0;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename ScalarType>
     inline MonitorObjectType Scalar<ScalarType>::getType() const
     {
       return UNKNOWN_MONITOR_OBJECT;
@@ -217,6 +226,14 @@ namespace dqm4hep {
     inline std::string Scalar<std::string>::toString() const
     {
       return m_value;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Scalar<std::string>::clear()
+    {
+      m_value.clear();
     }
 
     //-------------------------------------------------------------------------------------------------

@@ -108,16 +108,12 @@ namespace dqm4hep {
        */
       const EntryMap &getEntries() const;
 
-      /**
-      * [clear description]
-      */
-      void clear();
-
       // from monitor object
       bool isUpToDate() const;
       void fromJson(const Json::Value &value);
       void toJson(Json::Value &value, bool full = true, bool resetCache = true);
       MonitorObjectType getType() const;
+      void clear();
 
     private:
       void resetCache();

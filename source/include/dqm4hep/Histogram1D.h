@@ -227,11 +227,6 @@ namespace dqm4hep {
       void scale(const float scaleFactor);
 
       /**
-       * [clear description]
-       */
-      void clear();
-
-      /**
        * [setLineAttributes description]
        * @param attributes [description]
        */
@@ -293,7 +288,8 @@ namespace dqm4hep {
       void toJson(Json::Value &value, bool full = true, bool resetCache = true);
       bool isUpToDate() const;
       MonitorObjectType getType() const;
-
+      void clear();
+      
     private:
       /**
        * Constructor

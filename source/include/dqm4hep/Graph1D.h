@@ -176,11 +176,6 @@ namespace dqm4hep {
       void getPointErrors(int index, float &errorXLow, float &errorXUp, float &errorYLow, float &errorYUp) const;
 
       /**
-       * [clear description]
-       */
-      void clear();
-
-      /**
        * [setLineAttributes description]
        * @param attributes [description]
        */
@@ -232,6 +227,7 @@ namespace dqm4hep {
       void fromJson(const Json::Value &value);
       void toJson(Json::Value &value, bool full = true, bool resetCache = true);
       MonitorObjectType getType() const;
+      void clear();
 
     private:
       std::string                 m_title;
