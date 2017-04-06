@@ -239,6 +239,8 @@ namespace dqm4hep {
       m_drawLegend = value.get("leg", m_drawLegend).asBool();
       m_title = value.get("title", m_title).asString();
 
+      // in any case reset the entries and add the new ones
+      m_entries.clear();
       Json::Value entryValues(value.get("entries", Json::Value()));
 
       for(unsigned int e=0 ; e<entryValues.size() ; e++)
