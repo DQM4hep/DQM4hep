@@ -304,7 +304,7 @@ namespace dqm4hep {
         sum += iter->second.m_value;
 
       for(auto iter = m_entries.begin(), endIter = m_entries.end() ; endIter != iter ; ++iter)
-        iter->second.m_percentage = (iter->second.m_value*sum)/100.f;
+        iter->second.m_percentage = (iter->second.m_value/sum);
     }
 
     //-------------------------------------------------------------------------------------------------
