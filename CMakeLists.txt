@@ -33,7 +33,11 @@ INCLUDE( default_settings )
 ###############################
 # Define options
 
-OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
+OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
+OPTION( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" ON )
+
+# TODO Setup doxygen files
+SET( INSTALL_DOC OFF )
 
 # ----- Find Threads for multithreading -----
 FIND_PACKAGE( Threads REQUIRED )
@@ -68,6 +72,27 @@ IF( INSTALL_DOC )
         MESSAGE( "Please install doxygen or set INSTALL_DOC to OFF" )
         MESSAGE( "" )
     ENDIF()
+ENDIF()
+
+# ----- Build web socket lib -----
+IF( DQMNET_WEBSOCKETS )
+  SET( BOOST_COMPONENTS system coroutine context thread )
+
+  # Late 2017 TODO: remove the following checks and always use std::regex
+  IF( "${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" )
+      IF( CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9 )
+          SET( BOOST_COMPONENTS ${BOOST_COMPONENTS} regex )
+          SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DUSE_BOOST_REGEX" )
+      ENDIF()
+  ENDIF()
+
+  # ----- Boost package -----
+  FIND_PACKAGE( Boost 1.54.0 COMPONENTS ${BOOST_COMPONENTS} REQUIRED )
+  INCLUDE_DIRECTORIES( SYSTEM ${Boost_INCLUDE_DIR} )
+
+  # ----- OpenSSL package -----
+  FIND_PACKAGE( OpenSSL REQUIRED )
+  INCLUDE_DIRECTORIES( ${OPENSSL_INCLUDE_DIR} )
 ENDIF()
 
 ###############################
