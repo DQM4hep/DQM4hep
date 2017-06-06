@@ -338,7 +338,7 @@ dim.DimClient = function (host, port) {
       }
     }
 
-    var message += rpcName;
+    var message = rpcName;
     message += " ".repeat(dim.maxServiceName-rpcName.length);
 
     var rpcUid = guid.getUID().toString();
