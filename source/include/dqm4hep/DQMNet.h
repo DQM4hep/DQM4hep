@@ -298,12 +298,15 @@ namespace dqm4hep {
       }
     };
 
-
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
 
     /**
-    *  @brief SignalBase class.
-    *         Base class to store callback function
-    */
+     *  @brief SignalBase class.
+     *         Base class to store callback function
+     */
     template <typename ...Args>
     class SignalBase
     {
@@ -311,17 +314,22 @@ namespace dqm4hep {
       typedef std::vector<SignalBase<Args...> *>  Vector;
 
       /**
-      *  @brief  Destructor
-      */
+       *  @brief  Destructor
+       */
       virtual ~SignalBase() {}
 
       /**
-      *  @brief  Process the callback
-      */
+       *  @brief  Process the callback
+       */
       virtual void process(Args ...args) = 0;
     };
 
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
 
+    /**
+     *  @brief  SignalBase specialization class for void type (no arg)
+     */
     template <>
     class SignalBase<void>
     {
@@ -329,13 +337,13 @@ namespace dqm4hep {
       typedef std::vector<SignalBase<void> *>  Vector;
 
       /**
-      *  @brief  Destructor
-      */
+       *  @brief  Destructor
+       */
       virtual ~SignalBase() {}
 
       /**
-      *  @brief  Process the callback
-      */
+       *  @brief  Process the callback
+       */
       virtual void process() = 0;
     };
 
@@ -343,8 +351,8 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
 
     /**
-    *  @brief  SignalT class.
-    */
+     *  @brief  SignalT class.
+     */
     template <typename T, typename ...Args>
     class SignalT : public SignalBase<Args ...>
     {
@@ -352,54 +360,45 @@ namespace dqm4hep {
       typedef void (T::*Function)(Args...args);
 
       /**
-      *  @brief  Constructor with
-      */
+       *  @brief  Constructor with
+       */
       SignalT(T *pClass, Function function);
 
       /**
-      *  @brief  Process the callback
-      */
+       *  @brief  Process the callback
+       */
       void process(Args ...args);
 
       /**
-       *
+       *  @brief  Get the class instance
        */
       const T *getClass() const;
 
       /**
-       *
+       *  @brief  Get the callback class method
        */
       const Function getFunction() const;
 
     private:
-      T                 *m_pClass;
-      Function           m_function;
+      T                 *m_pClass;             ///< The class instance
+      Function           m_function;           ///< The callback class method
     };
 
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+
+    /**
+     *  @brief  SignalT specialization for void type (no arg)
+     *  @see    SignalT
+     */
     template <typename T>
     class SignalT<T, void> : public SignalBase<void>
     {
     public:
       typedef void (T::*Function)();
-
-      /**
-      *  @brief  Constructor with
-      */
       SignalT(T *pClass, Function function);
-
-      /**
-      *  @brief  Process the callback
-      */
       void process();
-
-      /**
-       *
-       */
       const T *getClass() const;
-
-      /**
-       *
-       */
       const Function getFunction() const;
 
     private:
@@ -410,58 +409,104 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
 
+    /**
+     *  @brief  SignalT specialization for void type (no class)
+     *  @see    SignalT
+     */
+     template <typename ...Args>
+     class SignalT<void, Args...> : public SignalBase<Args ...>
+     {
+     public:
+       typedef void (*Function)(Args...args);
+       SignalT(Function function);
+       void process(Args ...args);
+       const void *getClass() const;
+       const Function getFunction() const;
+
+     private:
+       Function           m_function;           ///< The callback class method
+     };
+
+     //----------------------------------------------------------------------------------
+     //----------------------------------------------------------------------------------
+
+     /**
+      *  @brief  SignalT specialization for void type (no class and no arg)
+      *  @see    SignalT
+      */
+     template <>
+      class SignalT<void, void> : public SignalBase<void>
+      {
+      public:
+        typedef void (*Function)();
+        SignalT(Function function);
+        void process();
+        const void *getClass() const;
+        const Function getFunction() const;
+
+      private:
+        Function           m_function;           ///< The callback class method
+      };
+
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+
+    /**
+     *  @brief  Signal class. User interface class to use signals
+     */
     template <typename ...Args>
     class Signal
     {
     public:
       /**
-      *
-      */
+       *  @brief  Destructor
+       */
       ~Signal();
 
       /**
-      *
-      */
+       *  @brief  Process the signal. Calls all registered class->method(args...) signal handlers
+       */
       void process(Args ...args);
 
       /**
-      *
-      */
+       *  @brief  Connect a class method to this signal
+       */
       template <typename T, typename S>
       bool connect(T *pClass, S function);
 
       /**
-      *
-      */
+       *  @brief  Disconnect all class methods for a target class instance
+       */
       template <typename T>
       bool disconnect(T *pClass);
 
       /**
-       *
+       *  @brief  Disconnect a target class instance method
        */
       template <typename T, typename S>
       bool disconnect(T *pClass, S function);
 
       /**
-      *
-      */
+       *  @brief  Disconnect all class methods
+       */
       void disconnectAll();
 
       /**
-      *
-      */
+       *  @brief  Whether the class instance has at least one connection
+       *  with this signal
+       */
       template <typename T>
       bool isConnected(T *pClass) const;
 
       /**
-       *
+       *  @brief  Whether the target class method is connected to this signal
        */
       template <typename T, typename S>
       bool isConnected(T *pClass, S function) const;
 
       /**
-      *
-      */
+       *  @brief  Whether this signal has at least one registered class method
+       */
       bool hasConnection() const;
 
     private:
@@ -475,54 +520,27 @@ namespace dqm4hep {
     class Signal<void>
     {
     public:
-      /**
-      *
-      */
       ~Signal();
-
-      /**
-      *
-      */
       void process();
 
-      /**
-      *
-      */
       template <typename T, typename S>
       bool connect(T *pClass, S function);
 
-      /**
-      *
-      */
+
       template <typename T>
       bool disconnect(T *pClass);
 
-      /**
-       *
-       */
       template <typename T, typename S>
       bool disconnect(T *pClass, S function);
 
-      /**
-      *
-      */
       void disconnectAll();
 
-      /**
-      *
-      */
       template <typename T>
       bool isConnected(T *pClass) const;
 
-      /**
-       *
-       */
       template <typename T, typename S>
       bool isConnected(T *pClass, S function) const;
 
-      /**
-      *
-      */
       bool hasConnection() const;
 
     private:
@@ -641,6 +659,8 @@ namespace dqm4hep {
 
       return false;
     }
+
+    //----------------------------------------------------------------------------------
 
     template <typename ...Args>
     template <typename T, typename S>
@@ -866,6 +886,74 @@ namespace dqm4hep {
 
     template <typename T>
     inline const typename SignalT<T, void>::Function SignalT<T, void>::getFunction() const
+    {
+      return m_function;
+    }
+
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+
+    template <typename ...Args>
+    inline SignalT<void, Args...>::SignalT(Function function) :
+      m_function(function)
+    {
+      /* nop */
+    }
+
+    //----------------------------------------------------------------------------------
+
+    template <typename ...Args>
+    inline void SignalT<void, Args...>::process(Args... args)
+    {
+      (*m_function)(args...);
+    }
+
+    //----------------------------------------------------------------------------------
+
+    template <typename ...Args>
+    inline const void *SignalT<void, Args...>::getClass() const
+    {
+      return nullptr;
+    }
+
+    //----------------------------------------------------------------------------------
+
+    template <typename ...Args>
+    inline const typename SignalT<void, Args...>::Function SignalT<void, Args...>::getFunction() const
+    {
+      return m_function;
+    }
+
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+
+    // template <>
+    inline SignalT<void, void>::SignalT(Function function) :
+      m_function(function)
+    {
+      /* nop */
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // template <>
+    inline void SignalT<void, void>::process()
+    {
+      (*m_function)();
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // template <>
+    inline const void *SignalT<void, void>::getClass() const
+    {
+      return nullptr;
+    }
+
+    //----------------------------------------------------------------------------------
+
+    // template <>
+    inline const typename SignalT<void, void>::Function SignalT<void, void>::getFunction() const
     {
       return m_function;
     }
