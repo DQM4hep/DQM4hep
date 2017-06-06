@@ -36,9 +36,6 @@ INCLUDE( default_settings )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
 OPTION( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" ON )
 
-# TODO Setup doxygen files
-SET( INSTALL_DOC OFF )
-
 # ----- Find Threads for multithreading -----
 FIND_PACKAGE( Threads REQUIRED )
 
