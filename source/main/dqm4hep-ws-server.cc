@@ -499,12 +499,6 @@ int main(int argc, char **argv)
   });
 
   std::this_thread::sleep_for(std::chrono::seconds(2));
-
-  auto sendStream = std::make_shared<WsServer::SendStream>();
-  std::cout << "Forward server creation signal !" << std::endl;
-  webServer.forward(connect.get_connections(), sendStream, nullptr);
-
-
   serverThread.join();
 
   return 0;
