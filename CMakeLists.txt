@@ -33,8 +33,8 @@ INCLUDE( default_settings )
 ###############################
 # Define options
 
-OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" ON )
-OPTION( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" ON )
+OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
+OPTION( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" OFF )
 
 # ----- Find Threads for multithreading -----
 FIND_PACKAGE( Threads REQUIRED )
