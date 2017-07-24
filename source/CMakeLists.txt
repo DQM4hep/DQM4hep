@@ -4,7 +4,10 @@
 # Copyright (c) CNRS / IPNL
 #######################################################
 
+ADD_SUBDIRECTORY( ./dim )
+
 # include directories
+INCLUDE_DIRECTORIES( BEFORE dim/include )
 INCLUDE_DIRECTORIES( BEFORE include )
 
 # require proper c++
@@ -17,6 +20,7 @@ ADD_DEFINITIONS("-Wno-long-long -Wreturn-type -Werror")
 AUX_SOURCE_DIRECTORY( src SRC_FILES )
 
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} )
+TARGET_LINK_LIBRARIES( ${PROJECT_NAME} dim_shared )
 
 INSTALL(
         TARGETS ${PROJECT_NAME}
