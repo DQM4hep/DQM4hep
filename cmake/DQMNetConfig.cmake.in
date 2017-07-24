@@ -49,7 +49,7 @@ INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroCheckPackageLibs.cmake" )
 # only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
 # additional components are set by cmake in variable PKG_FIND_COMPONENTS
 # first argument should be the package name
-CHECK_PACKAGE_LIBS( DQMNet DQMNet )
+CHECK_PACKAGE_LIBS( DQMNet DQMNet dim )
 
 
 # ---------- dependencies -----------------------------------------------------
@@ -82,4 +82,3 @@ IF( DQMNet_FOUND )
     ENDIF()
 
 ENDIF()
-
