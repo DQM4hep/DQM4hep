@@ -1,0 +1,110 @@
+--- /Users/antoine/Downloads/dim_v20r13/src/tcpip.c	2015-06-11 16:31:13.000000000 +0200
++++ /opt/dim/src/tcpip.c	2015-06-11 16:51:24.000000000 +0200
+@@ -67,7 +67,7 @@
+ 
+ #endif
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ #include <poll.h>
+ #define MY_FD_ZERO(set)	
+ #define MY_FD_SET(fd, set)		poll_add(fd)
+@@ -448,7 +448,7 @@
+ 	return(1);
+ }
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ int tcpip_get_send_space(int conn_id)
+ {
+ 	int ret, n_bytes;
+@@ -481,7 +481,7 @@
+ }
+ */
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ static struct pollfd *Pollfds = 0;
+ static int Pollfd_size = 0;
+ 
+@@ -538,7 +538,7 @@
+ 	int found = 0;
+ 
+ 	DISABLE_AST
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 	if(fds) {}
+ 	poll_create();
+ #else
+@@ -546,7 +546,7 @@
+ #endif
+ 	for( i = 1; i < Curr_N_Conns; i++ )
+     {
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 		Pollfds[i].fd = -1;
+ #endif
+ 		if( Dna_conns[i].busy )
+@@ -554,7 +554,7 @@
+ 			if(Net_conns[i].channel)
+ 			{
+ 				found = 1;
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 				Pollfds[i].fd = Net_conns[i].channel;
+ #else
+ 				FD_SET( Net_conns[i].channel, fds );
+@@ -571,7 +571,7 @@
+ {
+ 	int	i;
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 	int index = *conn_id;
+ 	if(fds) {}
+ 	index++;
+@@ -820,7 +820,7 @@
+ 		timeout.tv_sec = 0;		/* Don't wait, just poll */
+ 		timeout.tv_usec = 0;
+ 		list_to_fds( &rfds );
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 		selret = poll(Pollfds, Pollfd_size, 0);
+ #else
+ 		selret = select(FD_SETSIZE, &rfds, NULL, NULL, &timeout);
+@@ -883,7 +883,7 @@
+ 		pfds = &rfds;
+ #endif
+ 		MY_FD_SET( DIM_IO_path[0], pfds );
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 		ret = poll(Pollfds, Pollfd_size, -1);
+ #else
+ 		ret = select(FD_SETSIZE, &rfds, NULL, &efds, NULL);
+@@ -1438,7 +1438,7 @@
+ 	 */
+ 	int	wrote, ret, selret;
+ 	int tcpip_would_block();
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 	struct pollfd pollitem;
+ #else
+ 	struct timeval	timeout;
+@@ -1447,7 +1447,7 @@
+ 	
+ 	set_non_blocking(Net_conns[conn_id].channel);
+ /*
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 	tcpip_get_send_space(conn_id);
+ #endif
+ */
+@@ -1470,7 +1470,7 @@
+ 	{
+ 		if(tcpip_would_block(ret))
+ 		{
+-#ifdef __linux__
++#if defined(__linux__) || defined (__APPLE__)
+ 		  pollitem.fd = Net_conns[conn_id].channel;
+ 		  pollitem.events = POLLOUT;
+ 		  pollitem.revents = 0;

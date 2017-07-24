@@ -1,0 +1,17 @@
+--- /Users/antoine/Downloads/dim_v20r13-2/makefile_common	2014-11-10 17:50:38.000000000 +0100
++++ /opt/dimTest/makefile_common	2015-06-15 11:08:20.000000000 +0200
+@@ -96,9 +96,11 @@
+ endif
+ endif
+ ifeq ($(OS),Darwin)
+-	CC = gcc
+-	CXX = g++
+-	SHAREABLE = no
++	CC = clang
++	CXX = clang++
++	LD = clang++
++	SHAREABLE = yes
++	LIBFLAGS += -shared -install_name 
+ 	CFLAGS += -DMIPSEL -DPROTOCOL=1 -Dunix -Dlinux -Ddarwin -fPIC
+ endif
+ 

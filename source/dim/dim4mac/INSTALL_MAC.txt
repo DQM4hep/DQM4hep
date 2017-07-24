@@ -1,0 +1,19 @@
+To compile and install dim properly on macosx>10.10
+
+download dim (http://dim.web.cern.ch)
+extract to a "dim" folder using unzip -a
+
+copy content of dim4mac folder into dim (cp path/to/dim4mac/* /path/to/dim)
+cd dim
+tcsh
+source setupMac.sh ( same procedure as setup.sh + Apply few patches to compile with clang and build shared libraries for mac)
+make all
+
+if you encounter this error when compiling did: 
+	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"
+Check if OpenMotif is installed in /usr/OpenMotif
+If it’s not change MOTIFINC and MOTIFLIB variables in makefile_did accordingly
+if using macport:
+	MOTIFINC = /opt/local/include
+	MOTIFLIB = /opt/local/lib
+

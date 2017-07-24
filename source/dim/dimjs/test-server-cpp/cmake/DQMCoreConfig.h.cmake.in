@@ -1,0 +1,31 @@
+#ifndef DQMCoreConfig_H
+#define DQMCoreConfig_H
+
+// version macros
+#define DQMCore_MAJOR_VERSION @DQMCore_VERSION_MAJOR@
+#define DQMCore_MINOR_VERSION @DQMCore_VERSION_MINOR@
+#define DQMCore_PATCH_LEVEL @DQMCore_VERSION_PATCH@
+
+#define DQMCore_VERSION_STR "@DQMCore_VERSION_MAJOR@.@DQMCore_VERSION_MINOR@.@DQMCore_VERSION_PATCH@"
+// for backward compatibility
+#define DQM4HEP_VERSION_STR "@DQMCore_VERSION_MAJOR@.@DQMCore_VERSION_MINOR@.@DQMCore_VERSION_PATCH@"
+
+#define DQMCore_VERSION_GE( MAJV , MINV , PLEV )  \
+     ( (DQMCore_MAJOR_VERSION > MAJV) || ( (DQMCore_MAJOR_VERSION == MAJV) && (DQMCore_MINOR_VERSION > MINV) ) \
+  || ( (DQMCore_MAJOR_VERSION == MAJV) && (DQMCore_MINOR_VERSION == MINV) && (DQMCore_PATCH_LEVEL >= PLEV) ) )
+
+// project source dir
+// useful for icons
+#define DQMCore_DIR "@CMAKE_INSTALL_PREFIX@"
+// for backward compatibility
+#define DQM4HEP_DIR "@CMAKE_INSTALL_PREFIX@"
+
+
+#ifdef DQM4HEP_USE_ELOG
+#define DQM4HEP_ELOG_EXECUTABLE "@ELOG_EXECUTABLE@"
+#else
+#define DQM4HEP_ELOG_EXECUTABLE ""
+#endif
+
+
+#endif // DQMCoreConfig_H
