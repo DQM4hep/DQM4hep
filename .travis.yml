@@ -3,6 +3,8 @@ language: cpp
 sudo: not required
 
 script:
+  - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew update; fi"
+  - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew install jsoncpp; fi"
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   - mkdir build
   - cd build
