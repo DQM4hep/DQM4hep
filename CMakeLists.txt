@@ -39,14 +39,11 @@ OPTION( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" 
 # ----- Find Threads for multithreading -----
 FIND_PACKAGE( Threads REQUIRED )
 
-# ----- Find DIM package -----
-FIND_PACKAGE( DIM REQUIRED SHARED )
-
 # ----- Find json cpp package -----
 FIND_PACKAGE( JSONCPP REQUIRED )
 
 # ----- Include package properties -----
-FOREACH( pkg DIM JSONCPP )
+FOREACH( pkg JSONCPP )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
