@@ -1,6 +1,8 @@
-
-
-
+#######################################################
+# cmake file for building dim software
+# @author Eté Rémi, DESY
+# Copyright (c) 2017
+#######################################################
 
 ###############################
 # User options for compiling dim
