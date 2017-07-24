@@ -3,12 +3,10 @@ language: cpp
 sudo: not required
 
 script:
-  - ./.travis.d/install_dependencies.sh ${DIM_OS}
-  - export DIMDIR=$PWD/dim
   - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
   - mkdir build
   - cd build
-  - cmake -DDIMDIR=${DIMDIR} ..
+  - cmake ..
   - make install
 
 addons:
@@ -25,12 +23,10 @@ matrix:
   include:
     - os: linux
       compiler: clang
-      env:
-        - DIM_OS=Linux
     - os: linux
       compiler: gcc
-      env:
-        - DIM_OS=Linux
+    - os: osx
+      compiler: clang
 
 notifications:
   email: false
