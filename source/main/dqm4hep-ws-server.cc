@@ -292,7 +292,7 @@ int main(int argc, char **argv)
     Json::Value jsonStream, servicesValue(Json::arrayValue);
     unsigned int index = 0;
 
-    while(type = browser.getNextService(service, format))
+    while( (type = browser.getNextService(service, format)) )
     {
       Json::Value serviceValue;
       serviceValue["service"] = service;
@@ -367,7 +367,7 @@ int main(int argc, char **argv)
     Json::Value jsonStream, servicesValue(Json::arrayValue);
     unsigned int index = 0;
 
-    while(type = browser.getNextServerService(service, format))
+    while( (type = browser.getNextServerService(service, format)) )
     {
       Json::Value serviceValue;
       serviceValue["service"] = service;
