@@ -104,7 +104,7 @@ namespace dqm4hep {
           bptr->data=(char*)&base64[0];
 
           BIO_write(b64, &ascii[0], static_cast<int>(ascii.size()));
-          BIO_flush(b64);
+          (void)BIO_flush(b64);
 
           //To keep &base64[0] through BIO_free_all(b64)
           bptr->length=0;
