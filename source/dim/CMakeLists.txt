@@ -32,10 +32,7 @@ IF( UNIX )
     SET( DIM_EXCFLAGS "${DIM_EXCFLAGS} -Wall -Wextra" )
   ELSE() # MACOSX case
     SET( DIM_ARCH "Darwin" )
-    SET( DIM_CFLAGS "${DIM_CFLAGS} -DMIPSEL -DPROTOCOL=1 -Dunix -Dlinux -Ddarwin -fPIC" )
-
-    # dim requires a patch on MacOSX
-    EXECUTE_PROCESS( COMMAND patch src/tcpip.c dim4mac/tcpip.c.patch )
+    SET( DIM_CFLAGS "${DIM_CFLAGS} -DMIPSEL -DPROTOCOL=1 -Dunix -Ddarwin -fPIC" )
   ENDIF()
 ELSE()
   MESSAGE( SEND_ERROR "UNIX plateform only ! Consider buying a decent OS please ..." )
