@@ -6,14 +6,14 @@ dist: trusty
 
 compilers:
   - gcc
-  - clang
+#  - clang
 
 os:
   - linux
-  - osx
+#  - osx
         
 script:
-  - mkdir build
+  - mkdir -p build
   - cd build  
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP ..
   - make
@@ -33,7 +33,7 @@ env:
     - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH
 
 env:
-  - BUILD_DQMVIZ=ON
+  - BUILD_DQMVIZ=OFF # Travis won't let root recompile with qt enable (build is too long)
   - INSTALL_DOC=ON
   - BUILD_EXAMPLES=ON
   - BUILD_EVB=ON
@@ -42,13 +42,21 @@ env:
 
 matrix:
   include:
-    - os: osx
-      compiler: clang
+#    - os: osx
+#      compiler: clang
     - os: linux
       compiler: gcc
       
 before_install:
   - source .travis/before_install.sh
+  # Downlad&Unpack root binaries (Qt not enable -> No viz)
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd .. && wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then tar -xf root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source root/bin/thisroot.sh; fi
+  # Checking root config
+  - root-config --version
+  - cd -
+
 
 #before_script:
 #  - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
