@@ -87,6 +87,11 @@ make -jN
 
 ### Known bugs
 
+#### When compiling DQM4ILC
+Some combination of ilcutil and gcc version produces error with the default CXX_FLAGS from ilcutil.
+This was resolved in commit https://github.com/iLCSoft/iLCUtil/commit/2c9d897bff08f7e98f4c68dee4f5bc57c8df97e9.
+Either use ilcutil v01-05 (not shipped as of this writing) or replace the `cmakemodules/ilcsoft_default_cxx_flags.cmake` file from your ilcutil folder by the one associtaed with commit https://github.com/iLCSoft/iLCUtil/commit/2c9d897bff08f7e98f4c68dee4f5bc57c8df97e9.
+
 #### On MAC-OSX:
 if you encounter this error when compiling did (dim sub-package) :
 	"./src/did/did.h:1:10: fatal error: 'Mrm/MrmAppl.h' file not found"
