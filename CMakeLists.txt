@@ -351,6 +351,31 @@ SET( levbdim_additional_cmake_args
     -DDIMDIR=${DIMDIR}
   )
 
+IF ( LCIO_DIR )
+  SET( xdrlcio_additional_cmake_args
+    ${xdrlcio_additional_cmake_args}
+    -DLCIO_DIR=${LCIO_DIR}
+    )
+
+  SET( DQM4ILC_additional_cmake_args
+    ${DQM4ILC_additional_cmake_args}
+    -DLCIO_DIR=${LCIO_DIR}
+    )
+ENDIF()
+
+
+IF ( BUILD_DQM4ILC )
+    SET (DQM4ILC_DEP Marlin GEAR)
+    FOREACH (DEP ${DQM4ILC_DEP})
+      IF (${DEP}_DIR)
+	SET( DQM4ILC_additional_cmake_args
+	  ${DQM4ILC_additional_cmake_args}
+	  -D${DEP}_DIR=${${DEP}_DIR}
+	  )
+      ENDIF()
+    ENDFOREACH()
+ENDIF()
+
 # ----- JsonCpp package -----
 FIND_PACKAGE( JSONCPP QUIET )
 
