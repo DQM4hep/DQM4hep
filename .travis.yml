@@ -13,9 +13,12 @@ os:
 #  - osx
         
 script:
-  - mkdir -p build
-  - cd build  
-  - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
+  - if [[ "${COVERITY_SCAN_BRANCH}" == 1 ]];
+    then
+      echo "Don't build on coverty_scan branch.";
+      exit 0;
+    fi
+  # Otherwise compile away
   - make -j 4
 
 addons:
@@ -31,9 +34,21 @@ addons:
       - doxygen
       - liblog4cxx10
       - liblog4cxx10-dev
+      
+  coverity_scan:
+    project:
+      name: "apingault/dqm4hep"
+      description: "Build submitted via Travis CI"
+    notification_email: antoine.pingault@ugent.be
+    build_command:   "make -j 4"
+    branch_pattern: coverity_scan
 
 env:
   global:
+    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+    #   via the "travis encrypt" command using the project repo's public key
+    - secure: "VkdhwAMaxTEaHM7xJeQclNCzuC6x2f6mwepQZqJHtQ2krzlkLyJXRbmAtzolmUTBNUw82RA1TpbI3Dd3x5f3yJmQwKvjy0GuxokrHm2t9/MW8ScLGwCRBvXf0P3nPN8/ewThuqZGu+S/qTxinirghHWhJEiPGRmqGTM3sHKA9gxuwY9hQ6vVJzOa0QrMeu5Oegyw8pVIZFJ4AAcjr9alMK1Csxip20pSfBEID6RXivPG+LhzuBlKrVIrMz1DiGkxMw/dOM76GM/ZnrGCe0F0r7MskjZgZD0s3e2pp7i41cSgwNwKKpvYWEu536pxCRPhdEn261szkqeaMs3/a2Cx3dKTfvH3EjruAq3U/MkYTrliEFHm6lY7lJs6GOip0St9hWRUZR7ej66WcE+O3jgrq79nbNb7KvM66Yl0j7FRNWnOVc/r6Qz0jKy7hUTknaD18Oi3Puu1j96XGHOGKJLn2WW2/T0S4wrQVmHwtaeHT8ncEPUbtM7HVIZ0JshNujNR6AvmSqGMTB5Z1O+zROJWS8x4MRaqfM5mtP//zyVcl+HiKciPUuJKux1t+8r3i/ykWeTvFgWs9RSozaw3ciidtzoQohFZHiPNI3Ad8OxODw7t+YiwtvNqK7KDyCWgfE4vEjlPr6UC+k3hqWcVfTAPgxpvBIuU7D0pNMtWHpF8Cpc="
+
     - BUILD_DQMVIZ: OFF
     - INSTALL_DOC: OFF    
     - BUILD_EXAMPLES: OFF    
@@ -69,6 +84,14 @@ before_install:
   # Checking root config
   - root-config --version
   - cd -
+  # Create build folder/run cmake here so we can build with coverity
+  - mkdir -p build
+  - cd build
+  - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
+  
+  # Coverity Scan
+  # - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+      
 
 
 #before_script:
