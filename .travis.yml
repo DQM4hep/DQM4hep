@@ -1,6 +1,6 @@
 language: cpp
 
-sudo: required
+sudo: false
 
 dist: trusty
 
@@ -22,6 +22,15 @@ addons:
   apt:
     sources:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
+    packages:
+      - libqt4-dev
+      - qt4-qmake
+      - libboost-thread-dev
+      - libboost-system-dev 
+      - libboost-filesystem-dev
+      - doxygen
+      - liblog4cxx10
+      - liblog4cxx10-dev
 
 env:
   global:
@@ -54,7 +63,6 @@ matrix:
       compiler: gcc
       
 before_install:
-  - source .travis/before_install.sh
   # Downlad&Unpack root binaries (Qt not enable -> No viz)
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd .. && wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi 
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then tar -xf root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi
