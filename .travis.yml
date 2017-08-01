@@ -16,7 +16,7 @@ script:
   - mkdir -p build
   - cd build  
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
-  - make VERBOSE=1
+  - make -j 4
 
 addons:
   apt:
@@ -34,7 +34,6 @@ addons:
 
 env:
   global:
-    - USE_MASTER: ON 
     - BUILD_DQMVIZ: OFF
     - INSTALL_DOC: OFF    
     - BUILD_EXAMPLES: OFF    
