@@ -25,6 +25,7 @@ addons:
 
 env:
   global:
+    - USE_MASTER=ON 
     - BUILD_DQMVIZ=OFF
     - INSTALL_DOC=OFF    
     - BUILD_EXAMPLES=OFF    
