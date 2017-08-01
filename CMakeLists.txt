@@ -100,17 +100,11 @@ SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WI
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
 # ----- Also complains about multi-line // comment [-Werror,-Wcomment]
-IF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  SET( DQMCore_additional_cmake_args
-    ${DQMCore_additional_cmake_args}
-    "-DCMAKE_CXX_FLAGS=-Wno-keyword-macro -Wno-comment"
-	)
+# --- Errors also on Travis CI
 SET( levbdim_additional_cmake_args
-    ${levbdim_additional_cmake_args}
-    "-DCMAKE_CXX_FLAGS= -Wno-macro-redefined -Wno-format"
+  ${levbdim_additional_cmake_args}
+  "-DCMAKE_CXX_FLAGS= -Wno-macro-redefined -Wno-format"
   )
-
-ENDIF (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 
 # ----- DQM4ILC complains about unusedParameter and shadow (found in Marlin package) [-Werror,-Wunused-parameter -Wshadow]
 # ----- Also complains about effc++ warning from xdrstream : need to be taken care off in a future release
