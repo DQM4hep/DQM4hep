@@ -151,6 +151,12 @@ SET( common_cmake_args
 )
 
 # ----- package options -----------------------------------------------------------------------
+OPTION(BUILD_OFFLINE "Build offline" OFF)
+IF (BUILD_OFFLINE)
+  MESSAGE( WARNING "Building framework offline - No update will be performed !")
+    set_property(DIRECTORY ${PROJECT_SOURCE_DIR}
+                 PROPERTY EP_UPDATE_DISCONNECTED 1)
+ENDIF()
 
 OPTION( BUILD_DQMVIZ "Build DQMViz library and binaries (requires Qt and ROOT built with Qt support (--enable-qt))" OFF )
 MESSAGE( STATUS "BUILD_DQMVIZ: ${BUILD_DQMVIZ}" )
