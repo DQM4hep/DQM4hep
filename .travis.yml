@@ -32,18 +32,19 @@ env:
     - BUILD_EVB: OFF    
     - BUILD_HTTP: OFF
     - LD_LIBRARY_PATH: "/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH"
-
-env:
-  # - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
-  - INSTALL_DOC: ON
-  - BUILD_EXAMPLES: ON
-  - BUILD_EVB: ON
-  - BUILD_HTTP: ON
-  - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
-    INSTALL_DOC: ON
-    BUILD_EXAMPLES: ON
-    BUILD_EVB: ON
-    BUILD_HTTP: ON
+  matrix:
+    # - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
+    - INSTALL_DOC: ON
+    - BUILD_EXAMPLES: ON
+    - BUILD_EVB: ON
+    - BUILD_HTTP: ON
+      USE_MASTER: ON # Need master DQMCore branch for now
+    - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
+      INSTALL_DOC: ON
+      BUILD_EXAMPLES: ON
+      BUILD_EVB: ON
+      BUILD_HTTP: ON
+      USE_MASTER: ON # Need master DQMCore branch for now
 
 matrix:
   include:
