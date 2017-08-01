@@ -25,13 +25,13 @@ addons:
 
 env:
   global:
-    - USE_MASTER=ON 
-    - BUILD_DQMVIZ=OFF
-    - INSTALL_DOC=OFF    
-    - BUILD_EXAMPLES=OFF    
-    - BUILD_EVB=OFF    
-    - BUILD_HTTP=OFF
-    - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH
+    - USE_MASTER: ON 
+    - BUILD_DQMVIZ: OFF
+    - INSTALL_DOC: OFF    
+    - BUILD_EXAMPLES: OFF    
+    - BUILD_EVB: OFF    
+    - BUILD_HTTP: OFF
+    - LD_LIBRARY_PATH: "/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH"
 
 env:
   # - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
