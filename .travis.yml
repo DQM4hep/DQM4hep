@@ -16,7 +16,7 @@ script:
   - mkdir -p build
   - cd build  
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP ..
-  - make
+  - make VERBOSE=1
 
 addons:
   apt:
@@ -33,12 +33,16 @@ env:
     - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH
 
 env:
-  - BUILD_DQMVIZ=OFF # Travis won't let root recompile with qt enable (build is too long)
-  - INSTALL_DOC=ON
-  - BUILD_EXAMPLES=ON
-  - BUILD_EVB=ON
-  - BUILD_HTTP=ON
-  
+  # - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
+  - INSTALL_DOC: ON
+  - BUILD_EXAMPLES: ON
+  - BUILD_EVB: ON
+  - BUILD_HTTP: ON
+  - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
+    INSTALL_DOC: ON
+    BUILD_EXAMPLES: ON
+    BUILD_EVB: ON
+    BUILD_HTTP: ON
 
 matrix:
   include:
