@@ -90,6 +90,8 @@ before_install:
   # Create build folder/run cmake here so we can build with coverity
   - mkdir -p build
   - cd build
+  # Don't waste time with the doc when using coverity
+  - if [ "$TRAVIS_BRANCH" == "coverity_scan" ];  then INSTALL_DOC=OFF; fi 
   # Don't run all the matrixes on coverity. Exiting gracefully so the build doesn't appear to have failed.
   - if [ "$TRAVIS_BRANCH" == "coverity_scan" ] && [ "$USE_COVERITY" = false ];  then echo "Running on coverity branch, Skipping this build"; exit 0; fi 
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
