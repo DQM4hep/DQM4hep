@@ -1,9 +1,11 @@
-[![Build Status](https://travis-ci.org/DQM4HEP/DQM4HEP.svg?branch=master)](https://travis-ci.org/DQM4HEP/DQM4HEP)
-[![Coverity Scan](https://scan.coverity.com/projects/13338/badge.svg)](https://scan.coverity.com/projects/apingault-dqm4hep)
+[![Build Status](https://travis-ci.org/DQM4HEP/dqm4hep.svg?branch=master)](https://travis-ci.org/DQM4HEP/dqm4hep)
+[![Coverity Scan](https://scan.coverity.com/projects/13354/badge.svg)](https://scan.coverity.com/projects/dqm4hep-dqm4hep)
 
 # DQM4HEP
 # A Data Quality Monitoring for High Energy Physics
-Copyright IPNL/CNRS/IN2P3
+DQM4HEP is distributed under the [GPLv3 License](http://www.gnu.org/licenses/gpl-3.0.en.html)
+
+[![License](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)
 
 ## INSTALL:
 
