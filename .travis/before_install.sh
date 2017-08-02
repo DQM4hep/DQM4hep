@@ -6,6 +6,9 @@ sudo apt-get update -q
 # install Qt
 sudo apt-get install libqt4-dev qt4-qmake 
 
+# install boost 
+sudo apt-get install libboost-thread-dev libboost-system-dev libboost-filesystem-dev
+
 # install Doxygen
 sudo apt-get install doxygen
 
@@ -14,8 +17,9 @@ sudo apt-get install doxygen
 sudo apt-get install liblog4cxx10 liblog4cxx10-dev
 
 # install root with Qt backend
-wget https://root.cern.ch/download/root_v5.34.36.source.tar.gz
-tar -xzf root_v5.34.36.source.tar.gz
-cd root
-./configure --enable-qt && make -j6 --quiet && . ./bin/thisroot.sh
-cd ..
+#cd && wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+#tar -xf root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+#source ~/root/bin/thisroot.sh
+# cd root
+# ./configure --enable-qt && make -j6 --quiet && . ./bin/thisroot.sh
+# cd ..
