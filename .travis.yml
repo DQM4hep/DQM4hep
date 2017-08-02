@@ -31,7 +31,7 @@ addons:
       
   coverity_scan:
     project:
-      name: "apingault/dqm4hep"
+      name: "dqm4hep/dqm4hep"
       description: "Build submitted via Travis CI"
     notification_email: antoine.pingault@ugent.be
     build_command:   "make -j 4"
@@ -74,6 +74,9 @@ matrix:
       compiler: gcc
       
 before_install:
+  # Don't run all the matrixes on coverity. Exiting gracefully so the build doesn't appear to have failed.
+  - if [ "$TRAVIS_BRANCH" == "coverity_scan" ] && [ "$USE_COVERITY" = false ];  then echo "Running on coverity branch, Skipping this build"; exit 0; fi 
+
   # Downlad&Unpack root binaries (Qt not enable -> No viz)
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd .. && wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi 
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then tar -xf root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi
@@ -86,8 +89,6 @@ before_install:
   - cd build
   # Don't waste time with the doc when using coverity
   - if [ "$TRAVIS_BRANCH" == "coverity_scan" ];  then INSTALL_DOC=OFF; fi 
-  # Don't run all the matrixes on coverity. Exiting gracefully so the build doesn't appear to have failed.
-  - if [ "$TRAVIS_BRANCH" == "coverity_scan" ] && [ "$USE_COVERITY" = false ];  then echo "Running on coverity branch, Skipping this build"; exit 0; fi 
   - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
   
   # Coverity Scan
