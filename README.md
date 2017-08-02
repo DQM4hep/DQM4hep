@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/DQM4HEP/DQM4HEP.svg?branch=master)](https://travis-ci.org/DQM4HEP/DQM4HEP)
+[![Coverity Scan](https://scan.coverity.com/projects/13338/badge.svg)](https://scan.coverity.com/projects/apingault-dqm4hep)
 
 # DQM4HEP
 # A Data Quality Monitoring for High Energy Physics
