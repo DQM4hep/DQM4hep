@@ -1,54 +1,75 @@
 language: cpp
 
-sudo: required
+sudo: false
 
 dist: trusty
 
 compilers:
   - gcc
-  - clang
+#  - clang
 
 os:
   - linux
-  - osx
+#  - osx
         
 script:
-  - mkdir build
+  - mkdir -p build
   - cd build  
-  - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP ..
-  - make
+  - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
+  - make -j 4
 
 addons:
   apt:
     sources:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
+    packages:
+      - libqt4-dev
+      - qt4-qmake
+      - libboost-thread-dev
+      - libboost-system-dev 
+      - libboost-filesystem-dev
+      - doxygen
+      - liblog4cxx10
+      - liblog4cxx10-dev
 
 env:
   global:
-    - BUILD_DQMVIZ=OFF
-    - INSTALL_DOC=OFF    
-    - BUILD_EXAMPLES=OFF    
-    - BUILD_EVB=OFF    
-    - BUILD_HTTP=OFF
-    - LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH
-
-env:
-  - BUILD_DQMVIZ=ON
-  - INSTALL_DOC=ON
-  - BUILD_EXAMPLES=ON
-  - BUILD_EVB=ON
-  - BUILD_HTTP=ON
-  
+    - BUILD_DQMVIZ: OFF
+    - INSTALL_DOC: OFF    
+    - BUILD_EXAMPLES: OFF    
+    - BUILD_EVB: OFF    
+    - BUILD_HTTP: OFF
+    - LD_LIBRARY_PATH: "/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH"
+  matrix:
+    # - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
+    - INSTALL_DOC: ON
+    - BUILD_EXAMPLES: ON
+    - BUILD_EVB: ON
+    - BUILD_HTTP: ON
+      USE_MASTER: ON # Need master DQMCore branch for now
+    - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
+      INSTALL_DOC: ON
+      BUILD_EXAMPLES: ON
+      BUILD_EVB: ON
+      BUILD_HTTP: ON
+      USE_MASTER: ON # Need master DQMCore branch for now
 
 matrix:
   include:
-    - os: osx
-      compiler: gcc
+#    - os: osx
+#      compiler: clang
     - os: linux
-      compiler: clang
+      compiler: gcc
       
 before_install:
-  - source .travis/before_install.sh
+  # Downlad&Unpack root binaries (Qt not enable -> No viz)
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd .. && wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi 
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then tar -xf root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi
+  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source root/bin/thisroot.sh; fi
+  # Checking root config
+  - root-config --version
+  - cd -
+
 
 #before_script:
 #  - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
