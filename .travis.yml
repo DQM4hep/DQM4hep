@@ -92,7 +92,11 @@ before_install:
   
   # Coverity Scan
   # - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-      
+
+notifications:
+  email:
+    on_success: never
+    on_failure: always
 
 
 #before_script:
