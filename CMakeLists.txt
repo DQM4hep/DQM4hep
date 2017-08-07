@@ -411,6 +411,7 @@ IF ( BUILD_EVB OR BUILD_HTTP )
   SET ( Mongoose_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongoose-cpp )
   
   ExternalProject_Add( Mongoose
+    DEPENDS ${jsoncpp_package_depends}
     GIT_REPOSITORY ${Mongoose_repository}
     GIT_TAG ${Mongoose_version}
     CMAKE_ARGS ${common_cmake_args} ${Mongoose_additional_cmake_args}
