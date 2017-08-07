@@ -96,6 +96,7 @@ ENDIF ( NOT APPLE )
 
 SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_WARNING_AS_ERROR=OFF )
 
+SET ( Mongoose_additional_cmake_args ${Mongoose_additional_cmake_args} -DEXAMPLES=ON -DWEBSOCKET=OFF -DHAS_JSONCPP=ON )
 
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
@@ -404,12 +405,32 @@ IF ( NOT JSONCPP_FOUND )
 
 ENDIF()
 
+# ----- Mongoose package -----
+IF ( BUILD_EVB OR BUILD_HTTP )
+  
+  SET ( Mongoose_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongoose-cpp )
+  
+  ExternalProject_Add( Mongoose
+    GIT_REPOSITORY ${Mongoose_repository}
+    GIT_TAG ${Mongoose_version}
+    CMAKE_ARGS ${common_cmake_args} ${Mongoose_additional_cmake_args}
+    PREFIX mongoose-cpp
+    LIST_SEPARATOR %
+    SOURCE_DIR ${Mongoose_DIR}
+  )
+  
+  SET( Mongoose_package_depends "Mongoose" )
+  
+  LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${CMAKE_INSTALL_PREFIX}" )
+  
+ENDIF()
+
 # ----- levbdim package -----
 IF ( BUILD_EVB )
 	SET ( levbdim_DIR ${CMAKE_CURRENT_SOURCE_DIR}/levbdim )
 
 	ExternalProject_Add( levbdim
-		DEPENDS ${jsoncpp_package_depends} ${dim_package_depends}
+		DEPENDS ${jsoncpp_package_depends} ${dim_package_depends} ${Mongoose_package_depends}
 	    GIT_REPOSITORY ${levbdim_repository}
 	    GIT_TAG ${levbdim_version}
 	    CMAKE_ARGS ${common_cmake_args} ${levbdim_additional_cmake_args}
@@ -419,25 +440,6 @@ IF ( BUILD_EVB )
 	)
 
 	SET( levbdim_package_depends "levbdim" )
-
-ENDIF()
-
-# ----- Mongoose package -----
-IF ( BUILD_HTTP )
-	SET ( Mongoose_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongoose-cpp )
-
-	ExternalProject_Add( Mongoose
-	    GIT_REPOSITORY ${Mongoose_repository}
-	    GIT_TAG ${Mongoose_version}
-	    CMAKE_ARGS ${common_cmake_args} ${Mongoose_additional_cmake_args}
-		PREFIX mongoose-cpp
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${Mongoose_DIR}
-	)
-
-      SET( Mongoose_package_depends "Mongoose" )
-
-      LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${CMAKE_INSTALL_PREFIX}" )
 
 ENDIF()
 
