@@ -1,0 +1,21 @@
+export DHCAL_DIR="/opt/dhcal"
+export ILCSOFT_DIR="/home/acqilc/ilcsoft/v01-17-03"
+export DQM_DIR="/home/acqilc/dqmsoftware"
+export DQM4HEP_DIR="${DQM_DIR}/dqm4hep"
+export DQMSDHCAL_DIR="${DQM_DIR}/dqmsdhcal"
+export CALOSOFTWARE_DIR="${DQM_DIR}/CaloSoftWare"
+export TRIVENT_DIR="${DQM_DIR}/Trivent"
+
+export ROOTSYS=${DHCAL_DIR}/root
+export DIM_DIR=${DQM4HEP_DIR}/dim
+export DIMJC_DIR=${DQM4HEP_DIR}/dimjc
+export LEVBDIM_DIR=${DQM4HEP_DIR}/levbdim
+
+if ! echo $LD_LIBRARY_PATH | grep -q "${DQM4HEP_DIR}" ; then
+    LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${DQM4HEP_DIR}/lib"
+fi
+
+if ! echo $PATH | grep -q "${DQM4HEP_DIR}" ; then
+    PATH="${PATH}:${DQM4HEP_DIR}/bin"
+fi
+
