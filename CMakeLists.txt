@@ -179,6 +179,12 @@ MESSAGE( STATUS "BUILD_EVB: ${BUILD_EVB}" )
 OPTION( BUILD_HTTP "Whether to compile the http supprt of DQMCore" OFF )
 MESSAGE( STATUS "BUILD_HTTP: ${BUILD_HTTP}" )
 
+OPTION( FORCE_DIM_INSTALL "Whether to look for present dim install or force install a standalone one " OFF )
+MESSAGE( STATUS "FORCE_DIM_INSTALL: ${FORCE_DIM_INSTALL}" )
+
+OPTION( FORCE_DIMJC_INSTALL "Whether to look for present dim install or force install a standalone one " OFF )
+MESSAGE( STATUS "FORCE_DIMJC_INSTALL: ${FORCE_DIMJC_INSTALL}" )
+
 # ----------------------------------------------------------------------------
 
 IF( DIM_GUI )
@@ -224,7 +230,9 @@ ExternalProject_Add( xdrstream
 )
 
 # ----- DIM package -----
-FIND_PACKAGE( DIM QUIET )
+IF ( NOT FORCE_DIM_INSTALL )
+  FIND_PACKAGE( DIM QUIET )
+ENDIF()
 
 IF ( NOT DIM_FOUND )
 	SET ( DIMDIR ${CMAKE_CURRENT_SOURCE_DIR}/dim )
@@ -445,7 +453,9 @@ ExternalProject_Add( DQMCore
 )
 
 # ----- DIMJC package -----
-FIND_PACKAGE( DIMJC QUIET )
+IF ( NOT FORCE_DIMJC_INSTALL )
+  FIND_PACKAGE( DIMJC QUIET )
+ENDIF()
 
 IF ( NOT DIMJC_FOUND )
 	SET ( DIMJC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc )
