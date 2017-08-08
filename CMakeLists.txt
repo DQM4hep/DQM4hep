@@ -104,14 +104,16 @@ SET ( Mongoose_additional_cmake_args ${Mongoose_additional_cmake_args} -DEXAMPLE
 # --- Errors also on Travis CI
 SET( levbdim_additional_cmake_args
   ${levbdim_additional_cmake_args}
-  "-DCMAKE_CXX_FLAGS= -Wno-macro-redefined -Wno-format"
+  "-DCMAKE_CXX_FLAGS= ${CMAKE_CXX_FLAGS} -Wno-macro-redefined -Wno-format -Wno-vla-extension -Wno-variadic-macros"
   )
+  # vla in filetailer.cxx (might explains crashes when opening logs on osx)
+  # variadic macros in fsmjob.cxx
 
 # ----- DQM4ILC complains about unusedParameter and shadow (found in Marlin package) [-Werror,-Wunused-parameter -Wshadow]
 # ----- Also complains about effc++ warning from xdrstream : need to be taken care off in a future release
 SET( DQM4ILC_additional_cmake_args
   ${DQM4ILC_additional_cmake_args}
-  "-DCMAKE_CXX_FLAGS= -Wno-unused-parameter -Wno-shadow -Wno-effc++"
+  "-DCMAKE_CXX_FLAGS= ${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wno-shadow -Wno-effc++"
   )
 
 # ----- dim os detection -----
