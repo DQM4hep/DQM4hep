@@ -90,9 +90,9 @@ SET( APR_package_depends "" )
 SET( APRUTIL_package_depends "" )
 
 # ----- additional cmake args -----
-IF ( NOT APPLE )
+# IF ( NOT APPLE )
 	SET( JsonCpp_additional_cmake_args  -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON )
-ENDIF ( NOT APPLE )
+# ENDIF ( NOT APPLE )
 
 SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_WARNING_AS_ERROR=OFF )
 
