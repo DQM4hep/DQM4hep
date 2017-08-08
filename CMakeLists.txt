@@ -389,23 +389,19 @@ IF ( BUILD_DQM4ILC )
 ENDIF()
 
 # ----- JsonCpp package -----
-FIND_PACKAGE( JSONCPP QUIET )
+SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
 
-IF ( NOT JSONCPP_FOUND )
-	SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
+ExternalProject_Add( jsoncpp
+    GIT_REPOSITORY ${JsonCpp_repository}
+    GIT_TAG ${JsonCpp_version}
+    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
+	  PREFIX jsoncpp
+    LIST_SEPARATOR %
+    SOURCE_DIR ${JSONCPP_DIR}
+)
+SET( jsoncpp_package_depends "jsoncpp" )
+LIST( APPEND Mongoose_additional_cmake_args "-DJSONCPP_DIR=${CMAKE_INSTALL_PREFIX}" )
 
-	ExternalProject_Add( jsoncpp
-	    GIT_REPOSITORY ${JsonCpp_repository}
-	    GIT_TAG ${JsonCpp_version}
-	    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
-		PREFIX jsoncpp
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${JSONCPP_DIR}
-	)
-
-	SET( jsoncpp_package_depends "jsoncpp" )
-
-ENDIF()
 
 # ----- Mongoose package -----
 IF ( BUILD_EVB OR BUILD_HTTP )
@@ -437,7 +433,7 @@ IF ( BUILD_EVB )
 	    GIT_REPOSITORY ${levbdim_repository}
 	    GIT_TAG ${levbdim_version}
 	    CMAKE_ARGS ${common_cmake_args} ${levbdim_additional_cmake_args}
-		PREFIX levbdim
+		  PREFIX levbdim
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${levbdim_DIR}
 	)
