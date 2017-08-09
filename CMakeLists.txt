@@ -96,7 +96,7 @@ SET( APRUTIL_package_depends "" )
 
 SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_WARNING_AS_ERROR=OFF )
 
-SET ( Mongoose_additional_cmake_args ${Mongoose_additional_cmake_args} -DEXAMPLES=ON -DWEBSOCKET=OFF -DHAS_JSONCPP=ON )
+SET ( Mongoose_additional_cmake_args ${Mongoose_additional_cmake_args} -DEXAMPLES=OFF -DWEBSOCKET=OFF -DHAS_JSONCPP=ON )
 
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
