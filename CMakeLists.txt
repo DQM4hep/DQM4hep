@@ -403,7 +403,7 @@ ExternalProject_Add( jsoncpp
     UPDATE_COMMAND ""
 )
 SET( jsoncpp_package_depends "jsoncpp" )
-LIST( APPEND Mongoose_additional_cmake_args "-DJSONCPP_DIR=${CMAKE_INSTALL_PREFIX}" )
+LIST( APPEND Mongoose_additional_cmake_args "-DJSONCPP_DIR=${JSONCPP_DIR}" )
 
 
 # ----- Mongoose package -----
@@ -424,7 +424,7 @@ IF ( BUILD_EVB OR BUILD_HTTP )
   
   SET( Mongoose_package_depends "Mongoose" )
   
-  LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${CMAKE_INSTALL_PREFIX}" )
+  LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${Mongoose_DIR}" )
   
 ENDIF()
 
