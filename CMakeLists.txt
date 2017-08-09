@@ -230,6 +230,7 @@ ExternalProject_Add( xdrstream
     PREFIX xdrstream
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
     LIST_SEPARATOR %
+    UPDATE_COMMAND ""
 )
 
 # ----- DIM package -----
@@ -252,6 +253,7 @@ IF ( NOT DIM_FOUND )
 	    CONFIGURE_COMMAND ""
 	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS} ${DIM_GUI_FLAG}
 	    INSTALL_COMMAND ${DIMDIR}/external-project/install-command ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/include
+      UPDATE_COMMAND ""
 	)
 
 	SET( dim_package_depends "dim" )
@@ -380,10 +382,10 @@ IF ( BUILD_DQM4ILC )
     SET (DQM4ILC_DEP Marlin GEAR)
     FOREACH (DEP ${DQM4ILC_DEP})
       IF (${DEP}_DIR)
-	SET( DQM4ILC_additional_cmake_args
-	  ${DQM4ILC_additional_cmake_args}
-	  -D${DEP}_DIR=${${DEP}_DIR}
-	  )
+	       SET( DQM4ILC_additional_cmake_args
+	          ${DQM4ILC_additional_cmake_args}
+	          -D${DEP}_DIR=${${DEP}_DIR}
+	         )
       ENDIF()
     ENDFOREACH()
 ENDIF()
@@ -398,6 +400,7 @@ ExternalProject_Add( jsoncpp
 	  PREFIX jsoncpp
     LIST_SEPARATOR %
     SOURCE_DIR ${JSONCPP_DIR}
+    UPDATE_COMMAND ""
 )
 SET( jsoncpp_package_depends "jsoncpp" )
 LIST( APPEND Mongoose_additional_cmake_args "-DJSONCPP_DIR=${CMAKE_INSTALL_PREFIX}" )
@@ -416,6 +419,7 @@ IF ( BUILD_EVB OR BUILD_HTTP )
     PREFIX mongoose-cpp
     LIST_SEPARATOR %
     SOURCE_DIR ${Mongoose_DIR}
+    UPDATE_COMMAND ""
   )
   
   SET( Mongoose_package_depends "Mongoose" )
@@ -436,6 +440,7 @@ IF ( BUILD_EVB )
 		  PREFIX levbdim
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${levbdim_DIR}
+      UPDATE_COMMAND ""
 	)
 
 	SET( levbdim_package_depends "levbdim" )
@@ -451,6 +456,7 @@ ExternalProject_Add( DQMCore
     PREFIX DQMCore
     LIST_SEPARATOR %
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
+    UPDATE_COMMAND ""
 )
 
 # ----- DIMJC package -----
@@ -469,6 +475,7 @@ IF ( NOT DIMJC_FOUND )
 	    PREFIX dimjc
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${DIMJC_DIR}
+      UPDATE_COMMAND ""
 	)
 
 	SET( dimjc_package_depends "dimjc" )
@@ -493,6 +500,7 @@ IF( BUILD_DQM4ILC )
 	    PREFIX xdrlcio
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
+        UPDATE_COMMAND ""
     )
 
     SET( xdrlcio_package_depends "xdrlcio" )
@@ -509,6 +517,7 @@ IF( BUILD_DQM4ILC )
 	    PREFIX DQM4ILC
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQM4ILC
+        UPDATE_COMMAND ""
     )
 
 ENDIF()
@@ -531,6 +540,7 @@ IF( BUILD_DQMVIZ )
 	    PREFIX DQMViz
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMViz
+        UPDATE_COMMAND ""
     )
 
 ENDIF()
