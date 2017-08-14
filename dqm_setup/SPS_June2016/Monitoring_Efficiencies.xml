@@ -1,0 +1,59 @@
+<?xml version="1.0" ?>
+<dqm4hep>
+    <monitoring>
+        <dimDnsNode value="lyosdhcal12" />
+        <view>
+            <meView>
+                <collector name="me_collector">
+                    <module name="AsicEfficiencies">
+                        <item path="/Global/Multiplicity/" name="AsicMultiplicity" checked="1" />
+                        <item path="/Global/Multiplicity/" name="GlobalMultiplicity" checked="0" />
+                        <item path="/Global/Multiplicity/" name="LayerMultiplicity" checked="1" />
+                        <item path="/Global/Multiplicity/" name="StackedMultiplicityMap" checked="1" />
+                        <item path="/Global/" name="NTracksPerAsic" checked="1" />
+                        <item path="/Global/Thr1/" name="AsicEfficiency" checked="1" />
+                        <item path="/Global/Thr1/" name="GlobalEfficiency" checked="1" />
+                        <item path="/Global/Thr1/" name="LayerEfficiency" checked="1" />
+                        <item path="/Global/Thr1/" name="StackedEfficiencyMap" checked="1" />
+                        <item path="/Global/Thr2/" name="AsicEfficiency" checked="0" />
+                        <item path="/Global/Thr2/" name="GlobalEfficiency" checked="0" />
+                        <item path="/Global/Thr2/" name="LayerEfficiency" checked="0" />
+                        <item path="/Global/Thr2/" name="StackedEfficiencyMap" checked="0" />
+                        <item path="/Global/Thr3/" name="AsicEfficiency" checked="0" />
+                        <item path="/Global/Thr3/" name="GlobalEfficiency" checked="0" />
+                        <item path="/Global/Thr3/" name="LayerEfficiency" checked="0" />
+                        <item path="/Global/Thr3/" name="StackedEfficiencyMap" checked="0" />
+                    </module>
+                </collector>
+            </meView>
+            <canvasView>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global/Thr1" name="AsicEfficiency" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global/Thr1" name="GlobalEfficiency" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global/Thr1" name="LayerEfficiency" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global/Thr1" name="StackedEfficiencyMap" />
+                    </canvas>
+                    <canvas x="401" y="251" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global" name="NTracksPerAsic" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global/Multiplicity" name="LayerMultiplicity" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="AsicEfficiencies" path="Global/Multiplicity" name="AsicMultiplicity" />
+                    </canvas>
+                </canvasArea>
+            </canvasView>
+        </view>
+        <controller>
+            <collector value="me_collector" />
+        </controller>
+    </monitoring>
+</dqm4hep>

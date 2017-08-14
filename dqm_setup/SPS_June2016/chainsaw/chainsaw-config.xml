@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="true">
+
+  <plugin name="DQMLogger" class="org.apache.log4j.net.XMLSocketReceiver">
+    <param name="active" value="true"/>
+    <param name="decoder" value="org.apache.log4j.xml.XMLDecoder"/> 
+    <param name="loggerRepository" value="org.apache.log4j.Hierarchy@43a38226"/> 
+    <param name="name" value="ChainsawAppenderXML" />
+    <param name="port" value="4449" />
+  </plugin>
+
+  <root>
+    <level value="debug"/>
+  </root>
+</log4j:configuration>

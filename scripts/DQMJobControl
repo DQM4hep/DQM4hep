@@ -1,0 +1,11 @@
+#!/bin/sh
+
+jobControlFile=""
+
+if [ $# -eq 1 ]
+then
+    jobControlFile=" -f $1"
+fi
+
+export DIM_DNS_NODE=lyosdhcal10
+/opt/dqmsoftware/dqm4hep/bin/dqm4hep_start_job_interface ${jobControlFile} &

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+monitoringFile=""
+
+if [ $# -eq 1 ]
+then
+    monitoringFile=" -f $1"
+fi
+
+export DIM_DNS_NODE=lyosdhcal12
+/opt/dqmsoftware/dqm4hep/bin/dqm4hep_start_dqm_monitor_gui ${monitoringFile} &

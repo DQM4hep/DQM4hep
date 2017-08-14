@@ -1,0 +1,3 @@
+#!/bin/sh
+
+/home/acqilc/ilcsoft/v01-17-09/root/5.34.36/bin/root -l "/home/acqilc/open_dqm_archive_root_macro.C("\"$1\"")"
