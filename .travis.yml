@@ -56,6 +56,7 @@ env:
     - INSTALL_DOC: ON
     - BUILD_EXAMPLES: ON
     - BUILD_EVB: ON
+      USE_MASTER: ON
     - BUILD_HTTP: ON
       USE_MASTER: ON # Need master DQMCore branch for now
     - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
