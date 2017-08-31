@@ -20,8 +20,8 @@ addons:
     sources:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
     packages:
-      - libqt4-dev
-      - qt4-qmake
+      # - libqt4-dev
+      # - qt4-qmake
       - libboost-thread-dev
       - libboost-system-dev 
       - libboost-filesystem-dev
