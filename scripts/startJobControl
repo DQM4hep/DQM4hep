@@ -1,11 +1,35 @@
 #!/bin/sh
 
-jobControlFile=""
+envFile="/home/acqilc/dqmsoftware/dqm4hepenv"
+[ -f ${envFile} ] && . ${envFile}
+
+if [ -z "$DIM_DNS_NODE" ] ;  then
+  echo "DIM_DNS_NODE is not set, please set it in ${envFile}" >&2
+  exit 1
+fi
+
+
+if [ -z "$DQM4HEP_DIR" ] ;  then
+  echo "DQM4HEP_DIR is not set, please set it in ${envFile}" >&2
+  exit 1
+fi
+
+if [ -z "$DIM_DIR" ] ;  then
+  echo "DIM_DIR is not set, please set it in ${envFile}" >&2
+  exit 1
+fi
+
+
+#jobControlFile=""
 
 if [ $# -eq 1 ]
 then
-    jobControlFile=" -f $1"
+    jobControlFile="$1"
 fi
 
-export DIM_DNS_NODE=lyosdhcal10
-/opt/dqmsoftware/dqm4hep/bin/dqm4hep_start_job_interface ${jobControlFile} &
+
+if [ -z "$jobControlFile" ] ;  then
+  echo "No config file found, please set it in ${envFile}, pass it at command line or open it with the interface" >&2
+fi
+
+${DQM4HEP_DIR}/bin/dqm4hep_start_job_interface -f ${jobControlFile} &
