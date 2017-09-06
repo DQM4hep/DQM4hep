@@ -20,7 +20,7 @@ must not be misrepresented as being the original software.
 
 3. This notice may not be removed or altered from any source
 distribution.
-*/
+ */
 
 #include "dqm4hep/tinyxml.h" // Altered path
 
@@ -31,27 +31,30 @@ distribution.
 // It also cleans up the code a bit.
 //
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-const char* TiXmlBase::errorString[ TIXML_ERROR_STRING_COUNT ] =
-{
-	"No error",
-	"Error",
-	"Failed to open file",
-	"Error parsing Element.",
-	"Failed to read Element name",
-	"Error reading Element value.",
-	"Error reading Attributes.",
-	"Error: empty tag.",
-	"Error reading end tag.",
-	"Error parsing Unknown.",
-	"Error parsing Comment.",
-	"Error parsing Declaration.",
-	"Error document empty.",
-	"Error null (0) or unexpected EOF found in input stream.",
-	"Error parsing CDATA.",
-	"Error when TiXmlDocument added to document, because TiXmlDocument can only be at the root.",
-};
+  namespace core {
+
+    const char* TiXmlBase::errorString[ TIXML_ERROR_STRING_COUNT ] =
+        {
+            "No error",
+            "Error",
+            "Failed to open file",
+            "Error parsing Element.",
+            "Failed to read Element name",
+            "Error reading Element value.",
+            "Error reading Attributes.",
+            "Error: empty tag.",
+            "Error reading end tag.",
+            "Error parsing Unknown.",
+            "Error parsing Comment.",
+            "Error parsing Declaration.",
+            "Error document empty.",
+            "Error null (0) or unexpected EOF found in input stream.",
+            "Error parsing CDATA.",
+            "Error when TiXmlDocument added to document, because TiXmlDocument can only be at the root.",
+        };
+
+  }
 
 }

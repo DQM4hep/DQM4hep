@@ -36,6 +36,7 @@ INCLUDE( default_settings )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 OPTION( BUILD_EXAMPLES "Whether to build DQM4HEP examples" OFF )
 OPTION( BUILD_EVB "Whether to build the event builder support" OFF )
+OPTION( BUILD_TESTS "Whether to build framework tests" OFF )
 
 ###############################
 FIND_PROGRAM( ELOG_EXECUTABLE elog HINTS /usr/local/bin /usr/bin )
@@ -68,17 +69,23 @@ FIND_PACKAGE( xdrstream REQUIRED )
 # ----- Find LOG4CXX package -----
 FIND_PACKAGE( LOG4CXX REQUIRED )
 
+# ----- Find JSONCPP package -----
+FIND_PACKAGE( JSONCPP REQUIRED )
+
+# ----- Find DQMNet package -----
+FIND_PACKAGE( DQMNet REQUIRED )
+
 # ----- Find Mongoose package -----
 FIND_PACKAGE( Mongoose QUIET )
 
 IF( MONGOOSE_FOUND )
 	MESSAGE( STATUS "Check for Mongoose_INCLUDE_DIRS : ${Mongoose_INCLUDE_DIRS} -- ok" )
 	MESSAGE( STATUS "Check for Mongoose_LIBRARIES : ${Mongoose_LIBRARIES} -- ok" )
-	
+
 	ADD_DEFINITIONS( -DDQM4HEP_USE_MONGOOSE )
 	INCLUDE_DIRECTORIES( ${Mongoose_INCLUDE_DIRS} )
 	LINK_LIBRARIES( ${Mongoose_LIBRARIES} )
-	
+
 	LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${Mongoose_INCLUDE_DIRS} )
 	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${Mongoose_LIBRARY_DIRS} )
 	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${Mongoose_LIBRARIES} )
@@ -88,7 +95,7 @@ ENDIF()
 
 
 # ----- Include package properties -----
-FOREACH( pkg ROOT DIM MySQL xdrstream LOG4CXX )
+FOREACH( pkg ROOT DIM MySQL xdrstream LOG4CXX DQMNet JSONCPP )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
@@ -115,14 +122,14 @@ ENDIF()
 
 # ----- levbdim -----
 IF( BUILD_EVB )
-	
+
 	FIND_PACKAGE( levbdim REQUIRED )
-	
+
 	IF( NOT levbdim_FOUND )
 		MESSAGE( SEND_ERROR "levbdim package not found !" )
 		MESSAGE( "Please switch OFF BUILD_EVB or adjust your CMAKE_MODULE_PATH" )
 	ENDIF()
-	
+
 	INCLUDE_DIRECTORIES( ${levbdim_INCLUDE_DIRS} )
 	LINK_LIBRARIES( ${levbdim_LIBRARIES} )
 	ADD_DEFINITIONS ( ${levbdim_DEFINITIONS} )
@@ -130,7 +137,7 @@ IF( BUILD_EVB )
 	LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${levbdim_INCLUDE_DIRS} )
 	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${levbdim_LIBRARY_DIRS} )
 	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${levbdim_LIBRARIES} )
-	
+
 ENDIF()
 
 ###############################
@@ -186,4 +193,3 @@ DISPLAY_STD_VARIABLES()
 ###############################
 # generate and install following configuration files
 GENERATE_PACKAGE_CONFIGURATION_FILES( ${PROJECT_NAME}Config.cmake ${PROJECT_NAME}ConfigVersion.cmake ${PROJECT_NAME}LibDeps.cmake )
-

@@ -20,7 +20,7 @@ must not be misrepresented as being the original software.
 
 3. This notice may not be removed or altered from any source
 distribution.
-*/
+ */
 
 /*
  * THIS FILE WAS ALTERED BY Tyge Løvset, 7. April 2005.
@@ -31,89 +31,92 @@ distribution.
 
 #include "dqm4hep/tinystr.h" // Altered path
 
-namespace dqm4hep
-{
+namespace dqm4hep {
 
-// Error value for find primitive
-const TiXmlString::size_type TiXmlString::npos = static_cast< TiXmlString::size_type >(-1);
+  namespace core {
 
-
-// Null rep.
-TiXmlString::Rep TiXmlString::nullrep_ = { 0, 0, { '\0' } };
+    // Error value for find primitive
+    const TiXmlString::size_type TiXmlString::npos = static_cast< TiXmlString::size_type >(-1);
 
 
-void TiXmlString::reserve (size_type cap)
-{
-	if (cap > capacity())
-	{
-		TiXmlString tmp;
-		tmp.init(length(), cap);
-		memcpy(tmp.start(), data(), length());
-		swap(tmp);
-	}
-}
+    // Null rep.
+    TiXmlString::Rep TiXmlString::nullrep_ = { 0, 0, { '\0' } };
 
 
-TiXmlString& TiXmlString::assign(const char* str, size_type len)
-{
-	size_type cap = capacity();
-	if (len > cap || cap > 3*(len + 8))
-	{
-		TiXmlString tmp;
-		tmp.init(len);
-		memcpy(tmp.start(), str, len);
-		swap(tmp);
-	}
-	else
-	{
-		memmove(start(), str, len);
-		set_size(len);
-	}
-	return *this;
-}
+    void TiXmlString::reserve (size_type cap)
+    {
+      if (cap > capacity())
+      {
+        TiXmlString tmp;
+        tmp.init(length(), cap);
+        memcpy(tmp.start(), data(), length());
+        swap(tmp);
+      }
+    }
 
 
-TiXmlString& TiXmlString::append(const char* str, size_type len)
-{
-	size_type newsize = length() + len;
-	if (newsize > capacity())
-	{
-		reserve (newsize + capacity());
-	}
-	memmove(finish(), str, len);
-	set_size(newsize);
-	return *this;
-}
+    TiXmlString& TiXmlString::assign(const char* str, size_type len)
+    {
+      size_type cap = capacity();
+      if (len > cap || cap > 3*(len + 8))
+      {
+        TiXmlString tmp;
+        tmp.init(len);
+        memcpy(tmp.start(), str, len);
+        swap(tmp);
+      }
+      else
+      {
+        memmove(start(), str, len);
+        set_size(len);
+      }
+      return *this;
+    }
 
 
-TiXmlString operator + (const TiXmlString & a, const TiXmlString & b)
-{
-	TiXmlString tmp;
-	tmp.reserve(a.length() + b.length());
-	tmp += a;
-	tmp += b;
-	return tmp;
-}
+    TiXmlString& TiXmlString::append(const char* str, size_type len)
+    {
+      size_type newsize = length() + len;
+      if (newsize > capacity())
+      {
+        reserve (newsize + capacity());
+      }
+      memmove(finish(), str, len);
+      set_size(newsize);
+      return *this;
+    }
 
-TiXmlString operator + (const TiXmlString & a, const char* b)
-{
-	TiXmlString tmp;
-	TiXmlString::size_type b_len = static_cast<TiXmlString::size_type>( strlen(b) );
-	tmp.reserve(a.length() + b_len);
-	tmp += a;
-	tmp.append(b, b_len);
-	return tmp;
-}
 
-TiXmlString operator + (const char* a, const TiXmlString & b)
-{
-	TiXmlString tmp;
-	TiXmlString::size_type a_len = static_cast<TiXmlString::size_type>( strlen(a) );
-	tmp.reserve(a_len + b.length());
-	tmp.append(a, a_len);
-	tmp += b;
-	return tmp;
-}
+    TiXmlString operator + (const TiXmlString & a, const TiXmlString & b)
+    {
+      TiXmlString tmp;
+      tmp.reserve(a.length() + b.length());
+      tmp += a;
+      tmp += b;
+      return tmp;
+    }
+
+    TiXmlString operator + (const TiXmlString & a, const char* b)
+    {
+      TiXmlString tmp;
+      TiXmlString::size_type b_len = static_cast<TiXmlString::size_type>( strlen(b) );
+      tmp.reserve(a.length() + b_len);
+      tmp += a;
+      tmp.append(b, b_len);
+      return tmp;
+    }
+
+    TiXmlString operator + (const char* a, const TiXmlString & b)
+    {
+      TiXmlString tmp;
+      TiXmlString::size_type a_len = static_cast<TiXmlString::size_type>( strlen(a) );
+      tmp.reserve(a_len + b.length());
+      tmp.append(a, a_len);
+      tmp += b;
+      return tmp;
+    }
+
+  }
 
 }
 
