@@ -77,6 +77,11 @@ namespace dqm4hep {
       };
 
       /**
+       * Constructor
+       */
+      Histogram1D();
+
+      /**
       * Constructor
       */
       Histogram1D(const unsigned int nBins, const float &min, const float &max);
@@ -289,12 +294,6 @@ namespace dqm4hep {
       bool isUpToDate() const;
       MonitorObjectType getType() const;
       void clear();
-      
-    private:
-      /**
-       * Constructor
-       */
-      Histogram1D();
 
     private:
       unsigned int                m_nBins;
