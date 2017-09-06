@@ -104,7 +104,6 @@ namespace dqm4hep {
     class QualityTestResult;
     class StatisticsService;
     class Path;
-    class Alert;
     struct Stats;
 
     /** allocator_helper class
@@ -132,8 +131,6 @@ namespace dqm4hep {
     typedef std::queue<Event*>                                  EventQueue;
     typedef std::shared_ptr<Event>                              EventPtr;
     typedef std::queue<EventPtr>                                EventPtrQueue;
-
-    typedef std::shared_ptr<Alert>                              AlertPtr;
 
     typedef std::shared_ptr<MonitorElement>                     MonitorElementPtr;
     typedef std::vector<MonitorElementPtr>                      MonitorElementPtrList;
@@ -629,46 +626,6 @@ namespace dqm4hep {
     {
       DQM_RESET_POLICY_TABLE(GET_STR_COMPARE)
 	    else return NO_RESET_POLICY;
-    }
-
-
-    //-------------------------------------------------------------------------------------------------
-
-    // definitions of the alert type table
-#define DQM_ALERT_TYPE_TABLE(d) \
-    d(SOFTWARE_ALERT,  "SoftwareAlert") \
-    d(DANGER_ALERT,    "DangerAlert") \
-    d(BIOHAZARD_ALERT, "BiohazardAlert") \
-    d(LEAK_ALERT,      "LeakAlert") \
-    d(DAQ_ALERT,       "DaqAlert") \
-    d(OTHER_ALERT,     "OtherAlert")
-
-    /** AlertType enum
-     *
-     *  Defines different types of alert that
-     *  could be raised by module or a generic
-     *  emitter. The OTHER_ALERT is a user defined
-     *  generic alert type
-     */
-    enum AlertType
-    {
-      DQM_ALERT_TYPE_TABLE(GET_ENUM_ENTRY)
-      NUMBER_OF_DQM_ALERT_TYPES
-    };
-
-    inline std::string alertTypeToString(const AlertType type)
-    {
-      switch (type)
-      {
-      DQM_ALERT_TYPE_TABLE(GET_NAME_SWITCH)
-      default : throw dqm4hep::core::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-      }
-    }
-
-    inline AlertType stringToAlertType(const std::string &str)
-    {
-      DQM_ALERT_TYPE_TABLE(GET_STR_COMPARE)
-	    else return OTHER_ALERT;
     }
 
     //-------------------------------------------------------------------------------------------------
