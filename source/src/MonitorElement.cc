@@ -5,22 +5,22 @@
  * Creation date : jeu. sept. 4 2014
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Ete Remi
  * @copyright CNRS , IPNL
  */
@@ -54,6 +54,347 @@ ClassImp(dqm4hep::core::TDynamicGraph)
 namespace dqm4hep {
 
   namespace core {
+
+    namespace experimental {
+
+
+      MonitorElement::MonitorElement(MonitorObjectType type, const std::string &name, const std::string &moduleName) :
+  		    m_name(name),
+  		    m_moduleName(moduleName),
+  		    m_description(""),
+  		    m_quality(NO_QUALITY),
+  		    m_resetPolicy(END_OF_RUN_RESET_POLICY),
+  		    m_runNumber(0),
+  		    m_toPublish(true),
+  		    m_pObject(nullptr)
+      {
+        /* nop */
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      MonitorElement::MonitorElement(MonitorObject *pObject, const std::string &name, const std::string &moduleName) :
+  		    m_name(name),
+  		    m_description(""),
+  		    m_moduleName(moduleName),
+  		    m_quality(NO_QUALITY),
+  		    m_resetPolicy(END_OF_RUN_RESET_POLICY),
+  		    m_runNumber(0),
+  		    m_toPublish(true),
+  		    m_pObject(pObject)
+      {
+        if(NULL == m_pObject)
+          throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      MonitorElement::~MonitorElement()
+      {
+        if(nullptr != m_pObject)
+          delete m_pObject;
+
+        m_qualityTestMap.clear();
+        m_qualityTestResultMap.clear();
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &MonitorElement::getModuleName() const
+      {
+        return m_moduleName;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      Quality MonitorElement::getQuality() const
+      {
+        return m_quality;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setQuality(Quality quality)
+      {
+        m_quality = quality;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      ResetPolicy MonitorElement::getResetPolicy() const
+      {
+        return m_resetPolicy;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setResetPolicy(ResetPolicy policy)
+      {
+        m_resetPolicy = policy;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      MonitorObjectType MonitorElement::getType() const
+      {
+        if(nullptr != m_pObject)
+          return m_pObject->getType();
+
+        return UNKNOWN_MONITOR_OBJECT;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &MonitorElement::getName() const
+      {
+        return m_name;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &MonitorElement::getDescription() const
+      {
+        return m_description;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setDescription(const std::string &description)
+      {
+        m_description = description;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      unsigned int MonitorElement::getRunNumber() const
+      {
+        return m_runNumber;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setToPublish(bool toPublish)
+      {
+        m_toPublish = toPublish;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      bool MonitorElement::isToPublish() const
+      {
+        return m_toPublish;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setRunNumber(unsigned int runNumber)
+      {
+        m_runNumber = runNumber;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      MonitorObject *MonitorElement::getObject() const
+      {
+        return m_pObject;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::reset()
+      {
+        m_pObject->clear();
+        m_description.clear();
+        m_quality = NO_QUALITY;
+        m_runNumber = 0;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const Path &MonitorElement::getPath() const
+      {
+        return m_path;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setPath(const Path &path)
+      {
+        m_path = path;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &MonitorElement::getCollectorName() const
+      {
+        return m_collectorName;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::setCollectorName(const std::string &collectorName)
+      {
+        m_collectorName = collectorName;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::toJson(Json::Value &value, bool full, bool resetCache) const
+      {
+        value["name"] = m_name;
+        value["description"] = m_description;
+        value["moduleName"] = m_moduleName;
+        value["collectorName"] = m_collectorName;
+        value["path"] = m_path.getPath();
+        value["quality"] = static_cast<int>(m_quality);
+        value["resetPolicy"] = static_cast<int>(m_resetPolicy);
+        value["runNumber"] = m_runNumber;
+
+        Json::Value qtestsValue;
+
+        for(auto qtest : m_qualityTestResultMap)
+        {
+          Json::Value qtestValue;
+          qtest.second.toJson(qtestValue);
+          qtestsValue[qtest.first] = qtestValue;
+        }
+
+        value["qtests"] = qtestsValue;
+        value["objectType"] = static_cast<int>(this->getType());
+
+        Json::Value objectValue;
+
+        if(nullptr != m_pObject)
+          m_pObject->toJson(objectValue, full, resetCache);
+
+        value["object"] = objectValue;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void MonitorElement::fromJson(const Json::Value &value)
+      {
+        m_name = value.get("name", m_name).asString();
+        m_description = value.get("description", m_description).asString();
+        m_moduleName = value.get("moduleName", m_moduleName).asString();
+        m_collectorName = value.get("collectorName", m_collectorName).asString();
+        m_path = value.get("path", m_path.getPath()).asString();
+        m_quality = static_cast<Quality>(value.get("quality", static_cast<int>(m_quality)).asInt());
+        m_resetPolicy = static_cast<ResetPolicy>(value.get("resetPolicy", static_cast<int>(m_resetPolicy)).asInt());
+        m_runNumber = value.get("runNumber", m_runNumber).asInt();
+
+        Json::Value qtests(value.get("qtests", Json::Value(Json::objectValue)));
+        auto members = qtests.getMemberNames();
+
+        for(auto qtest : members)
+        {
+          QualityTestResult result;
+          result.fromJson(qtests[qtest]);
+          m_qualityTestResultMap.insert(QualityTestResultMap::value_type(qtest, result));
+        }
+
+        MonitorObjectType type = static_cast<MonitorObjectType>(value.get("objectType", 0).asInt());
+        MonitorObject *pMonitorObject = createMonitorObject(type);
+        Json::Value objectValue(value.get("object", Json::Value(Json::objectValue)));
+
+        if(nullptr != pMonitorObject)
+          pMonitorObject->fromJson(objectValue);
+
+        if(nullptr != m_pObject)
+          delete m_pObject;
+
+        m_pObject = pMonitorObject;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const MonitorElement::QualityTestResultMap &MonitorElement::getQualityTestResults() const
+      {
+        return m_qualityTestResultMap;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      StatusCode MonitorElement::runQualityTest(const std::string &qualityTestName)
+      {
+        std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(qualityTestName);
+
+        if(findIter == m_qualityTestMap.end())
+          return STATUS_CODE_NOT_FOUND;
+
+        QualityTest *pQualityTest = findIter->second;
+        QualityTestResult result;
+
+        // TODO remove experimental namespace to make this working
+        // RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->run(this, result));
+
+        m_qualityTestResultMap[pQualityTest->getName()] = result;
+
+        return STATUS_CODE_SUCCESS;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      StatusCode MonitorElement::runQualityTests()
+      {
+        for(std::map<std::string, QualityTest*>::iterator iter = m_qualityTestMap.begin(), endIter = m_qualityTestMap.end() ;
+            endIter != iter ; ++iter)
+        {
+          QualityTest *pQualityTest = iter->second;
+          QualityTestResult result;
+
+          // TODO remove experimental namespace to make this working
+          // RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->run(this, result));
+
+          m_qualityTestResultMap[pQualityTest->getName()] = result;
+        }
+
+        return STATUS_CODE_SUCCESS;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      StatusCode MonitorElement::addQualityTest(QualityTest *pQualityTest)
+      {
+        if(NULL == pQualityTest)
+          return STATUS_CODE_INVALID_PTR;
+
+        std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(pQualityTest->getName());
+
+        if(m_qualityTestMap.end() != findIter)
+          return STATUS_CODE_ALREADY_PRESENT;
+
+        if(!m_qualityTestMap.insert(std::map<std::string, QualityTest*>::value_type(pQualityTest->getName(), pQualityTest)).second)
+          return STATUS_CODE_FAILURE;
+
+        return STATUS_CODE_SUCCESS;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      StatusCode MonitorElement::removeQualityTest(QualityTest *pQualityTest)
+      {
+        if(NULL == pQualityTest)
+          return STATUS_CODE_INVALID_PTR;
+
+        return removeQualityTest(pQualityTest->getName());
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      StatusCode MonitorElement::removeQualityTest(const std::string &qualityTestName)
+      {
+        std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(qualityTestName);
+
+        if(m_qualityTestMap.end() == findIter)
+          return STATUS_CODE_NOT_FOUND;
+
+        m_qualityTestMap.erase(findIter);
+
+        return STATUS_CODE_SUCCESS;
+      }
+
+    }
 
     MonitorElement::MonitorElement(MonitorElementType type,
         const std::string &name, const std::string &title,
@@ -715,5 +1056,4 @@ namespace dqm4hep {
 
   }
 
-} 
-
+}

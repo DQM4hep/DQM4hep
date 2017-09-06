@@ -5,22 +5,22 @@
  * Creation date : jeu. sept. 4 2014
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Ete Remi
  * @copyright CNRS , IPNL
  */
@@ -33,6 +33,10 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/QualityTest.h"
 #include "dqm4hep/Path.h"
+
+#ifndef __CINT__
+#include <dqm4hep/MonitorObject.h>
+#endif
 
 // -- root headers
 #include <TObject.h>
@@ -53,6 +57,198 @@ namespace dqm4hep {
     class QualityTest;
     class QualityTestResult;
     class MonitorElementManager;
+
+    namespace experimental {
+
+#ifndef __CINT__
+
+      class MonitorElement
+      {
+        friend class ModuleApi;
+        friend class Storage;
+        friend class Directory;
+        friend class MonitorElementManager;
+
+        typedef std::map<std::string, QualityTestResult> QualityTestResultMap;
+
+      public:
+        /** Default constructor
+         */
+        MonitorElement(MonitorObjectType type = UNKNOWN_MONITOR_OBJECT,
+            const std::string &name = "", const std::string &moduleName = "");
+
+        /** MonitorElement with object, type, name, title and module name
+         */
+        MonitorElement(MonitorObject *pObject,
+            const std::string &name, const std::string &moduleName);
+
+        /** Destructor
+         */
+        virtual ~MonitorElement();
+
+        /** Returns the element type
+         */
+        MonitorObjectType getType() const;
+
+        /** Returns the name of the element
+         */
+        virtual const std::string &getName() const;
+
+        /** Get the path (directory) of this element
+         */
+        const Path &getPath() const;
+
+        /** Set the path (directory) for this element
+         */
+        void setPath(const Path &path);
+
+        /** Get the collector name where this element is collected (or will be)
+         *  Set by the framework after collect
+         */
+        const std::string &getCollectorName() const;
+
+        /** Set the collector name where this element is collected (or will be)
+         *  Used by the framework after collect.
+         */
+        void setCollectorName(const std::string &collectorName);
+
+        /** Get the module name that has booked this element
+         */
+        const std::string &getModuleName() const;
+
+        /** Returns the element quality
+         */
+        Quality getQuality() const;
+
+        /** Set the element quality
+         */
+        void setQuality(Quality quality);
+
+        /** Returns the reset policy of the element. See enumerator definition
+         */
+        ResetPolicy getResetPolicy() const;
+
+        /** Sets the reset policy of the element. See enumerator definition
+         */
+        void setResetPolicy(ResetPolicy policy);
+
+        /** Returns the element description
+         */
+        const std::string &getDescription() const;
+
+        /** Sets the element description
+         */
+        void setDescription(const std::string &description);
+
+        /** Returns the current run for this monitor element
+         */
+        unsigned int getRunNumber() const;
+
+        /** Sets the current run number
+         */
+        void setRunNumber(unsigned int runNumber);
+
+        /** Sets whether the element has to be published at the next end of cycle.
+         *  This flag is not reset by the framework. The user is
+         *  responsible for publishing or not the element.
+         */
+        void setToPublish(bool publish);
+
+        /** Whether the element has to be published at the next end of cycle.
+         */
+        bool isToPublish() const;
+
+        /** Return the associated MonitorObject that is monitored
+         */
+        MonitorObject *getObject() const;
+
+        /** Return the monitor object after a dynamic cast of the asked type
+         */
+        template <typename T>
+        T *get() const;
+
+        /** Return the quality test results map.
+         *  Key : quality test name, value : quality test result
+         */
+        const QualityTestResultMap &getQualityTestResults() const;
+
+        /** Reset the element
+         */
+        void reset();
+
+        /**
+         * [toJson description]
+         * @param value      [description]
+         * @param full       [description]
+         * @param resetCache [description]
+         */
+        void toJson(Json::Value &value, bool full = true, bool resetCache = true) const;
+
+        /**
+         * [fromJson description]
+         * @param value [description]
+         */
+        void fromJson(const Json::Value &value);
+
+      private:
+        /** Run the given quality test
+         */
+        StatusCode runQualityTest(const std::string &qualityTestName);
+
+        /** Run all the quality tests
+         */
+        StatusCode runQualityTests();
+
+        /** Add a quality test
+         */
+        StatusCode addQualityTest(QualityTest *pQualityTest);
+
+        /** Remove a quality test
+         */
+        StatusCode removeQualityTest(QualityTest *pQualityTest);
+
+        /** Remove a quality test
+         */
+        StatusCode removeQualityTest(const std::string &qualityTestName);
+
+        //members
+        MonitorObject                  *m_pObject;             ///< The monitored MonitorObject
+
+        std::string                     m_name;                ///< The element name
+        std::string                     m_description;         ///< The element description
+        std::string                     m_moduleName;          ///< The module name that have booked this element
+        std::string                     m_collectorName;       ///< The collector name that have collected this element
+
+        Path                            m_path;
+        Quality                         m_quality;             ///< The element quality has defined by the user
+        ResetPolicy                     m_resetPolicy;         ///< The reset policy. See enumerator definition
+
+        unsigned int                    m_runNumber;           ///< The run number when the element is published
+        bool                            m_toPublish;           ///< Whether the element has to be published at end of cycle
+
+        std::map<std::string, QualityTest*>       m_qualityTestMap;         /// The quality test map to perform
+        std::map<std::string, QualityTestResult>  m_qualityTestResultMap;  /// The quality test result list filled after performing the quality tests
+      };
+
+      //-------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------
+
+      template <typename T>
+      T *MonitorElement::get() const
+      {
+        return dynamic_cast<T*>(m_pObject);
+      }
+
+#endif // CINT
+
+    } // namespace experimental
+
+
+
+
+
+
+
 
     /** MonitorElement class.
      *  Base class for plots and scalars that can be monitored via a user module.
@@ -521,6 +717,6 @@ namespace dqm4hep {
 
   }
 
-} 
+}
 
 #endif  //  DQM4HEP_MONITORELEMENT_H

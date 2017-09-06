@@ -43,25 +43,45 @@ namespace dqm4hep {
 
   namespace core {
 
-    /**
-     * MonitorObjectType enum
+    class MonitorObject;
+
+// definitions of the monitor object table
+#define MONITOR_OBJECT_TABLE(d) \
+    d(UNKNOWN_MONITOR_OBJECT,  "Unknown"                 , nullptr) \
+    d(HISTOGRAM_1D,            "Histogram1D"             , new Histogram1D()) \
+    d(GRAPH_1D,                "Graph1D"                 , new Graph1D()) \
+    d(PIE_CHART,               "PieChart"                , new PieChart()) \
+    d(SUMMARY,                 "Summary"                 , new Summary()) \
+    d(INTEGER_OBJECT,          "Int"                     , new ScalarInt()) \
+    d(UNSIGNED_INTEGER_OBJECT, "UInt"                    , new ScalarUInt()) \
+    d(FLOAT_OBJECT,            "Float"                   , new ScalarFloat()) \
+    d(DOUBLE_OBJECT,           "Double"                  , new ScalarDouble()) \
+    d(STRING_OBJECT,           "String"                  , new ScalarString()) \
+    d(LONG_INTEGER_OBJECT,     "Long"                    , new ScalarLong()) \
+    d(SHORT_INTEGER_OBJECT,    "Short"                   , new ScalarShort())
+    // d(SCATTER_PLOT,            "ScatterPlot"             , new ScatterPlot()) \
+
+
+#define GET_MO_CREATE_SWITCH(a, b, c) case a: return c;
+
+    /** MonitorObjectType enumerator
      */
     enum MonitorObjectType
     {
-      UNKNOWN_MONITOR_OBJECT = 0,
-      HISTOGRAM_1D,
-      SCATTER_PLOT,
-      GRAPH_1D,
-      PIE_CHART,
-      SUMMARY,
-      INTEGER_OBJECT,
-      UNSIGNED_INTEGER_OBJECT,
-      FLOAT_OBJECT,
-      DOUBLE_OBJECT,
-      STRING_OBJECT,
-      LONG_INTEGER_OBJECT,
-      SHORT_INTEGER_OBJECT
+      MONITOR_OBJECT_TABLE(GET_ENUM_ENTRY_2)
+      NUMBER_OF_MONITOR_OBJECTS
     };
+
+    MonitorObject *createMonitorObject(MonitorObjectType type);
+
+    inline std::string monitorObjectTypeToString(MonitorObjectType type)
+    {
+      switch(type)
+      {
+        MONITOR_OBJECT_TABLE(GET_NAME_SWITCH_2)
+        default: throw dqm4hep::core::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+      }
+    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------

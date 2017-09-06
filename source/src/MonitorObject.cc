@@ -28,9 +28,27 @@
 
 #include "dqm4hep/MonitorObject.h"
 
+#include "dqm4hep/Graph1D.h"
+#include "dqm4hep/Histogram1D.h"
+#include "dqm4hep/PieChart.h"
+#include "dqm4hep/Scalar.h"
+#include "dqm4hep/Summary.h"
+
 namespace dqm4hep {
 
   namespace core {
+
+    MonitorObject *createMonitorObject(MonitorObjectType type)
+    {
+      switch(type)
+      {
+        MONITOR_OBJECT_TABLE(GET_MO_CREATE_SWITCH)
+        default: return nullptr;
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     MonitorObject::MonitorObject()
     {

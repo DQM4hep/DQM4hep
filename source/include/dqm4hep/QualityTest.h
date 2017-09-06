@@ -35,9 +35,127 @@
 // -- xdrstream headers
 #include "xdrstream/xdrstream.h"
 
+#include <json/json.h>
+
 namespace dqm4hep {
 
   namespace core {
+
+    class TiXmlHandle;
+
+    namespace experimental {
+
+      class MonitorElement;
+
+      /** QualityTestResult class
+       *  Hanlde the result of a quality test
+       */
+      class QualityTestResult
+      {
+      public:
+        /** Constructor
+         */
+        QualityTestResult();
+
+        /** Copy constructor
+         */
+        QualityTestResult(const QualityTestResult &qualityTestResult);
+
+        /** Assignment operator
+         */
+        QualityTestResult &operator=(const QualityTestResult &qualityTestResult);
+
+        /**
+         * [toJson description]
+         * @param value [description]
+         */
+        void toJson(Json::Value &value) const;
+
+        /**
+         * [fromJson description]
+         * @param value [description]
+         */
+        void fromJson(const Json::Value &value);
+
+      public:
+        std::string           m_name;
+        std::string           m_type;
+        std::string           m_message;
+        Quality               m_quality;
+        bool                  m_isSuccessful;
+      };
+
+
+      /** QualityTest class
+       */
+      class QualityTest
+      {
+      public:
+        /** Constructor with quality test name (unique identifier)
+         */
+        QualityTest(const std::string &name);
+
+        /** Destructor
+         */
+        virtual ~QualityTest();
+
+        /** Get the quality test type
+         */
+        const std::string &getType() const;
+
+        /** Get the quality test name (unique identifier)
+         */
+        const std::string &getName() const;
+
+        /** Get the message after quality test
+         */
+        const std::string &getMessage() const;
+
+        /** Get the quality flag
+         */
+        Quality getQuality() const;
+
+        /** Whether the quality test is successful
+         */
+        bool isSuccessful() const;
+
+      protected:
+        /** Read the settings from the xml handle
+         */
+        virtual StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) = 0;
+
+        /** Initialize the quality test.
+         */
+        virtual StatusCode init() = 0;
+
+        /** Runs a quality test on the given monitor element
+         */
+        virtual StatusCode run(MonitorElement *pMonitorElement) = 0;
+
+        /** Whether the quality test can be run on the monitor element
+         */
+        virtual bool canRun(MonitorElement *pMonitorElement) const = 0;
+
+      private:
+        /** Perform the quality test result and fill the quality test result object
+         */
+        StatusCode run(MonitorElement *pMonitorElement, QualityTestResult &result);
+
+      protected:
+        std::string           m_message;
+        bool                  m_isSuccessful;
+        Quality               m_quality;
+
+      private:
+        std::string           m_type;
+        std::string           m_name;
+
+        // friendship
+        friend class MonitorElementManager; // to create quality test
+        friend class MonitorElement;     // to run quality test
+      };
+
+    }
 
     class MonitorElement;
     class TiXmlHandle;

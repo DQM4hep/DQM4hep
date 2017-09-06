@@ -5,22 +5,22 @@
  * Creation date : ven. f�vr. 20 2015
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -40,6 +40,140 @@
 namespace dqm4hep {
 
   namespace core {
+
+    namespace experimental {
+
+      QualityTestResult::QualityTestResult() :
+          m_quality(NO_QUALITY),
+          m_isSuccessful(true)
+      {
+        /* nop */
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      QualityTestResult::QualityTestResult(const QualityTestResult &qualityTestResult)
+      {
+        *this = qualityTestResult;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      QualityTestResult &QualityTestResult::operator=(const QualityTestResult &qualityTestResult)
+      {
+        m_type = qualityTestResult.m_type;
+        m_name = qualityTestResult.m_name;
+        m_message = qualityTestResult.m_message;
+        m_quality = qualityTestResult.m_quality;
+        m_isSuccessful = qualityTestResult.m_isSuccessful;
+
+        return *this;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void QualityTestResult::toJson(Json::Value &value) const
+      {
+        value["type"] = m_type;
+        value["name"] = m_name;
+        value["message"] = m_message;
+        value["quality"] = static_cast<int>(m_quality);
+        value["successful"] = m_isSuccessful;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      void QualityTestResult::fromJson(const Json::Value &value)
+      {
+        m_type = value.get("type", m_type).asString();
+        m_name = value.get("name", m_name).asString();
+        m_message = value.get("message", m_message).asString();
+        m_quality = static_cast<Quality>(value.get("quality", static_cast<int>(m_quality)).asInt());
+        m_isSuccessful = value.get("successful", m_isSuccessful).asBool();
+      }
+
+      //-------------------------------------------------------------------------------------------------
+      //-------------------------------------------------------------------------------------------------
+
+      QualityTest::QualityTest(const std::string &name) :
+  		    m_name(name),
+  		    m_quality(NO_QUALITY),
+  		    m_isSuccessful(true)
+      {
+        /* nop */
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      QualityTest::~QualityTest()
+      {
+        /* nop */
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &QualityTest::getType() const
+      {
+        return m_type;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &QualityTest::getName() const
+      {
+        return m_name;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      const std::string &QualityTest::getMessage() const
+      {
+        return m_message;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      bool QualityTest::isSuccessful() const
+      {
+        return m_isSuccessful;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      Quality QualityTest::getQuality() const
+      {
+        return m_quality;
+      }
+
+      //-------------------------------------------------------------------------------------------------
+
+      StatusCode QualityTest::run(MonitorElement *pMonitorElement, QualityTestResult &result)
+      {
+        result.m_type = this->getType();
+        result.m_name = this->getName();
+
+        if(this->canRun(pMonitorElement))
+        {
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, run(pMonitorElement));
+
+          result.m_message = getMessage();
+          result.m_isSuccessful = isSuccessful();
+          result.m_quality = getQuality();
+        }
+        else
+        {
+          result.m_message = "Couldn't run quality test";
+          result.m_isSuccessful = false;
+          result.m_quality = NO_QUALITY;
+        }
+
+        return STATUS_CODE_SUCCESS;
+      }
+
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     QualityTestResult::QualityTestResult() :
         m_quality(NO_QUALITY),
@@ -452,4 +586,3 @@ namespace dqm4hep {
   }
 
 }
-
