@@ -36,6 +36,7 @@ INCLUDE( default_settings )
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 OPTION( BUILD_EXAMPLES "Whether to build DQM4HEP examples" OFF )
 OPTION( BUILD_EVB "Whether to build the event builder support" OFF )
+OPTION( BUILD_TESTS "Whether to build framework tests" OFF )
 
 ###############################
 FIND_PROGRAM( ELOG_EXECUTABLE elog HINTS /usr/local/bin /usr/bin )

@@ -209,4 +209,14 @@ IF( BUILD_EXAMPLES )
 
 ENDIF()
 
+IF( BUILD_TESTS )
+  ADD_EXECUTABLE( test-monitor-elements tests/test-monitor-elements.cc )
+  TARGET_LINK_LIBRARIES( test-monitor-elements ${PROJECT_NAME} )
+
+  INSTALL (
+      TARGETS test-monitor-elements
+      RUNTIME DESTINATION bin/tests
+  )
+ENDIF()
+
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
