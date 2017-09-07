@@ -14,28 +14,28 @@ ADD_DEFINITIONS("-Wno-long-long -Wreturn-type -Werror")
 # -------------------------------------------------
 # build the global library
 
-# SET (
-#   ${PROJECT_NAME}DictHeaders
-#   ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/MonitorElement.h
-# )
-#
-# SET( DICT_INCLUDE_DIRS "" )
-# GET_DIRECTORY_PROPERTY(IncludeDirs INCLUDE_DIRECTORIES)
-#
-# FOREACH( dir ${IncludeDirs} )
-#    SET( DICT_INCLUDE_DIRS ${DICT_INCLUDE_DIRS}\t-I${dir} )
-# ENDFOREACH(dir)
-#
-# SET( LIB_HEADERS_PKG ${${PROJECT_NAME}DictHeaders} )
-# SET( LINK_DEF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/LinkDef.h )
-# SET( ROOT_DICT_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dict" )
-#
-# ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.h
-#                    COMMAND mkdir -p ${ROOT_DICT_OUTPUT_DIR}
-#                    COMMAND ${ROOT_CINT_EXECUTABLE} -f ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc -c ${DICT_INCLUDE_DIRS} -p ${LIB_HEADERS_PKG} ${LINK_DEF_FILE}
-#                    COMMENT "Generating ROOT dictionary for DQMCore library."
-#                    DEPENDS ${LIB_HEADERS_PKG}
-# )
+SET (
+  ${PROJECT_NAME}DictHeaders
+  ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/MonitorElement.h
+)
+
+SET( DICT_INCLUDE_DIRS "" )
+GET_DIRECTORY_PROPERTY(IncludeDirs INCLUDE_DIRECTORIES)
+
+FOREACH( dir ${IncludeDirs} )
+   SET( DICT_INCLUDE_DIRS ${DICT_INCLUDE_DIRS}\t-I${dir} )
+ENDFOREACH(dir)
+
+SET( LIB_HEADERS_PKG ${${PROJECT_NAME}DictHeaders} )
+SET( LINK_DEF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/LinkDef.h )
+SET( ROOT_DICT_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dict" )
+
+ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.h
+                   COMMAND mkdir -p ${ROOT_DICT_OUTPUT_DIR}
+                   COMMAND ${ROOT_CINT_EXECUTABLE} -f ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc -c ${DICT_INCLUDE_DIRS} -p ${LIB_HEADERS_PKG} ${LINK_DEF_FILE}
+                   COMMENT "Generating ROOT dictionary for DQMCore library."
+                   DEPENDS ${LIB_HEADERS_PKG}
+)
 
 # AUX_SOURCE_DIRECTORY( src SRC_FILES )
 SET( SRC_FILES ${SRC_FILES} src/DQM4HEP.cc )
@@ -50,9 +50,14 @@ SET( SRC_FILES ${SRC_FILES} src/XmlHelper.cc )
 SET( SRC_FILES ${SRC_FILES} src/CoreTool.cc )
 SET( SRC_FILES ${SRC_FILES} src/Event.cc )
 SET( SRC_FILES ${SRC_FILES} src/Path.cc )
+SET( SRC_FILES ${SRC_FILES} src/PluginManager.cc )
+SET( SRC_FILES ${SRC_FILES} src/Plugin.cc )
+SET( SRC_FILES ${SRC_FILES} src/GenericEvent.cc )
+SET( SRC_FILES ${SRC_FILES} src/Run.cc )
+SET( SRC_FILES ${SRC_FILES} src/Version.cc )
+SET( SRC_FILES ${SRC_FILES} src/MonitorElement.cc )
 
-ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} )
-# ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
+ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
 
 INSTALL(
         TARGETS ${PROJECT_NAME}
