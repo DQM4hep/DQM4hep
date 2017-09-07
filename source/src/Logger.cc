@@ -37,59 +37,8 @@ namespace dqm4hep {
 
   namespace core {
 
-    class remote_sink : public spdlog::sinks::sink
-    {
-    public:
-      remote_sink();
-      void log(const spdlog::details::log_msg& msg);
-      void flush();
-
-    public:
-      static constexpr const char *REMOTE_COMMAND = "/dqm4hep/logcollector/collect";
-
-    private:
-      Json::Value         m_messageValue;
-      std::string         m_hostname;
-      net::Client         m_client;
-    };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    inline remote_sink::remote_sink()
-    {
-      char hname[256];
-      gethostname(hname, 256);
-      m_hostname = hname;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    inline void remote_sink::log(const spdlog::details::log_msg& msg)
-    {
-      m_messageValue["name"] = *msg.logger_name;
-      m_messageValue["level"] = msg.level;
-      m_messageValue["message"] = msg.raw.str();
-      m_messageValue["time"] = int64_t(std::chrono::system_clock::to_time_t(msg.time));
-      m_messageValue["host"] = m_hostname;
-      m_messageValue["pid"] = getpid();
-
-      m_client.sendCommand(REMOTE_COMMAND, m_messageValue);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    inline void remote_sink::flush()
-    {
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
     std::shared_ptr<spdlog::logger>  Logger::m_mainLogger = Logger::createLogger("main", {
-      Logger::coloredConsole(),
-      Logger::remote()
+      Logger::coloredConsole()
     });
 
     //-------------------------------------------------------------------------------------------------

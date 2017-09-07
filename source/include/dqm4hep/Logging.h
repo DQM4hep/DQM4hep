@@ -29,21 +29,7 @@
 #ifndef DQM4HEP_LOGGING_H
 #define DQM4HEP_LOGGING_H
 
-// -- log4cxx headers
-#include <log4cxx/logger.h>
-#include <log4cxx/xml/domconfigurator.h>
-
 #include <dqm4hep/Logger.h>
-
-namespace dqm4hep {
-
-  namespace core {
-
-    // old log4cxx logger
-    static log4cxx::LoggerPtr dqmMainLogger(log4cxx::Logger::getLogger("main"));
-  }
-
-}
 
 #define dqm_logger_log(logger, level, ...) logger->log(level, __VA_ARGS__)
 #define dqm_logger_trace(logger, ...) logger->trace(__VA_ARGS__)
