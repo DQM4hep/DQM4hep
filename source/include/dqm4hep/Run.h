@@ -35,6 +35,9 @@
 // -- xdrstream headers
 #include "xdrstream/xdrstream.h"
 
+// -- json headers
+#include <json/json.h>
+
 // -- std headers
 #include <ctime>
 #include <string>
@@ -119,6 +122,14 @@ namespace dqm4hep {
 
       xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
           xdrstream::xdr_version_t version = 0);
+      
+      /** Convert run to json
+       */
+      void toJson(Json::Value &value) const;
+      
+      /** Read run info from json
+       */
+      void fromJson(const Json::Value &value);
 
     protected:
       int                                    m_runNumber;

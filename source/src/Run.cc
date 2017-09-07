@@ -101,6 +101,47 @@ namespace dqm4hep {
 
       return xdrstream::XDR_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Run::toJson(Json::Value &value) const
+    {
+      Json::Value::Int64 startTime = std::chrono::system_clock::to_time_t(m_startTime);
+      Json::Value::Int64 endTime = std::chrono::system_clock::to_time_t(m_endTime);
+      
+      value["runNumber"] = m_runNumber;
+      value["startTime"] = startTime;
+      value["endTime"] = endTime;
+      value["detector"] = m_detectorName;
+      value["description"] = m_description;
+      
+      Json::Value parametersValue;
+      
+      for(const auto &parameter : m_parametersMap)
+        parametersValue[parameter.first] = parameter.second;
+      
+      value["parameters"] = parametersValue;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Run::fromJson(const Json::Value &value)
+    {
+      m_runNumber = value.get("runNumber", 0).asInt();
+      int64_t startTime = value.get("startTime", 0).asInt64();
+      int64_t endTime = value.get("endTime", 0).asInt64();
+      m_startTime = std::chrono::system_clock::from_time_t(startTime);
+      m_endTime = std::chrono::system_clock::from_time_t(endTime);
+      m_detectorName = value.get("detector", "").asString();
+      m_description = value.get("description", "").asString();
+      
+      m_parametersMap.clear();
+      Json::Value parametersValue(value.get("parameters", Json::Value(Json::objectValue)));
+      auto members = parametersValue.getMemberNames();
+      
+      for( const auto &parameter : members )
+        m_parametersMap[parameter] = parametersValue[parameter].asString();
+    }
 
   }
 
