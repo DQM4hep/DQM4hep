@@ -63,7 +63,7 @@ namespace dqm4hep {
 
       if( pPluginDllEnv == 0 )
       {
-        LOG4CXX_WARN( dqmMainLogger , "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
+        dqm_warning( "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
             "Set it before loading shared libraries. \n"
             "Example : export DQM4HEP_PLUGIN_DLL=libPlugin1.so:libPlugin2.so" );
 
@@ -106,23 +106,21 @@ namespace dqm4hep {
 
       if( NULL != real_path )
       {
-        LOG4CXX_INFO( dqmMainLogger , "<!-- Loading shared library : " << real_path << " ("<< libBaseName << ")-->" );
+        dqm_info( "<!-- Loading shared library : {0} ({1})-->", real_path, libBaseName );
 
         // use real_path
         free( real_path );
       }
       else
       {
-        LOG4CXX_INFO( dqmMainLogger , "<!-- Loading shared library : " << libraryName << " ("<< libBaseName << ")-->" );
+        dqm_info( "<!-- Loading shared library : {0} ({1})-->", libraryName, libBaseName );
       }
 
       void *pLibPointer = dlopen( libraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL );
 
       if( pLibPointer == 0 )
       {
-        LOG4CXX_ERROR( dqmMainLogger , "<!-- ERROR loading shared library : " << libraryName << "\n"
-            << "    ->    "   << dlerror() << " -->" );
-
+        dqm_error( "<!-- ERROR loading shared library : {0}\n    ->    {1} -->", libraryName, dlerror() );
         return STATUS_CODE_FAILURE;
       }
       else
