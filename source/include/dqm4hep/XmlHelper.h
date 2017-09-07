@@ -33,7 +33,6 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/tinyxml.h"
 #include "dqm4hep/Logging.h"
-#include "dqm4hep/CartesianVector.h"
 
 namespace dqm4hep {
 
@@ -93,33 +92,29 @@ namespace dqm4hep {
       template <typename T, typename Validator>
       static StatusCode readParameterValues(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector, Validator validator);
 
-      /** Create a quality test. Works if the quality test factory has been registered first
-       */
-      static StatusCode createQualityTest(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
-
-      /** Create a monitor element from a xml handle
-       */
-      static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-          MonitorElementPtr &monitorElement);
-
-      /** Create a monitor element from a xml handle
-       */
-      static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-          const std::string &strSuffix, MonitorElementPtr &monitorElement);
-
-      /** Create a monitor element from a xml handle
-       */
-      static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-          unsigned int suffix, MonitorElementPtr &monitorElement);
-
-      /** Create a monitor element from a xml handle and configure name, path and title from parameters (see DQM4HEP::replace())
-       */
-      static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-          MonitorElementPtr &monitorElement, const ParameterMap &parameters);
-
-      /** Tokenize a string
-       */
-      static void tokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ");
+      // /** Create a quality test. Works if the quality test factory has been registered first
+      //  */
+      // static StatusCode createQualityTest(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
+      // 
+      // /** Create a monitor element from a xml handle
+      //  */
+      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+      //     MonitorElementPtr &monitorElement);
+      // 
+      // /** Create a monitor element from a xml handle
+      //  */
+      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+      //     const std::string &strSuffix, MonitorElementPtr &monitorElement);
+      // 
+      // /** Create a monitor element from a xml handle
+      //  */
+      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+      //     unsigned int suffix, MonitorElementPtr &monitorElement);
+      // 
+      // /** Create a monitor element from a xml handle and configure name, path and title from parameters (see DQM4HEP::replace())
+      //  */
+      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+      //     MonitorElementPtr &monitorElement, const ParameterMap &parameters);
 
       /** Replace all xml attribute recursively from the parameters map
        */
@@ -173,32 +168,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    template <>
-    inline StatusCode XmlHelper::readValue<CartesianVector>(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, CartesianVector &t)
-    {
-      const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
-
-      if (NULL == pXmlElement)
-        return STATUS_CODE_NOT_FOUND;
-
-      StringVector tokens;
-      tokenizeString(pXmlElement->GetText(), tokens);
-
-      if(tokens.size() != 3)
-        return STATUS_CODE_FAILURE;
-
-      float x(0.f), y(0.f), z(0.f);
-
-      if ( ! DQM4HEP::stringToType(tokens[0], x) || DQM4HEP::stringToType(tokens[1], y) || DQM4HEP::stringToType(tokens[2], z) )
-        return STATUS_CODE_FAILURE;
-
-      t = CartesianVector(x, y, z);
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     template <typename T>
     inline StatusCode XmlHelper::readVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<T> &vector)
     {
@@ -208,7 +177,7 @@ namespace dqm4hep {
         return STATUS_CODE_NOT_FOUND;
 
       StringVector tokens;
-      tokenizeString(pXmlElement->GetText(), tokens);
+      DQM4HEP::tokenize(pXmlElement->GetText(), tokens);
 
       for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
       {
@@ -244,7 +213,7 @@ namespace dqm4hep {
         std::vector<T> rowVector;
 
         StringVector tokens;
-        tokenizeString(pXmlRowElement->GetText(), tokens);
+        DQM4HEP::tokenize(pXmlRowElement->GetText(), tokens);
 
         for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
         {
@@ -339,39 +308,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    template <>
-    inline StatusCode XmlHelper::readParameterValue<CartesianVector>(const TiXmlHandle &xmlHandle, const std::string &parameterName, CartesianVector &t)
-    {
-      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("parameter").Element(); NULL != pXmlElement;
-          pXmlElement = pXmlElement->NextSiblingElement("parameter"))
-      {
-        std::string name;
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
-
-        if(name != parameterName)
-          continue;
-
-        StringVector tokens;
-        tokenizeString(pXmlElement->GetText(), tokens);
-
-        if(tokens.size() != 3)
-          return STATUS_CODE_FAILURE;
-
-        float x(0.f), y(0.f), z(0.f);
-
-        if ( ! DQM4HEP::stringToType(tokens[0], x) || ! DQM4HEP::stringToType(tokens[1], y) || ! DQM4HEP::stringToType(tokens[2], z) )
-          return STATUS_CODE_FAILURE;
-
-        t = CartesianVector(x, y, z);
-
-        return STATUS_CODE_SUCCESS;
-      }
-
-      return STATUS_CODE_NOT_FOUND;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     template <typename T, typename Validator>
     inline StatusCode XmlHelper::readParameterValue(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t, Validator validator)
     {
@@ -398,7 +334,7 @@ namespace dqm4hep {
           continue;
 
         StringVector tokens;
-        tokenizeString(pXmlElement->GetText(), tokens);
+        DQM4HEP::tokenize(pXmlElement->GetText(), tokens);
 
         for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
         {

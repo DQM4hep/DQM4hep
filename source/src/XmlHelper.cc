@@ -27,8 +27,6 @@
 
 
 #include "dqm4hep/XmlHelper.h"
-#include "dqm4hep/ModuleApi.h"
-#include "dqm4hep/Module.h"
 
 namespace dqm4hep {
 
@@ -36,103 +34,88 @@ namespace dqm4hep {
 
     //----------------------------------------------------------------------------------------------------
 
-    void XmlHelper::tokenizeString(const std::string &inputString, StringVector &tokens, const std::string &delimiter)
-    {
-      std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
-      std::string::size_type pos     = inputString.find_first_of(delimiter, lastPos);
-
-      while ((std::string::npos != pos) || (std::string::npos != lastPos))
-      {
-        tokens.push_back(inputString.substr(lastPos, pos - lastPos));
-        lastPos = inputString.find_first_not_of(delimiter, pos);
-        pos = inputString.find_first_of(delimiter, lastPos);
-      }
-    }
-
-    //----------------------------------------------------------------------------------------------------
-
-    StatusCode XmlHelper::createQualityTest(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName)
-    {
-      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("qualitytest").Element(); NULL != pXmlElement;
-          pXmlElement = pXmlElement->NextSiblingElement("qualitytest"))
-      {
-        std::string name;
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
-
-        if(name != qualityTestName)
-          continue;
-
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ModuleApi::createQualityTest(pModule, pXmlElement));
-
-        return STATUS_CODE_SUCCESS;
-      }
-
-      return STATUS_CODE_NOT_FOUND;
-    }
-
-    //----------------------------------------------------------------------------------------------------
-
-    StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-        MonitorElementPtr &monitorElement)
-    {
-      return XmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, "", monitorElement);
-    }
-
-    //----------------------------------------------------------------------------------------------------
-
-    StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-        const std::string &strSuffix, MonitorElementPtr &monitorElement)
-    {
-      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
-          pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
-      {
-        std::string meId;
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "ID", meId));
-
-        if(meId != meStringId)
-          continue;
-
-        std::string meName;
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", meName));
-
-        meName += strSuffix;
-
-        return ModuleApi::bookMonitorElement(pModule, pXmlElement, meName, monitorElement);
-      }
-
-      return STATUS_CODE_NOT_FOUND;
-    }
-
-    //----------------------------------------------------------------------------------------------------
-
-    StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-        unsigned int suffix, MonitorElementPtr &monitorElement)
-    {
-      std::stringstream ss;
-      ss << suffix;
-
-      return XmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, ss.str(), monitorElement);
-    }
-
-    //----------------------------------------------------------------------------------------------------
-
-    StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-        MonitorElementPtr &monitorElement, const ParameterMap &parameters)
-    {
-      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
-          pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
-      {
-        std::string meId;
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "ID", meId));
-
-        if(meId != meStringId)
-          continue;
-
-        return ModuleApi::bookMonitorElement(pModule, pXmlElement, monitorElement, parameters);
-      }
-
-      return STATUS_CODE_NOT_FOUND;
-    }
+    // StatusCode XmlHelper::createQualityTest(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName)
+    // {
+    //   for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("qualitytest").Element(); NULL != pXmlElement;
+    //       pXmlElement = pXmlElement->NextSiblingElement("qualitytest"))
+    //   {
+    //     std::string name;
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
+    // 
+    //     if(name != qualityTestName)
+    //       continue;
+    // 
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, ModuleApi::createQualityTest(pModule, pXmlElement));
+    // 
+    //     return STATUS_CODE_SUCCESS;
+    //   }
+    // 
+    //   return STATUS_CODE_NOT_FOUND;
+    // }
+    // 
+    // //----------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+    //     MonitorElementPtr &monitorElement)
+    // {
+    //   return XmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, "", monitorElement);
+    // }
+    // 
+    // //----------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+    //     const std::string &strSuffix, MonitorElementPtr &monitorElement)
+    // {
+    //   for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
+    //       pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
+    //   {
+    //     std::string meId;
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "ID", meId));
+    // 
+    //     if(meId != meStringId)
+    //       continue;
+    // 
+    //     std::string meName;
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", meName));
+    // 
+    //     meName += strSuffix;
+    // 
+    //     return ModuleApi::bookMonitorElement(pModule, pXmlElement, meName, monitorElement);
+    //   }
+    // 
+    //   return STATUS_CODE_NOT_FOUND;
+    // }
+    // 
+    // //----------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+    //     unsigned int suffix, MonitorElementPtr &monitorElement)
+    // {
+    //   std::stringstream ss;
+    //   ss << suffix;
+    // 
+    //   return XmlHelper::bookMonitorElement(pModule, xmlHandle, meStringId, ss.str(), monitorElement);
+    // }
+    // 
+    // //----------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode XmlHelper::bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
+    //     MonitorElementPtr &monitorElement, const ParameterMap &parameters)
+    // {
+    //   for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("monitorElement").Element(); NULL != pXmlElement;
+    //       pXmlElement = pXmlElement->NextSiblingElement("monitorElement"))
+    //   {
+    //     std::string meId;
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "ID", meId));
+    // 
+    //     if(meId != meStringId)
+    //       continue;
+    // 
+    //     return ModuleApi::bookMonitorElement(pModule, pXmlElement, monitorElement, parameters);
+    //   }
+    // 
+    //   return STATUS_CODE_NOT_FOUND;
+    // }
 
     //----------------------------------------------------------------------------------------------------
 
@@ -145,7 +128,7 @@ namespace dqm4hep {
         std::string value(paramIter->second);
 
         StringVector xmlElementNames;
-        tokenizeString(key, xmlElementNames, ".");
+        DQM4HEP::tokenize(key, xmlElementNames, ".");
 
         TiXmlElement *pCurrentElement = pXmlElement;
         bool keyIsParameter = false;
@@ -161,7 +144,7 @@ namespace dqm4hep {
           {
             if( subKey.back() != ']' )
             {
-              LOG4CXX_ERROR( dqmMainLogger, "Missing ']' char in '" << subKey << "'" );
+              dqm_error( "Missing ']' char in '{0}'", subKey );
               return STATUS_CODE_NOT_FOUND;
             }
 
@@ -169,7 +152,7 @@ namespace dqm4hep {
 
             if( ! DQM4HEP::stringToType( eltIdStr , eltId ) )
             {
-              LOG4CXX_ERROR( dqmMainLogger, "Couldn't convert '" << eltIdStr << "' to array id in key '" << subKey << "' !" );
+              dqm_error( "Couldn't convert '{0}' to array id in key '{1}' !", eltIdStr, subKey);
               return STATUS_CODE_FAILURE;
             }
 
@@ -187,12 +170,12 @@ namespace dqm4hep {
               TiXmlText *pText = new TiXmlText( value );
               pCurrentElement->LinkEndChild(pText);
 
-              LOG4CXX_DEBUG( dqmMainLogger, "Parameter key '" << key << "' set to " << value );
+              dqm_debug( "Parameter key '{0}' set to {1}", key, value );
             }
             else
             {
               pCurrentElement->SetAttribute( subKey , value );
-              LOG4CXX_DEBUG( dqmMainLogger, "Key attribute '" << key << "' set to " << value );
+              dqm_debug( "Key attribute '{0}' set to ", key, value );
             }
           }
           else
@@ -218,7 +201,7 @@ namespace dqm4hep {
 
               if( ! found )
               {
-                LOG4CXX_ERROR( dqmMainLogger , "Key '" << key << "' , subKey '" << subKey << "' xml element not found !" );
+                dqm_error( "Key '{0}', subKey '{1}' xml element not found !", key, subKey );
                 return STATUS_CODE_NOT_FOUND;
               }
 
@@ -240,7 +223,7 @@ namespace dqm4hep {
 
             if( NULL == pCurrentElement )
             {
-              LOG4CXX_ERROR( dqmMainLogger , "Key '" << key << "' , subKey '" << subKey << "' xml element not found !" );
+              dqm_error( "Key '{0}', subKey '{1}' xml element not found !", key, subKey );
               return STATUS_CODE_NOT_FOUND;
             }
           }
