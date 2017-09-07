@@ -34,21 +34,6 @@ INCLUDE( default_settings )
 # Define options
 
 OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
-OPTION( BUILD_EXAMPLES "Whether to build DQM4HEP examples" OFF )
-OPTION( BUILD_EVB "Whether to build the event builder support" OFF )
-OPTION( BUILD_TESTS "Whether to build framework tests" OFF )
-
-###############################
-FIND_PROGRAM( ELOG_EXECUTABLE elog HINTS /usr/local/bin /usr/bin )
-
-IF( ELOG_EXECUTABLE )
-    MESSAGE( STATUS "Check for ELOG_EXECUTABLE: ${ELOG_EXECUTABLE} -- ok" )
-    SET( DQM4HEP_USE_ELOG 1 )
-    ADD_DEFINITIONS( -DDQM4HEP_USE_ELOG )
-ELSE()
-    MESSAGE( STATUS "Check for ELOG_EXECUTABLE: -- not found !" )
-    SET( DQM4HEP_USE_ELOG 0 )
-ENDIF()
 
 # ----- Find ROOT package -----
 LIST( APPEND ROOT_COMPONENT_LIST Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree )
@@ -58,44 +43,22 @@ FIND_PACKAGE( ROOT COMPONENTS ${ROOT_COMPONENT_LIST} REQUIRED )
 FIND_PACKAGE( Threads REQUIRED )
 
 # ----- Find MySQL package -----
-FIND_PACKAGE( MySQL REQUIRED )
-
-# ----- Find DIM package -----
-FIND_PACKAGE( DIM REQUIRED SHARED )
+#FIND_PACKAGE( MySQL REQUIRED )
 
 # ----- Find xdrstream package -----
-FIND_PACKAGE( xdrstream REQUIRED )
-
-# ----- Find LOG4CXX package -----
-FIND_PACKAGE( LOG4CXX REQUIRED )
+# FIND_PACKAGE( xdrstream REQUIRED )
 
 # ----- Find JSONCPP package -----
 FIND_PACKAGE( JSONCPP REQUIRED )
 
-# ----- Find DQMNet package -----
-FIND_PACKAGE( DQMNet REQUIRED )
-
-# ----- Find Mongoose package -----
-FIND_PACKAGE( Mongoose QUIET )
-
-IF( MONGOOSE_FOUND )
-	MESSAGE( STATUS "Check for Mongoose_INCLUDE_DIRS : ${Mongoose_INCLUDE_DIRS} -- ok" )
-	MESSAGE( STATUS "Check for Mongoose_LIBRARIES : ${Mongoose_LIBRARIES} -- ok" )
-
-	ADD_DEFINITIONS( -DDQM4HEP_USE_MONGOOSE )
-	INCLUDE_DIRECTORIES( ${Mongoose_INCLUDE_DIRS} )
-	LINK_LIBRARIES( ${Mongoose_LIBRARIES} )
-
-	LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${Mongoose_INCLUDE_DIRS} )
-	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${Mongoose_LIBRARY_DIRS} )
-	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${Mongoose_LIBRARIES} )
-ELSE()
-	MESSAGE( STATUS "Mongoose not found. Http won't be enabled !" )
-ENDIF()
 
 
 # ----- Include package properties -----
-FOREACH( pkg ROOT DIM MySQL xdrstream LOG4CXX DQMNet JSONCPP )
+FOREACH( pkg
+  ROOT
+  #MySQL
+  #xdrstream
+  JSONCPP )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
   LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
@@ -118,26 +81,6 @@ IF( INSTALL_DOC )
         MESSAGE( "Please install doxygen or set INSTALL_DOC to OFF" )
         MESSAGE( "" )
     ENDIF()
-ENDIF()
-
-# ----- levbdim -----
-IF( BUILD_EVB )
-
-	FIND_PACKAGE( levbdim REQUIRED )
-
-	IF( NOT levbdim_FOUND )
-		MESSAGE( SEND_ERROR "levbdim package not found !" )
-		MESSAGE( "Please switch OFF BUILD_EVB or adjust your CMAKE_MODULE_PATH" )
-	ENDIF()
-
-	INCLUDE_DIRECTORIES( ${levbdim_INCLUDE_DIRS} )
-	LINK_LIBRARIES( ${levbdim_LIBRARIES} )
-	ADD_DEFINITIONS ( ${levbdim_DEFINITIONS} )
-
-	LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${levbdim_INCLUDE_DIRS} )
-	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${levbdim_LIBRARY_DIRS} )
-	LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${levbdim_LIBRARIES} )
-
 ENDIF()
 
 ###############################
@@ -184,7 +127,6 @@ INSTALL(
 )
 
 INSTALL ( DIRECTORY cmake DESTINATION . PATTERN "*.in" EXCLUDE )
-INSTALL ( DIRECTORY web DESTINATION .  )
 
 ###############################
 # display some variables and write them to cache
