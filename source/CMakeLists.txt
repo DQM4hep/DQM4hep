@@ -39,6 +39,8 @@ ADD_DEFINITIONS("-Wno-long-long -Wreturn-type -Werror")
 
 # AUX_SOURCE_DIRECTORY( src SRC_FILES )
 SET( SRC_FILES src/QualityTest.cc )
+SET( SRC_FILES src/Logger.cc )
+SET( SRC_FILES src/DBInterface.cc )
 
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} )
 # ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
