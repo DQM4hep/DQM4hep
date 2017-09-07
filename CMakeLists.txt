@@ -43,7 +43,7 @@ FIND_PACKAGE( ROOT COMPONENTS ${ROOT_COMPONENT_LIST} REQUIRED )
 FIND_PACKAGE( Threads REQUIRED )
 
 # ----- Find MySQL package -----
-#FIND_PACKAGE( MySQL REQUIRED )
+FIND_PACKAGE( MySQL REQUIRED )
 
 # ----- Find xdrstream package -----
 # FIND_PACKAGE( xdrstream REQUIRED )
@@ -56,7 +56,7 @@ FIND_PACKAGE( JSONCPP REQUIRED )
 # ----- Include package properties -----
 FOREACH( pkg
   ROOT
-  #MySQL
+  MySQL
   #xdrstream
   JSONCPP )
 
