@@ -31,12 +31,6 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/QualityTest.h"
-#include "dqm4hep/Path.h"
-
-#ifndef __CINT__
-#include <dqm4hep/MonitorObject.h>
-#endif
 
 // -- root headers
 #include <TObject.h>
@@ -47,398 +41,139 @@
 // -- xdrstream headers
 #include "xdrstream/xdrstream.h"
 
+#include <cstddef>
+
 namespace dqm4hep {
 
   namespace core {
-
-    class ModuleApi;
-    class Storage;
-    class Directory;
-    class QualityTest;
-    class QualityTestResult;
-    class MonitorElementManager;
-
-    namespace experimental {
-
-#ifndef __CINT__
-
-      class MonitorElement
-      {
-        friend class ModuleApi;
-        friend class Storage;
-        friend class Directory;
-        friend class MonitorElementManager;
-
-        typedef std::map<std::string, QualityTestResult> QualityTestResultMap;
-
-      public:
-        /** Default constructor
-         */
-        MonitorElement(MonitorObjectType type = UNKNOWN_MONITOR_OBJECT,
-            const std::string &name = "", const std::string &moduleName = "");
-
-        /** MonitorElement with object, type, name, title and module name
-         */
-        MonitorElement(MonitorObject *pObject,
-            const std::string &name, const std::string &moduleName);
-
-        /** Destructor
-         */
-        virtual ~MonitorElement();
-
-        /** Returns the element type
-         */
-        MonitorObjectType getType() const;
-
-        /** Returns the name of the element
-         */
-        virtual const std::string &getName() const;
-
-        /** Get the path (directory) of this element
-         */
-        const Path &getPath() const;
-
-        /** Set the path (directory) for this element
-         */
-        void setPath(const Path &path);
-
-        /** Get the collector name where this element is collected (or will be)
-         *  Set by the framework after collect
-         */
-        const std::string &getCollectorName() const;
-
-        /** Set the collector name where this element is collected (or will be)
-         *  Used by the framework after collect.
-         */
-        void setCollectorName(const std::string &collectorName);
-
-        /** Get the module name that has booked this element
-         */
-        const std::string &getModuleName() const;
-
-        /** Returns the element quality
-         */
-        Quality getQuality() const;
-
-        /** Set the element quality
-         */
-        void setQuality(Quality quality);
-
-        /** Returns the reset policy of the element. See enumerator definition
-         */
-        ResetPolicy getResetPolicy() const;
-
-        /** Sets the reset policy of the element. See enumerator definition
-         */
-        void setResetPolicy(ResetPolicy policy);
-
-        /** Returns the element description
-         */
-        const std::string &getDescription() const;
-
-        /** Sets the element description
-         */
-        void setDescription(const std::string &description);
-
-        /** Returns the current run for this monitor element
-         */
-        unsigned int getRunNumber() const;
-
-        /** Sets the current run number
-         */
-        void setRunNumber(unsigned int runNumber);
-
-        /** Sets whether the element has to be published at the next end of cycle.
-         *  This flag is not reset by the framework. The user is
-         *  responsible for publishing or not the element.
-         */
-        void setToPublish(bool publish);
-
-        /** Whether the element has to be published at the next end of cycle.
-         */
-        bool isToPublish() const;
-
-        /** Return the associated MonitorObject that is monitored
-         */
-        MonitorObject *getObject() const;
-
-        /** Return the monitor object after a dynamic cast of the asked type
-         */
-        template <typename T>
-        T *get() const;
-
-        /** Return the quality test results map.
-         *  Key : quality test name, value : quality test result
-         */
-        const QualityTestResultMap &getQualityTestResults() const;
-
-        /** Reset the element
-         */
-        void reset();
-
-        /**
-         * [toJson description]
-         * @param value      [description]
-         * @param full       [description]
-         * @param resetCache [description]
-         */
-        void toJson(Json::Value &value, bool full = true, bool resetCache = true) const;
-
-        /**
-         * [fromJson description]
-         * @param value [description]
-         */
-        void fromJson(const Json::Value &value);
-
-      private:
-        /** Run the given quality test
-         */
-        StatusCode runQualityTest(const std::string &qualityTestName);
-
-        /** Run all the quality tests
-         */
-        StatusCode runQualityTests();
-
-        /** Add a quality test
-         */
-        StatusCode addQualityTest(QualityTest *pQualityTest);
-
-        /** Remove a quality test
-         */
-        StatusCode removeQualityTest(QualityTest *pQualityTest);
-
-        /** Remove a quality test
-         */
-        StatusCode removeQualityTest(const std::string &qualityTestName);
-
-        //members
-        MonitorObject                  *m_pObject;             ///< The monitored MonitorObject
-
-        std::string                     m_name;                ///< The element name
-        std::string                     m_description;         ///< The element description
-        std::string                     m_moduleName;          ///< The module name that have booked this element
-        std::string                     m_collectorName;       ///< The collector name that have collected this element
-
-        Path                            m_path;
-        Quality                         m_quality;             ///< The element quality has defined by the user
-        ResetPolicy                     m_resetPolicy;         ///< The reset policy. See enumerator definition
-
-        unsigned int                    m_runNumber;           ///< The run number when the element is published
-        bool                            m_toPublish;           ///< Whether the element has to be published at end of cycle
-
-        std::map<std::string, QualityTest*>       m_qualityTestMap;         /// The quality test map to perform
-        std::map<std::string, QualityTestResult>  m_qualityTestResultMap;  /// The quality test result list filled after performing the quality tests
-      };
-
-      //-------------------------------------------------------------------------------------------------
-      //-------------------------------------------------------------------------------------------------
-
-      template <typename T>
-      T *MonitorElement::get() const
-      {
-        return dynamic_cast<T*>(m_pObject);
-      }
-
-#endif // CINT
-
-    } // namespace experimental
-
-
-
-
-
-
-
-
-    /** MonitorElement class.
-     *  Base class for plots and scalars that can be monitored via a user module.
-     *  Monitor elements can be booked via the ModuleApi in order to be published.
-     *
-     *  @author R.Ete
-     */
-    class MonitorElement : public xdrstream::Streamable
+    
+    template <typename T>
+    class PtrHandler
     {
-      friend class ModuleApi;
-      friend class Storage;
-      friend class Directory;
-      friend class MonitorElementManager;
-
     public:
-      /** Default constructor
-       */
-      MonitorElement(MonitorElementType type = NO_ELEMENT_TYPE,
-          const std::string &name = "", const std::string &title = "",
-          const std::string &moduleName = "");
+      PtrHandler(T *ptr = nullptr, bool owner = true) : m_ptr(ptr), m_owner(owner) {}
+      T *take() { T *ptr = m_ptr; m_ptr = nullptr; return ptr; }
+      void set(T *ptr, bool owner = true) { this->clear(); m_ptr = ptr; m_owner = owner; }
+      void clear() { if(m_owner && nullptr != m_ptr) delete m_ptr; m_ptr = nullptr; }
+      T *ptr() const { return m_ptr; }
+      bool owner() const { return m_owner; }
+      
+      const T *operator->() const { return m_ptr; }
+      T *operator->() { return m_ptr; }
+      const T &operator*() const { return *m_ptr; }
+      T &operator*() { return *m_ptr; }
+      operator bool() const { return m_ptr != nullptr; }
+      
+      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator ==(const S *lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const S *rhs);
+      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator !=(const S *lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const S *rhs);
 
-      /** MonitorElement with type, name and title
-       */
-      MonitorElement(TObject *pObject, MonitorElementType type,
-          const std::string &name, const std::string &title, const std::string &moduleName);
+      template <typename S> friend bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs);
+      template <typename S> friend bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs);
+    private:
+      T        *m_ptr;
+      bool      m_owner;
+    };
+    
+    template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) { return lhs.m_ptr == rhs.m_ptr; }
+    template <typename T> inline bool operator ==(const T *lhs, const PtrHandler<T> &rhs) { return lhs == rhs.m_ptr; }
+    template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const T *rhs) { return lhs.m_ptr == rhs; }
+    template <typename T> inline bool operator !=(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) { return lhs.m_ptr != rhs.m_ptr; }
+    template <typename T> inline bool operator !=(const T *lhs, const PtrHandler<T> &rhs) { return lhs != rhs.m_ptr; }
+    template <typename T> inline bool operator !=(const PtrHandler<T> &lhs, const T *rhs) { return lhs.m_ptr != rhs; }
+    
+    template <typename S> inline bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs) { return lhs == rhs.m_ptr; }
+    template <typename S> inline bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs) { return lhs.m_ptr == rhs; }
+    template <typename S> inline bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs) { return lhs != rhs.m_ptr; }
+    template <typename S> inline bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs) { return lhs.m_ptr != rhs; }
 
-      /** Destructor
-       */
-      virtual ~MonitorElement();
+    // TODO document the MonitorElement class
+    // TODO Moved the PtrHandler class to a separate file
+    // 
+    /**
+     *  @brief  MonitorElement class
+     *
+     *  @author Remi Ete, DESY
+     */
+    class MonitorElement
+    {
+    public:
+      
+      MonitorElement();
 
-      /** Returns the element type
-       */
-      MonitorElementType getType() const;
-
-      /** Returns the name of the element
-       */
-      virtual const std::string &getName() const;
-
-      /** Get the path (directory) of this element
-       */
-      const Path &getPath() const;
-
-      /** Set the path (directory) for this element
-       */
-      void setPath(const Path &path);
-
-      /** Get the collector name where this element is collected (or will be)
-       *  Set by the framework after collect
-       */
-      const std::string &getCollectorName() const;
-
-      /** Set the collector name where this element is collected (or will be)
-       *  Used by the framework after collect.
-       */
-      void setCollectorName(const std::string &collectorName);
-
-      /** Get the module name that has booked this element
-       */
-      const std::string &getModuleName() const;
-
-      /** Whether the monitor element is a histogram
-       */
-      bool isHistogram() const;
-
-      /** Whether the monitor element is a scalar value
-       */
-      bool isScalar() const;
-
-      /** Returns the element quality
-       */
-      Quality getQuality() const;
-
-      /** Set the element quality
-       */
-      void setQuality(Quality quality);
-
-      /** Returns the reset policy of the element. See enumerator definition
-       */
-      ResetPolicy getResetPolicy() const;
-
-      /** Sets the reset policy of the element. See enumerator definition
-       */
-      void setResetPolicy(ResetPolicy policy);
-
-      /** Returns the title of the object
-       */
-      virtual const std::string &getTitle() const;
-
-      /** Sets the element title
-       */
-      virtual void setTitle(const std::string &title);
-
-      /** Returns the element description
-       */
-      const std::string &getDescription() const;
-
-      /** Sets the element description
-       */
-      void setDescription(const std::string &description);
-
-      /** Return the draw option
-       */
-      const std::string &getDrawOption() const;
-
-      /** Set the draw option
-       */
-      void setDrawOption(const std::string &drawOption);
-
-      /** Returns the current run for this monitor element
-       */
-      unsigned int getRunNumber() const;
-
-      /** Sets the current run number
-       */
-      void setRunNumber(unsigned int runNumber);
-
-      /** Sets whether the element has to be published at the next end of cycle.
-       *  This flag is not reset by the framework. The user is
-       *  responsible for publishing or not the element.
-       */
-      void setToPublish(bool publish);
-
-      /** Whether the element has to be published at the next end of cycle.
-       */
-      bool isToPublish() const;
-
-      /** Return the associated TObject that is monitored
-       */
-      TObject *getObject() const;
-
-      /** Return the monitor object after a dynamic cast of the asked type
-       */
+      MonitorElement(TObject *pMonitorObject);
+      
+      MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject);
+      
+      MonitorElement(const PtrHandler<TObject> &monitorObject);
+      
+      MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
+      
+      std::string type() const;
+      
+      std::string name() const;
+      
+      std::string title() const;
+      
+      bool hasObject() const;
+      
+      bool hasReference() const;
+      
+      TObject *object();
+      
+      const TObject *object() const;
+      
+      TObject *reference();
+      
+      const TObject *reference() const;
+      
       template <typename T>
-      T *get() const;
+      T *objectTo();
+      
+      template <typename T>
+      T *referenceTo();
+      
+      void setMonitorObject(TObject *pMonitorObject);
+      
+      void setMonitorObject(const PtrHandler<TObject> &monitorObject);
+      
+      void setReferenceObject(TObject *pReferenceObject);
 
-      /** Return the quality test results map.
-       *  Key : quality test name, value : quality test result
-       */
-      const QualityTestResultMap &getQualityTestResults() const;
-
-      /** Reset the element
-       */
-      void reset();
-
-      xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-          xdrstream::xdr_version_t version = 0);
+      void setReferenceObject(const PtrHandler<TObject> &referenceObject);
+      
+      void set(TObject *pMonitorObject, TObject *pReferenceObject);
+      
+      void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
 
     private:
-      /** Run the given quality test
-       */
-      StatusCode runQualityTest(const std::string &qualityTestName);
-
-      /** Run all the quality tests
-       */
-      StatusCode runQualityTests();
-
-      /** Add a quality test
-       */
-      StatusCode addQualityTest(QualityTest *pQualityTest);
-
-      /** Remove a quality test
-       */
-      StatusCode removeQualityTest(QualityTest *pQualityTest);
-
-      /** Remove a quality test
-       */
-      StatusCode removeQualityTest(const std::string &qualityTestName);
-
-      //members
-      TObject                        *m_pObject;             ///< The monitored TObject
-
-      std::string                     m_name;                ///< The element name
-      std::string                     m_title;               ///< The element title
-      std::string                     m_description;        ///< The element description
-      std::string                     m_drawOption;         ///< The draw option to apply while drawing
-      std::string                     m_moduleName;         ///< The module name that have booked this element
-      std::string                     m_collectorName;      ///< The collector name that have collected this element
-
-      Path                         m_path;
-      MonitorElementType           m_type;                  ///< The element type
-      Quality                      m_quality;               ///< The element quality has defined by the user
-      ResetPolicy                  m_resetPolicy;          ///< The reset policy. See enumerator definition
-
-      unsigned int                    m_runNumber;           ///< The run number when the element is published
-      bool                            m_toPublish;           ///< Whether the element has to be published at end of cycle
-
-      std::map<std::string, QualityTest*>       m_qualityTestMap;         /// The quality test map to perform
-      std::map<std::string, QualityTestResult>  m_qualityTestResultMap;  /// The quality test result list filled after performing the quality tests
+      PtrHandler<TObject>     m_monitorObject;
+      PtrHandler<TObject>     m_referenceObject;
     };
-
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline T *MonitorElement::objectTo()
+    {
+      T *objCast = (T *) this->object(); // use old C cast for ROOT objects ...     
+      return objCast ? objCast : nullptr;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline T *MonitorElement::referenceTo()
+    {
+      T *objCast = (T *) this->reference(); // use old C cast for ROOT objects ...     
+      return objCast ? objCast : nullptr;
+    }
+    
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
@@ -553,15 +288,6 @@ namespace dqm4hep {
 
       ClassDef(TDynamicGraph, 1);
     };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    T *MonitorElement::get() const
-    {
-      return dynamic_cast<T*>(m_pObject);
-    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------

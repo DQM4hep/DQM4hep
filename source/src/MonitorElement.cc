@@ -30,21 +30,7 @@
 #include "dqm4hep/Logging.h"
 
 // -- root headers
-#include "TObject.h"
-#include "TNamed.h"
-#include "TBufferFile.h"
 #include "TH1.h"
-#include "TH1F.h"
-#include "TH1I.h"
-#include "TH1S.h"
-#include "TH1C.h"
-#include "TH2.h"
-#include "TH2F.h"
-#include "TH2I.h"
-#include "TH2S.h"
-#include "TH2C.h"
-#include "TProfile.h"
-#include "TProfile2D.h"
 #include "TAxis.h"
 #include "TPad.h"
 
@@ -54,912 +40,158 @@ ClassImp(dqm4hep::core::TDynamicGraph)
 namespace dqm4hep {
 
   namespace core {
-
-    namespace experimental {
-
-
-      MonitorElement::MonitorElement(MonitorObjectType type, const std::string &name, const std::string &moduleName) :
-  		    m_name(name),
-  		    m_moduleName(moduleName),
-  		    m_description(""),
-  		    m_quality(NO_QUALITY),
-  		    m_resetPolicy(END_OF_RUN_RESET_POLICY),
-  		    m_runNumber(0),
-  		    m_toPublish(true),
-  		    m_pObject(nullptr)
-      {
-        /* nop */
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      MonitorElement::MonitorElement(MonitorObject *pObject, const std::string &name, const std::string &moduleName) :
-  		    m_name(name),
-  		    m_description(""),
-  		    m_moduleName(moduleName),
-  		    m_quality(NO_QUALITY),
-  		    m_resetPolicy(END_OF_RUN_RESET_POLICY),
-  		    m_runNumber(0),
-  		    m_toPublish(true),
-  		    m_pObject(pObject)
-      {
-        if(NULL == m_pObject)
-          throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      MonitorElement::~MonitorElement()
-      {
-        if(nullptr != m_pObject)
-          delete m_pObject;
-
-        m_qualityTestMap.clear();
-        m_qualityTestResultMap.clear();
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      const std::string &MonitorElement::getModuleName() const
-      {
-        return m_moduleName;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      Quality MonitorElement::getQuality() const
-      {
-        return m_quality;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setQuality(Quality quality)
-      {
-        m_quality = quality;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      ResetPolicy MonitorElement::getResetPolicy() const
-      {
-        return m_resetPolicy;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setResetPolicy(ResetPolicy policy)
-      {
-        m_resetPolicy = policy;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      MonitorObjectType MonitorElement::getType() const
-      {
-        if(nullptr != m_pObject)
-          return m_pObject->getType();
-
-        return UNKNOWN_MONITOR_OBJECT;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      const std::string &MonitorElement::getName() const
-      {
-        return m_name;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      const std::string &MonitorElement::getDescription() const
-      {
-        return m_description;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setDescription(const std::string &description)
-      {
-        m_description = description;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      unsigned int MonitorElement::getRunNumber() const
-      {
-        return m_runNumber;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setToPublish(bool toPublish)
-      {
-        m_toPublish = toPublish;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      bool MonitorElement::isToPublish() const
-      {
-        return m_toPublish;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setRunNumber(unsigned int runNumber)
-      {
-        m_runNumber = runNumber;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      MonitorObject *MonitorElement::getObject() const
-      {
-        return m_pObject;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::reset()
-      {
-        m_pObject->clear();
-        m_description.clear();
-        m_quality = NO_QUALITY;
-        m_runNumber = 0;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      const Path &MonitorElement::getPath() const
-      {
-        return m_path;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setPath(const Path &path)
-      {
-        m_path = path;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      const std::string &MonitorElement::getCollectorName() const
-      {
-        return m_collectorName;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::setCollectorName(const std::string &collectorName)
-      {
-        m_collectorName = collectorName;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::toJson(Json::Value &value, bool full, bool resetCache) const
-      {
-        value["name"] = m_name;
-        value["description"] = m_description;
-        value["moduleName"] = m_moduleName;
-        value["collectorName"] = m_collectorName;
-        value["path"] = m_path.getPath();
-        value["quality"] = static_cast<int>(m_quality);
-        value["resetPolicy"] = static_cast<int>(m_resetPolicy);
-        value["runNumber"] = m_runNumber;
-
-        Json::Value qtestsValue;
-
-        for(auto qtest : m_qualityTestResultMap)
-        {
-          Json::Value qtestValue;
-          qtest.second.toJson(qtestValue);
-          qtestsValue[qtest.first] = qtestValue;
-        }
-
-        value["qtests"] = qtestsValue;
-        value["objectType"] = static_cast<int>(this->getType());
-
-        Json::Value objectValue;
-
-        if(nullptr != m_pObject)
-          m_pObject->toJson(objectValue, full, resetCache);
-
-        value["object"] = objectValue;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      void MonitorElement::fromJson(const Json::Value &value)
-      {
-        m_name = value.get("name", m_name).asString();
-        m_description = value.get("description", m_description).asString();
-        m_moduleName = value.get("moduleName", m_moduleName).asString();
-        m_collectorName = value.get("collectorName", m_collectorName).asString();
-        m_path = value.get("path", m_path.getPath()).asString();
-        m_quality = static_cast<Quality>(value.get("quality", static_cast<int>(m_quality)).asInt());
-        m_resetPolicy = static_cast<ResetPolicy>(value.get("resetPolicy", static_cast<int>(m_resetPolicy)).asInt());
-        m_runNumber = value.get("runNumber", m_runNumber).asInt();
-
-        Json::Value qtests(value.get("qtests", Json::Value(Json::objectValue)));
-        auto members = qtests.getMemberNames();
-
-        for(auto qtest : members)
-        {
-          QualityTestResult result;
-          result.fromJson(qtests[qtest]);
-          m_qualityTestResultMap.insert(QualityTestResultMap::value_type(qtest, result));
-        }
-
-        MonitorObjectType type = static_cast<MonitorObjectType>(value.get("objectType", 0).asInt());
-        MonitorObject *pMonitorObject = createMonitorObject(type);
-        Json::Value objectValue(value.get("object", Json::Value(Json::objectValue)));
-
-        if(nullptr != pMonitorObject)
-          pMonitorObject->fromJson(objectValue);
-
-        if(nullptr != m_pObject)
-          delete m_pObject;
-
-        m_pObject = pMonitorObject;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      const MonitorElement::QualityTestResultMap &MonitorElement::getQualityTestResults() const
-      {
-        return m_qualityTestResultMap;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      StatusCode MonitorElement::runQualityTest(const std::string &qualityTestName)
-      {
-        std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(qualityTestName);
-
-        if(findIter == m_qualityTestMap.end())
-          return STATUS_CODE_NOT_FOUND;
-
-        QualityTest *pQualityTest = findIter->second;
-        QualityTestResult result;
-
-        // TODO remove experimental namespace to make this working
-        // RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->run(this, result));
-
-        m_qualityTestResultMap[pQualityTest->getName()] = result;
-
-        return STATUS_CODE_SUCCESS;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      StatusCode MonitorElement::runQualityTests()
-      {
-        for(std::map<std::string, QualityTest*>::iterator iter = m_qualityTestMap.begin(), endIter = m_qualityTestMap.end() ;
-            endIter != iter ; ++iter)
-        {
-          QualityTest *pQualityTest = iter->second;
-          QualityTestResult result;
-
-          // TODO remove experimental namespace to make this working
-          // RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->run(this, result));
-
-          m_qualityTestResultMap[pQualityTest->getName()] = result;
-        }
-
-        return STATUS_CODE_SUCCESS;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      StatusCode MonitorElement::addQualityTest(QualityTest *pQualityTest)
-      {
-        if(NULL == pQualityTest)
-          return STATUS_CODE_INVALID_PTR;
-
-        std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(pQualityTest->getName());
-
-        if(m_qualityTestMap.end() != findIter)
-          return STATUS_CODE_ALREADY_PRESENT;
-
-        if(!m_qualityTestMap.insert(std::map<std::string, QualityTest*>::value_type(pQualityTest->getName(), pQualityTest)).second)
-          return STATUS_CODE_FAILURE;
-
-        return STATUS_CODE_SUCCESS;
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      StatusCode MonitorElement::removeQualityTest(QualityTest *pQualityTest)
-      {
-        if(NULL == pQualityTest)
-          return STATUS_CODE_INVALID_PTR;
-
-        return removeQualityTest(pQualityTest->getName());
-      }
-
-      //-------------------------------------------------------------------------------------------------
-
-      StatusCode MonitorElement::removeQualityTest(const std::string &qualityTestName)
-      {
-        std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(qualityTestName);
-
-        if(m_qualityTestMap.end() == findIter)
-          return STATUS_CODE_NOT_FOUND;
-
-        m_qualityTestMap.erase(findIter);
-
-        return STATUS_CODE_SUCCESS;
-      }
-
-    }
-
-    MonitorElement::MonitorElement(MonitorElementType type,
-        const std::string &name, const std::string &title,
-        const std::string &moduleName) :
-		    m_type(type),
-		    m_name(name),
-		    m_title(title),
-		    m_moduleName(moduleName),
-		    m_description(""),
-		    m_drawOption(""),
-		    m_quality(NO_QUALITY),
-		    m_resetPolicy(END_OF_RUN_RESET_POLICY),
-		    m_runNumber(0),
-		    m_toPublish(true),
-		    m_pObject(0)
+    
+    MonitorElement::MonitorElement() : 
+      m_monitorObject(), 
+      m_referenceObject()
     {
-      /* nop */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    MonitorElement::MonitorElement(TObject *pMonitorObject) :
+      m_monitorObject(pMonitorObject),
+      m_referenceObject() 
+    {
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    MonitorElement::MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject) :
+      m_monitorObject(pMonitorObject), 
+      m_referenceObject(pReferenceObject)
+    {
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    MonitorElement::MonitorElement(const PtrHandler<TObject> &monitorObject) : 
+      m_monitorObject(monitorObject.ptr(), false), 
+      m_referenceObject() 
+    {  
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    MonitorElement::MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject) : 
+      m_monitorObject(monitorObject.ptr(), false), 
+      m_referenceObject(referenceObject.ptr(), false) 
+    {
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    std::string MonitorElement::type() const 
+    { 
+      return (m_monitorObject ? m_monitorObject->ClassName() : ""); 
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    std::string MonitorElement::name() const 
+    { 
+      return (m_monitorObject ? m_monitorObject->GetName() : ""); 
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    std::string MonitorElement::title() const 
+    { 
+      return (m_monitorObject ? m_monitorObject->GetTitle() : ""); 
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    bool MonitorElement::hasObject() const 
+    { 
+      return (m_monitorObject != nullptr); 
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    MonitorElement::MonitorElement(TObject *pObject, MonitorElementType type,
-        const std::string &name, const std::string &title,
-        const std::string &moduleName) :
-		    m_type(type),
-		    m_name(name),
-		    m_title(title),
-		    m_description(""),
-		    m_moduleName(moduleName),
-		    m_drawOption(""),
-		    m_quality(NO_QUALITY),
-		    m_resetPolicy(END_OF_RUN_RESET_POLICY),
-		    m_runNumber(0),
-		    m_toPublish(true),
-		    m_pObject(pObject)
-    {
-      if(NULL == m_pObject)
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    bool MonitorElement::hasReference() const 
+    { 
+      return (m_referenceObject != nullptr); 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    MonitorElement::~MonitorElement()
-    {
-      if(NULL != m_pObject)
-        delete m_pObject;
-
-      m_qualityTestMap.clear();
-      m_qualityTestResultMap.clear();
+    
+    TObject *MonitorElement::object() 
+    { 
+      return m_monitorObject ? m_monitorObject.ptr() : nullptr; 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    const std::string &MonitorElement::getModuleName() const
-    {
-      return m_moduleName;
+    
+    const TObject *MonitorElement::object() const 
+    { 
+      return m_monitorObject ? m_monitorObject.ptr() : nullptr; 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    Quality MonitorElement::getQuality() const
-    {
-      return m_quality;
+    
+    TObject *MonitorElement::reference() 
+    { 
+      return m_referenceObject ? m_referenceObject.ptr() : nullptr; 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setQuality(Quality quality)
-    {
-      m_quality = quality;
+    
+    const TObject *MonitorElement::reference() const 
+    { 
+      return m_referenceObject ? m_referenceObject.ptr() : nullptr; 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    ResetPolicy MonitorElement::getResetPolicy() const
-    {
-      return m_resetPolicy;
+    
+    void MonitorElement::setMonitorObject(TObject *pMonitorObject) 
+    { 
+      m_monitorObject.clear(); 
+      m_monitorObject.set(pMonitorObject); 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setResetPolicy(ResetPolicy policy)
-    {
-      m_resetPolicy = policy;
+    
+    void MonitorElement::setMonitorObject(const PtrHandler<TObject> &monitorObject) 
+    { 
+      m_monitorObject.clear(); 
+      m_monitorObject.set(monitorObject.ptr(), false);
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    MonitorElementType MonitorElement::getType() const
-    {
-      return m_type;
+    
+    void MonitorElement::setReferenceObject(TObject *pReferenceObject) 
+    { 
+      m_referenceObject.clear(); 
+      m_referenceObject.set(pReferenceObject); 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    const std::string &MonitorElement::getName() const
+    
+    void MonitorElement::setReferenceObject(const PtrHandler<TObject> &referenceObject)
     {
-      return m_name;
+      m_referenceObject.clear(); 
+      m_referenceObject.set(referenceObject.ptr(), false); 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    const std::string &MonitorElement::getTitle() const
-    {
-      return m_title;
+    
+    void MonitorElement::set(TObject *pMonitorObject, TObject *pReferenceObject) 
+    { 
+      m_monitorObject.clear(); 
+      m_monitorObject.set(pMonitorObject);
+      m_referenceObject.clear(); 
+      m_referenceObject.set(pReferenceObject); 
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setTitle(const std::string &title)
+    
+    void MonitorElement::set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject) 
     {
-      m_title = title;
-
-      if(m_pObject)
-      {
-        TNamed *pNamed = dynamic_cast<TNamed*>(m_pObject);
-
-        if(pNamed)
-          pNamed->SetTitle(title.c_str());
-      }
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &MonitorElement::getDescription() const
-    {
-      return m_description;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setDescription(const std::string &description)
-    {
-      m_description = description;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &MonitorElement::getDrawOption() const
-    {
-      return m_drawOption;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setDrawOption(const std::string &drawOption)
-    {
-      m_drawOption = drawOption;
-
-      if(m_pObject)
-        m_pObject->SetDrawOption(drawOption.c_str());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    unsigned int MonitorElement::getRunNumber() const
-    {
-      return m_runNumber;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setToPublish(bool toPublish)
-    {
-      m_toPublish = toPublish;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    bool MonitorElement::isToPublish() const
-    {
-      return m_toPublish;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setRunNumber(unsigned int runNumber)
-    {
-      m_runNumber = runNumber;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    TObject *MonitorElement::getObject() const
-    {
-      return m_pObject;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::reset()
-    {
-      m_pObject->Clear();
-
-      // special case for histograms
-      TH1 *pHistogram = dynamic_cast<TH1 *>(m_pObject);
-
-      if(NULL != pHistogram)
-        pHistogram->Reset();
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    bool MonitorElement::isHistogram() const
-    {
-      if( ! m_pObject )
-        return false;
-
-      return ( dynamic_cast<const TH1 *>(m_pObject) != 0 );
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    bool MonitorElement::isScalar() const
-    {
-      if(m_type >= INT_ELEMENT_TYPE && m_type <= STRING_ELEMENT_TYPE)
-        return true;
-
-      return false;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const Path &MonitorElement::getPath() const
-    {
-      return m_path;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setPath(const Path &path)
-    {
-      m_path = path;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const std::string &MonitorElement::getCollectorName() const
-    {
-      return m_collectorName;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElement::setCollectorName(const std::string &collectorName)
-    {
-      m_collectorName = collectorName;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    const QualityTestResultMap &MonitorElement::getQualityTestResults() const
-    {
-      return m_qualityTestResultMap;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    xdrstream::Status MonitorElement::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-        xdrstream::xdr_version_t version)
-    {
-      if( xdrstream::XDR_READ_STREAM == mode )
-      {
-        int32_t elementType = 0;
-        XDR_STREAM( pDevice->read( & elementType ) )
-
-        std::string elementName;
-        XDR_STREAM( pDevice->read( & elementName ) )
-
-        std::string elementTitle;
-        XDR_STREAM( pDevice->read( & elementTitle ) )
-
-        bool hasTObject;
-        XDR_STREAM( pDevice->read( & hasTObject ) )
-
-        TObject *pObject = NULL;
-
-        if(hasTObject)
-        {
-          if(elementType == INT_ELEMENT_TYPE)
-          {
-            int32_t value;
-            XDR_STREAM( pDevice->read( & value ) )
-            pObject = new TScalarInt(value);
-          }
-          else if(elementType == REAL_ELEMENT_TYPE)
-          {
-            float value;
-            XDR_STREAM( pDevice->read( & value ) )
-            pObject = new TScalarReal(value);
-          }
-          else if(elementType == SHORT_ELEMENT_TYPE)
-          {
-            int16_t value;
-            XDR_STREAM( pDevice->read( & value ) )
-            pObject = new TScalarShort(value);
-          }
-          else if(elementType == STRING_ELEMENT_TYPE)
-          {
-            std::string value;
-            XDR_STREAM( pDevice->read( & value ) )
-            pObject = new TScalarString(value);
-          }
-          else
-          {
-            char *pBuffer = NULL;
-            xdrstream::xdr_size_t bufferSize = 0;
-            XDR_STREAM( pDevice->readDynamicArray( pBuffer, bufferSize) )
-
-            // buffer is adopted by TBufferFile
-            TBufferFile bufferFile(TBuffer::kRead, bufferSize, pBuffer);
-            pObject = bufferFile.ReadObject(0);
-          }
-
-          if(NULL == pObject)
-            return STATUS_CODE_FAILURE;
-        }
-
-        int32_t elementQuality = static_cast<int32_t>(NO_QUALITY);
-        XDR_STREAM( pDevice->read( & elementQuality ) )
-
-        std::string drawOption;
-        XDR_STREAM( pDevice->read( & drawOption ) )
-
-        std::string path;
-        XDR_STREAM( pDevice->read( & path ) )
-
-        std::string collectorName;
-        XDR_STREAM( pDevice->read( & collectorName ) )
-
-        std::string moduleName;
-        XDR_STREAM( pDevice->read( & moduleName ) )
-
-        std::string elementDescription;
-        XDR_STREAM( pDevice->read( & elementDescription ) )
-
-        int32_t resetPolicy = static_cast<int32_t>(NO_RESET_POLICY);
-        XDR_STREAM( pDevice->read( & resetPolicy ) )
-
-        int32_t runNumber = 0;
-        XDR_STREAM( pDevice->read( & runNumber ) )
-
-        bool isToPublish = true;
-        XDR_STREAM( pDevice->read( & isToPublish ) )
-
-        uint32_t nQTestResults = 0;
-        XDR_STREAM( pDevice->read( & nQTestResults ) )
-
-        for(unsigned int q=0 ; q<nQTestResults ; q++)
-        {
-          std::string qTestName;
-          XDR_STREAM( pDevice->read( & qTestName ) )
-
-          QualityTestResult qTestResult;
-          XDR_STREAM( qTestResult.stream( mode , pDevice , version ) )
-
-          m_qualityTestResultMap[qTestName] = qTestResult;
-        }
-
-        if(0 != m_pObject)
-        {
-          delete m_pObject;
-          m_pObject = 0;
-        }
-
-        m_pObject = pObject;
-
-        if(m_pObject)
-        {
-          TNamed *pNamed = dynamic_cast<TNamed*>(m_pObject);
-
-          if(pNamed)
-            pNamed->SetName((Path(path) + elementName).getPath().c_str());
-        }
-
-        m_name = elementName;
-        m_type = static_cast<MonitorElementType>(elementType);
-        m_moduleName = moduleName;
-
-        this->setTitle(elementTitle);
-        this->setQuality(static_cast<Quality>(elementQuality));
-        this->setDrawOption(drawOption);
-        this->setPath(Path(path));
-        this->setCollectorName(collectorName);
-        this->setDescription(elementDescription);
-        this->setResetPolicy(static_cast<ResetPolicy>(resetPolicy));
-        this->setRunNumber(runNumber);
-        this->setToPublish(isToPublish);
-
-        return xdrstream::XDR_SUCCESS;
-      }
-      else
-      {
-        int32_t elementType = static_cast<int32_t>(this->getType());
-        XDR_STREAM( pDevice->write( & elementType ) )
-
-        std::string elementName = this->getName();
-        XDR_STREAM( pDevice->write( & elementName ) )
-
-        std::string elementTitle = getTitle();
-        XDR_STREAM( pDevice->write( & elementTitle ) )
-
-        TObject *pObject = this->getObject();
-
-        bool hasTObject = (NULL != pObject);
-        XDR_STREAM( pDevice->write( & hasTObject ) )
-
-        if(hasTObject)
-        {
-          if(elementType == INT_ELEMENT_TYPE)
-          {
-            int32_t value = this->get<TScalarInt>()->Get();
-            XDR_STREAM( pDevice->write( & value ) )
-          }
-          else if(elementType == REAL_ELEMENT_TYPE)
-          {
-            float value = this->get<TScalarReal>()->Get();
-            XDR_STREAM( pDevice->write( & value ) )
-          }
-          else if(elementType == SHORT_ELEMENT_TYPE)
-          {
-            int16_t value = this->get<TScalarShort>()->Get();
-            XDR_STREAM( pDevice->write( & value ) )
-          }
-          else if(elementType == STRING_ELEMENT_TYPE)
-          {
-            std::string value = this->get<TScalarString>()->Get();
-            XDR_STREAM( pDevice->write( & value ) )
-          }
-          else
-          {
-            // serialize
-            TBufferFile bufferFile(TBuffer::kWrite);
-            bufferFile.WriteObject(pObject);
-
-            // get the buffer and length
-            const char *pRawBuffer = bufferFile.Buffer();
-            xdrstream::xdr_size_t bufferSize = bufferFile.BufferSize();
-
-            // and write it
-            XDR_STREAM( pDevice->writeArray( pRawBuffer , bufferSize ) )
-          }
-        }
-
-        int32_t elementQuality = static_cast<int32_t>(this->getQuality());
-        XDR_STREAM( pDevice->write( & elementQuality ) )
-
-        std::string drawOption = this->getDrawOption();
-        XDR_STREAM( pDevice->write( & drawOption ) )
-
-        std::string path = this->getPath().getPath();
-        XDR_STREAM( pDevice->write( & path ) )
-
-        std::string collectorName = this->getCollectorName();
-        XDR_STREAM( pDevice->write( & collectorName ) )
-
-        std::string moduleName = this->getModuleName();
-        XDR_STREAM( pDevice->write( & moduleName ) )
-
-        std::string elementDescription = this->getDescription();
-        XDR_STREAM( pDevice->write( & elementDescription ) )
-
-        int32_t resetPolicy = static_cast<int32_t>(this->getResetPolicy());
-        XDR_STREAM( pDevice->write( & resetPolicy ) )
-
-        int32_t runNumber = static_cast<int32_t>(this->getRunNumber());
-        XDR_STREAM( pDevice->write( & runNumber ) )
-
-        bool isToPublish = this->isToPublish();
-        XDR_STREAM( pDevice->write( & isToPublish ) )
-
-        uint32_t nQTestResults = m_qualityTestResultMap.size();
-        XDR_STREAM( pDevice->write( & nQTestResults ) )
-
-        for(std::map<std::string, QualityTestResult>::iterator iter = m_qualityTestResultMap.begin(),
-            endIter = m_qualityTestResultMap.end() ; endIter != iter ; ++iter)
-        {
-          // write qtest name
-          XDR_STREAM( pDevice->write( & iter->first ) )
-
-			    // write qtest result
-			    XDR_STREAM( iter->second.stream( mode , pDevice , version ) )
-        }
-      }
-
-      return xdrstream::XDR_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElement::runQualityTest(const std::string &qualityTestName)
-    {
-      std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(qualityTestName);
-
-      if(findIter == m_qualityTestMap.end())
-        return STATUS_CODE_NOT_FOUND;
-
-      QualityTest *pQualityTest = findIter->second;
-      QualityTestResult result;
-
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->run(this, result));
-
-      m_qualityTestResultMap[pQualityTest->getName()] = result;
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElement::runQualityTests()
-    {
-      for(std::map<std::string, QualityTest*>::iterator iter = m_qualityTestMap.begin(), endIter = m_qualityTestMap.end() ;
-          endIter != iter ; ++iter)
-      {
-        QualityTest *pQualityTest = iter->second;
-        QualityTestResult result;
-
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->run(this, result));
-
-        m_qualityTestResultMap[pQualityTest->getName()] = result;
-      }
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElement::addQualityTest(QualityTest *pQualityTest)
-    {
-      if(NULL == pQualityTest)
-        return STATUS_CODE_INVALID_PTR;
-
-      std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(pQualityTest->getName());
-
-      if(m_qualityTestMap.end() != findIter)
-        return STATUS_CODE_ALREADY_PRESENT;
-
-      if(!m_qualityTestMap.insert(std::map<std::string, QualityTest*>::value_type(pQualityTest->getName(), pQualityTest)).second)
-        return STATUS_CODE_FAILURE;
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElement::removeQualityTest(QualityTest *pQualityTest)
-    {
-      if(NULL == pQualityTest)
-        return STATUS_CODE_INVALID_PTR;
-
-      return removeQualityTest(pQualityTest->getName());
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElement::removeQualityTest(const std::string &qualityTestName)
-    {
-      std::map<std::string, QualityTest*>::iterator findIter = m_qualityTestMap.find(qualityTestName);
-
-      if(m_qualityTestMap.end() == findIter)
-        return STATUS_CODE_NOT_FOUND;
-
-      m_qualityTestMap.erase(findIter);
-
-      return STATUS_CODE_SUCCESS;
+      m_monitorObject.clear(); 
+      m_monitorObject.set(monitorObject.ptr(), false);
+      m_referenceObject.clear(); 
+      m_referenceObject.set(referenceObject.ptr(), false); 
     }
 
     //-------------------------------------------------------------------------------------------------
