@@ -122,8 +122,8 @@ namespace dqm4hep {
 
     protected:
       int                                    m_runNumber;
-      TimePoint                           m_startTime;
-      TimePoint                           m_endTime;
+      TimePoint                              m_startTime;
+      TimePoint                              m_endTime;
       std::string                            m_detectorName;
       std::string                            m_description;
       std::map<std::string, std::string>     m_parametersMap;
