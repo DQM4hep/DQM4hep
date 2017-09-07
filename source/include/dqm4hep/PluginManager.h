@@ -42,7 +42,9 @@
     DQMPlugin_##ClassName (bool shouldRegister = true) : dqm4hep::core::Plugin(ClassStr, shouldRegister), ClassName() {} \
     dqm4hep::core::Plugin *create() const { return new DQMPlugin_##ClassName (false) ; } \
     }; \
-    static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName;
+    static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName
+
+//-------------------------------------------------------------------------------------------------
 
 namespace dqm4hep {
 
