@@ -33,21 +33,6 @@ namespace dqm4hep {
 
   namespace core {
 
-    const std::string Key::MODULE_NAME = "MODULE_NAME";
-    const std::string Key::DETECTOR_NAME = "DETECTOR_NAME";
-    const std::string Key::ME_NAME = "ME_NAME";
-    const std::string Key::ME_PATH = "ME_PATH";
-    const std::string Key::ME_TYPE = "ME_TYPE";
-    const std::string Key::ME_DESCRIPTION = "ME_DESCRIPTION";
-    const std::string Key::SYSTEM_NAME = "SYSTEM_NAME";
-    const std::string Key::NODE_NAME = "NODE_NAME";
-    const std::string Key::RELEASE = "RELEASE";
-    const std::string Key::VERSION = "VERSION";
-    const std::string Key::MACHINE = "MACHINE";
-    const std::string Key::HOST_NAME = "HOST_NAME";
-
-    //-------------------------------------------------------------------------------------------------
-
     xdrstream::Status StreamingHelper::read( xdrstream::IODevice *pDevice, Publication &publication )
     {
       uint32_t mapSize = 0;
