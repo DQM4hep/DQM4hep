@@ -166,7 +166,7 @@ namespace dqm4hep {
 
       if(mysql_query(m_pMySQL, query.c_str()))
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -174,7 +174,7 @@ namespace dqm4hep {
 
       if(!pMySQLResult)
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -201,7 +201,7 @@ namespace dqm4hep {
 
       if(mysql_query(m_pMySQL, query.c_str()))
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -209,7 +209,7 @@ namespace dqm4hep {
 
       if(!pMySQLResult)
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -240,7 +240,7 @@ namespace dqm4hep {
 
       if(mysql_query(m_pMySQL, query.c_str()))
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -248,7 +248,7 @@ namespace dqm4hep {
 
       if(!pMySQLResult)
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 

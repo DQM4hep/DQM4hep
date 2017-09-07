@@ -73,7 +73,7 @@ namespace dqm4hep {
 
         if(!m_pMySQL)
         {
-          LOG4CXX_ERROR( dqmMainLogger , "Couldn't create mysql instance : " << mysql_error(m_pMySQL) );
+          dqm_error( "Couldn't create mysql instance : {0}", mysql_error(m_pMySQL) );
           throw StatusCodeException(STATUS_CODE_FAILURE);
         }
 
@@ -81,7 +81,7 @@ namespace dqm4hep {
         if(NULL == mysql_real_connect(m_pMySQL, m_host.c_str(), m_user.c_str(), m_password.c_str(),
             NULL, 0, NULL, 0))
         {
-          LOG4CXX_ERROR( dqmMainLogger , "Couldn't initialize mysql connection : " << mysql_error(m_pMySQL) );
+          dqm_error( "Couldn't initialize mysql connection : {0}", mysql_error(m_pMySQL) );
           throw StatusCodeException(STATUS_CODE_FAILURE);
         }
 
@@ -185,7 +185,7 @@ namespace dqm4hep {
 
       if(mysql_query(m_pMySQL, query.c_str()))
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -193,7 +193,7 @@ namespace dqm4hep {
 
       if(!pMySQLResult)
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL store result failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -218,7 +218,7 @@ namespace dqm4hep {
 
       if(mysql_query(m_pMySQL, query.c_str()))
       {
-        LOG4CXX_ERROR( dqmMainLogger , "MySQL query failed : " << mysql_error(m_pMySQL) );
+        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
       }
 
@@ -324,7 +324,7 @@ namespace dqm4hep {
 
       if(!ifile.is_open())
       {
-        LOG4CXX_ERROR( dqmMainLogger , "Couln't open file '" << localFileName << "' !" );
+        dqm_error( "Couln't open file '{0}' !", localFileName );
         return STATUS_CODE_FAILURE;
       }
 
