@@ -31,15 +31,21 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/Streamer.h"
+
+// xdrstream forward declaration
+namespace xdrstream {
+  class IODevice;
+}
 
 namespace dqm4hep {
 
   namespace core {
+    
+    class Event;
 
     /** EventStreamer class
      */
-    class EventStreamer : public Streamer<Event>
+    class EventStreamer
     {
     public:
       /** Destructor
@@ -66,8 +72,16 @@ namespace dqm4hep {
        *
        *  The identifier decoding has to be performed by the user, based on the event contents itself
        */
-      virtual StatusCode write(const Event *const pObject, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice) = 0;
+      virtual StatusCode write(const Event *const pObject, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice);
     };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode write(const Event *const pObject, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice)
+    {
+      return this->write(pObject, pDevice);
+    }
 
   }
 
