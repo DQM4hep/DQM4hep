@@ -187,9 +187,9 @@ namespace dqm4hep {
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if (statusCode Operator StatusCode1)				\
   {									\
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , #Command << " return " << dqm4hep::core::statusCodeToString(statusCode) ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "    in function: {0}", __FUNCTION__ ); \
+    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     return statusCode;						\
   }									\
     }
@@ -201,9 +201,9 @@ namespace dqm4hep {
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
   {									\
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , #Command << " return " << dqm4hep::core::statusCodeToString(statusCode) ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "    in function: {0}", __FUNCTION__ ); \
+    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     return statusCode;						\
   }									\
     }
@@ -215,9 +215,9 @@ namespace dqm4hep {
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if (statusCode Operator StatusCode1)				\
   {									\
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , #Command << " throw " << dqm4hep::core::statusCodeToString(statusCode) ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "    in function: {0}", __FUNCTION__ ); \
+    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     throw dqm4hep::core::StatusCodeException(statusCode);			\
   }									\
     }
@@ -229,9 +229,9 @@ namespace dqm4hep {
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
   {									\
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , #Command << " throw " << dqm4hep::core::statusCodeToString(statusCode) ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in function: " << __FUNCTION__ ); \
-    LOG4CXX_ERROR( dqm4hep::core::dqmMainLogger , "    in file:     " << __FILE__ << " line#: " << __LINE__ ); \
+    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "    in function: {0}", __FUNCTION__ ); \
+    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     throw dqm4hep::core::StatusCodeException(statusCode);			\
   }									\
     }
@@ -262,18 +262,7 @@ namespace dqm4hep {
 
 //-------------------------------------------------------------------------------------------------
 
-#define NOTIFY_METHOD_CALLED LOG4CXX_DEBUG( dqm4hep::core::dqmMainLogger ,  "Method called : " << __FUNCTION__ );
-
-//-------------------------------------------------------------------------------------------------
-
-#define DQM_PLUGIN_DECL( ClassName , ClassStr ) \
-    class DQMPlugin_##ClassName : public dqm4hep::core::Plugin, public ClassName \
-    { \
-    public: \
-    DQMPlugin_##ClassName (bool shouldRegister = true) : dqm4hep::core::Plugin(ClassStr, shouldRegister), ClassName() {} \
-    dqm4hep::core::Plugin *create() const { return new DQMPlugin_##ClassName (false) ; } \
-    }; \
-    DQMPlugin_##ClassName instance_DQMPlugin_##ClassName;
+#define NOTIFY_METHOD_CALLED dqm_debug( "Method called : {0}", __FUNCTION__ );
 
 //-------------------------------------------------------------------------------------------------
 
