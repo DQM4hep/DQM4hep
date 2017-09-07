@@ -28,13 +28,13 @@
 // -- dqm4hep headers
 #include "dqm4hep/GenericEvent.h"
 #include "dqm4hep/StreamingHelper.h"
-#include "dqm4hep/Plugin.h"
+#include "dqm4hep/PluginManager.h"
 
 namespace dqm4hep {
 
   namespace core {
 
-    DQM_PLUGIN_DECL( GenericEventStreamer , "GenericEventStreamer" )
+    DQM_PLUGIN_DECL( GenericEventStreamer , "GenericEventStreamer" );
 
     GenericEvent::GenericEvent()
     {
