@@ -38,9 +38,18 @@ ADD_DEFINITIONS("-Wno-long-long -Wreturn-type -Werror")
 # )
 
 # AUX_SOURCE_DIRECTORY( src SRC_FILES )
-SET( SRC_FILES src/QualityTest.cc )
-SET( SRC_FILES src/Logger.cc )
-SET( SRC_FILES src/DBInterface.cc )
+SET( SRC_FILES ${SRC_FILES} src/DQM4HEP.cc )
+SET( SRC_FILES ${SRC_FILES} src/QualityTest.cc )
+SET( SRC_FILES ${SRC_FILES} src/Logger.cc )
+SET( SRC_FILES ${SRC_FILES} src/DBInterface.cc )
+SET( SRC_FILES ${SRC_FILES} src/tinystr.cc )
+SET( SRC_FILES ${SRC_FILES} src/tinyxml.cc )
+SET( SRC_FILES ${SRC_FILES} src/tinyxmlerror.cc )
+SET( SRC_FILES ${SRC_FILES} src/tinyxmlparser.cc )
+SET( SRC_FILES ${SRC_FILES} src/XmlHelper.cc )
+SET( SRC_FILES ${SRC_FILES} src/CoreTool.cc )
+SET( SRC_FILES ${SRC_FILES} src/Event.cc )
+SET( SRC_FILES ${SRC_FILES} src/Path.cc )
 
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} )
 # ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
@@ -208,15 +217,15 @@ INSTALL(
 #
 # ENDIF()
 
-# IF( BUILD_TESTS )
-#   ADD_EXECUTABLE( test-monitor-elements tests/test-monitor-elements.cc )
-#   TARGET_LINK_LIBRARIES( test-monitor-elements ${PROJECT_NAME} )
-#
-#   INSTALL (
-#       TARGETS test-monitor-elements
-#       RUNTIME DESTINATION bin/tests
-#   )
-# ENDIF()
-#
+IF( BUILD_TESTS )
+  ADD_EXECUTABLE( test-directory tests/test-directory.cc )
+  TARGET_LINK_LIBRARIES( test-directory ${PROJECT_NAME} )
+
+  INSTALL (
+      TARGETS test-directory
+      RUNTIME DESTINATION bin/tests
+  )
+ENDIF()
+
 
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )

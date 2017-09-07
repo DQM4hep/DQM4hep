@@ -46,7 +46,7 @@ FIND_PACKAGE( Threads REQUIRED )
 FIND_PACKAGE( MySQL REQUIRED )
 
 # ----- Find xdrstream package -----
-# FIND_PACKAGE( xdrstream REQUIRED )
+FIND_PACKAGE( xdrstream REQUIRED )
 
 # ----- Find JSONCPP package -----
 FIND_PACKAGE( JSONCPP REQUIRED )
@@ -57,7 +57,7 @@ FIND_PACKAGE( JSONCPP REQUIRED )
 FOREACH( pkg
   ROOT
   MySQL
-  #xdrstream
+  xdrstream
   JSONCPP )
 
   INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )

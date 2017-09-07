@@ -31,30 +31,34 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/CoreTool.h"
 #include "dqm4hep/Path.h"
 
 namespace dqm4hep {
 
   namespace core {
-
+  
     /** Directory class.
      *
      *  A directory is the owner of its sub-directories.
-     *  Monitor elements owning depends on how the method
+     *  Unit owning depends on how the method
      *  are called (default : not owner)
      *
      *  This interface doesn't allow moving sub-directories
      */
+    template <typename T>
     class Directory
     {
     public:
+      typedef std::vector<T*> ObjectList;
+      
       /** Default constructor
        */
       Directory();
 
       /** Constructor with name and parent dir
        */
-      Directory(const std::string &name, Directory *pParentDir = NULL);
+      Directory(const std::string &name, Directory<T> *pParentDir = NULL);
 
       /** Destructor.
        *  Delete the subdirectories but not the contents
@@ -63,94 +67,402 @@ namespace dqm4hep {
 
       /** Create a new directory
        */
-      StatusCode mkdir(const std::string &dirName);
-
-      /** List the directory contents and subdirs if asked
-       */
-      void ls(bool recursive = false) const;
+      Directory<T> *mkdir(const std::string &dirName);
 
       /** Returns the directory name
        */
-      const std::string &getName() const;
+      const std::string &name() const;
 
       /** Returns the parent directory
        */
-      Directory *getParentDir() const;
+      Directory<T> *parent() const;
 
       /** Get the sub directory list
        */
-      const std::vector<Directory*> &getSubDirList() const;
+      const std::vector<Directory<T>*> &subdirs() const;
 
       /** Whether the directory contains the sub dir
        */
-      bool containsDir(const std::string &dirName) const;
+      bool hasChild(const std::string &dirName) const;
 
       /** Find the sub directory by name
        */
-      StatusCode findDir(const std::string &dirName, Directory *&pDirectory) const;
+      StatusCode find(const std::string &dirName, Directory<T> *&pDirectory) const;
 
-      /** Add a monitor elements to the directory
+      /** Add an object to the directory
        */
-      StatusCode addMonitorElement(const MonitorElementPtr &monitorElement);
+      StatusCode add(T *pObject);
 
       /** Find a monitor element with a given name in the directory
        */
-      StatusCode findMonitorElement(const std::string &name, MonitorElementPtr &monitorElement) const;
+      template <typename F>
+      T *find(F function) const;
 
       /** Whether the directory contains the monitor element (search by ptr compare)
        */
-      bool containsMonitorElement(const MonitorElementPtr &monitorElement) const;
+      bool containsObject(const T *pObject) const;
 
       /** Whether the directory contains the monitor element (search by name compare)
        */
-      bool containsMonitorElement(const std::string &monitorElementName) const;
+      template <typename F>
+      bool contains(F function) const;
 
       /** Remove the monitor element from the directory
        */
-      StatusCode removeMonitorElement(const MonitorElementPtr &monitorElement);
+      StatusCode remove(T *pObject);
 
       /** Remove the monitor element from the directory
        */
-      StatusCode removeMonitorElement(const std::string &monitorElementName);
+      template <typename F>
+      StatusCode remove(F function);
 
       /** Get the monitor element list
        */
-      const MonitorElementPtrList &getMonitorElementList() const;
+      const ObjectList &contents() const;
 
       /** Remove the directory and its contents
        */
-      StatusCode removeDir(const std::string &dirName);
+      StatusCode rmdir(const std::string &dirName);
 
       /** Clear the directory.
        *  The operation is done recursively
        */
-      StatusCode clear();
+      void clear();
 
       /** Get the full path name of the directory
        */
-      Path getFullPathName() const;
+      Path fullPath() const;
 
       /** Whether the directory is a root directory
        */
-      bool isRootDir() const;
+      bool isRoot() const;
 
       /** Whether the directory is empty
        */
       bool isEmpty() const;
 
     private:
-
-      /** Recursive print of sub directory structure (dirs and contents)
-       */
-      void ls(int depth) const;
-
-      // members
       std::string                     m_name;
-      Directory                      *m_pParentDir;
-      std::vector<Directory*>         m_directoryList;
-      MonitorElementPtrList           m_contentsList;
+      Directory                      *m_pParent;
+      std::vector<Directory<T>*>      m_subdirs;
+      ObjectList                      m_contents;
     };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
+    template <typename T>
+    inline Directory<T>::Directory() :
+      m_name(""),
+      m_pParent(nullptr),
+      m_subdirs(),
+      m_contents()
+    {
+      /* nop */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Directory<T>::Directory(const std::string &name, Directory<T> *pParent) :
+      m_name(name),
+      m_pParent(pParent),
+      m_subdirs(),
+      m_contents()
+    {
+      /* nop */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Directory<T>::~Directory()
+    {
+      this->clear();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline const std::string &Directory<T>::name() const
+    {
+      return m_name;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline Directory<T> *Directory<T>::parent() const
+    {
+      return m_pParent;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline const std::vector<Directory<T>*> &Directory<T>::subdirs() const
+    {
+      return m_subdirs;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Directory<T> *Directory<T>::mkdir(const std::string &dirName)
+    {
+      Directory<T> *pDirectory = nullptr;
+      
+      this->find(dirName, pDirectory);
+      
+      if(nullptr != pDirectory)
+        return pDirectory;
+      
+      if(dirName.find("/") != std::string::npos || CoreTool::containsSpecialCharacters(dirName) || dirName.empty())
+        return nullptr;
+
+      Directory<T> *pNewDirectory = new Directory<T>(dirName, this);
+      m_subdirs.push_back(pNewDirectory);
+
+      return pNewDirectory;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline bool Directory<T>::hasChild(const std::string &dirName) const
+    {
+      if(dirName.find("/") != std::string::npos || CoreTool::containsSpecialCharacters(dirName) || dirName.empty())
+        return false;
+
+      for(typename std::vector<Directory<T>*>::const_iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
+          endIter != iter ; ++iter)
+      {
+        Directory<T> *pDirectory = *iter;
+
+        if(pDirectory->name() == dirName)
+          return true;
+      }
+
+      return false;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Directory<T>::find(const std::string &dirName, Directory<T> *&pDirectory) const
+    {
+      pDirectory = NULL;
+
+      for(typename std::vector<Directory<T>*>::const_iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
+          endIter != iter ; ++iter)
+      {
+        Directory<T> *pDir = *iter;
+
+        if(pDir->name() == dirName)
+        {
+          pDirectory = pDir;
+          return STATUS_CODE_SUCCESS;
+        }
+      }
+
+      return STATUS_CODE_NOT_FOUND;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode Directory<T>::add(T *pObject)
+    {
+      if(nullptr == pObject)
+        return STATUS_CODE_INVALID_PTR;
+
+      if(this->containsObject(pObject))
+        return STATUS_CODE_ALREADY_PRESENT;
+
+      m_contents.push_back(pObject);
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline T *Directory<T>::find(F function) const
+    {
+      for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
+          endIter != iter ; ++iter)
+        if(function(*iter))
+          return *iter;
+
+      return nullptr;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline bool Directory<T>::containsObject(const T *pObject) const
+    {
+      if(nullptr == pObject)
+        return false;
+      
+      for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
+          endIter != iter ; ++iter)
+        if(pObject == *iter)
+          return true;
+      
+      return false;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    template <typename F>
+    inline bool Directory<T>::contains(F function) const
+    {    
+      for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
+          endIter != iter ; ++iter)
+        if(function(*iter))
+          return true;
+      
+      return false;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Directory<T>::remove(T *pObject)
+    {
+      if(nullptr == pObject)
+        return STATUS_CODE_INVALID_PTR;
+        
+      for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
+          endIter != iter ; ++iter)
+      {
+        if(pObject == *iter)
+        {
+          m_contents.erase(iter);
+          delete pObject;
+          return STATUS_CODE_SUCCESS;
+        }
+      }
+      
+      return STATUS_CODE_NOT_FOUND;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline StatusCode Directory<T>::remove(F function)
+    {
+      for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
+          endIter != iter ; ++iter)
+      {
+        if(function(*iter))
+        {
+          T *pObject = *iter;
+          m_contents.erase(iter);
+          delete pObject;
+          return STATUS_CODE_SUCCESS;
+        }
+      }
+      
+      return STATUS_CODE_NOT_FOUND;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline const typename Directory<T>::ObjectList &Directory<T>::contents() const
+    {
+      return m_contents;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Directory<T>::rmdir(const std::string &dirName)
+    {
+      for(typename std::vector<Directory<T>*>::iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
+          endIter != iter ; ++iter)
+      {
+        Directory<T> *pDir = *iter;
+
+        if(pDir->name() == dirName)
+        {
+          m_subdirs.erase(*iter);
+          delete pDir;
+          return STATUS_CODE_SUCCESS;
+        }
+      }
+      
+      return STATUS_CODE_NOT_FOUND;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline void Directory<T>::clear()
+    {
+      for(typename std::vector<Directory<T>*>::iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
+          endIter != iter ; ++iter)
+      {
+        (*iter)->clear();
+        delete *iter;
+      }
+        
+      for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
+          endIter != iter ; ++iter)
+        delete *iter;
+      
+      m_subdirs.clear();
+      m_contents.clear();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Path Directory<T>::fullPath() const
+    {
+      Path fullPath = this->name();
+      const Directory<T> *pDir = this;
+
+      while(1)
+      {
+        const Directory<T> *pParentDir = pDir->parent();
+
+        if(nullptr != pParentDir)
+        {
+          fullPath = pParentDir->name() + fullPath;
+          pDir = pParentDir;
+        }
+        else
+        {
+          fullPath = Path("/") + fullPath;
+          break;
+        }
+      }
+
+      return fullPath;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline bool Directory<T>::isRoot() const
+    {
+      return (nullptr == m_pParent);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline bool Directory<T>::isEmpty() const
+    {
+      return (m_subdirs.empty() && m_contents.empty());
+    }
+    
   }
 
 } 
