@@ -111,22 +111,6 @@ namespace dqm4hep {
        */
       template <typename KeyType, typename ValueType>
       static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlMap );
-
-      /**
-       */
-      static xdrstream::Status read( xdrstream::IODevice *pDevice , Publication &publication );
-
-      /**
-       */
-      static xdrstream::Status write( xdrstream::IODevice *pDevice , const Publication &publication );
-
-      /**
-       */
-      static xdrstream::Status read( xdrstream::IODevice *pDevice , MonitorElementInfoList &infoList );
-
-      /**
-       */
-      static xdrstream::Status write( xdrstream::IODevice *pDevice , const MonitorElementInfoList &infoList );
     };
 
     //-------------------------------------------------------------------------------------------------
