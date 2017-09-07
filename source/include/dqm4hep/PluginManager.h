@@ -33,6 +33,17 @@
 #include "dqm4hep/Singleton.h"
 #include "dqm4hep/Plugin.h"
 
+//-------------------------------------------------------------------------------------------------
+
+#define DQM_PLUGIN_DECL( ClassName , ClassStr ) \
+    class DQMPlugin_##ClassName : public dqm4hep::core::Plugin, public ClassName \
+    { \
+    public: \
+    DQMPlugin_##ClassName (bool shouldRegister = true) : dqm4hep::core::Plugin(ClassStr, shouldRegister), ClassName() {} \
+    dqm4hep::core::Plugin *create() const { return new DQMPlugin_##ClassName (false) ; } \
+    }; \
+    static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName;
+
 namespace dqm4hep {
 
   namespace core {
