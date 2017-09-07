@@ -118,15 +118,11 @@ namespace dqm4hep {
        */
       uint32_t getRunNumber() const;
 
-      /** Whether the event wrapper owns the real event implementation
-       */
-      bool isOwner() const;
-
       /** Clear the event.
        *  Should call the real event implementation
        *  destructor if owned by the event wrapper
        */
-      virtual void clear() = 0;
+      virtual void clear();
 
       /** Returns the true event implementation
        */
@@ -159,7 +155,6 @@ namespace dqm4hep {
       uint64_t                           m_eventSize;     ///< The serialized event size (unit bytes)
       uint32_t                           m_eventNumber;   ///< The event number
       uint32_t                           m_runNumber;     ///< The run number
-      bool                               m_isOwner;       ///< Whether the event wrapper owns the real event implementation
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -185,40 +180,27 @@ namespace dqm4hep {
 
       /** Returns the real event implementation
        */
-      virtual T *getEvent() const;
+      T *getEvent() const;
 
       /** Set the real event implementation
        */
-      virtual void setEvent(T *pEvent);
+      void setEvent(T *pEvent, bool isOwner = true);
 
+      /** Whether the event wrapper owns the real event implementation
+       */
+      bool isOwner() const;
+      
       /** The implementation of this method may delete the real event implementation if needed.
        *  ATTN : do not forget the check the event ownership using the isOwner() method
        */
-      virtual void clear();
+      void clear();
 
     protected:
-      T                    *m_pEvent;     ///< The real event implementation
+      T                    *m_pEvent;        ///< The real event implementation
+      bool                  m_isOwner;       ///< Whether the event wrapper owns the real event implementation
     };
 
     //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    inline Event::Event() :
-        m_type(UNKNOWN_EVENT),
-        m_source("unknwon"),
-        m_eventSize(0),
-        m_eventNumber(0),
-        m_runNumber(0),
-        m_isOwner(true)
-    {
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    inline Event::~Event()
-    {
-    }
-
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -248,9 +230,7 @@ namespace dqm4hep {
       }
 
       pEventBase->clear();
-      pEventBase->setEvent(pEvent);
-
-      m_isOwner = isOwner;
+      pEventBase->setEvent(pEvent, isOwner);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -338,57 +318,13 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-
-    inline bool Event::isOwner() const
-    {
-      return m_isOwner;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    inline xdrstream::Status Event::writeBase(xdrstream::IODevice *pDevice) const
-    {
-      uint8_t type(static_cast<uint8_t>(m_type));
-      int64_t timeStamp = std::chrono::system_clock::to_time_t(m_timeStamp);
-
-      XDR_STREAM(pDevice->write(&type));
-      XDR_STREAM(pDevice->write(&m_source));
-      XDR_STREAM(pDevice->write(&timeStamp));
-      XDR_STREAM(pDevice->write(&m_eventSize));
-      XDR_STREAM(pDevice->write(&m_eventNumber));
-      XDR_STREAM(pDevice->write(&m_runNumber));
-      XDR_STREAM(pDevice->write(&m_isOwner));
-
-      return xdrstream::XDR_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    inline xdrstream::Status Event::readBase(xdrstream::IODevice *pDevice)
-    {
-      uint8_t type(0);
-      int64_t timeStamp(0);
-
-      XDR_STREAM(pDevice->read(&type));
-      XDR_STREAM(pDevice->read(&m_source));
-      XDR_STREAM(pDevice->read(&timeStamp));
-      XDR_STREAM(pDevice->read(&m_eventSize));
-      XDR_STREAM(pDevice->read(&m_eventNumber));
-      XDR_STREAM(pDevice->read(&m_runNumber));
-      XDR_STREAM(pDevice->read(&m_isOwner));
-
-      this->setType(static_cast<EventType>(type));
-      this->setTimeStamp(std::chrono::system_clock::from_time_t(timeStamp));
-
-      return xdrstream::XDR_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline EventBase<T>::EventBase() :
-      Event()
+      Event(),
+      m_isOwner(true),
+      m_pEvent(nullptr)
     {
       /* nop */
     }
@@ -414,16 +350,17 @@ namespace dqm4hep {
     template <typename T>
     inline T *EventBase<T>::getEvent() const
     {
-        return m_pEvent;
+      return m_pEvent;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void EventBase<T>::setEvent(T *pEvent)
+    inline void EventBase<T>::setEvent(T *pEvent, bool isOwner)
     {
       this->clear();
       m_pEvent = pEvent;
+      m_isOwner = isOwner;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -431,10 +368,20 @@ namespace dqm4hep {
     template <typename T>
     inline void EventBase<T>::clear()
     {
+      Event::clear();
+      
       if(0 != m_pEvent && this->isOwner())
         delete m_pEvent;
 
       m_pEvent = nullptr;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T> 
+    inline bool EventBase<T>::isOwner() const
+    {
+      return m_isOwner;
     }
 
   }
