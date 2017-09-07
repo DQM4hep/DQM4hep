@@ -156,13 +156,6 @@ namespace dqm4hep {
       return std::make_shared<spdlog::sinks::ansicolor_sink>(Logger::console());
     }
 
-    //-------------------------------------------------------------------------------------------------
-
-    Logger::AppenderPtr Logger::remote()
-    {
-      return std::make_shared<remote_sink>();
-    }
-
   }
 
 }
