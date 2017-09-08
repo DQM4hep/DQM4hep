@@ -31,141 +31,431 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/Directory.h"
 
 namespace dqm4hep {
 
   namespace core {
 
-    class MonitorElement;
-    class Directory;
-
-    /** Storage class.
-     *
-     *  A simple storage class for monitor elements
-     *  with a directory structure (see Directory).
-     *
-     *  All dirName strings passed in argument of this interface
-     *  refers to an absolute path if it starts by the '/' character.
-     *  In this case it is considered to start from the root dir and else
-     *  from the current directory.
-     */
+    template <typename T>
     class Storage
     {
     public:
-      /** Constructor.
-       */
       Storage();
-
-      /** Destructor
-       */
       ~Storage();
-
-      /** Create a new directory
-       */
       StatusCode mkdir(const std::string &dirName);
-
-      /** Go back to root directory
-       */
       void cd();
-
-      /** Go to directory.
-       *
-       *  If dirName starts with '/' then the path is
-       *  absolute and refers to the root directory.
-       *  Any directory matching ".." referes to the
-       *  parent dir (unix style)
-       */
       StatusCode cd(const std::string &dirName);
-
-      /** List the current directory contents
-       */
-      void ls(bool recursive = false) const;
-
-      /** Whether the directory exists
-       */
       bool dirExists(const std::string &dirName) const;
-
-      /** Get the current directory name
-       */
       const std::string &pwd() const;
-
-      /** Navigate backward in the directory structure.
-       *  Equivalent to cd("..")
-       */
       StatusCode goUp();
-
-      /** Remove the given directory.
-       *
-       *  It can't be the root directory
-       *  or a parent directory of the current directory. The contents
-       *  will be deleted if the flag 'owner' in the constructor has
-       *  been passed. Users can check the flag using the method isOwner()
-       *  and take appropriate action to avoid memory leak
-       */
-      StatusCode rmdir(const std::string &fullDirName);
-
-      /** Add a monitor element to the current directory
-       */
-      StatusCode addMonitorElement(const MonitorElementPtr &monitorElement);
-
-      /** Add a monitor element to the given directory
-       */
-      StatusCode addMonitorElement(const std::string &dirName, const MonitorElementPtr &monitorElement);
-
-      /** Remove a monitor element from the current directory
-       */
-      StatusCode removeMonitorElement(const std::string &monitorElementName);
-
-      /** Remove a monitor element from the given directory
-       */
-      StatusCode removeMonitorElement(const std::string &dirName, const std::string &monitorElementName);
-
-      /** Get the monitor element in the current directory
-       */
-      StatusCode getMonitorElement(const std::string &monitorElementName, MonitorElementPtr &monitorElement) const;
-
-      /** Get the monitor element in the given directory
-       */
-      StatusCode getMonitorElement(const std::string &dirName, const std::string &monitorElementName, MonitorElementPtr &monitorElement) const;
-
-      /** Get all monitor elements in all the directories starting from the root directory
-       */
-      StatusCode getAllMonitorElements(MonitorElementPtrList &monitorElementList);
-
-      /** Whether the monitor element exists in the current dir
-       */
-      bool monitorElementExists(const MonitorElementPtr &monitorElement) const;
-
-      /** Whether the monitor element exists in the current dir
-       */
-      bool monitorElementExists(const std::string &dirName, const MonitorElementPtr &monitorElement) const;
-
-      /** Clear the storage.
-       */
-      StatusCode clear();
-
-      /** Get the root directory
-       */
-      Directory *getRootDirectory() const;
-
-      /** Get the current directory
-       */
-      Directory *getCurrentDirectory() const;
-
-      /** Find a sub directory
-       */
-      StatusCode findDir(const std::string &dirName, Directory *&pDirectory) const;
-
-      /** Get recursively all the monitor elements in the sub dirs
-       */
-      static StatusCode recursiveContentList(Directory *pDirectory, MonitorElementPtrList &monitorElementList);
-
+      StatusCode rmdir(const std::string &dirName);
+      StatusCode find(const std::string &dirName, Directory<T> *&pDirectory) const;
+      Directory<T> *root() const;
+      Directory<T> *current() const;
+      StatusCode add(T *pObject);
+      StatusCode add(const std::string &dirName, T *pObject);
+      template <typename F>
+      StatusCode remove(F function);
+      template <typename F>
+      StatusCode remove(const std::string &dirName, F function);
+      template <typename F>
+      T *findObject(F function) const;
+      template <typename F>
+      T *findObject(const std::string &dirName, F function) const;
+      bool containsObject(const T *pObject) const;
+      bool containsObject(const std::string &dirName, const T *pObject) const;  
+      template <typename F>
+      void iterate(F function) const;
+      void getObjects(std::vector<T*> &objectList) const;
+      void clear();
+      
     private:
-
-      Directory                *m_pCurrentDir;
-      Directory                *m_pRootDir;
-      bool                      m_isOwner;
+      template <typename F>
+      bool iterate(const Directory<T> *pDirectory, F function) const;
+      
+    private:
+      Directory<T>          *m_pRootDirectory;
+      Directory<T>          *m_pCurrentDirectory;
     };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline Storage<T>::Storage() :
+      m_pRootDirectory(new Directory<T>("")),
+      m_pCurrentDirectory(m_pRootDirectory)
+    {
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline Storage<T>::~Storage()
+    {
+      delete m_pRootDirectory;
+      m_pRootDirectory = nullptr;
+      m_pCurrentDirectory = nullptr;      
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Storage<T>::mkdir(const std::string &dirName)
+    {
+      if(dirName.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+
+      Path path(dirName);
+
+      if(!path.isValid())
+        return STATUS_CODE_INVALID_PARAMETER;
+
+      Directory<T> *pDirectory = !path.isRelative() ? m_pRootDirectory : m_pCurrentDirectory;
+      StringVector directoryList = path.getSplitPath();
+
+      for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
+          endIter != iter ; ++iter)
+      {
+        std::string dirName = *iter;
+
+        if(dirName == ".")
+          continue;
+
+        if(dirName == "..")
+        {
+          if(pDirectory == m_pRootDirectory)
+            return STATUS_CODE_FAILURE;
+
+          pDirectory = pDirectory->parent();
+          continue;
+        }
+
+        // if sub dir doesn't exists, create it
+        if(!pDirectory->hasChild(dirName))
+          pDirectory->mkdir(dirName);
+
+        // navigate forward
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->find(dirName, pDirectory));
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline void Storage<T>::cd()
+    {
+      m_pCurrentDirectory = m_pRootDirectory;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Storage<T>::cd(const std::string &dirName)
+    {
+      // go back to sub dir
+      if(dirName.empty())
+      {
+        this->cd();
+        return STATUS_CODE_SUCCESS;
+      }
+
+      Path path(dirName);
+
+      if(!path.isValid())
+        return STATUS_CODE_INVALID_PARAMETER;
+
+      Directory<T> *pDirectory = !path.isRelative() ? m_pRootDirectory : m_pCurrentDirectory;
+      StringVector directoryList = path.getSplitPath();
+
+      for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
+          endIter != iter ; ++iter)
+      {
+        std::string dirName = *iter;
+
+        if(dirName == ".")
+          continue;
+
+        if(dirName == "..")
+        {
+          if(pDirectory == m_pRootDirectory)
+            return STATUS_CODE_FAILURE;
+
+          pDirectory = pDirectory->parent();
+          continue;
+        }
+
+        // navigate forward
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->find(dirName, pDirectory));
+      }
+
+      if(nullptr == pDirectory)
+        return STATUS_CODE_FAILURE;
+
+      m_pCurrentDirectory = pDirectory;
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline bool Storage<T>::dirExists(const std::string &dirName) const
+    {
+      Directory<T> *pDirectory = NULL;
+      return (this->find(dirName, pDirectory) == STATUS_CODE_SUCCESS);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline const std::string &Storage<T>::pwd() const
+    {
+      return m_pCurrentDirectory->name();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode Storage<T>::goUp()
+    {
+      if(m_pCurrentDirectory->isRoot())
+        return STATUS_CODE_UNCHANGED;
+
+      m_pCurrentDirectory = m_pCurrentDirectory->parent();
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode Storage<T>::rmdir(const std::string &dirName)
+    {
+      if(dirName.empty())
+        return STATUS_CODE_NOT_ALLOWED;
+
+      Directory<T> *pDirectory = NULL;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, pDirectory));
+
+      if(pDirectory == m_pRootDirectory)
+        return STATUS_CODE_NOT_ALLOWED;
+        
+
+      std::string fullPathDirName = pDirectory->fullPath().getPath();
+      std::string currentFullPathDirName = m_pCurrentDirectory->fullPath().getPath();
+      size_t pos = currentFullPathDirName.find(fullPathDirName);
+
+      // this mean that the directory that we try
+      // to remove is a parent of the current one.
+      if(pos == 0 || pos != std::string::npos)
+        return STATUS_CODE_FAILURE;        
+
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->parent()->rmdir(pDirectory->name()));
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Storage<T>::find(const std::string &dirName, Directory<T> *&pDirectory) const
+    {
+      pDirectory = nullptr;
+
+      // go back to sub dir
+      if(dirName.empty() || dirName == "." || dirName == "./")
+      {
+        pDirectory = m_pCurrentDirectory;
+        return STATUS_CODE_SUCCESS;
+      }
+
+      Path path(dirName);
+
+      if(!path.isValid())
+        return STATUS_CODE_INVALID_PARAMETER;
+
+      pDirectory = !path.isRelative() ? m_pRootDirectory : m_pCurrentDirectory;
+      StringVector directoryList = path.getSplitPath();
+
+      for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
+          endIter != iter ; ++iter)
+      {
+        std::string dirName = *iter;
+
+        if(dirName == ".")
+          continue;
+
+        if(dirName == "..")
+        {
+          if(pDirectory == m_pRootDirectory)
+            return STATUS_CODE_FAILURE;
+
+          pDirectory = pDirectory->parent();
+          continue;
+        }
+
+        // navigate forward
+        StatusCode statusCode = pDirectory->find(dirName, pDirectory);
+
+        if(statusCode != STATUS_CODE_SUCCESS)
+          return statusCode;
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Directory<T> *Storage<T>::root() const
+    {
+      return m_pRootDirectory;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline Directory<T> *Storage<T>::current() const
+    {
+      return m_pCurrentDirectory;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode Storage<T>::add(T *pObject)
+    {
+      return m_pCurrentDirectory->add(pObject);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode Storage<T>::add(const std::string &dirName, T *pObject)
+    {
+      Directory<T> *pDirectory = nullptr;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->mkdir(dirName));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, pDirectory));
+      return pDirectory->add(pObject);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline StatusCode Storage<T>::remove(F function)
+    {
+      return m_pCurrentDirectory->remove(function);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    template <typename F>
+    inline StatusCode Storage<T>::remove(const std::string &dirName, F function)
+    {
+      Directory<T> *pDirectory = NULL;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, pDirectory));
+      return pDirectory->remove(function);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline T *Storage<T>::findObject(F function) const
+    {
+      return m_pCurrentDirectory->find(function);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline T *Storage<T>::findObject(const std::string &dirName, F function) const
+    {
+      Directory<T> *pDirectory = NULL;
+      
+      if(this->find(dirName, pDirectory))
+        return nullptr;
+        
+      return pDirectory->find(function);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline bool Storage<T>::containsObject(const T *pObject) const
+    {
+      return m_pCurrentDirectory->containsObject(pObject);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline bool Storage<T>::containsObject(const std::string &dirName, const T *pObject) const
+    {
+      Directory<T> *pDirectory = NULL;
+      
+      if(this->find(dirName, pDirectory))
+        return false;
+        
+      return pDirectory->containsObject(pObject);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline bool Storage<T>::iterate(const Directory<T> *pDirectory, F function) const
+    {
+      auto contents(pDirectory->contents()); 
+      
+      for (auto &obj : contents)
+        if(!function(pDirectory, obj))
+          return false;
+      
+      auto subdirs(pDirectory->subdirs());
+      
+      for(const auto &dir : subdirs)
+        if(!this->iterate(dir, function))
+          return false;
+      
+      return true;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline void Storage<T>::iterate(F function) const
+    {
+      this->iterate(m_pRootDirectory, function);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline void Storage<T>::getObjects(std::vector<T*> &objectList) const
+    {
+      this->iterate([&](const Directory<T> *pDirectory, T *pObject){
+        objectList.push_back(pObject); 
+        return true;
+      });
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline void Storage<T>::clear()
+    {
+      m_pRootDirectory->clear();
+      m_pCurrentDirectory = m_pRootDirectory;
+    }
 
   }
 
