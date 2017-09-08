@@ -64,172 +64,21 @@ INSTALL(
         LIBRARY DESTINATION lib
 )
 
-# # -------------------------------------------------
-# # build start external application executable
-#
-# ADD_EXECUTABLE( dqm4hep_start_external_application main/dqm4hep_start_external_application.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_start_external_application ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_start_external_application
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build start event collector executable
-#
-# ADD_EXECUTABLE( dqm4hep_start_event_collector main/dqm4hep_start_event_collector.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_start_event_collector ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_start_event_collector
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build start monitor element collector executable
-#
-# ADD_EXECUTABLE( dqm4hep_start_monitor_element_collector main/dqm4hep_start_monitor_element_collector.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_start_monitor_element_collector ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_start_monitor_element_collector
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build start analysis module executable
-#
-# ADD_EXECUTABLE( dqm4hep_start_analysis_module main/dqm4hep_start_analysis_module.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_start_analysis_module ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_start_analysis_module
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build start standalone module executable
-#
-# ADD_EXECUTABLE( dqm4hep_start_standalone_module main/dqm4hep_start_standalone_module.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_start_standalone_module ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_start_standalone_module
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build open root canvas executable
-#
-# ADD_EXECUTABLE( dqm4hep_open_root_canvas main/dqm4hep_open_root_canvas.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_open_root_canvas ${PROJECT_NAME} ${ROOT_GUI_LIBRARY} ${ROOT_GRAPH_LIBRARY} ${ROOT_HIST_LIBRARY} ${ROOT_CINT_LIBRARY} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_open_root_canvas
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build db insert config file executable
-#
-# ADD_EXECUTABLE( dqm4hep_db_insert_config_file main/dqm4hep_db_insert_config_file.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_db_insert_config_file ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_db_insert_config_file
-#     RUNTIME DESTINATION bin
-# )
-#
-# # -------------------------------------------------
-# # build run control interface executable
-#
-# ADD_EXECUTABLE( dqm4hep_run_control main/dqm4hep_run_control.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_run_control ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_run_control
-#     RUNTIME DESTINATION bin
-# )
-#
-# # -------------------------------------------------
-# # build run control server executable
-#
-# ADD_EXECUTABLE( dqm4hep_start_run_control_server main/dqm4hep_start_run_control_server.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep_start_run_control_server ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep_start_run_control_server
-#     RUNTIME DESTINATION bin
-# )
-#
-# # -------------------------------------------------
-# # build run control server executable
-#
-# ADD_EXECUTABLE( dqm4hep-start-log-collector main/dqm4hep-start-log-collector.cc )
-# TARGET_LINK_LIBRARIES( dqm4hep-start-log-collector ${PROJECT_NAME} )
-#
-# INSTALL (
-#     TARGETS dqm4hep-start-log-collector
-#     RUNTIME DESTINATION bin
-# )
-#
-#
-# # -------------------------------------------------
-# # build start shm driver executable
-#
-# IF( BUILD_EVB )
-#
-# 	ADD_EXECUTABLE( dqm4hep_start_shm_driver main/dqm4hep_start_shm_driver.cc )
-# 	TARGET_LINK_LIBRARIES( dqm4hep_start_shm_driver ${PROJECT_NAME} )
-#
-# 	INSTALL (
-# 	    TARGETS dqm4hep_start_shm_driver
-# 	    RUNTIME DESTINATION bin
-# 	)
-#
-# ENDIF()
-
-# -------------------------------------------------
-# build examples
-
-# IF( BUILD_EXAMPLES )
-#
-#     INCLUDE_DIRECTORIES( examples/module )
-#
-#     ADD_SHARED_LIBRARY( RandomModuleExample examples/module/random/RandomModule.cc )
-#     TARGET_LINK_LIBRARIES( RandomModuleExample ${PROJECT_NAME} )
-#
-#     INSTALL(
-#         TARGETS RandomModuleExample
-#         LIBRARY DESTINATION lib
-#     )
-#
-#
-#     ADD_SHARED_LIBRARY( StandaloneRandomModuleExample examples/module/standaloneRandom/StandaloneRandomModule.cc )
-#     TARGET_LINK_LIBRARIES( StandaloneRandomModuleExample ${PROJECT_NAME} )
-#
-#     INSTALL(
-#         TARGETS StandaloneRandomModuleExample
-#         LIBRARY DESTINATION lib
-#     )
-#
-# ENDIF()
 
 IF( BUILD_TESTS )
-  ADD_EXECUTABLE( test-directory tests/test-directory.cc )
-  TARGET_LINK_LIBRARIES( test-directory ${PROJECT_NAME} )
-
-  INSTALL (
-      TARGETS test-directory
-      RUNTIME DESTINATION bin/tests
-  )
+  ENABLE_TESTING()
+  FILE(GLOB TEST_SRCS "tests/*.cc")
+  
+  FOREACH( TEST_SRC ${TEST_SRCS} )
+    GET_FILENAME_COMPONENT( TEST_SRC_WITHOUT_EXT ${TEST_SRC} NAME_WE )
+    ADD_EXECUTABLE( ${TEST_SRC_WITHOUT_EXT} tests/${TEST_SRC_WITHOUT_EXT}.cc )
+    TARGET_LINK_LIBRARIES( ${TEST_SRC_WITHOUT_EXT} ${PROJECT_NAME} )
+    INSTALL (
+        TARGETS ${TEST_SRC_WITHOUT_EXT}
+        RUNTIME DESTINATION bin/tests
+    )
+    ADD_TEST( ${TEST_SRC_WITHOUT_EXT}-test ${PROJECT_BINARY_DIR}/bin/${TEST_SRC_WITHOUT_EXT} )
+  ENDFOREACH()
 ENDIF()
 
 
