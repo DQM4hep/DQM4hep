@@ -251,7 +251,7 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode Directory<T>::find(const std::string &dirName, Directory<T> *&pDirectory) const
     {
-      pDirectory = NULL;
+      pDirectory = nullptr;
 
       for(typename std::vector<Directory<T>*>::const_iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
           endIter != iter ; ++iter)
@@ -391,7 +391,7 @@ namespace dqm4hep {
 
         if(pDir->name() == dirName)
         {
-          m_subdirs.erase(*iter);
+          m_subdirs.erase(iter);
           delete pDir;
           return STATUS_CODE_SUCCESS;
         }
