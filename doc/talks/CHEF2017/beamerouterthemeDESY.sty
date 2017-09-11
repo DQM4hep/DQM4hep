@@ -1,0 +1,228 @@
+% Latex-Beamer Template DESY
+% version 1.0
+% based upon beamer theme for Juelich by i.kabadshow@fz-juelich.de
+
+\mode<presentation>
+
+% No navigation symbols in handout or trans mode:
+\only<handout| trans>{\setbeamertemplate{navigation symbols}{}}
+
+% reduced navigation symbol set
+\defbeamertemplate*{navigation symbols}{DESY}
+{%
+  \hbox{%
+    \hbox{\insertframenavigationsymbol}
+    \hbox{\insertsubsectionnavigationsymbol}
+    \hbox{\insertsectionnavigationsymbol}
+  }%
+}
+\defbeamertemplate*{navigation symbols}{plain}
+{%
+}
+
+% DESY Banner Helmholtz
+\defbeamertemplate*{title banner}{}{\translate{DESYOrganization}}
+
+% Slide counter
+\defbeamertemplate*{slide counter}{shownone}[1][\translate{DESYSlideName}]
+{%
+}
+\defbeamertemplate*{slide counter}{showall}[1][\translate{DESYSlideName}]
+{%
+{\usebeamercolor[fg]{date in head/foot}%
+#1~\insertframenumber\ \vrule width0.3pt height5pt\ \inserttotalframenumber%
+}%
+}
+\defbeamertemplate*{slide counter}{default}[1][\translate{DESYSlideName}]
+{%
+{\usebeamercolor[fg]{date in head/foot}%
+#1~\insertframenumber%
+}%
+}
+
+
+% Headline and footline
+\defbeamertemplate*{headline}{DESY}
+{%
+%\begin{beamercolorbox}[leftskip=7.5mm,ht=10mm,dp=0mm]{header}
+%\end{beamercolorbox}
+}
+
+
+\defbeamertemplate*{footline}{DESY}
+{%
+    \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+    \@tempdima=\textwidth%
+    \advance\@tempdima by\beamer@leftmargin%
+    \advance\@tempdima by\beamer@rightmargin%
+    %\begin{beamercolorbox}[sep=0.35cm,wd=\the\@tempdima]{footline}
+    \begin{beamercolorbox}[wd=1.0\paperwidth,ht=2.25ex,dp=5ex,center]{section in head/foot}%
+       \begin{beamercolorbox}[leftskip=6mm,ht=3.5mm,dp=0.0mm]{header}
+            \usebeamercolor[fg]{date in head/foot}%
+            %element 1
+            \ifbeamertemplateempty{footer element1}{}{%
+                \usebeamertemplate*{footer element1}%
+                \hfill%
+            }%
+            \ifnum\insertframenumber>1
+            \usebeamerfont{title in head/foot}%
+            \textbf{\insertshortauthor}\hspace*{0.3em}|\hspace*{1em}%
+            \insertinstitute\hspace*{0.3em}|\hspace*{1em}%
+            \insertdate{}\hspace*{0.3em}|\hspace*{1em}%
+            \textbf{Page\hspace*{1ex}\insertframenumber{}}\hspace*{2em}%
+            \fi
+            \hfill\includegraphics[width=1.0cm]{DESY-Logo-cyan-RGB_ger}%
+            \hspace*{0.5cm}
+        \end{beamercolorbox}%
+    \end{beamercolorbox}%
+}
+
+% Background
+\defbeamertemplate*{background}{DESYTitle}
+{%
+}
+
+\defbeamertemplate*{background}{DESY}
+{%
+}
+
+\defbeamertemplate*{background canvas}{DESYTitle}
+{%
+}
+
+\defbeamertemplate*{background canvas}{DESY}
+{%
+}
+
+
+% Sidebar
+\defbeamertemplate*{sidebar left}{DESY}
+{%
+}
+
+%Logos
+\defbeamertemplate*{logo partner1}{show}[1][]
+{%
+  \includegraphics[height=1.2240cm]{#1}
+}%
+\defbeamertemplate*{logo partner1}{hide}[1][]
+{%
+}%
+
+\defbeamertemplate*{logo partner2}{show}[1][]
+{%
+\includegraphics[height=1.2240cm]{#1}
+}%
+\defbeamertemplate*{logo partner2}{hide}[1][]
+{%
+}%
+
+
+\defbeamertemplate*{sidebar right}{DESYTitle}
+{%
+  % titlepage: set a larger DESY logo to the lower right
+  \vfill%
+  \llap{%
+  \mbox{
+  \includegraphics[height=2cm]{DESY-Logo-cyan-RGB_ger}%
+  \hspace*{0.3cm}
+  }
+  }% titleframe-sized logo
+}
+
+\defbeamertemplate*{sidebar left}{DESYTitle}
+{%
+  % titlepage: set a HGF logo to the lower left
+  \ifnum\insertframenumber<2
+  \vfill%
+  \mbox{\hspace*{0.3cm}
+  \includegraphics[height=1cm]{HG_LOGO_S_K}%
+  }
+  \fi
+}
+
+\defbeamertemplate*{sidebar right}{DESY}
+{%
+% DESY style requires the logo to be in line with the footer. Set it
+% there to avoid overlapping
+}
+
+\defbeamertemplate*{sidebar canvas left}{DESYTitle}
+{%
+}
+
+\defbeamertemplate*{sidebar canvas left}{DESY}
+{%
+}
+
+\defbeamertemplate*{sidebar canvas right}{DESY}
+{%
+}
+
+% Frame title: DESY
+\defbeamertemplate*{frametitle}{DESY}%
+{%
+  \ifbeamercolorempty[bg]{frametitle}{}{\nointerlineskip}%
+  \@tempdima=\textwidth%
+  \advance\@tempdima by\beamer@leftmargin%
+  \advance\@tempdima by\beamer@rightmargin%
+  \begin{beamercolorbox}[sep=0.6cm,wd=
+  \the\@tempdima
+  %4.ex
+  ]{frametitle}
+    \if@tempswa\else\csname beamer@fte\endcsname\fi%
+    \strut{\usebeamerfont{frametitle}\insertframetitle}\strut\par%
+    {%
+      \ifx\insertframe\@empty%
+      \else%
+      {\usebeamerfont{framesubtitle}\usebeamercolor[fg]{framesubtitle}\insertframesubtitle\strut\par}%
+      \fi
+    }%
+    \vskip-2ex%
+    \if@tempswa\else\vskip-.3cm\fi% set inside beamercolorbox... evil here...
+  \end{beamercolorbox}%
+}
+
+
+\def\beamer@fteright{\vskip0.35cm\advance\leftskip by 1.7cm\advance\rightskip by 1.7cm}
+
+
+% Title slide
+% \def\maketitle{%
+% \setbeamertemplate{background canvas}[DESYTitle]
+% \setbeamertemplate{sidebar canvas left}[DESYTitle]
+% \setbeamertemplate{sidebar right}[DESYTitle]
+% \setbeamertemplate{footline}{}
+% \begin{frame}[t]
+% \vskip-\headheight%
+% \vbox{}%
+% \titlepage%
+% \vfill%
+% \end{frame}
+% % reset to default
+% \setbeamertemplate{footline}[DESY]
+% \setbeamertemplate{sidebar right}[DESY]
+% \setbeamertemplate{sidebar left}[DESY]
+% \setbeamertemplate{sidebar canvas left}[DESY]
+% \setbeamertemplate{background canvas}[DESY]
+% }
+
+% Part slide
+% \def\makepart{%
+% \setbeamertemplate{background canvas}[DESYTitle]
+% \setbeamertemplate{sidebar canvas left}[DESYTitle]
+% \setbeamertemplate{sidebar right}[DESYTitle]
+% \setbeamertemplate{footline}{}
+% \begin{frame}[t]
+% \vskip-\headheight%
+% \vbox{}%
+% \partpage%
+% \end{frame}
+% \setbeamertemplate{footline}[DESY]
+% \setbeamertemplate{sidebar right}[DESY]
+% \setbeamertemplate{sidebar canvas left}[DESY]
+% \setbeamertemplate{background canvas}[DESY]
+% }
+
+\mode
+<all>

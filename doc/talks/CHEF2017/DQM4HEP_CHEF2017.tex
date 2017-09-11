@@ -1,0 +1,63 @@
+% Format:  Latex Orientation:  Portrait
+% MASTERFILE
+%
+% Last change: <Thu, 2016/05/26 10:25:26 arwagner l00slwagner.desy.de>
+%
+\documentclass[presentation, 10pt]{beamer}
+% use ``handout'' instead of ``presentation'' to create a 2 on 1 page
+% handout version of the document
+
+\mode<handout>{%
+	\usepackage{pgf}
+	\usepackage{pgfpages}
+	\pgfpagesuselayout{2 on 1}[a4paper,border shrink=5mm]
+}
+\mode<presentation>{%
+	\usetheme{DESY}
+}
+%\input{macros}
+
+\title{DQM4HEP \\ Status and prospectives}
+% subtitle is required for DESY beamer, set at least a space ~
+\subtitle{CHEF 2017 - Lyon}
+
+\author[R. Ete]{\underline{R. Ete}, A. Pingault}
+\institute{DESY}
+\date{\today}
+
+\newenvironment{topitemize}{%
+   \setlength{\topsep}{0pt}
+   \setlength{\partopsep}{0pt}
+   \renewcommand*{\@listi}{\leftmargin\leftmargini \parsep\z@ \topsep\z@ \itemsep\z@}
+   \let\@listI\@listi
+   \itemize
+}{\enditemize}
+
+\usepackage{makecell}
+
+%---------------------------------------------------------------------
+
+\begin{document}
+
+\maketitle
+
+%----------------------------------------------------------------------
+\begin{frame}
+  \frametitle{Summary}
+
+  \begin{itemize}
+    \item Introduction
+    \item Framework presentation
+    \item Experiments running with DQM4HEP
+    \item EUDAQ / DQM4HEP interface
+    \item Current status
+    \item Ongoing and future working
+  \end{itemize}
+  
+\end{frame}
+
+
+\end{document}
+
+% Enable spell checker for vim
+% setlocal spell spelllang=en
