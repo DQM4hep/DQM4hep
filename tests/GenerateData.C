@@ -16,6 +16,9 @@ void GenerateData()
 {
   std::vector<TObject*> writeObject;
   TFile *pTFile = new TFile("test_samples.root", "RECREATE");
+  
+  TDirectory *pSubDir = pTFile->mkdir("Gaussians");
+  pSubDir->cd();
 
   //
   // Generate random gaussian distribution
@@ -52,6 +55,20 @@ void GenerateData()
     pDblGaus_Mean15_RMS2_RMS5->Fill(gRandom->Gaus(15, 5));
   }
 
+  //
+  // Random gaussian with exponential background
+  //
+  TH1F *pGaus_Mean15_RMS1_ExpBck = new TH1F("Gaus_Mean15_RMS1_ExpBck", "Random gaus(15, 1) + Exp background", 150, 0, 30);
+  writeObject.push_back(pGaus_Mean15_RMS1_ExpBck);
+
+  for(unsigned int i=0 ; i<10000 ; i++)
+  {
+    if(i%10==0)
+      pGaus_Mean15_RMS1_ExpBck->Fill(gRandom->Gaus(15, 1));
+    pGaus_Mean15_RMS1_ExpBck->Fill(gRandom->Exp(12));
+  }
+  
+  pTFile->cd();
 
   //
   // Random Landau
@@ -87,18 +104,6 @@ void GenerateData()
     pExp_Dev5_HugeBck->Fill(gRandom->Uniform(0, 30));
 
 
-  //
-  // Random gaussian with exponential background
-  //
-  TH1F *pGaus_Mean15_RMS1_ExpBck = new TH1F("Gaus_Mean15_RMS1_ExpBck", "Random gaus(15, 1) + Exp background", 150, 0, 30);
-  writeObject.push_back(pGaus_Mean15_RMS1_ExpBck);
-
-  for(unsigned int i=0 ; i<10000 ; i++)
-  {
-    if(i%10==0)
-      pGaus_Mean15_RMS1_ExpBck->Fill(gRandom->Gaus(15, 1));
-    pGaus_Mean15_RMS1_ExpBck->Fill(gRandom->Exp(12));
-  }
 
   //
   // Random cos function and cos function in range [-0.8, 0.8]
@@ -116,17 +121,20 @@ void GenerateData()
   }
 
   delete pCosFunction;
+  
+  
 
 
-  //
-  // Write content to file
-  //
-  for(unsigned int i=0 ; i<writeObject.size() ; i++)
-  {
-    TObject *pTObject = writeObject.at(i);
-    pTObject->Write();
-  }
+  // //
+  // // Write content to file
+  // //
+  // for(unsigned int i=0 ; i<writeObject.size() ; i++)
+  // {
+  //   TObject *pTObject = writeObject.at(i);
+  //   pTObject->Write();
+  // }
 
+  pTFile->Write();
   pTFile->Close();
   delete pTFile;
 }
