@@ -32,6 +32,7 @@
 #include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/Singleton.h"
 #include "dqm4hep/Plugin.h"
+#include "dqm4hep/Logging.h"
 
 //-------------------------------------------------------------------------------------------------
 
@@ -39,10 +40,13 @@
     class DQMPlugin_##ClassName : public dqm4hep::core::Plugin, public ClassName \
     { \
     public: \
-    DQMPlugin_##ClassName (bool shouldRegister = true) : dqm4hep::core::Plugin(ClassStr, shouldRegister), ClassName() {} \
-    dqm4hep::core::Plugin *create() const { return new DQMPlugin_##ClassName (false) ; } \
+    DQMPlugin_##ClassName (bool reg) : dqm4hep::core::Plugin(ClassStr), ClassName() { \
+      if(reg) THROW_RESULT_IF(dqm4hep::core::STATUS_CODE_SUCCESS, !=, this->registerMe()); \
+    } \
+    dqm4hep::core::Plugin *create() const { return new DQMPlugin_##ClassName (false); } \
+    std::string className() const { return std::string(#ClassName); } \
     }; \
-    static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName
+    static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName(true)
 
 //-------------------------------------------------------------------------------------------------
 
@@ -84,7 +88,7 @@ namespace dqm4hep {
        *  to the user. Ownership of the plug-in transfered to the caller.
        */
       template <typename T>
-      T *createPluginClass( const std::string &pluginName ) const;
+      T *create( const std::string &pluginName ) const;
 
       /** Whether the plug-in is registered within the plug-in manager
        */
@@ -92,7 +96,14 @@ namespace dqm4hep {
 
       /** Get the plug-in name list
        */
-      StringVector getPluginNameList() const;
+      StringVector pluginNames() const;
+
+      /** Get the plugin name list matching the type T
+       */
+      template <typename T>
+      StringVector pluginNamesMatchingType() const;
+
+      void dump() const;
 
     private:
       /** Constructor
@@ -115,7 +126,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *PluginManager::createPluginClass( const std::string &pluginName ) const
+    inline T *PluginManager::create( const std::string &pluginName ) const
     {
       const Plugin *pPlugin = this->getPlugin( pluginName );
 
@@ -128,6 +139,24 @@ namespace dqm4hep {
         return 0;
 
       return dynamic_cast<T *>(pClass);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StringVector PluginManager::pluginNamesMatchingType() const
+    {
+      StringVector pluginNames;
+
+      for (auto plugin : m_pluginMap)
+      {
+        const Plugin *pPlugin(plugin.second);
+
+        if(nullptr != dynamic_cast<const T *>(pPlugin))
+          pluginNames.push_back(plugin.first);
+      }
+
+      return pluginNames;
     }
 
   }

@@ -146,7 +146,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StringVector PluginManager::getPluginNameList() const
+    StringVector PluginManager::pluginNames() const
     {
       StringVector pluginNameList;
 
@@ -168,7 +168,7 @@ namespace dqm4hep {
         return STATUS_CODE_INVALID_PTR;
 
       // check if the plug is already registered
-      if( isPluginRegistered( pPlugin->getPluginName() ) )
+      if( isPluginRegistered( pPlugin->pluginName() ) )
       {
         delete pPlugin;
         pPlugin = NULL;
@@ -176,7 +176,7 @@ namespace dqm4hep {
       }
 
       // try to register it
-      if( ! m_pluginMap.insert( PluginMap::value_type( pPlugin->getPluginName(), pPlugin ) ).second )
+      if( ! m_pluginMap.insert( PluginMap::value_type( pPlugin->pluginName(), pPlugin ) ).second )
       {
         delete pPlugin;
         pPlugin = NULL;
@@ -185,6 +185,19 @@ namespace dqm4hep {
       }
 
       return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void PluginManager::dump() const
+    {
+      dqm_info( "******************************************************" );
+      dqm_info( "******** Plugin manager -- Registered plugins ********" );
+      for(auto plugin : m_pluginMap)
+      {
+        dqm_info( "** Plugin [class={0}] : {1}", plugin.second->pluginName(), plugin.second->className() );
+      }
+      dqm_info( "******************************************************" );
     }
 
   }
