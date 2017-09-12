@@ -117,7 +117,7 @@ namespace dqm4hep {
     template <typename T>
     inline T *PluginManager::createPluginClass( const std::string &pluginName ) const
     {
-      Plugin *pPlugin = this->getPlugin( pluginName );
+      const Plugin *pPlugin = this->getPlugin( pluginName );
 
       if(!pPlugin)
         return 0;
