@@ -103,6 +103,8 @@ namespace dqm4hep {
       template <typename T>
       StringVector pluginNamesMatchingType() const;
 
+      /** Dump registered plugin via logging
+       */
       void dump() const;
 
     private:
