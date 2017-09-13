@@ -56,6 +56,98 @@
   
 \end{frame}
 
+%----------------------------------------------------------------------
+\begin{frame}
+  \frametitle{Introduction}
+  \footnotesize
+  DQM systems in HEP domain :
+  \begin{itemize}
+    \item Evaluate data quality and alert users of anomalies
+    \item Yet developped for most of HEP experiments (i.e AMORE or CMSSW)
+    \item Provide for online and offline analysis
+    \begin{itemize}
+      \item Automatic data quality tests, possibly with reference histograms
+      \item Distributed system for online analysis (data collectors)
+      \item Dedicated visualization interface (Qt, Web)
+    \end{itemize}
+  \end{itemize}
+  ~\\
+  \textbf{But ...} Based on experiment specific event format
+  \begin{itemize}
+    \item Not re-usable by other experiments
+    \item Dulicated software
+    \item Ad-hoc solution for test-beam setup monitoring
+  \end{itemize}
+  ~\\
+  Development of a generic DQM software for any HEP experiment : \textbf{DQM4HEP}
+\end{frame}
+
+
+
+%----------------------------------------------------------------------
+\begin{frame}
+  \frametitle{DQM4HEP}
+  \framesubtitle{Software overview}
+  \footnotesize
+  Key points : 
+  \begin{itemize}
+    \item Standalone plugin system (dynamic shared lib loading) 
+    \item \textbf{Event data model/format + event streaming abstraction}
+  \end{itemize}
+  ~ \\
+  More general features :
+  \begin{itemize}
+    \item Online analysis (API)
+    \item Streaming tools for event read/write functions
+    \item Distributed system (DIM)
+    \item Data collectors : event and histogram collector servers
+    \item Quality test tools : interface + many template
+  \end{itemize}
+\end{frame}
+
+
+%----------------------------------------------------------------------
+\begin{frame}
+  \frametitle{DQM4HEP}
+  \framesubtitle{Quality test API}
+  \footnotesize
+  \begin{block}{Monitor element}
+    \begin{itemize}
+      \item Wrap a ROOT TObject 
+      \item Optional hold a ROOT TObject as reference
+    \end{itemize}
+  \end{block}
+  \begin{block}{Quality test}
+    \begin{itemize}
+      \item Implement the logic a testing a monitor element
+      \item Output a quality report (quality flag, success, etc)
+    \end{itemize}
+  \end{block}
+  One monitor element can be tested with many QTests, i.e : \\
+  \begin{itemize}
+    \item Kolmogorov test using a reference histogram
+    \item Mean of histogram within an expected value
+  \end{itemize}
+  One QTest can be attached to many monitor elements, i.e :
+  \begin{itemize}
+    \item Test different histograms with expected same gaussian distribution parameters
+  \end{itemize}
+\end{frame}
+
+
+%----------------------------------------------------------------------
+\begin{frame}
+  \frametitle{DQM4HEP}
+  \framesubtitle{Online architecture}
+  \centering\includegraphics[width=0.9\linewidth]{figs/GlobalArchitectureDiagram.pdf}
+\end{frame}
+
+%----------------------------------------------------------------------
+\begin{frame}
+  \frametitle{DQM4HEP}
+  \framesubtitle{Online monitoring interface (Qt Gui)}
+    \centering\includegraphics[width=0.95\linewidth]{figs/DQM4HEPMonitoringGui.png}
+\end{frame}
 
 \end{document}
 
