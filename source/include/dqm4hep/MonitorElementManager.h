@@ -162,7 +162,11 @@ namespace dqm4hep {
       // BOOKING INTERFACE //
       ///////////////////////
 
-      StatusCode addMonitorElement(const std::string &path, TObject *pObject);
+      /** Add a monitor element from an external source.
+       *  WARNING : The ROOT object is NOT owned by the framework.
+       *  The caller must delete the object on termination
+       */
+      StatusCode addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
 
       /** Book a ROOT histogram. The histogram must be valid and must be a built-in ROOT histogram.
        *  The two first arguments of the histogram constructor must the name and the title.

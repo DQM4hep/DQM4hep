@@ -143,11 +143,12 @@ namespace dqm4hep {
       return m_storage.dirExists(dirName);
     }
 
+    //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject)
+    StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement)
     {
       PtrHandler<TObject> ptrObject(pObject, false);
-      MonitorElement *pMonitorElement(nullptr);
+      pMonitorElement = nullptr;
 
       try
       {
@@ -157,14 +158,20 @@ namespace dqm4hep {
       catch(StatusCodeException &e)
       {
         if(nullptr != pMonitorElement)
+        {
           delete pMonitorElement;
+          pMonitorElement = nullptr;
+        }
 
         return e.getStatusCode();
       }
       catch(...)
       {
         if(nullptr != pMonitorElement)
+        {
           delete pMonitorElement;
+          pMonitorElement = nullptr;
+        }
 
         return STATUS_CODE_FAILURE;
       }
