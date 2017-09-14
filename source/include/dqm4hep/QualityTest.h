@@ -120,7 +120,7 @@ namespace dqm4hep {
 
       /** Initialize the quality test.
        */
-      virtual StatusCode init() = 0;
+      virtual StatusCode init();
 
     protected:
       /** Runs a quality test on the given monitor element
@@ -162,6 +162,13 @@ namespace dqm4hep {
     };
 
     //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode QualityTest::init()
+    {
+      return STATUS_CODE_SUCCESS;
+    }
+
     //-------------------------------------------------------------------------------------------------
 
     inline QualityTestFactory::~QualityTestFactory()
