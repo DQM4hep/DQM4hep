@@ -131,20 +131,17 @@ namespace dqm4hep {
        */
       virtual bool canRun(MonitorElement *pMonitorElement) const = 0;
 
-      /**
-       *  @brief  Fill basic info in the qtest report.
-       *          Must be called at start of qtest run
-       *
-       *  @param  report the report to fill
+      /** Fill basic info in the qtest report.
+       *  Must be called at start of qtest run
        */
       void fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const;
       
     private:
-      std::string           m_type;
-      std::string           m_name;
+      std::string           m_type;           ///< Quality test type (usually class name)
+      std::string           m_name;           ///< Quality test name
       
     protected:
-      std::string           m_description;
+      std::string           m_description;    ///< Quality test description
     };
 
     //-------------------------------------------------------------------------------------------------
