@@ -138,10 +138,13 @@ namespace dqm4hep {
        *  @param  report the report to fill
        */
       void fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const;
-
+      
     private:
       std::string           m_type;
       std::string           m_name;
+      
+    protected:
+      std::string           m_description;
     };
 
     //-------------------------------------------------------------------------------------------------

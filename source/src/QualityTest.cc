@@ -102,7 +102,8 @@ namespace dqm4hep {
 
     QualityTest::QualityTest(const std::string &type, const std::string &name) :
       m_type(type),
-	    m_name(name)
+	    m_name(name),
+      m_description("")
     {
       /* nop */
     }
