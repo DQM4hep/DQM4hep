@@ -26,14 +26,56 @@
  */
 
 // -- dqm4hep headers
+#include "dqm4hep/DQM4HEP.h"
 #include "dqm4hep/QualityTest.h"
+#include "dqm4hep/PluginManager.h"
 #include "dqm4hep/Logging.h"
 #include "dqm4hep/XmlHelper.h"
 #include "dqm4hep/MonitorElement.h"
 
+// -- root headers 
+#include <TH1.h>
+#include <TMath.h>
+
 namespace dqm4hep {
 
   namespace core {
+    
+    /** MeanWithinExpectedTest class
+     */
+    class MeanWithinExpectedTest : public QualityTest
+    {
+    public:
+      class Factory : public QualityTestFactory
+      {
+      public:
+        QualityTest *createQualityTest(const std::string &name) const;
+      };
+
+      MeanWithinExpectedTest(const std::string &name);
+      ~MeanWithinExpectedTest() {}
+      StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle);
+      StatusCode userRun(MonitorElement *pMonitorElement, QualityTestReport &report);
+      bool canRun(MonitorElement *pMonitorElement) const;
+
+    protected:
+      float               m_expectedMean;
+      float               m_meanDeviationLower;
+      float               m_meanDeviationUpper;
+    };
+    
+    typedef MeanWithinExpectedTest::Factory MeanWithinExpectedTestFactory;
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    inline QualityTest *MeanWithinExpectedTest::Factory::createQualityTest(const std::string &name) const
+    {
+      return new MeanWithinExpectedTest(name);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     MeanWithinExpectedTest::MeanWithinExpectedTest(const std::string &name) :
 	    QualityTest("MeanWithinExpected", name),
@@ -41,14 +83,7 @@ namespace dqm4hep {
       m_meanDeviationLower(0.f),
       m_meanDeviationUpper(0.f)
     {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    MeanWithinExpectedTest::~MeanWithinExpectedTest()
-    {
-      /* nop */
+      m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean (using TMath::Prob(chi2,1))";
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -72,60 +107,24 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MeanWithinExpectedTest::init()
-    {
-      /* nop */
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MeanWithinExpectedTest::run(MonitorElement *pMonitorElement, QualityTestReport &report)
+    StatusCode MeanWithinExpectedTest::userRun(MonitorElement *pMonitorElement, QualityTestReport &report)
     {
       TH1 *pHistogram = pMonitorElement->objectTo<TH1>();
-      float mean = pHistogram->GetMean();
+      const float mean(pHistogram->GetMean());
+      const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
       if(m_meanDeviationLower < mean && mean < m_meanDeviationUpper)
       {
-          
-      }
-
-        // test failed ?
-        if(mean < m_xMin || mean > m_xMax)
-        {
-          m_quality = VERY_BAD_QUALITY;
-          m_message = "Out of range !";
-        }
-        else
-        {
-          m_quality = VERY_GOOD_QUALITY;
-          m_message = "";
-        }
-
-        m_isSuccessful = true;
-      }
-      else if(1 == m_strategy)
-      {
-        float chi = (pHistogram->GetMean() - m_expectedMean)/m_sigma;
-        float probability = TMath::Prob(chi*chi, 1);
-
-        m_quality = DQM4HEP::scaleToQuality(probability);
-        m_isSuccessful = true;
-      }
-      else if(2 == m_strategy)
-      {
-        float chi = (pHistogram->GetMean() - m_expectedMean)/pHistogram->GetRMS();
-        float probability = TMath::Prob(chi*chi, 1);
-
-        m_quality = DQM4HEP::scaleToQuality(probability);
-        m_isSuccessful = true;
+        report.m_message = "Within expected range";
       }
       else
       {
-        m_isSuccessful = false;
-        m_quality = NO_QUALITY;
-        m_message = "Undefined strategy for this test";
+        report.m_message = "Out of expected range";
       }
+      
+      const float chi = (mean - m_expectedMean)/range;
+      const float probability = TMath::Prob(chi*chi, 1);
+      report.m_isSuccessful = true;
 
       return STATUS_CODE_SUCCESS;
     }
@@ -144,7 +143,8 @@ namespace dqm4hep {
 
       return true;
     }
-
+    
+    DQM_PLUGIN_DECL( MeanWithinExpectedTestFactory, "MeanWithinExpectedTest" );
   }
 
 }
