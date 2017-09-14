@@ -110,6 +110,10 @@ namespace dqm4hep {
       /** Get the quality test name (unique identifier)
        */
       const std::string &name() const;
+      
+      /** Get the quality test description
+       */
+      const std::string &description() const;
 
       /** Perform the quality test result and fill the quality test report
        */
