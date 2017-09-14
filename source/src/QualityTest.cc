@@ -26,6 +26,8 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/QualityTest.h"
+#include "dqm4hep/Logging.h"
+#include "dqm4hep/MonitorElement.h"
 
 namespace dqm4hep {
 
@@ -34,6 +36,8 @@ namespace dqm4hep {
     QualityTestReport::QualityTestReport() :
       m_name(""),
       m_type(""),
+      m_monitorElementName(""),
+      m_monitorElementType(""),
       m_message(""),
       m_quality(0.f),
       m_isSuccessful(true),
@@ -55,6 +59,8 @@ namespace dqm4hep {
     {
       m_name = qreport.m_name;
       m_type = qreport.m_type;
+      m_monitorElementName = qreport.m_monitorElementName;
+      m_monitorElementType = qreport.m_monitorElementType;
       m_message = qreport.m_message;
       m_quality = qreport.m_quality;
       m_isSuccessful = qreport.m_isSuccessful;
@@ -69,6 +75,8 @@ namespace dqm4hep {
     {
       value["type"] = m_type;
       value["name"] = m_name;
+      value["monitorElementName"] = m_monitorElementName;
+      value["monitorElementType"] = m_monitorElementType;
       value["message"] = m_message;
       value["quality"] = static_cast<int>(m_quality);
       value["successful"] = m_isSuccessful;
@@ -81,6 +89,8 @@ namespace dqm4hep {
     {
       m_type = value.get("type", m_type).asString();
       m_name = value.get("name", m_name).asString();
+      m_monitorElementType = value.get("monitorElementType", m_monitorElementType).asString();
+      m_monitorElementName = value.get("monitorElementName", m_monitorElementName).asString();
       m_message = value.get("message", m_message).asString();
       m_quality = value.get("quality", m_quality).asFloat();
       m_isSuccessful = value.get("successful", m_isSuccessful).asBool();
@@ -106,24 +116,70 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &QualityTest::getType() const
+    const std::string &QualityTest::type() const
     {
       return m_type;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &QualityTest::getName() const
+    const std::string &QualityTest::name() const
     {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTest::fillBasicInfo(QualityTestReport &report) const
+    void QualityTest::run(MonitorElement *pMonitorElement, QualityTestReport &report)
     {
-      report.m_name = this->getName();
-      report.m_type = this->getType();
+      this->fillBasicInfo(pMonitorElement, report);
+
+      if(!this->canRun(pMonitorElement))
+      {
+        report.m_message = "Couldn't run quality test: canRun() failed";
+        report.m_quality = 0.f;
+        report.m_isSuccessful = false;
+        return;
+      }
+
+      try
+      {
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->userRun(pMonitorElement, report));
+      }
+      catch(StatusCodeException &exception)
+      {
+        const std::string message("Caught StatusCodeException while run QTest: " + exception.toString());
+
+        if(!report.m_message.empty())
+          report.m_message + " " + message;
+        else
+          report.m_message = message;
+
+        report.m_quality = 0.f;
+        report.m_isSuccessful = false;
+      }
+      catch(...)
+      {
+        const std::string message("Caught unknown exception while run QTest");
+
+        if(!report.m_message.empty())
+          report.m_message + " " + message;
+        else
+          report.m_message = message;
+
+        report.m_quality = 0.f;
+        report.m_isSuccessful = false;
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void QualityTest::fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const
+    {
+      report.m_name = this->name();
+      report.m_type = this->type();
+      report.m_monitorElementType = pMonitorElement->type();
+      report.m_monitorElementName = pMonitorElement->name();
       report.m_quality = 0.f;
       report.m_message = "";
       report.m_isSuccessful = false;

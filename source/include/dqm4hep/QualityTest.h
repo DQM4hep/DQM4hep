@@ -76,6 +76,8 @@ namespace dqm4hep {
     public:
       std::string           m_name;
       std::string           m_type;
+      std::string           m_monitorElementName;
+      std::string           m_monitorElementType;
       std::string           m_message;
       float                 m_quality;
       bool                  m_isSuccessful;
@@ -102,15 +104,15 @@ namespace dqm4hep {
 
       /** Get the quality test type
        */
-      const std::string &getType() const;
+      const std::string &type() const;
 
       /** Get the quality test name (unique identifier)
        */
-      const std::string &getName() const;
+      const std::string &name() const;
 
       /** Perform the quality test result and fill the quality test report
        */
-      StatusCode run(TObject *pMonitorElement, QualityTestReport &report);
+      void run(MonitorElement *pMonitorElement, QualityTestReport &report);
 
       /** Read the settings from the xml handle
        */
@@ -123,11 +125,11 @@ namespace dqm4hep {
     protected:
       /** Runs a quality test on the given monitor element
        */
-      virtual QualityTestReport run(TObject *pMonitorElement) = 0;
+      virtual StatusCode userRun(MonitorElement *pMonitorElement, QualityTestReport &report) = 0;
 
       /** Whether the quality test can be run on the monitor element
        */
-      virtual bool canRun(TObject *pMonitorElement) const = 0;
+      virtual bool canRun(MonitorElement *pMonitorElement) const = 0;
 
       /**
        *  @brief  Fill basic info in the qtest report.
@@ -135,14 +137,11 @@ namespace dqm4hep {
        *
        *  @param  report the report to fill
        */
-      void fillBasicInfo(QualityTestReport &report) const;
+      void fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const;
 
     private:
       std::string           m_type;
       std::string           m_name;
-
-      // friendship
-      friend class MonitorElementManager; // to create quality test
     };
 
     //-------------------------------------------------------------------------------------------------
