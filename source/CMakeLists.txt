@@ -59,6 +59,8 @@ SET( SRC_FILES ${SRC_FILES} src/Version.cc )
 SET( SRC_FILES ${SRC_FILES} src/MonitorElement.cc )
 SET( SRC_FILES ${SRC_FILES} src/MonitorElementManager.cc )
 
+AUX_SOURCE_DIRECTORY( src/qtest SRC_FILES )
+
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
 
 INSTALL(
