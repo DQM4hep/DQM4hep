@@ -74,8 +74,9 @@ namespace dqm4hep {
       void fromJson(const Json::Value &value);
 
     public:
-      std::string           m_name;
-      std::string           m_type;
+      std::string           m_qualityTestName;
+      std::string           m_qualityTestType;
+      std::string           m_qualityTestDescription;
       std::string           m_monitorElementName;
       std::string           m_monitorElementType;
       std::string           m_message;

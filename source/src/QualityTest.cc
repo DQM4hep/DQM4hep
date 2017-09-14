@@ -34,8 +34,9 @@ namespace dqm4hep {
   namespace core {
 
     QualityTestReport::QualityTestReport() :
-      m_name(""),
-      m_type(""),
+      m_qualityTestName(""),
+      m_qualityTestType(""),
+      m_qualityTestDescription(""),
       m_monitorElementName(""),
       m_monitorElementType(""),
       m_message(""),
@@ -57,8 +58,9 @@ namespace dqm4hep {
 
     QualityTestReport &QualityTestReport::operator=(const QualityTestReport &qreport)
     {
-      m_name = qreport.m_name;
-      m_type = qreport.m_type;
+      m_qualityTestName = qreport.m_qualityTestName;
+      m_qualityTestType = qreport.m_qualityTestType;
+      m_qualityTestDescription = qreport.m_qualityTestDescription;
       m_monitorElementName = qreport.m_monitorElementName;
       m_monitorElementType = qreport.m_monitorElementType;
       m_message = qreport.m_message;
@@ -73,8 +75,9 @@ namespace dqm4hep {
 
     void QualityTestReport::toJson(Json::Value &value) const
     {
-      value["type"] = m_type;
-      value["name"] = m_name;
+      value["qualityTestType"] = m_qualityTestType;
+      value["qualityTestName"] = m_qualityTestName;
+      value["qualityTestDescription"] = m_qualityTestDescription;
       value["monitorElementName"] = m_monitorElementName;
       value["monitorElementType"] = m_monitorElementType;
       value["message"] = m_message;
@@ -87,8 +90,9 @@ namespace dqm4hep {
 
     void QualityTestReport::fromJson(const Json::Value &value)
     {
-      m_type = value.get("type", m_type).asString();
-      m_name = value.get("name", m_name).asString();
+      m_qualityTestType = value.get("qualityTestType", m_qualityTestType).asString();
+      m_qualityTestName = value.get("qualityTestName", m_qualityTestName).asString();
+      m_qualityTestDescription = value.get("qualityTestDescription", m_qualityTestDescription).asString();
       m_monitorElementType = value.get("monitorElementType", m_monitorElementType).asString();
       m_monitorElementName = value.get("monitorElementName", m_monitorElementName).asString();
       m_message = value.get("message", m_message).asString();
