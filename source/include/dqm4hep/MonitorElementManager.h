@@ -39,22 +39,8 @@
 #include "dqm4hep/QualityTest.h"
 
 // -- root headers
-// #include "TH1F.h"
-// #include "TH1I.h"
-// #include "TH1S.h"
-// #include "TH1C.h"
-// #include "TH2F.h"
-// #include "TH2I.h"
-// #include "TH2S.h"
-// #include "TH2C.h"
-// #include "TH3F.h"
-// #include "TH3I.h"
-// #include "TGraph.h"
-// #include "TGraphErrors.h"
-// #include "TProfile.h"
-// #include "TProfile2D.h"
-// #include "TObject.h"
-// #include "TClass.h"
+#include "TObject.h"
+#include "TFile.h"
 
 namespace dqm4hep {
 
@@ -163,10 +149,31 @@ namespace dqm4hep {
       ///////////////////////
 
       /** Add a monitor element from an external source.
-       *  WARNING : The ROOT object is NOT owned by the framework.
-       *  The caller must delete the object on termination
+       *  WARNING : The ROOT object is owned by the framework.
+       *  The caller must NOT delete the object
        */
       StatusCode addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
+      
+      /** Read TObject from file and add it to list. 
+       *  The ROOT TObject is owned by the manager
+       */
+      StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
+      
+      /** Read TObject from file and add it to list. 
+       *  The ROOT TObject is owned by the manager
+       */
+      StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
+      
+      /** Book a monitor element using the ROOT TClass facility. 
+       *  The className is passed to TClass::GetClass() to get the corresponding
+       *  TClass object handler. Note that to allocate the TObject: 
+       *    - the default constructor is used
+       *    - ROOT object is disabled so that object with same can be allocated safely memory leak
+       *  The resulting monitored TObject is owned by the manager
+       */
+      StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
+      
+      StatusCode handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
 
       /** Book a ROOT histogram. The histogram must be valid and must be a built-in ROOT histogram.
        *  The two first arguments of the histogram constructor must the name and the title.

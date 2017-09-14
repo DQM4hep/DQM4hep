@@ -51,6 +51,8 @@
 #include "TROOT.h"
 #include "TClass.h"
 #include "TObject.h"
+#include "TNamed.h"
+#include "TFile.h"
 
 // -- std headers
 #include <stdexcept>
@@ -147,6 +149,54 @@ namespace dqm4hep {
 
     StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement)
     {
+      PtrHandler<TObject> ptrObject(pObject, true);
+      pMonitorElement = nullptr;
+
+      try
+      {
+        pMonitorElement = new MonitorElement(ptrObject);
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
+      }
+      catch(StatusCodeException &e)
+      {
+        if(nullptr != pMonitorElement)
+        {
+          delete pMonitorElement;
+          pMonitorElement = nullptr;
+        }
+        else
+        {
+          // TObject should have been owned by the MonitorElement
+          // but creation failed, we need to delete it manually 
+          delete pObject;
+        }
+
+        return e.getStatusCode();
+      }
+      catch(...)
+      {
+        if(nullptr != pMonitorElement)
+        {
+          delete pMonitorElement;
+          pMonitorElement = nullptr;
+        }
+        else
+        {
+          // TObject should have been owned by the MonitorElement
+          // but creation failed, we need to delete it manually 
+          delete pObject;
+        }
+
+        return STATUS_CODE_FAILURE;
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement)
+    {
       PtrHandler<TObject> ptrObject(pObject, false);
       pMonitorElement = nullptr;
 
@@ -177,6 +227,69 @@ namespace dqm4hep {
       }
 
       return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
+    {
+      pMonitorElement = nullptr;
+      std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
+      return this->readMonitorElement(rootFile.get(), path, name, pMonitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
+    {
+      pMonitorElement = nullptr;
+      
+      Path fullName = path;
+      fullName += name;
+      dqm_debug( "MonitorElementManager::readMonitorElement: looking for element {0}", fullName.getPath() );
+      
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject = pTFile->Get(fullName.getPath().c_str());
+      TObject::SetObjectStat(objectStat);
+      
+      if(!pTObject)
+        return STATUS_CODE_NOT_FOUND;
+      
+      return this->addMonitorElement(path, pTObject, pMonitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
+    {
+      pMonitorElement = nullptr;
+      TClass *pTClass = TClass::GetClass(className.c_str());
+      
+      if(!pTClass->IsTObject())
+      {
+        dqm_error( "MonitorElementManager::bookMonitorElement: ROOT class '{0}' does not inherit from TObject. Can only handle TObject object type", className );
+        return STATUS_CODE_FAILURE;
+      }
+      
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject = (TObject*)pTClass->New();
+      TObject::SetObjectStat(objectStat);
+      
+      if(!pTObject)
+      {
+        dqm_error( "MonitorElementManager::bookMonitorElement: Couldn't allocate ROOT class '{0}' from TClass facility", className );
+        return STATUS_CODE_FAILURE;
+      }
+      
+      if(pTObject->InheritsFrom("TNamed"))
+      {
+        dqm_debug( "Set name of object {0} to '{1}'", (void*) pTObject, name );
+        ((TNamed*)pTObject)->SetName(name.c_str());
+      }
+      
+      return this->addMonitorElement(path, pTObject, pMonitorElement);
     }
 
     //-------------------------------------------------------------------------------------------------
