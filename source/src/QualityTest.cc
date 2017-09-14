@@ -181,8 +181,8 @@ namespace dqm4hep {
 
     void QualityTest::fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const
     {
-      report.m_name = this->name();
-      report.m_type = this->type();
+      report.m_qualityTestName = this->name();
+      report.m_qualityTestType = this->type();
       report.m_monitorElementType = pMonitorElement->type();
       report.m_monitorElementName = pMonitorElement->name();
       report.m_quality = 0.f;
