@@ -39,6 +39,7 @@ namespace dqm4hep {
       m_qualityTestDescription(""),
       m_monitorElementName(""),
       m_monitorElementType(""),
+      m_monitorElementPath(""),
       m_message(""),
       m_quality(0.f),
       m_isSuccessful(true),
@@ -63,6 +64,7 @@ namespace dqm4hep {
       m_qualityTestDescription = qreport.m_qualityTestDescription;
       m_monitorElementName = qreport.m_monitorElementName;
       m_monitorElementType = qreport.m_monitorElementType;
+      m_monitorElementPath = qreport.m_monitorElementPath;
       m_message = qreport.m_message;
       m_quality = qreport.m_quality;
       m_isSuccessful = qreport.m_isSuccessful;
@@ -80,6 +82,7 @@ namespace dqm4hep {
       value["qualityTestDescription"] = m_qualityTestDescription;
       value["monitorElementName"] = m_monitorElementName;
       value["monitorElementType"] = m_monitorElementType;
+      value["monitorElementPath"] = m_monitorElementPath;
       value["message"] = m_message;
       value["quality"] = static_cast<int>(m_quality);
       value["successful"] = m_isSuccessful;
@@ -95,12 +98,208 @@ namespace dqm4hep {
       m_qualityTestDescription = value.get("qualityTestDescription", m_qualityTestDescription).asString();
       m_monitorElementType = value.get("monitorElementType", m_monitorElementType).asString();
       m_monitorElementName = value.get("monitorElementName", m_monitorElementName).asString();
+      m_monitorElementPath = value.get("monitorElementPath", m_monitorElementPath).asString();      
       m_message = value.get("message", m_message).asString();
       m_quality = value.get("quality", m_quality).asFloat();
       m_isSuccessful = value.get("successful", m_isSuccessful).asBool();
       m_extraInfos = value.get("extra", m_extraInfos);
     }
 
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    QReportStorage::QReportStorage() :
+      m_reports()
+    {
+      /* nop */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void QReportStorage::addReport(const QReport &report, bool warnOnReplace)
+    {
+      const std::string &path(report.m_monitorElementPath);
+      const std::string &name(report.m_monitorElementName);
+      const std::string &qtname(report.m_qualityTestName);
+      
+      if(!warnOnReplace)
+      {
+        QReportContainer::key_type key(path, name);
+        m_reports[key][qtname] = report;        
+      }
+      else
+      {
+        QReportContainer::key_type key(path, name);
+        auto iter1 = m_reports.find(key);
+        
+        if(m_reports.end() == iter1)
+          iter1 = m_reports.insert(QReportContainer::value_type(key, QReportMap())).first;
+        
+        auto iter2 = iter1->second.find(qtname);
+        
+        if(iter1->second.end() == iter2)
+        {
+          iter2 = iter1->second.insert(QReportMap::value_type(qtname, report)).first;
+        }
+        else
+        {  
+          dqm_warning( "QReportStorage::addReport: Replacing qreport path '{0}', name '{1}', qtest '{2}'", path, name, qtname );
+          iter2->second = report;
+        }
+      }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode QReportStorage::report(const std::string &path, const std::string &name, const std::string &qualityTestName, QReport &report)
+    {
+      QReportContainer::key_type key(path, name);
+      auto findIter = m_reports.find(key);
+      
+      if(m_reports.end() == findIter)
+        return STATUS_CODE_NOT_FOUND;
+      
+      auto findIter2 = findIter->second.find(qualityTestName);
+      
+      if(findIter->second.end() == findIter2)
+        return STATUS_CODE_NOT_FOUND;
+      
+      report = findIter2->second;
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode QReportStorage::reports(const std::string &path, const std::string &name, QReportMap &reports)
+    {
+      QReportContainer::key_type key(path, name);
+      auto findIter = m_reports.find(key);
+      
+      if(m_reports.end() == findIter)
+        return STATUS_CODE_NOT_FOUND;
+      
+      reports.insert(findIter->second.begin(), findIter->second.end());
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode QReportStorage::reportsQualityHigher(const std::string &path, const std::string &name, float qlimit, QReportMap &reports)
+    {
+      if(0.f < qlimit || qlimit > 1.f)
+        return STATUS_CODE_OUT_OF_RANGE;
+      
+      QReportContainer::key_type key(path, name);
+      auto findIter = m_reports.find(key);
+      
+      if(m_reports.end() == findIter)
+        return STATUS_CODE_NOT_FOUND;
+      
+      for(auto qtest : findIter->second)
+      {
+        if(qtest.second.m_quality >= qlimit)
+        {
+          reports.insert(QReportMap::value_type(qtest.first, qtest.second));
+        }
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode QReportStorage::reportsQualityLower(const std::string &path, const std::string &name, float qlimit, QReportMap &reports)
+    {
+      if(0.f < qlimit || qlimit > 1.f)
+        return STATUS_CODE_OUT_OF_RANGE;
+      
+      QReportContainer::key_type key(path, name);
+      auto findIter = m_reports.find(key);
+      
+      if(m_reports.end() == findIter)
+        return STATUS_CODE_NOT_FOUND;
+      
+      for(auto qtest : findIter->second)
+      {
+        if(qtest.second.m_quality <= qlimit)
+        {
+          reports.insert(QReportMap::value_type(qtest.first, qtest.second));
+        }
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const QReportContainer &QReportStorage::reports()
+    {
+      return m_reports;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode QReportStorage::reportsQualityHigher(float qlimit, QReportContainer &reports)
+    {
+      if(0.f < qlimit || qlimit > 1.f)
+        return STATUS_CODE_OUT_OF_RANGE;
+        
+      for(auto iter1 : m_reports)
+      {
+        QReportMap reportMap;
+        
+        for(auto iter2 : iter1.second)
+        {
+          if(iter2.second.m_quality >= qlimit)
+          {
+            reportMap.insert(QReportMap::value_type(iter2.first, iter2.second));
+          }
+        }
+        
+        if(reportMap.empty())
+          continue;
+        
+        m_reports.insert(QReportContainer::value_type(iter1.first, reportMap));
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode QReportStorage::reportsQualityLower(float qlimit, QReportContainer &reports)
+    {
+      if(0.f < qlimit || qlimit > 1.f)
+        return STATUS_CODE_OUT_OF_RANGE;
+        
+      for(auto iter1 : m_reports)
+      {
+        QReportMap reportMap;
+        
+        for(auto iter2 : iter1.second)
+        {
+          if(iter2.second.m_quality <= qlimit)
+          {
+            reportMap.insert(QReportMap::value_type(iter2.first, iter2.second));
+          }
+        }
+        
+        if(reportMap.empty())
+          continue;
+        
+        m_reports.insert(QReportContainer::value_type(iter1.first, reportMap));
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void QReportStorage::clear()
+    {
+      m_reports.clear();
+    }
+    
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 

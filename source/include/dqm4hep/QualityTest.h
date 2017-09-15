@@ -79,6 +79,7 @@ namespace dqm4hep {
       std::string           m_qualityTestDescription;
       std::string           m_monitorElementName;
       std::string           m_monitorElementType;
+      std::string           m_monitorElementPath;
       std::string           m_message;
       float                 m_quality;
       bool                  m_isSuccessful;
@@ -86,6 +87,64 @@ namespace dqm4hep {
     };
 
     typedef QualityTestReport QReport;
+    typedef std::map<std::string, QReport> QReportMap;
+    typedef std::map< std::pair<std::string, std::string>, QReportMap> QReportContainer;
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    /** QReportStorage class
+     */
+    class QReportStorage
+    {
+    public:
+      /** Constructor
+       */
+      QReportStorage();
+      
+      /** Add report to list. If report already exists, replace it.
+       *  Comparison made from :
+       *    - monitor element name
+       *    - monitor element type
+       *    - quality test name
+       */
+      void addReport(const QReport &report, bool warnOnReplace = true);
+      
+      /** Get a specific report
+       */
+      StatusCode report(const std::string &path, const std::string &name, const std::string &qualityTestName, QReport &report);
+      
+      /** Get all reports of the monitor element
+       */
+      StatusCode reports(const std::string &path, const std::string &name, QReportMap &reports);
+      
+      /** Get all reports of the monitor element with quality higher than a limit (range [0,1])
+       */
+      StatusCode reportsQualityHigher(const std::string &path, const std::string &name, float qlimit, QReportMap &reports);
+      
+      /** Get all reports of the monitor element with quality lower than a limit (range [0,1])
+       */
+      StatusCode reportsQualityLower(const std::string &path, const std::string &name, float qlimit, QReportMap &reports);
+      
+      /** Get all reports
+       */
+      const QReportContainer &reports();
+      
+      /** Get all reports with quality higher than a limit (range [0,1])
+       */
+      StatusCode reportsQualityHigher(float qlimit, QReportContainer &reports);
+      
+      /** Get all reports with quality lower than a limit (range [0,1])
+       */
+      StatusCode reportsQualityLower(float qlimit, QReportContainer &reports);
+      
+      /** Clear all contents
+       */
+      void clear();
+    
+    private:
+      QReportContainer         m_reports;
+    };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
