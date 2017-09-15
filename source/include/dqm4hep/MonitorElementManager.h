@@ -37,62 +37,69 @@
 #include "dqm4hep/MonitorElement.h"
 #include "dqm4hep/CoreTool.h"
 #include "dqm4hep/QualityTest.h"
+#include "dqm4hep/Logging.h"
 
 // -- root headers
 #include "TObject.h"
 #include "TFile.h"
 
+class TH1F; class TH1I; class TH1C; class TH1S;
+class TH2F; class TH2I; class TH2C; class TH2S;
+class TH3F; class TH3I;
+class THStack; class TMultiGraph; class TH2Poly;
+class TProfile; class TProfile2D;
+class TScalarInt; class TScalarFloat; class TScalarShort; class TScalarString;
+class TGraph; class TGraphErrors;  class TGraph2D;
+
 namespace dqm4hep {
 
   namespace core {
+    
+    class TDynamicGraph; // this one comes from DQM4HEP, not ROOT
 
-    // Define the most common allocator helpers for user interface.
-    // Hide them from CINT since C++11 is not supported by ROOT version <= 5
+// Define the most common allocator helpers for user interface.
+// Hide them from CINT since C++11 is not supported by ROOT version <= 5
 // #ifndef __CINT__
 
-    // typedef allocator_helper<TObject, TH1F, const char*, const char *, int, float, float> TH1FAllocator;
-    // typedef allocator_helper<TObject, TH1I, const char*, const char *, int, float, float> TH1IAllocator;
-    // typedef allocator_helper<TObject, TH1C, const char*, const char *, int, float, float> TH1CAllocator;
-    // typedef allocator_helper<TObject, TH1S, const char*, const char *, int, float, float> TH1SAllocator;
-    //
-    // typedef allocator_helper<TObject, TH2F, const char*, const char *, int, float, float, int, float, float> TH2FAllocator;
-    // typedef allocator_helper<TObject, TH2I, const char*, const char *, int, float, float, int, float, float> TH2IAllocator;
-    // typedef allocator_helper<TObject, TH2C, const char*, const char *, int, float, float, int, float, float> TH2CAllocator;
-    // typedef allocator_helper<TObject, TH2S, const char*, const char *, int, float, float, int, float, float> TH2SAllocator;
-    //
-    // typedef allocator_helper<TObject, TH3F, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3FAllocator;
-    // typedef allocator_helper<TObject, TH3I, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3IAllocator;
-    //
-    // typedef allocator_helper<TObject, TProfile, const char*, const char *, int, float, float, float, float> TProfileAllocator;
-    // typedef allocator_helper<TObject, TProfile2D, const char*, const char *, int, float, float, int, float, float, float, float> TProfile2DAllocator;
-    //
-    // typedef allocator_helper<TObject, TScalarInt, int> TScalarIntAllocator;
-    // typedef allocator_helper<TObject, TScalarFloat, float> TScalarFloatAllocator;
-    // typedef allocator_helper<TObject, TScalarShort, short> TScalarShortAllocator;
-    // typedef allocator_helper<TObject, TScalarString, std::string> TScalarStringAllocator;
-    //
-    // typedef allocator_helper<TObject, TGraph> TGraphAllocator;
-    // typedef allocator_helper<TObject, TGraphErrors> TGraphErrorsAllocator;
-    //
-    // typedef allocator_helper<TObject, TDynamicGraph> TDynamicGraphAllocator;
+    typedef allocator_helper<TObject, TH1F, const char*, const char *, int, float, float> TH1FAllocator;
+    typedef allocator_helper<TObject, TH1I, const char*, const char *, int, float, float> TH1IAllocator;
+    typedef allocator_helper<TObject, TH1C, const char*, const char *, int, float, float> TH1CAllocator;
+    typedef allocator_helper<TObject, TH1S, const char*, const char *, int, float, float> TH1SAllocator;
+    
+    typedef allocator_helper<TObject, TH2F, const char*, const char *, int, float, float, int, float, float> TH2FAllocator;
+    typedef allocator_helper<TObject, TH2I, const char*, const char *, int, float, float, int, float, float> TH2IAllocator;
+    typedef allocator_helper<TObject, TH2C, const char*, const char *, int, float, float, int, float, float> TH2CAllocator;
+    typedef allocator_helper<TObject, TH2S, const char*, const char *, int, float, float, int, float, float> TH2SAllocator;
+    
+    typedef allocator_helper<TObject, TH3F, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3FAllocator;
+    typedef allocator_helper<TObject, TH3I, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3IAllocator;
+    
+    typedef allocator_helper<TObject, THStack, const char*, const char *> THStackAllocator;
+    typedef allocator_helper<TObject, TH2Poly, const char*, const char *, double, double, double, double> TH2PolyAllocator;
+    
+    typedef allocator_helper<TObject, TProfile, const char*, const char *, int, float, float, float, float> TProfileAllocator;
+    typedef allocator_helper<TObject, TProfile2D, const char*, const char *, int, float, float, int, float, float, float, float> TProfile2DAllocator;
+    
+    typedef allocator_helper<TObject, TScalarInt, int> TScalarIntAllocator;
+    typedef allocator_helper<TObject, TScalarFloat, float> TScalarFloatAllocator;
+    typedef allocator_helper<TObject, TScalarShort, short> TScalarShortAllocator;
+    typedef allocator_helper<TObject, TScalarString, std::string> TScalarStringAllocator;
+    
+    typedef allocator_helper<TObject, TGraph> TGraphAllocator;
+    typedef allocator_helper<TObject, TGraphErrors> TGraphErrorsAllocator;
+    typedef allocator_helper<TObject, TGraph2D> TGraph2DAllocator;
+    typedef allocator_helper<TObject, TMultiGraph> TMultiGraphAllocator;
+    
+    typedef allocator_helper<TObject, TDynamicGraph> TDynamicGraphAllocator;
 
 // #endif
-
-    // class Storage;
-    // class Archiver;
-    // class MonitorElement;
-    // class QualityTest;
-    // class QualityTestFactory;
 
     /** MonitorElementManager class
      */
     class MonitorElementManager
     {
-      // friend class Archiver;
-
       typedef std::map<const std::string, QualityTest *> QualityTestMap;
       typedef std::map<const std::string, const QualityTestFactory *> QualityTestFactoryMap;
-
     public:
       /** Constructor
        */
@@ -173,7 +180,19 @@ namespace dqm4hep {
        */
       StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
       
+      /** Add a monitor element from an external source.
+      *  WARNING : The ROOT object is NOT owned by the framework.
+      *  The caller must delete the object on termination
+       */
       StatusCode handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
+      
+      /** Book a monitor element. The objectType must inherit TObject and have a ROOT dictionnary.
+       *  
+       */
+      template <typename ObjectType, typename ...Args>
+      StatusCode bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
+          allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
+        
 
       /** Book a ROOT histogram. The histogram must be valid and must be a built-in ROOT histogram.
        *  The two first arguments of the histogram constructor must the name and the title.
@@ -227,29 +246,14 @@ namespace dqm4hep {
       /** Get the monitor element in the given directory (result by ptr reference)
        */
       StatusCode getMonitorElement(const std::string &dirName, const std::string &name, MonitorElement *&monitorElement) const;
-      //
-      // /** Get the monitor element in the current directory.
-      //  *  The element is directly returned without any ptr check
-      //  */
-      // MonitorElementPtr getMonitorElement(const std::string &monitorElementName) const;
-      //
-      // /** Get the monitor element in the given directory.
-      //  *  The element is directly returned without any ptr check
-      //  */
-      // MonitorElementPtr getMonitorElement(const std::string &dirName, const std::string &monitorElementName) const;
-
 
       ////////////////////////
       // DELETION INTERFACE //
       ////////////////////////
 
-      // /** Delete the monitor element (by element ptr)
-      //  */
-      // StatusCode deleteMonitorElement(MonitorElementPtr &monitorElement);
-      //
-      // /** Delete the monitor element (by element name)
-      //  */
-      // StatusCode deleteMonitorElement(const std::string &dirName, const std::string &monitorElement);
+      /** Remove the monitor element
+       */
+      StatusCode removeMonitorElement(const std::string &path, const std::string &name);
 
     public:
 
@@ -257,15 +261,32 @@ namespace dqm4hep {
       // QUALITY TEST INTERFACE //
       ////////////////////////////
 
-      // /** Register a new quality test.
-      //  *  Ownership transfered to the manager.
-      //  */
-      // StatusCode registerQualityTestFactory(const std::string &qualityTestType, const QualityTestFactory *const pQualityTestFactory);
-      //
-      // /** Create a quality test from the xml element.
-      //  *  The xml element must contain the attribute 'type' and 'name'
-      //  */
-      // StatusCode createQualityTest(TiXmlElement *const pXmlElement);
+      /** Create a quality test from the xml element.
+       *  The xml element must contain the attribute 'type' and 'name'
+       */
+      StatusCode createQualityTest(TiXmlElement *const pXmlElement);
+      
+      /** Add a (already created) quality test to the monitor element
+       */
+      StatusCode addQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName);
+      
+      /** Remove a quality test from the monitor element
+       */
+      StatusCode removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName);
+      
+      /**
+       */
+      StatusCode runQualityTests(QReportStorage &reports);
+      
+      /**
+       */
+      StatusCode runQualityTests(const std::string &path, const std::string &name, QReportStorage &reports);
+      
+      /**
+       */
+      StatusCode runQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName, QReportStorage &reports);
+      
+      
       //
       // /** Add a quality test to a given monitor element.
       //  *
@@ -339,10 +360,14 @@ namespace dqm4hep {
       /** Get the monitor element storage
        */
       const Storage<MonitorElement> &getStorage() const;
+      
+      typedef std::map<MonitorElement*, QualityTestMap>    MonitorElementToQTestMap;
 
       Storage<MonitorElement>        m_storage;
       QualityTestFactoryMap          m_qualityTestFactoryMap;
       QualityTestMap                 m_qualityTestMap;
+      MonitorElementToQTestMap       m_monitorElementToQTestMap;
+      
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -394,6 +419,31 @@ namespace dqm4hep {
     //
     // //-------------------------------------------------------------------------------------------------
     //
+    
+    template <typename ObjectType, typename ...Args>
+    StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
+        allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
+    {
+      pMonitorElement = nullptr;
+      
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject = allocator.create(args...);
+      TObject::SetObjectStat(objectStat);
+      
+      if(!pTObject)
+      {
+        dqm_warning( "Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_name(), path, name );
+        return STATUS_CODE_FAILURE;
+      }
+        
+      if(pTObject->InheritsFrom("TNamed"))
+        ((TNamed*)pTObject)->SetName(name.c_str());
+
+      return this->addMonitorElement(path, pTObject, pMonitorElement);
+    }
+    
+    
     // template <typename ObjectType, typename ... Args>
     // inline StatusCode MonitorElementManager::bookObject(MonitorElementPtr &monitorElement, MonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
     //     const std::string &moduleName, allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)

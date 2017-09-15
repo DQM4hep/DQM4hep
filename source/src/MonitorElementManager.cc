@@ -31,7 +31,6 @@
 #include "dqm4hep/Storage.h"
 #include "dqm4hep/Directory.h"
 #include "dqm4hep/CoreTool.h"
-#include "dqm4hep/Plugin.h"
 #include "dqm4hep/PluginManager.h"
 #include "dqm4hep/QualityTest.h"
 
@@ -64,6 +63,21 @@ namespace dqm4hep {
     MonitorElementManager::MonitorElementManager() :
       m_storage()
     {
+      PluginManager *pPluginMgr(PluginManager::instance());
+      StringVector factoryNames(pPluginMgr->pluginNamesMatchingType<QualityTestFactory>());
+      
+      for(auto factoryName : factoryNames)
+      {
+        QualityTestFactory *pFactory(pPluginMgr->create<QualityTestFactory>(factoryName));
+        
+        if(nullptr == pFactory)
+        {
+          dqm_error( "MonitorElementManager::MonitorElementManager: Couldn't create qtest factory '{0}'. This is normally not possible !", factoryName );
+          continue;
+        }
+        
+        m_qualityTestFactoryMap.insert(QualityTestFactoryMap::value_type(factoryName, pFactory));
+      }
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -294,682 +308,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::bookObject(MonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
-    //     const std::string &moduleName, const std::string &className)
-    // {
-    //   monitorElement = NULL;
-    //
-    //   if(name.empty() || CoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
-    //     return STATUS_CODE_INVALID_PARAMETER;
-    //
-    //   try
-    //   {
-    //     TClass *pClass = gROOT->GetClass(className.c_str());
-    //
-    //     if(!pClass)
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     TObject *pObject = reinterpret_cast<TObject *>(pClass->New());
-    //
-    //     if(!pObject)
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     // create the monitor element
-    //     monitorElement = std::make_shared<MonitorElement>(pObject, USER_DEFINED_ELEMENT_TYPE, name, title, moduleName);
-    //
-    //     if(NULL == monitorElement)
-    //       throw StatusCodeException(STATUS_CODE_FAILURE);
-    //
-    //     // add it to the monitor element list of the module
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, monitorElement));
-    //   }
-    //   catch(StatusCodeException &exception)
-    //   {
-    //     LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
-    //     return exception.getStatusCode();
-    //   }
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
-    //     const std::string &name, MonitorElementPtr &monitorElement)
-    // {
-    //   if(NULL == pXmlElement)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   std::string type;
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
-    //
-    //   MonitorElementType monitorElementType = stringToMonitorElementRootType(type);
-    //
-    //   if(NO_ELEMENT_TYPE == monitorElementType || monitorElementType >= NUMBER_OF_DQM_MONITOR_ELEMENT_TYPES)
-    //     return STATUS_CODE_INVALID_PARAMETER;
-    //
-    //   // empty path means current directory
-    //   std::string path;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "path", path));
-    //
-    //   // create dir
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, this->mkdir(path));
-    //
-    //   // not mandatory
-    //   std::string title;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "title", title));
-    //
-    //   // not mandatory
-    //   std::string description;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "description", description));
-    //
-    //   // not mandatory
-    //   std::string drawOption;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "drawOption", drawOption));
-    //
-    //   // not mandatory
-    //   std::string resetPolicyStr;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "resetPolicy", resetPolicyStr));
-    //
-    //   // for scalar values
-    //   std::string value;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "value", value));
-    //
-    //   // switch necessary because of different xml parsing per monitor element type
-    //   // Could be replaced at most by a polymorphic impl ... in future
-    //   switch(monitorElementType)
-    //   {
-    //   case INT_ELEMENT_TYPE :
-    //   {
-    //
-    //     int intValue;
-    //
-    //     if(!DQM4HEP::stringToType(value, intValue))
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, INT_ELEMENT_TYPE, path, name, title, moduleName, TScalarIntAllocator(), intValue));
-    //
-    //     break;
-    //   }
-    //   case REAL_ELEMENT_TYPE :
-    //   {
-    //     float floatValue;
-    //
-    //     if(!DQM4HEP::stringToType(value, floatValue))
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, REAL_ELEMENT_TYPE, path, name, title, moduleName, TScalarFloatAllocator(), floatValue));
-    //
-    //     break;
-    //   }
-    //   case SHORT_ELEMENT_TYPE :
-    //   {
-    //
-    //     short shortValue;
-    //
-    //     if(!DQM4HEP::stringToType(value, shortValue))
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, SHORT_ELEMENT_TYPE, path, name, title, moduleName, TScalarShortAllocator(), shortValue));
-    //
-    //     break;
-    //   }
-    //   case STRING_ELEMENT_TYPE :
-    //   {
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, STRING_ELEMENT_TYPE, path, name, title, moduleName, TScalarStringAllocator(), value));
-    //
-    //     break;
-    //   }
-    //   case INT_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1IAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case REAL_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1FAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case SHORT_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, SHORT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1SAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case CHAR_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, CHAR_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1CAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case INT_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case REAL_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case CHAR_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, CHAR_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2CAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case SHORT_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, SHORT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2SAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case INT_HISTOGRAM_3D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     int nBinsZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsZ", nBinsZ, &PositiveValidator<int>::validate ));
-    //     float minZ, maxZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minZ", minZ));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
-    //
-    //     break;
-    //   }
-    //   case REAL_HISTOGRAM_3D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     int nBinsZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsZ", nBinsZ, &PositiveValidator<int>::validate ));
-    //     float minZ, maxZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minZ", minZ));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
-    //
-    //     break;
-    //   }
-    //   case PROFILE_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxX, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, PROFILE_1D_ELEMENT_TYPE, path, name, title, moduleName, TProfileAllocator(), nBinsX, minX, maxX, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case PROFILE_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     float minZ, maxZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minZ", minZ));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minZ) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, PROFILE_2D_ELEMENT_TYPE, path, name, title, moduleName, TProfile2DAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, minZ, maxZ));
-    //
-    //     break;
-    //   }
-    //   case USER_DEFINED_ELEMENT_TYPE :
-    //   {
-    //     std::string rootClass;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "ROOTClass", rootClass));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, path, name, title, moduleName, rootClass));
-    //
-    //     break;
-    //   }
-    //   default:
-    //     return STATUS_CODE_FAILURE;
-    //   }
-    //
-    //   monitorElement->setDrawOption(drawOption);
-    //   monitorElement->setDescription(description);
-    //   monitorElement->setResetPolicy(stringToResetPolicy(resetPolicyStr));
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
-    //     MonitorElementPtr &monitorElement, const ParameterMap &parameters)
-    // {
-    //   if(NULL == pXmlElement)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   std::string name;
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
-    //   DQM4HEP::replace(name, parameters);
-    //
-    //   std::string type;
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
-    //
-    //   MonitorElementType monitorElementType = stringToMonitorElementRootType(type);
-    //
-    //   if(NO_ELEMENT_TYPE == monitorElementType || monitorElementType >= NUMBER_OF_DQM_MONITOR_ELEMENT_TYPES)
-    //     return STATUS_CODE_INVALID_PARAMETER;
-    //
-    //   // empty path means current directory
-    //   std::string path;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "path", path));
-    //   DQM4HEP::replace(path, parameters);
-    //
-    //   // create dir
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_ALREADY_PRESENT, !=, this->mkdir(path));
-    //
-    //   // not mandatory
-    //   std::string title;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "title", title));
-    //   DQM4HEP::replace(title, parameters);
-    //
-    //   // not mandatory
-    //   std::string description;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "description", description));
-    //   DQM4HEP::replace(description, parameters);
-    //
-    //   // not mandatory
-    //   std::string drawOption;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "drawOption", drawOption));
-    //
-    //   // not mandatory
-    //   std::string resetPolicyStr;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "resetPolicy", resetPolicyStr));
-    //
-    //   // for scalar values
-    //   std::string value;
-    //   RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "value", value));
-    //
-    //   // switch necessary because of different xml parsing per monitor element type
-    //   // Could be replaced at most by a polymorphic impl ... in future
-    //   switch(monitorElementType)
-    //   {
-    //   case INT_ELEMENT_TYPE :
-    //   {
-    //
-    //     int intValue;
-    //
-    //     if(!DQM4HEP::stringToType(value, intValue))
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, INT_ELEMENT_TYPE, path, name, title, moduleName, TScalarIntAllocator(), intValue));
-    //
-    //     break;
-    //   }
-    //   case REAL_ELEMENT_TYPE :
-    //   {
-    //     float floatValue;
-    //
-    //     if(!DQM4HEP::stringToType(value, floatValue))
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, REAL_ELEMENT_TYPE, path, name, title, moduleName, TScalarFloatAllocator(), floatValue));
-    //
-    //     break;
-    //   }
-    //   case SHORT_ELEMENT_TYPE :
-    //   {
-    //
-    //     short shortValue;
-    //
-    //     if(!DQM4HEP::stringToType(value, shortValue))
-    //       return STATUS_CODE_FAILURE;
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, SHORT_ELEMENT_TYPE, path, name, title, moduleName, TScalarShortAllocator(), shortValue));
-    //
-    //     break;
-    //   }
-    //   case STRING_ELEMENT_TYPE :
-    //   {
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, STRING_ELEMENT_TYPE, path, name, title, moduleName, TScalarStringAllocator(), value));
-    //
-    //     break;
-    //   }
-    //   case INT_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1IAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case REAL_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1FAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case SHORT_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, SHORT_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1SAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case CHAR_HISTOGRAM_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBins;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBins", nBins, &PositiveValidator<int>::validate ));
-    //     float min, max;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "min", min));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "max", max, BiggerThanValidator<float>(min) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, CHAR_HISTOGRAM_1D_ELEMENT_TYPE, path, name, title, moduleName, TH1CAllocator(), nBins, min, max));
-    //
-    //     break;
-    //   }
-    //   case INT_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case REAL_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case CHAR_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, CHAR_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2CAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case SHORT_HISTOGRAM_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, SHORT_HISTOGRAM_2D_ELEMENT_TYPE, path, name, title, moduleName, TH2SAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case INT_HISTOGRAM_3D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     int nBinsZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsZ", nBinsZ, &PositiveValidator<int>::validate ));
-    //     float minZ, maxZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minZ", minZ));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, INT_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3IAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
-    //
-    //     break;
-    //   }
-    //   case REAL_HISTOGRAM_3D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     int nBinsZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsZ", nBinsZ, &PositiveValidator<int>::validate ));
-    //     float minZ, maxZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minZ", minZ));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, REAL_HISTOGRAM_3D_ELEMENT_TYPE, path, name, title, moduleName, TH3FAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ));
-    //
-    //     break;
-    //   }
-    //   case PROFILE_1D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxX, BiggerThanValidator<float>(minY) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, PROFILE_1D_ELEMENT_TYPE, path, name, title, moduleName, TProfileAllocator(), nBinsX, minX, maxX, minY, maxY));
-    //
-    //     break;
-    //   }
-    //   case PROFILE_2D_ELEMENT_TYPE :
-    //   {
-    //     int nBinsX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsX", nBinsX, &PositiveValidator<int>::validate ));
-    //     float minX, maxX;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minX", minX));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxX", maxX, BiggerThanValidator<float>(minX) ));
-    //
-    //     int nBinsY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "nBinsY", nBinsY, &PositiveValidator<int>::validate ));
-    //     float minY, maxY;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minY", minY));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxY", maxY, BiggerThanValidator<float>(minY) ));
-    //
-    //     float minZ, maxZ;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "minZ", minZ));
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "maxZ", maxZ, BiggerThanValidator<float>(minZ) ));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookHistogram(monitorElement, PROFILE_2D_ELEMENT_TYPE, path, name, title, moduleName, TProfile2DAllocator(), nBinsX, minX, maxX, nBinsY, minY, maxY, minZ, maxZ));
-    //
-    //     break;
-    //   }
-    //   case USER_DEFINED_ELEMENT_TYPE :
-    //   {
-    //     std::string rootClass;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "ROOTClass", rootClass));
-    //
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->bookObject(monitorElement, path, name, title, moduleName, rootClass));
-    //
-    //     break;
-    //   }
-    //   default:
-    //     return STATUS_CODE_FAILURE;
-    //   }
-    //
-    //   monitorElement->setDrawOption(drawOption);
-    //   monitorElement->setDescription(description);
-    //   monitorElement->setResetPolicy(stringToResetPolicy(resetPolicyStr));
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
 
     void MonitorElementManager::getMonitorElements(std::vector<MonitorElement*> &monitorElements) const
     {
@@ -1009,89 +347,116 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    // StatusCode MonitorElementManager::deleteMonitorElement(MonitorElementPtr &monitorElement)
-    // {
-    //   if(NULL == monitorElement)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   const std::string fullPath = monitorElement->getPath().getPath();
-    //   const std::string name = monitorElement->getName();
-    //
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(fullPath, name));
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::deleteMonitorElement(const std::string &dirName, const std::string &monitorElementName)
-    // {
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->removeMonitorElement(dirName, monitorElementName));
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
+    StatusCode MonitorElementManager::removeMonitorElement(const std::string &path, const std::string &name)
+    {
+      MonitorElement *pMonitorElement(nullptr);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
+      
+      // look in qtest map first
+      auto iter = m_monitorElementToQTestMap.find(pMonitorElement);
+      
+      if(m_monitorElementToQTestMap.end() != iter)
+        m_monitorElementToQTestMap.erase(iter);
+
+      // remove the element form storage. Call delete operator 
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.remove(path, [&name](const MonitorElement *pMonitorElement){
+        return (pMonitorElement->name() == name); 
+      }));
+    
+      return STATUS_CODE_SUCCESS;
+    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    // StatusCode MonitorElementManager::registerQualityTestFactory(const std::string &qualityTestFactoryName, const QualityTestFactory *const pQualityTestFactory)
-    // {
-    //   if(NULL == pQualityTestFactory)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   QualityTestFactoryMap::iterator findIter = m_qualityTestFactoryMap.find(qualityTestFactoryName);
-    //
-    //   if(m_qualityTestFactoryMap.end() != findIter)
-    //   {
-    //     delete pQualityTestFactory;
-    //     return STATUS_CODE_ALREADY_PRESENT;
-    //   }
-    //
-    //   m_qualityTestFactoryMap[qualityTestFactoryName] = pQualityTestFactory;
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::createQualityTest(TiXmlElement *const pXmlElement)
-    // {
-    //   std::string name;
-    //   std::string type;
-    //
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
-    //
-    //   QualityTestMap::iterator findIter = m_qualityTestMap.find(name);
-    //
-    //   if(m_qualityTestMap.end() != findIter)
-    //     return STATUS_CODE_ALREADY_PRESENT;
-    //
-    //   QualityTestFactoryMap::iterator findFactoryIter = m_qualityTestFactoryMap.find(type);
-    //
-    //   if(m_qualityTestFactoryMap.end() == findFactoryIter)
-    //     return STATUS_CODE_NOT_FOUND;
-    //
-    //   QualityTest *const pQualityTest = findFactoryIter->second->createQualityTest(name);
-    //   pQualityTest->m_type = type;
-    //
-    //   try
-    //   {
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->readSettings(TiXmlHandle(pXmlElement)));
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->init());
-    //
-    //     if(!m_qualityTestMap.insert(QualityTestMap::value_type(name, pQualityTest)).second)
-    //       throw StatusCodeException(STATUS_CODE_FAILURE);
-    //   }
-    //   catch(const StatusCodeException &exception)
-    //   {
-    //     delete pQualityTest;
-    //     return exception.getStatusCode();
-    //   }
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
+    StatusCode MonitorElementManager::createQualityTest(TiXmlElement *const pXmlElement)
+    {
+      std::string name, type;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
+    
+      QualityTestMap::iterator findIter = m_qualityTestMap.find(name);
+    
+      if(m_qualityTestMap.end() != findIter)
+        return STATUS_CODE_ALREADY_PRESENT;
+    
+      QualityTestFactoryMap::iterator findFactoryIter = m_qualityTestFactoryMap.find(type);
+    
+      if(m_qualityTestFactoryMap.end() == findFactoryIter)
+        return STATUS_CODE_NOT_FOUND;
+    
+      QualityTest *const pQualityTest = findFactoryIter->second->createQualityTest(name);
+    
+      try
+      {
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->readSettings(TiXmlHandle(pXmlElement)));
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->init());
+    
+        if(!m_qualityTestMap.insert(QualityTestMap::value_type(name, pQualityTest)).second)
+          throw StatusCodeException(STATUS_CODE_FAILURE);
+      }
+      catch(const StatusCodeException &exception)
+      {
+        delete pQualityTest;
+        return exception.getStatusCode();
+      }
+    
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    
+    //-------------------------------------------------------------------------------------------------
+  
+    StatusCode MonitorElementManager::addQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
+    {
+      QualityTestMap::iterator findIter = m_qualityTestMap.find(qualityTestName);
+    
+      if(m_qualityTestMap.end() == findIter)
+        return STATUS_CODE_NOT_FOUND;
+      
+      MonitorElement *pMonitorElement = m_storage.findObject(path, [&name](const MonitorElement *pMonitorElement){
+          return (pMonitorElement->name() == name);
+      });
+      
+      if(!pMonitorElement)
+        return STATUS_CODE_NOT_FOUND;
+      
+      auto findIter2 = m_monitorElementToQTestMap.find(pMonitorElement);
+      
+      if(m_monitorElementToQTestMap.end() == findIter2)
+        findIter2 = m_monitorElementToQTestMap.insert(MonitorElementToQTestMap::value_type(pMonitorElement, QualityTestMap())).first;
+        
+      auto findIter3 = findIter2->second.find(qualityTestName);
+      
+      if(findIter3 != findIter2->second.end())
+      {
+        dqm_warning( "QTest '{0}' already added to monitor element : path '{1}', name '{2}'", qualityTestName, path, name );
+        return STATUS_CODE_ALREADY_PRESENT;
+      }
+      
+      findIter2->second.insert(QualityTestMap::value_type(qualityTestName, findIter->second));
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    
+    StatusCode removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
+    {
+      MonitorElement *pMonitorElement(nullptr);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
+      
+      // look in qtest map first
+      auto iter = m_monitorElementToQTestMap.find(pMonitorElement);
+      
+      if(m_monitorElementToQTestMap.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+      
+      // TODO finish qtest interface
+      // TODO move fillBasicInfo() from QTest class to here
+      // TODO add me path to qreport on qtest run() call (not done in current fillBasicInfo() call)
+      return STATUS_CODE_SUCCESS;
+    }
+    
     // //-------------------------------------------------------------------------------------------------
     //
     // StatusCode MonitorElementManager::addQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName) const
