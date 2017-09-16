@@ -65,17 +65,17 @@ namespace dqm4hep {
     {
       PluginManager *pPluginMgr(PluginManager::instance());
       StringVector factoryNames(pPluginMgr->pluginNamesMatchingType<QualityTestFactory>());
-      
+
       for(auto factoryName : factoryNames)
       {
         QualityTestFactory *pFactory(pPluginMgr->create<QualityTestFactory>(factoryName));
-        
+
         if(nullptr == pFactory)
         {
           dqm_error( "MonitorElementManager::MonitorElementManager: Couldn't create qtest factory '{0}'. This is normally not possible !", factoryName );
           continue;
         }
-        
+
         m_qualityTestFactoryMap.insert(QualityTestFactoryMap::value_type(factoryName, pFactory));
       }
     }
@@ -170,6 +170,7 @@ namespace dqm4hep {
       {
         pMonitorElement = new MonitorElement(ptrObject);
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
+        pMonitorElement->setPath(path);
       }
       catch(StatusCodeException &e)
       {
@@ -181,7 +182,7 @@ namespace dqm4hep {
         else
         {
           // TObject should have been owned by the MonitorElement
-          // but creation failed, we need to delete it manually 
+          // but creation failed, we need to delete it manually
           delete pObject;
         }
 
@@ -197,7 +198,7 @@ namespace dqm4hep {
         else
         {
           // TObject should have been owned by the MonitorElement
-          // but creation failed, we need to delete it manually 
+          // but creation failed, we need to delete it manually
           delete pObject;
         }
 
@@ -206,9 +207,9 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement)
     {
       PtrHandler<TObject> ptrObject(pObject, false);
@@ -218,6 +219,7 @@ namespace dqm4hep {
       {
         pMonitorElement = new MonitorElement(ptrObject);
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
+        pMonitorElement->setPath(path);
       }
       catch(StatusCodeException &e)
       {
@@ -242,67 +244,67 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
     {
       pMonitorElement = nullptr;
       std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
       return this->readMonitorElement(rootFile.get(), path, name, pMonitorElement);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
     {
       pMonitorElement = nullptr;
-      
+
       Path fullName = path;
       fullName += name;
       dqm_debug( "MonitorElementManager::readMonitorElement: looking for element {0}", fullName.getPath() );
-      
+
       const bool objectStat(TObject::GetObjectStat());
       TObject::SetObjectStat(false);
       TObject *pTObject = pTFile->Get(fullName.getPath().c_str());
       TObject::SetObjectStat(objectStat);
-      
+
       if(!pTObject)
         return STATUS_CODE_NOT_FOUND;
-      
+
       return this->addMonitorElement(path, pTObject, pMonitorElement);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
     {
       pMonitorElement = nullptr;
       TClass *pTClass = TClass::GetClass(className.c_str());
-      
+
       if(!pTClass->IsTObject())
       {
         dqm_error( "MonitorElementManager::bookMonitorElement: ROOT class '{0}' does not inherit from TObject. Can only handle TObject object type", className );
         return STATUS_CODE_FAILURE;
       }
-      
+
       const bool objectStat(TObject::GetObjectStat());
       TObject::SetObjectStat(false);
       TObject *pTObject = (TObject*)pTClass->New();
       TObject::SetObjectStat(objectStat);
-      
+
       if(!pTObject)
       {
         dqm_error( "MonitorElementManager::bookMonitorElement: Couldn't allocate ROOT class '{0}' from TClass facility", className );
         return STATUS_CODE_FAILURE;
       }
-      
+
       if(pTObject->InheritsFrom("TNamed"))
       {
         dqm_debug( "Set name of object {0} to '{1}'", (void*) pTObject, name );
         ((TNamed*)pTObject)->SetName(name.c_str());
       }
-      
+
       return this->addMonitorElement(path, pTObject, pMonitorElement);
     }
 
@@ -351,18 +353,18 @@ namespace dqm4hep {
     {
       MonitorElement *pMonitorElement(nullptr);
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-      
+
       // look in qtest map first
       auto iter = m_monitorElementToQTestMap.find(pMonitorElement);
-      
+
       if(m_monitorElementToQTestMap.end() != iter)
         m_monitorElementToQTestMap.erase(iter);
 
-      // remove the element form storage. Call delete operator 
+      // remove the element form storage. Call delete operator
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.remove(path, [&name](const MonitorElement *pMonitorElement){
-        return (pMonitorElement->name() == name); 
+        return (pMonitorElement->name() == name);
       }));
-    
+
       return STATUS_CODE_SUCCESS;
     }
 
@@ -374,24 +376,24 @@ namespace dqm4hep {
       std::string name, type;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
-    
+
       QualityTestMap::iterator findIter = m_qualityTestMap.find(name);
-    
+
       if(m_qualityTestMap.end() != findIter)
         return STATUS_CODE_ALREADY_PRESENT;
-    
+
       QualityTestFactoryMap::iterator findFactoryIter = m_qualityTestFactoryMap.find(type);
-    
+
       if(m_qualityTestFactoryMap.end() == findFactoryIter)
         return STATUS_CODE_NOT_FOUND;
-    
+
       QualityTest *const pQualityTest = findFactoryIter->second->createQualityTest(name);
-    
+
       try
       {
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->readSettings(TiXmlHandle(pXmlElement)));
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->init());
-    
+
         if(!m_qualityTestMap.insert(QualityTestMap::value_type(name, pQualityTest)).second)
           throw StatusCodeException(STATUS_CODE_FAILURE);
       }
@@ -400,63 +402,67 @@ namespace dqm4hep {
         delete pQualityTest;
         return exception.getStatusCode();
       }
-    
+
       return STATUS_CODE_SUCCESS;
     }
-    
-    
+
+
     //-------------------------------------------------------------------------------------------------
-  
+
     StatusCode MonitorElementManager::addQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
     {
       QualityTestMap::iterator findIter = m_qualityTestMap.find(qualityTestName);
-    
+
       if(m_qualityTestMap.end() == findIter)
         return STATUS_CODE_NOT_FOUND;
-      
+
       MonitorElement *pMonitorElement = m_storage.findObject(path, [&name](const MonitorElement *pMonitorElement){
           return (pMonitorElement->name() == name);
       });
-      
+
       if(!pMonitorElement)
         return STATUS_CODE_NOT_FOUND;
-      
+
       auto findIter2 = m_monitorElementToQTestMap.find(pMonitorElement);
-      
+
       if(m_monitorElementToQTestMap.end() == findIter2)
         findIter2 = m_monitorElementToQTestMap.insert(MonitorElementToQTestMap::value_type(pMonitorElement, QualityTestMap())).first;
-        
+
       auto findIter3 = findIter2->second.find(qualityTestName);
-      
+
       if(findIter3 != findIter2->second.end())
       {
         dqm_warning( "QTest '{0}' already added to monitor element : path '{1}', name '{2}'", qualityTestName, path, name );
         return STATUS_CODE_ALREADY_PRESENT;
       }
-      
+
       findIter2->second.insert(QualityTestMap::value_type(qualityTestName, findIter->second));
 
       return STATUS_CODE_SUCCESS;
     }
-    
-    
-    StatusCode removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
+
+
+    StatusCode MonitorElementManager::removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
     {
       MonitorElement *pMonitorElement(nullptr);
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-      
+
       // look in qtest map first
       auto iter = m_monitorElementToQTestMap.find(pMonitorElement);
-      
+
       if(m_monitorElementToQTestMap.end() == iter)
         return STATUS_CODE_NOT_FOUND;
-      
-      // TODO finish qtest interface
-      // TODO move fillBasicInfo() from QTest class to here
-      // TODO add me path to qreport on qtest run() call (not done in current fillBasicInfo() call)
+
+      auto iter2 = iter->second.find(qualityTestName);
+
+      if(iter->second.end() == iter2)
+        return STATUS_CODE_NOT_FOUND;
+
+      iter->second.erase(iter2);
+
       return STATUS_CODE_SUCCESS;
     }
-    
+
     // //-------------------------------------------------------------------------------------------------
     //
     // StatusCode MonitorElementManager::addQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName) const
