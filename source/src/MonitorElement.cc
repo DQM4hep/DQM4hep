@@ -40,158 +40,173 @@ ClassImp(dqm4hep::core::TDynamicGraph)
 namespace dqm4hep {
 
   namespace core {
-    
-    MonitorElement::MonitorElement() : 
-      m_monitorObject(), 
+
+    MonitorElement::MonitorElement() :
+      m_path(""),
+      m_monitorObject(),
       m_referenceObject()
     {
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     MonitorElement::MonitorElement(TObject *pMonitorObject) :
       m_monitorObject(pMonitorObject),
-      m_referenceObject() 
+      m_referenceObject()
     {
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     MonitorElement::MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject) :
-      m_monitorObject(pMonitorObject), 
+      m_monitorObject(pMonitorObject),
       m_referenceObject(pReferenceObject)
     {
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    MonitorElement::MonitorElement(const PtrHandler<TObject> &monitorObject) : 
-      m_monitorObject(monitorObject.ptr(), false), 
-      m_referenceObject() 
-    {  
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    MonitorElement::MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject) : 
-      m_monitorObject(monitorObject.ptr(), false), 
-      m_referenceObject(referenceObject.ptr(), false) 
+
+    MonitorElement::MonitorElement(const PtrHandler<TObject> &monitorObject) :
+      m_monitorObject(monitorObject.ptr(), false),
+      m_referenceObject()
     {
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    std::string MonitorElement::type() const 
-    { 
-      return (m_monitorObject ? m_monitorObject->ClassName() : ""); 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    std::string MonitorElement::name() const 
-    { 
-      return (m_monitorObject ? m_monitorObject->GetName() : ""); 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    std::string MonitorElement::title() const 
-    { 
-      return (m_monitorObject ? m_monitorObject->GetTitle() : ""); 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    bool MonitorElement::hasObject() const 
-    { 
-      return (m_monitorObject != nullptr); 
+
+    MonitorElement::MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject) :
+      m_monitorObject(monitorObject.ptr(), false),
+      m_referenceObject(referenceObject.ptr(), false)
+    {
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool MonitorElement::hasReference() const 
-    { 
-      return (m_referenceObject != nullptr); 
+    std::string MonitorElement::type() const
+    {
+      return (m_monitorObject ? m_monitorObject->ClassName() : "");
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    TObject *MonitorElement::object() 
-    { 
-      return m_monitorObject ? m_monitorObject.ptr() : nullptr; 
+
+    std::string MonitorElement::name() const
+    {
+      return (m_monitorObject ? m_monitorObject->GetName() : "");
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    const TObject *MonitorElement::object() const 
-    { 
-      return m_monitorObject ? m_monitorObject.ptr() : nullptr; 
+
+    std::string MonitorElement::title() const
+    {
+      return (m_monitorObject ? m_monitorObject->GetTitle() : "");
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    TObject *MonitorElement::reference() 
-    { 
-      return m_referenceObject ? m_referenceObject.ptr() : nullptr; 
+
+    std::string MonitorElement::path() const
+    {
+      return m_path;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    const TObject *MonitorElement::reference() const 
-    { 
-      return m_referenceObject ? m_referenceObject.ptr() : nullptr; 
+
+    void MonitorElement::setPath(const std::string &path)
+    {
+      m_path = path;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void MonitorElement::setMonitorObject(TObject *pMonitorObject) 
-    { 
-      m_monitorObject.clear(); 
-      m_monitorObject.set(pMonitorObject); 
+
+    bool MonitorElement::hasObject() const
+    {
+      return (m_monitorObject != nullptr);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void MonitorElement::setMonitorObject(const PtrHandler<TObject> &monitorObject) 
-    { 
-      m_monitorObject.clear(); 
+
+    bool MonitorElement::hasReference() const
+    {
+      return (m_referenceObject != nullptr);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    TObject *MonitorElement::object()
+    {
+      return m_monitorObject ? m_monitorObject.ptr() : nullptr;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const TObject *MonitorElement::object() const
+    {
+      return m_monitorObject ? m_monitorObject.ptr() : nullptr;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    TObject *MonitorElement::reference()
+    {
+      return m_referenceObject ? m_referenceObject.ptr() : nullptr;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const TObject *MonitorElement::reference() const
+    {
+      return m_referenceObject ? m_referenceObject.ptr() : nullptr;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void MonitorElement::setMonitorObject(TObject *pMonitorObject)
+    {
+      m_monitorObject.clear();
+      m_monitorObject.set(pMonitorObject);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void MonitorElement::setMonitorObject(const PtrHandler<TObject> &monitorObject)
+    {
+      m_monitorObject.clear();
       m_monitorObject.set(monitorObject.ptr(), false);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void MonitorElement::setReferenceObject(TObject *pReferenceObject) 
-    { 
-      m_referenceObject.clear(); 
-      m_referenceObject.set(pReferenceObject); 
+
+    void MonitorElement::setReferenceObject(TObject *pReferenceObject)
+    {
+      m_referenceObject.clear();
+      m_referenceObject.set(pReferenceObject);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     void MonitorElement::setReferenceObject(const PtrHandler<TObject> &referenceObject)
     {
-      m_referenceObject.clear(); 
-      m_referenceObject.set(referenceObject.ptr(), false); 
+      m_referenceObject.clear();
+      m_referenceObject.set(referenceObject.ptr(), false);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void MonitorElement::set(TObject *pMonitorObject, TObject *pReferenceObject) 
-    { 
-      m_monitorObject.clear(); 
-      m_monitorObject.set(pMonitorObject);
-      m_referenceObject.clear(); 
-      m_referenceObject.set(pReferenceObject); 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    void MonitorElement::set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject) 
+
+    void MonitorElement::set(TObject *pMonitorObject, TObject *pReferenceObject)
     {
-      m_monitorObject.clear(); 
+      m_monitorObject.clear();
+      m_monitorObject.set(pMonitorObject);
+      m_referenceObject.clear();
+      m_referenceObject.set(pReferenceObject);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void MonitorElement::set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject)
+    {
+      m_monitorObject.clear();
       m_monitorObject.set(monitorObject.ptr(), false);
-      m_referenceObject.clear(); 
-      m_referenceObject.set(referenceObject.ptr(), false); 
+      m_referenceObject.clear();
+      m_referenceObject.set(referenceObject.ptr(), false);
     }
 
     //-------------------------------------------------------------------------------------------------

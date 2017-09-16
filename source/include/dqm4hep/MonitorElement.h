@@ -46,7 +46,7 @@
 namespace dqm4hep {
 
   namespace core {
-    
+
     template <typename T>
     class PtrHandler
     {
@@ -57,13 +57,13 @@ namespace dqm4hep {
       void clear() { if(m_owner && nullptr != m_ptr) delete m_ptr; m_ptr = nullptr; }
       T *ptr() const { return m_ptr; }
       bool owner() const { return m_owner; }
-      
+
       const T *operator->() const { return m_ptr; }
       T *operator->() { return m_ptr; }
       const T &operator*() const { return *m_ptr; }
       T &operator*() { return *m_ptr; }
       operator bool() const { return m_ptr != nullptr; }
-      
+
       template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
       template <typename S> friend bool operator ==(const S *lhs, const PtrHandler<S> &rhs);
       template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const S *rhs);
@@ -79,22 +79,24 @@ namespace dqm4hep {
       T        *m_ptr;
       bool      m_owner;
     };
-    
+
     template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) { return lhs.m_ptr == rhs.m_ptr; }
     template <typename T> inline bool operator ==(const T *lhs, const PtrHandler<T> &rhs) { return lhs == rhs.m_ptr; }
     template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const T *rhs) { return lhs.m_ptr == rhs; }
     template <typename T> inline bool operator !=(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) { return lhs.m_ptr != rhs.m_ptr; }
     template <typename T> inline bool operator !=(const T *lhs, const PtrHandler<T> &rhs) { return lhs != rhs.m_ptr; }
     template <typename T> inline bool operator !=(const PtrHandler<T> &lhs, const T *rhs) { return lhs.m_ptr != rhs; }
-    
+
     template <typename S> inline bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs) { return lhs == rhs.m_ptr; }
     template <typename S> inline bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs) { return lhs.m_ptr == rhs; }
     template <typename S> inline bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs) { return lhs != rhs.m_ptr; }
     template <typename S> inline bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs) { return lhs.m_ptr != rhs; }
 
+    class MonitorElementManager;
+    
     // TODO document the MonitorElement class
     // TODO Moved the PtrHandler class to a separate file
-    // 
+    //
     /**
      *  @brief  MonitorElement class
      *
@@ -102,78 +104,86 @@ namespace dqm4hep {
      */
     class MonitorElement
     {
+      friend class MonitorElementManager;
     public:
-      
+
       MonitorElement();
 
       MonitorElement(TObject *pMonitorObject);
-      
+
       MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject);
-      
+
       MonitorElement(const PtrHandler<TObject> &monitorObject);
-      
+
       MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
-      
+
       std::string type() const;
-      
+
       std::string name() const;
-      
+
       std::string title() const;
-      
+
+      std::string path() const;
+
       bool hasObject() const;
-      
+
       bool hasReference() const;
-      
+
       TObject *object();
-      
+
       const TObject *object() const;
-      
+
       TObject *reference();
-      
+
       const TObject *reference() const;
-      
+
       template <typename T>
       T *objectTo();
-      
+
       template <typename T>
       T *referenceTo();
-      
+
       void setMonitorObject(TObject *pMonitorObject);
-      
+
       void setMonitorObject(const PtrHandler<TObject> &monitorObject);
-      
+
       void setReferenceObject(TObject *pReferenceObject);
 
       void setReferenceObject(const PtrHandler<TObject> &referenceObject);
-      
+
       void set(TObject *pMonitorObject, TObject *pReferenceObject);
-      
+
       void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
 
     private:
+
+      void setPath(const std::string &path);
+
+    private:
+      std::string             m_path;
       PtrHandler<TObject>     m_monitorObject;
       PtrHandler<TObject>     m_referenceObject;
     };
-    
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline T *MonitorElement::objectTo()
     {
-      T *objCast = (T *) this->object(); // use old C cast for ROOT objects ...     
+      T *objCast = (T *) this->object(); // use old C cast for ROOT objects ...
       return objCast ? objCast : nullptr;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline T *MonitorElement::referenceTo()
     {
-      T *objCast = (T *) this->reference(); // use old C cast for ROOT objects ...     
+      T *objCast = (T *) this->reference(); // use old C cast for ROOT objects ...
       return objCast ? objCast : nullptr;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
