@@ -86,10 +86,6 @@ namespace dqm4hep {
       Json::Value           m_extraInfos;
     };
 
-    typedef QualityTestReport QReport;
-    typedef std::map<std::string, QReport> QReportMap;
-    typedef std::map< std::pair<std::string, std::string>, QReportMap> QReportContainer;
-
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
@@ -101,7 +97,7 @@ namespace dqm4hep {
       /** Constructor
        */
       QReportStorage();
-      
+
       /** Add report to list. If report already exists, replace it.
        *  Comparison made from :
        *    - monitor element name
@@ -109,39 +105,47 @@ namespace dqm4hep {
        *    - quality test name
        */
       void addReport(const QReport &report, bool warnOnReplace = true);
-      
+
+      /** Add reports to list. If reports already exists, replace it.
+       *  Comparison made from :
+       *    - monitor element name
+       *    - monitor element type
+       *    - quality test name
+       */
+      void addReports(const QReportMap &reports, bool warnOnReplace = true);
+
       /** Get a specific report
        */
       StatusCode report(const std::string &path, const std::string &name, const std::string &qualityTestName, QReport &report);
-      
+
       /** Get all reports of the monitor element
        */
       StatusCode reports(const std::string &path, const std::string &name, QReportMap &reports);
-      
+
       /** Get all reports of the monitor element with quality higher than a limit (range [0,1])
        */
       StatusCode reportsQualityHigher(const std::string &path, const std::string &name, float qlimit, QReportMap &reports);
-      
+
       /** Get all reports of the monitor element with quality lower than a limit (range [0,1])
        */
       StatusCode reportsQualityLower(const std::string &path, const std::string &name, float qlimit, QReportMap &reports);
-      
+
       /** Get all reports
        */
       const QReportContainer &reports();
-      
+
       /** Get all reports with quality higher than a limit (range [0,1])
        */
       StatusCode reportsQualityHigher(float qlimit, QReportContainer &reports);
-      
+
       /** Get all reports with quality lower than a limit (range [0,1])
        */
       StatusCode reportsQualityLower(float qlimit, QReportContainer &reports);
-      
+
       /** Clear all contents
        */
       void clear();
-    
+
     private:
       QReportContainer         m_reports;
     };
@@ -169,7 +173,7 @@ namespace dqm4hep {
       /** Get the quality test name (unique identifier)
        */
       const std::string &name() const;
-      
+
       /** Get the quality test description
        */
       const std::string &description() const;
@@ -199,11 +203,11 @@ namespace dqm4hep {
        *  Must be called at start of qtest run
        */
       void fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const;
-      
+
     private:
       std::string           m_type;           ///< Quality test type (usually class name)
       std::string           m_name;           ///< Quality test name
-      
+
     protected:
       std::string           m_description;    ///< Quality test description
     };
@@ -227,7 +231,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    
+
     inline StatusCode QualityTest::init()
     {
       return STATUS_CODE_SUCCESS;
