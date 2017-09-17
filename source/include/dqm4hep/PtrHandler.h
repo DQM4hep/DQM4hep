@@ -78,7 +78,7 @@ namespace dqm4hep {
 
       /** Reference operator
        */
-      const T &operator*();
+      const T &operator*() const;
 
       /** Reference operator
        */
@@ -86,7 +86,7 @@ namespace dqm4hep {
 
       /** Boolean operator
        */
-      operator bool();
+      operator bool() const;
 
     private:
       T        *m_ptr;           ///< The handled pointer
@@ -108,7 +108,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline PtrHandler<T>::PtrHandler(T *ptr = nullptr, bool owner) :
+    inline PtrHandler<T>::PtrHandler(T *ptr, bool owner) :
       m_ptr(ptr),
       m_owner(owner)
     {
@@ -196,7 +196,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline operator PtrHandler<T>::bool() const
+    inline PtrHandler<T>::operator bool() const
     {
       return m_ptr != nullptr;
     }
