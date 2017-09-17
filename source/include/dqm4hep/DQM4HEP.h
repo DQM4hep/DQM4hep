@@ -101,7 +101,7 @@ namespace dqm4hep {
     class Streamer;
     class EventStreamer;
     class QualityTest;
-    class QualityTestResult;
+    class QualityTestReport;
     class StatisticsService;
     class Path;
     struct Stats;
@@ -157,17 +157,20 @@ namespace dqm4hep {
     typedef uint64_t              dqm_uint;
 
     // basic typedefs
-    typedef std::vector<int>            IntVector;
-    typedef std::vector<unsigned int>   UIntVector;
-    typedef std::vector<float>          FloatVector;
-    typedef std::vector<double>         DoubleVector;
-    typedef std::vector<std::string>    StringVector;
-    typedef std::set<std::string>       StringSet;
-    typedef std::map<std::string, std::string> ParameterMap;
+    typedef std::vector<int>                                    IntVector;
+    typedef std::vector<unsigned int>                           UIntVector;
+    typedef std::vector<float>                                  FloatVector;
+    typedef std::vector<double>                                 DoubleVector;
+    typedef std::vector<std::string>                            StringVector;
+    typedef std::set<std::string>                               StringSet;
+    typedef std::map<std::string, std::string>                  ParameterMap;
+    typedef std::pair<std::string, std::string>                 StringPair;
 
     typedef std::vector<MonitorElement*>                        MonitorElementList;
     typedef std::map<const std::string, MonitorElement*>        MonitorElementMap;
-    typedef std::map<std::string, QualityTestResult>            QualityTestResultMap;
+    typedef QualityTestReport                                   QReport;
+    typedef std::map<std::string, QReport>                      QReportMap;
+    typedef std::map<StringPair, QReportMap>                    QReportContainer;
     typedef std::map<std::string, QualityTest*>                 QualityTestMap;
     typedef std::vector<Stats>                                  StatsList;
 
