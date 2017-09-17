@@ -54,45 +54,39 @@ class TGraph; class TGraphErrors;  class TGraph2D;
 namespace dqm4hep {
 
   namespace core {
-    
-    class TDynamicGraph; // this one comes from DQM4HEP, not ROOT
 
-// Define the most common allocator helpers for user interface.
-// Hide them from CINT since C++11 is not supported by ROOT version <= 5
-// #ifndef __CINT__
+    class TDynamicGraph; // this one comes from DQM4HEP, not ROOT
 
     typedef allocator_helper<TObject, TH1F, const char*, const char *, int, float, float> TH1FAllocator;
     typedef allocator_helper<TObject, TH1I, const char*, const char *, int, float, float> TH1IAllocator;
     typedef allocator_helper<TObject, TH1C, const char*, const char *, int, float, float> TH1CAllocator;
     typedef allocator_helper<TObject, TH1S, const char*, const char *, int, float, float> TH1SAllocator;
-    
+
     typedef allocator_helper<TObject, TH2F, const char*, const char *, int, float, float, int, float, float> TH2FAllocator;
     typedef allocator_helper<TObject, TH2I, const char*, const char *, int, float, float, int, float, float> TH2IAllocator;
     typedef allocator_helper<TObject, TH2C, const char*, const char *, int, float, float, int, float, float> TH2CAllocator;
     typedef allocator_helper<TObject, TH2S, const char*, const char *, int, float, float, int, float, float> TH2SAllocator;
-    
+
     typedef allocator_helper<TObject, TH3F, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3FAllocator;
     typedef allocator_helper<TObject, TH3I, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3IAllocator;
-    
+
     typedef allocator_helper<TObject, THStack, const char*, const char *> THStackAllocator;
     typedef allocator_helper<TObject, TH2Poly, const char*, const char *, double, double, double, double> TH2PolyAllocator;
-    
+
     typedef allocator_helper<TObject, TProfile, const char*, const char *, int, float, float, float, float> TProfileAllocator;
     typedef allocator_helper<TObject, TProfile2D, const char*, const char *, int, float, float, int, float, float, float, float> TProfile2DAllocator;
-    
+
     typedef allocator_helper<TObject, TScalarInt, int> TScalarIntAllocator;
     typedef allocator_helper<TObject, TScalarFloat, float> TScalarFloatAllocator;
     typedef allocator_helper<TObject, TScalarShort, short> TScalarShortAllocator;
     typedef allocator_helper<TObject, TScalarString, std::string> TScalarStringAllocator;
-    
+
     typedef allocator_helper<TObject, TGraph> TGraphAllocator;
     typedef allocator_helper<TObject, TGraphErrors> TGraphErrorsAllocator;
     typedef allocator_helper<TObject, TGraph2D> TGraph2DAllocator;
     typedef allocator_helper<TObject, TMultiGraph> TMultiGraphAllocator;
-    
-    typedef allocator_helper<TObject, TDynamicGraph> TDynamicGraphAllocator;
 
-// #endif
+    typedef allocator_helper<TObject, TDynamicGraph> TDynamicGraphAllocator;
 
     /** MonitorElementManager class
      */
@@ -151,83 +145,47 @@ namespace dqm4hep {
 
     public:
 
-      ///////////////////////
-      // BOOKING INTERFACE //
-      ///////////////////////
+      ///////////////////////////////
+      // MONITOR ELEMENT INTERFACE //
+      ///////////////////////////////
 
       /** Add a monitor element from an external source.
        *  WARNING : The ROOT object is owned by the framework.
        *  The caller must NOT delete the object
        */
       StatusCode addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
-      
-      /** Read TObject from file and add it to list. 
+
+      /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
       StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
-      
-      /** Read TObject from file and add it to list. 
+
+      /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
       StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
-      
-      /** Book a monitor element using the ROOT TClass facility. 
+
+      /** Book a monitor element using the ROOT TClass facility.
        *  The className is passed to TClass::GetClass() to get the corresponding
-       *  TClass object handler. Note that to allocate the TObject: 
+       *  TClass object handler. Note that to allocate the TObject:
        *    - the default constructor is used
        *    - ROOT object is disabled so that object with same can be allocated safely memory leak
        *  The resulting monitored TObject is owned by the manager
        */
       StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
-      
+
       /** Add a monitor element from an external source.
       *  WARNING : The ROOT object is NOT owned by the framework.
       *  The caller must delete the object on termination
        */
       StatusCode handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
-      
+
       /** Book a monitor element. The objectType must inherit TObject and have a ROOT dictionnary.
-       *  
+       *
        */
       template <typename ObjectType, typename ...Args>
       StatusCode bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
           allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
-        
-
-      /** Book a ROOT histogram. The histogram must be valid and must be a built-in ROOT histogram.
-       *  The two first arguments of the histogram constructor must the name and the title.
-       *  Such a function should be used in Module implementation by passing 'this' as first argument
-       */
-      // template <typename HistoType, typename ... Args>
-      // StatusCode bookHistogram(MonitorElementPtr &monitorElement, MonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
-      //     const std::string &moduleName, allocator_helper<TObject, HistoType, const char *, const char *, Args...> allocator, Args ...args);
-      //
-      // /** Book a generic ROOT TObject.
-      //  *  Optionnal constructor may be passed using the variadic template arguments (Args...  args)
-      //  *  Such a function should be used in Module implementation by passing 'this' as first argument
-      //  */
-      // template <typename ObjectType, typename ... Args>
-      // StatusCode bookObject(MonitorElementPtr &monitorElement, MonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
-      //     const std::string &moduleName, allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
-      //
-      // /** Book a monitor element from the xml element (DEPRECATED, use version with parameters map)
-      //  */
-      // StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
-      //     const std::string &meName, MonitorElementPtr &monitorElement);
-      //
-      // /** Book a monitor element from the xml element
-      //  */
-      // StatusCode bookMonitorElement(const TiXmlElement *const pXmlElement, const std::string &moduleName,
-      //     MonitorElementPtr &monitorElement, const ParameterMap &parameters);
-      //
-      // /** Book a generic TObject. The TObject must be valid and must be a built-in ROOT object or
-      //  *  a user defined class inheriting from TObject and providing a dictionary.
-      //  *  Such a function should be used in Module implementation by passing 'this' as first argument
-      //  */
-      // StatusCode bookObject(MonitorElementPtr &monitorElement, const std::string &directory, const std::string &name, const std::string &title,
-      //     const std::string &moduleName, const std::string &className);
-
-
 
     public:
 
@@ -265,228 +223,84 @@ namespace dqm4hep {
        *  The xml element must contain the attribute 'type' and 'name'
        */
       StatusCode createQualityTest(TiXmlElement *const pXmlElement);
-      
+
       /** Add a (already created) quality test to the monitor element
        */
       StatusCode addQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName);
-      
+
       /** Remove a quality test from the monitor element
        */
       StatusCode removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName);
-      
+
       /**
        */
       StatusCode runQualityTests(QReportStorage &reports);
-      
+
       /**
        */
       StatusCode runQualityTests(const std::string &path, const std::string &name, QReportStorage &reports);
-      
+
       /**
        */
       StatusCode runQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName, QReportStorage &reports);
-      
-      
-      //
-      // /** Add a quality test to a given monitor element.
-      //  *
-      //  *  The quality test must have been registered in the framework before
-      //  *  calling this method.
-      //  */
-      // StatusCode addQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName) const;
-      //
-      // /** Remove a specific quality test attached to this monitor element
-      //  */
-      // StatusCode removeQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName);
-      //
-      // /** Remove all quality tests attached to this monitor element
-      //  */
-      // StatusCode removeQualityTests(MonitorElementPtr &monitorElement);
-      //
-      // /** Run all the quality test attached to this monitor element
-      //  */
-      // StatusCode runQualityTests(MonitorElementPtr &monitorElement);
-      //
-      // /** Run all the quality test attached to these monitor elements
-      //  */
-      // StatusCode runQualityTests(const MonitorElementPtrList &monitorElementList);
-      //
-      // /** Run a specific quality test attached to this monitor element
-      //  */
-      // StatusCode runQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName);
-      //
-      // /** Run all the quality test of all the monitor elements
-      //  */
-      // StatusCode runQualityTests();
-      //
-      // /** Get all the quality test results
-      //  */
-      // StatusCode getQualityTestResults(QualityTestResultMap &results) const;
-
-    private:
-
-      // /**
-      //  */
-      // StatusCode getQualityTest(const std::string &qualityTestName, QualityTest *&pQualityTest) const;
-      //
-      // /**
-      //  */
-      // StatusCode runQualityTests(const MonitorElementList &monitorElementList);
-
-      // 	/**
-      // 	 */
-      // 	StatusCode createQualityTest(const std::string &type, const std::string &name, QualityTest *&pQualityTest) const;
-
-    public:
-
-      ////////////////////////
-      // UITILITY FUNCTIONS //
-      ////////////////////////
-
-      /** Reset all the monitor elements that have the given reset policy
-       */
-      // StatusCode resetMonitorElements(ResetPolicy policy) const;
-      //
-      // /** Reset all the monitor elements of this module
-      //  */
-      // StatusCode resetMonitorElements() const;
-      //
-      // /** Get the monitor element list for which the flag "setToPublish" is true
-      //  */
-      // StatusCode getMonitorElementListToPublish(MonitorElementPtrList &monitorElementList) const;
 
     private:
 
       /** Get the monitor element storage
        */
       const Storage<MonitorElement> &getStorage() const;
-      
+
       typedef std::map<MonitorElement*, QualityTestMap>    MonitorElementToQTestMap;
 
       Storage<MonitorElement>        m_storage;
       QualityTestFactoryMap          m_qualityTestFactoryMap;
       QualityTestMap                 m_qualityTestMap;
       MonitorElementToQTestMap       m_monitorElementToQTestMap;
-      
+
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    // template <typename HistoType, typename ... Args>
-    // inline StatusCode MonitorElementManager::bookHistogram(MonitorElementPtr &monitorElement, MonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
-    //     const std::string &moduleName, allocator_helper<TObject, HistoType, const char *, const char *, Args...> allocator, Args ...args)
-    // {
-    //   monitorElement = NULL;
-    //   TObject *pObject = NULL;
-    //
-    //   if(name.empty() || CoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
-    //     return STATUS_CODE_INVALID_PARAMETER;
-    //
-    //   try
-    //   {
-    //     Directory *pDirectory = NULL;
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(directory, pDirectory));
-    //     std::string objectName = (pDirectory->getFullPathName() + name).getPath();
-    //
-    //     // create the histogram first
-    //     pObject = allocator.create(objectName.c_str(), title.c_str(), args...);
-    //
-    //     if(NULL == pObject)
-    //       throw StatusCodeException(STATUS_CODE_FAILURE);
-    //
-    //     // and the monitor element
-    //     monitorElement = std::make_shared<MonitorElement>(pObject, type, name, title, moduleName);
-    //
-    //     if(NULL == monitorElement)
-    //       throw StatusCodeException(STATUS_CODE_FAILURE);
-    //
-    //     // add it to the monitor element list of the module
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, monitorElement));
-    //   }
-    //   catch(StatusCodeException &exception)
-    //   {
-    //     LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
-    //
-    //     if(NULL != pObject)
-    //       delete pObject;
-    //
-    //     return exception.getStatusCode();
-    //   }
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    
     template <typename ObjectType, typename ...Args>
     StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
         allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
     {
       pMonitorElement = nullptr;
-      
+
+      if(!ObjectType::Class()->HasDictionary())
+      {
+        dqm_error( "Couldn't book object of type '{0}', because this class has no dictionnary!", ObjectType::Class_name() );
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+
+      if(ObjectType::Class()->IsForeign())
+      {
+        dqm_error( "Couldn't book object of type '{0}', because this class is foreign (does not have a Streamer method))!", ObjectType::Class_name() );
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+
+      if(!ObjectType::Class()->InheritsFrom("TNamed"))
+      {
+        dqm_error( "Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call SetName())!", ObjectType::Class_name() );
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+
       const bool objectStat(TObject::GetObjectStat());
       TObject::SetObjectStat(false);
       TObject *pTObject = allocator.create(args...);
       TObject::SetObjectStat(objectStat);
-      
+
       if(!pTObject)
       {
         dqm_warning( "Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_name(), path, name );
         return STATUS_CODE_FAILURE;
       }
-        
-      if(pTObject->InheritsFrom("TNamed"))
-        ((TNamed*)pTObject)->SetName(name.c_str());
+
+      ((TNamed*)pTObject)->SetName(name.c_str());
 
       return this->addMonitorElement(path, pTObject, pMonitorElement);
     }
-    
-    
-    // template <typename ObjectType, typename ... Args>
-    // inline StatusCode MonitorElementManager::bookObject(MonitorElementPtr &monitorElement, MonitorElementType type, const std::string &directory, const std::string &name, const std::string &title,
-    //     const std::string &moduleName, allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
-    // {
-    //   monitorElement = NULL;
-    //   TObject *pObject = NULL;
-    //
-    //   if(name.empty() || CoreTool::containsSpecialCharacters(name) || name.find("/") != std::string::npos)
-    //     return STATUS_CODE_INVALID_PARAMETER;
-    //
-    //   try
-    //   {
-    //     Directory *pDirectory = NULL;
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->findDir(directory, pDirectory));
-    //     std::string objectName = (pDirectory->getFullPathName() + name).getPath();
-    //
-    //     // create the histogram first
-    //     pObject = allocator.create(args...);
-    //
-    //     if(NULL == pObject)
-    //       throw StatusCodeException(STATUS_CODE_FAILURE);
-    //
-    //     // and the monitor element
-    //     monitorElement = std::make_shared<MonitorElement>(pObject, type, name, title, moduleName);
-    //
-    //     if(NULL == monitorElement)
-    //       throw StatusCodeException(STATUS_CODE_FAILURE);
-    //
-    //     // add it to the monitor element list of the module
-    //     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_pMonitorElementStorage->addMonitorElement(directory, monitorElement));
-    //   }
-    //   catch(StatusCodeException &exception)
-    //   {
-    //     LOG4CXX_ERROR( dqmMainLogger , "Couldn't create monitor element '" << name << "'. Status code exception caught : " << exception.toString() );
-    //
-    //     if(NULL != pObject)
-    //       delete pObject;
-    //
-    //     return exception.getStatusCode();
-    //   }
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
 
   }
 

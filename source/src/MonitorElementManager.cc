@@ -168,6 +168,24 @@ namespace dqm4hep {
 
       try
       {
+        if(!pObject->Class()->HasDictionary())
+        {
+          dqm_error( "Couldn't book object of type '{0}', because this class has no dictionnary!", pObject->ClassName() );
+          throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+        }
+
+        if(pObject->Class()->IsForeign())
+        {
+          dqm_error( "Couldn't book object of type '{0}', because this class is foreign ( does not have a Streamer method))!", pObject->ClassName() );
+          throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+        }
+
+        if(!pObject->Class()->InheritsFrom("TNamed"))
+        {
+          dqm_error( "Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call SetName())!", pObject->ClassName() );
+          throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+        }
+
         pMonitorElement = new MonitorElement(ptrObject);
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
         pMonitorElement->setPath(path);
@@ -416,144 +434,76 @@ namespace dqm4hep {
       if(m_qualityTestMap.end() == findIter)
         return STATUS_CODE_NOT_FOUND;
 
-      MonitorElement *pMonitorElement = m_storage.findObject(path, [&name](const MonitorElement *pMonitorElement){
-          return (pMonitorElement->name() == name);
-      });
-
-      if(!pMonitorElement)
-        return STATUS_CODE_NOT_FOUND;
-
-      auto findIter2 = m_monitorElementToQTestMap.find(pMonitorElement);
-
-      if(m_monitorElementToQTestMap.end() == findIter2)
-        findIter2 = m_monitorElementToQTestMap.insert(MonitorElementToQTestMap::value_type(pMonitorElement, QualityTestMap())).first;
-
-      auto findIter3 = findIter2->second.find(qualityTestName);
-
-      if(findIter3 != findIter2->second.end())
-      {
-        dqm_warning( "QTest '{0}' already added to monitor element : path '{1}', name '{2}'", qualityTestName, path, name );
-        return STATUS_CODE_ALREADY_PRESENT;
-      }
-
-      findIter2->second.insert(QualityTestMap::value_type(qualityTestName, findIter->second));
+      MonitorElement *pMonitorElement(nullptr);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->addQualityTest(findIter->second));
 
       return STATUS_CODE_SUCCESS;
     }
 
+    //-------------------------------------------------------------------------------------------------
 
     StatusCode MonitorElementManager::removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
     {
       MonitorElement *pMonitorElement(nullptr);
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-
-      // look in qtest map first
-      auto iter = m_monitorElementToQTestMap.find(pMonitorElement);
-
-      if(m_monitorElementToQTestMap.end() == iter)
-        return STATUS_CODE_NOT_FOUND;
-
-      auto iter2 = iter->second.find(qualityTestName);
-
-      if(iter->second.end() == iter2)
-        return STATUS_CODE_NOT_FOUND;
-
-      iter->second.erase(iter2);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->removeQualityTest(qualityTestName));
 
       return STATUS_CODE_SUCCESS;
     }
 
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::addQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName) const
-    // {
-    //   if(NULL == monitorElement)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   QualityTest *pQualityTest = NULL;
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getQualityTest(qualityTestName, pQualityTest));
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->addQualityTest(pQualityTest));
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::runQualityTests(MonitorElementPtr &monitorElement)
-    // {
-    //   if(NULL == monitorElement)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   return monitorElement->runQualityTests();
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::runQualityTest(MonitorElementPtr &monitorElement, const std::string &qualityTestName)
-    // {
-    //   if(NULL == monitorElement)
-    //     return STATUS_CODE_INVALID_PTR;
-    //
-    //   return monitorElement->runQualityTest(qualityTestName);
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::runQualityTests()
-    // {
-    //   MonitorElementPtrList monitorElementList;
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements(monitorElementList));
-    //
-    //   return this->runQualityTests(monitorElementList);
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::runQualityTests(const MonitorElementPtrList &monitorElementList)
-    // {
-    //   for(MonitorElementPtrList::const_iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
-    //       endIter != iter ; ++iter)
-    //   {
-    //     MonitorElementPtr monitorElement = *iter;
-    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->runQualityTests(monitorElement));
-    //   }
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::getQualityTest(const std::string &qualityTestName, QualityTest *&pQualityTest) const
-    // {
-    //   pQualityTest = NULL;
-    //
-    //   // look for an existing quality test in the map
-    //   QualityTestMap::const_iterator qTestFindIter = m_qualityTestMap.find(qualityTestName);
-    //
-    //   if(m_qualityTestMap.end() == qTestFindIter)
-    //     return STATUS_CODE_NOT_FOUND;
-    //
-    //   pQualityTest = qTestFindIter->second;
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
-    //
-    // //-------------------------------------------------------------------------------------------------
-    //
-    // StatusCode MonitorElementManager::getQualityTestResults(QualityTestResultMap &results) const
-    // {
-    //   MonitorElementPtrList monitorElementList;
-    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getAllMonitorElements(monitorElementList));
-    //
-    //   for( MonitorElementPtrList::const_iterator iter = monitorElementList.begin(), endIter = monitorElementList.end() ;
-    //       endIter != iter ; ++iter )
-    //   {
-    //     const QualityTestResultMap &meResults( (*iter)->getQualityTestResults() );
-    //     results.insert( meResults.begin(), meResults.end() );
-    //   }
-    //
-    //   return STATUS_CODE_SUCCESS;
-    // }
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElementManager::runQualityTests(QReportStorage &reports)
+    {
+      try
+      {
+        m_storage.iterate([&reports](const Directory<MonitorElement> *, MonitorElement *pMonitorElement){
+          QReportMap reportMap;
+          THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->runQualityTests(reportMap));
+          reports.addReports(reportMap);
+          return true;
+        });
+      }
+      catch(StatusCodeException &exception)
+      {
+        dqm_error( "Failed to process qtests: {0}", exception.toString() );
+        return exception.getStatusCode();
+      }
+      catch(...)
+      {
+        dqm_error( "Failed to process qtests: Unknown exception" );
+        return STATUS_CODE_FAILURE;
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElementManager::runQualityTests(const std::string &path, const std::string &name, QReportStorage &reports)
+    {
+      MonitorElement *pMonitorElement(nullptr);
+      QReportMap reportMap;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->runQualityTests(reportMap));
+      reports.addReports(reportMap);
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElementManager::runQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName, QReportStorage &reports)
+    {
+      MonitorElement *pMonitorElement(nullptr);
+      QReport report;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->runQualityTest(qualityTestName, report));
+      reports.addReport(report);
+
+      return STATUS_CODE_SUCCESS;
+    }
 
     //-------------------------------------------------------------------------------------------------
 
