@@ -28,6 +28,7 @@
 // -- dqm4hep headers
 #include "dqm4hep/MonitorElement.h"
 #include "dqm4hep/Logging.h"
+#include "dqm4hep/QualityTest.h"
 
 // -- root headers
 #include "TH1.h"
@@ -207,6 +208,74 @@ namespace dqm4hep {
       m_monitorObject.set(monitorObject.ptr(), false);
       m_referenceObject.clear();
       m_referenceObject.set(referenceObject.ptr(), false);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElement::addQualityTest(QualityTest *pQualityTest)
+    {
+      const std::string &name(pQualityTest->name());
+      auto iter = m_qualityTests.find(name);
+
+      if(m_qualityTests.end() != iter)
+        return STATUS_CODE_ALREADY_PRESENT;
+
+      m_qualityTests.insert(QualityTestMap::value_type(name, pQualityTest));
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElement::removeQualityTest(const std::string &name)
+    {
+      auto iter = m_qualityTests.find(name);
+
+      if(m_qualityTests.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+      m_qualityTests.erase(iter);
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElement::runQualityTests(QReportMap &reports)
+    {
+      try
+      {
+        for(auto iter : m_qualityTests)
+        {
+          QReport report;
+          iter.second->run(this, report);
+          reports.insert(QReportMap::value_type(iter.first, report));
+        }
+      }
+      catch(StatusCodeException &exception)
+      {
+        return exception.getStatusCode();
+      }
+      catch(...)
+      {
+        return STATUS_CODE_FAILURE;
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElement::runQualityTest(const std::string &name, QReport &report)
+    {
+      auto iter = m_qualityTests.find(name);
+
+      if(m_qualityTests.end() == iter)
+        return STATUS_CODE_NOT_FOUND;
+
+      iter->second->run(this, report);
+
+      return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
