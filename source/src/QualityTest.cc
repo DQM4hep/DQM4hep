@@ -151,6 +151,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    void QReportStorage::addReports(const QReportMap &reports, bool warnOnReplace)
+    {
+      for(auto iter : reports)
+        this->addReport(iter.second, warnOnReplace);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     StatusCode QReportStorage::report(const std::string &path, const std::string &name, const std::string &qualityTestName, QReport &report)
     {
       QReportContainer::key_type key(path, name);
