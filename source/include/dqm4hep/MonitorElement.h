@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/PtrHandler.h"
 
 // -- root headers
 #include <TObject.h>
@@ -38,67 +39,14 @@
 #include <TPaveText.h>
 #include <Rtypes.h>
 
-// -- xdrstream headers
-#include "xdrstream/xdrstream.h"
-
-#include <cstddef>
-
 namespace dqm4hep {
 
   namespace core {
 
-    template <typename T>
-    class PtrHandler
-    {
-    public:
-      PtrHandler(T *ptr = nullptr, bool owner = true) : m_ptr(ptr), m_owner(owner) {}
-      T *take() { T *ptr = m_ptr; m_ptr = nullptr; return ptr; }
-      void set(T *ptr, bool owner = true) { this->clear(); m_ptr = ptr; m_owner = owner; }
-      void clear() { if(m_owner && nullptr != m_ptr) delete m_ptr; m_ptr = nullptr; }
-      T *ptr() const { return m_ptr; }
-      bool owner() const { return m_owner; }
-
-      const T *operator->() const { return m_ptr; }
-      T *operator->() { return m_ptr; }
-      const T &operator*() const { return *m_ptr; }
-      T &operator*() { return *m_ptr; }
-      operator bool() const { return m_ptr != nullptr; }
-
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const S *lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const S *rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const S *lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const S *rhs);
-
-      template <typename S> friend bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs);
-      template <typename S> friend bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs);
-    private:
-      T        *m_ptr;
-      bool      m_owner;
-    };
-
-    template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) { return lhs.m_ptr == rhs.m_ptr; }
-    template <typename T> inline bool operator ==(const T *lhs, const PtrHandler<T> &rhs) { return lhs == rhs.m_ptr; }
-    template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const T *rhs) { return lhs.m_ptr == rhs; }
-    template <typename T> inline bool operator !=(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) { return lhs.m_ptr != rhs.m_ptr; }
-    template <typename T> inline bool operator !=(const T *lhs, const PtrHandler<T> &rhs) { return lhs != rhs.m_ptr; }
-    template <typename T> inline bool operator !=(const PtrHandler<T> &lhs, const T *rhs) { return lhs.m_ptr != rhs; }
-
-    template <typename S> inline bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs) { return lhs == rhs.m_ptr; }
-    template <typename S> inline bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs) { return lhs.m_ptr == rhs; }
-    template <typename S> inline bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs) { return lhs != rhs.m_ptr; }
-    template <typename S> inline bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs) { return lhs.m_ptr != rhs; }
-
     class MonitorElementManager;
-    
-    // TODO document the MonitorElement class
-    // TODO Moved the PtrHandler class to a separate file
-    //
+
     /**
-     *  @brief  MonitorElement class
+     *  @brief  MonitorElement class.
      *
      *  @author Remi Ete, DESY
      */
@@ -107,62 +55,126 @@ namespace dqm4hep {
       friend class MonitorElementManager;
     public:
 
+      /** Constructor
+       */
       MonitorElement();
 
+      /** Constructor with ROOT object
+       */
       MonitorElement(TObject *pMonitorObject);
 
+      /** Constructor with ROOT object and reference
+       */
       MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject);
 
+      /** Constructor with ROOT object ptr
+       */
       MonitorElement(const PtrHandler<TObject> &monitorObject);
 
+      /** Constructor with ROOT object and reference ptr
+       */
       MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
 
+      /** Get the monitor element type (class name)
+       */
       std::string type() const;
 
+      /** Get the object name
+       */
       std::string name() const;
 
+      /** Get the object title
+       */
       std::string title() const;
 
+      /** Get the object path (in directory structure)
+       */
       std::string path() const;
 
+      /** Whether the monitor element has a valid object ptr
+       */
       bool hasObject() const;
 
+      /** Whether the monitor element has a valid reference ptr
+       */
       bool hasReference() const;
 
+      /** Get the wrapped object
+       */
       TObject *object();
 
+      /** Get the wrapped object
+       */
       const TObject *object() const;
 
+      /** Get the wrapped reference object
+       */
       TObject *reference();
 
+      /** Get the wrapped reference object
+       */
       const TObject *reference() const;
 
+      /** Get a casted version of the wrapped object
+       */
       template <typename T>
       T *objectTo();
 
+      /** Get a casted version of the wrapped reference object
+       */
       template <typename T>
       T *referenceTo();
 
+      /** Set the wrapped object
+       */
       void setMonitorObject(TObject *pMonitorObject);
 
+      /** Set the wrapped object (ptr handle)
+       */
       void setMonitorObject(const PtrHandler<TObject> &monitorObject);
 
+      /** Set the wrapped reference object
+       */
       void setReferenceObject(TObject *pReferenceObject);
 
+      /** Set the wrapped reference object (ptr handle)
+       */
       void setReferenceObject(const PtrHandler<TObject> &referenceObject);
 
+      /** Set the wrapped object and reference object
+       */
       void set(TObject *pMonitorObject, TObject *pReferenceObject);
 
+      /** Set the wrapped object and reference object (ptr handle)
+       */
       void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
 
     private:
-
+      /** Set the monitor element object path
+       */
       void setPath(const std::string &path);
 
+      /** Add a quality test
+       */
+      StatusCode addQualityTest(QualityTest *pQualityTest);
+
+      /** Remove a quality test
+       */
+      StatusCode removeQualityTest(const std::string &name);
+
+      /** Run all quality tests
+       */
+      StatusCode runQualityTests(QReportMap &reports);
+
+      /** Run a specific quality test
+       */
+      StatusCode runQualityTest(const std::string &name, QReport &report);
+
     private:
-      std::string             m_path;
-      PtrHandler<TObject>     m_monitorObject;
-      PtrHandler<TObject>     m_referenceObject;
+      std::string             m_path;               ///< The monitor element path
+      PtrHandler<TObject>     m_monitorObject;      ///< The monitored object
+      PtrHandler<TObject>     m_referenceObject;    ///< The reference object
+      QualityTestMap          m_qualityTests;       ///< The list of assigned quality tests
     };
 
     //-------------------------------------------------------------------------------------------------
