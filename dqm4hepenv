@@ -1,6 +1,6 @@
-export DIM_DNS_NODE=lyosdhcal10
+export DIM_DNS_NODE=lyosdhcal12
 export DQM_DIR=/home/acqilc/dqmsoftware
 export DQM4HEP_DIR=${DQM_DIR}/dqm4hep
 export DIM_DIR=${DQM4HEP_DIR}/dim
 
-export jobControlFile="${DQM4HEP_DIR}/dqm_setup/SPS_09_2017/dqm4hep_jobcontrol_config_Sept2017_Offline.json"
+export jobControlFile="${DQM4HEP_DIR}/dqm_setup/dqm4hep_jobcontrol_config_Sept2017_Offline.json"

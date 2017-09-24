@@ -1,6 +1,6 @@
 #!/bin/sh
 
-envFile="/home/acqilc/dqmsoftware/dqm4hepenv"
+envFile="/home/acqilc/dqmsoftware/dqm4hep/dqm4hepenv"
 [ -f ${envFile} ] && . ${envFile}
 
 if [ -z "$DIM_DNS_NODE" ] ;  then
