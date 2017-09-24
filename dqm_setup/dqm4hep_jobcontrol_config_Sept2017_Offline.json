@@ -26,7 +26,7 @@
 	"GLOBAL":
 	{
 	    "DAQ_DNS_NODE" : "lyosdhcal9", // not used. Here just for your information
-	    "DQM_DNS_NODE" : "lyosdhcal10",
+	    "DQM_DNS_NODE" : "lyosdhcal12",
 	    // paths
 	    "DQM4HEP_DIR" : "/home/acqilc/dqmsoftware/dqm4hep",
 	    "DQM4HEP_BIN_DIR" : "${DQM4HEP_DIR}/bin",
@@ -41,24 +41,20 @@
 	    "RUN_CONTROL_NAME" : "SDHCALRunControl",
 	    "RUN_CONTROL_PORT" : "8082",
 	    "EVENT_COLLECTOR_NAME" : "event_collector",
-	    // "EVENT_COLLECTOR_NAME_2" : "event_collector_2",
 	    "ME_COLLECTOR_NAME" : "me_collector",
 	    "ME_COLLECTOR_NAME2" : "me_collector_slowControl",
-	    //"LCIO_FILE_NAME" : "/data/srv02/RAID6/SPS_10_2015/Compressed/DHCAL_730926_SO.slcio", // for local test during development
-	    "LCIO_FILE_NAME" : "/data/NAS/Oct2016/DHCAL_733723_I0_0.slcio", // for local test during development
+	    "LCIO_FILE_NAME" : "/data/NAS/H2SEPT2017/DHCAL_736523_I0_0.slcio", // for local test during development
 	    "SHM_APP_NAME" : "SDHCALShmReader",
 	    "SHM_DRIVER_DIR" : "/dev/shm/monitor",
-	    //"SHM_DRIVER_CONFIG_FILE" : "${DQMSDHCAL_CONFIG_DIR}/SDHCAL_SPS_06_2016_OFFLINE.xml", // must be on lyosdhcal9 with DAQ
 	    "SHM_DRIVER_CONFIG_FILE" : "${DQMSDHCAL_CONFIG_DIR}/SPS_09_2017/ShmDriver.xml", // must be on lyosdhcal9 with DAQ
 	    "LOGGER_FILE" : "${DQM4HEP_DIR}/conf/defaultLoggerConfig.xml",
-	    "GEOMETRY_FILE_NAME" : "${DQMSDHCAL_DIR}/config/geometry_PS_06_2015.xml",
-	    // "ARCHIVER_DIRECTORY" : "/data/NAS/Oct2016/DQMArchive"
+	    "GEOMETRY_FILE_NAME" : "${DQMSDHCAL_DIR}/config/SPS_09_2017/sdhcal_07_09_2017.xml",
 	    "ARCHIVER_DIRECTORY" : "/home/acqilc/dqmsoftware/Arxivs"
 	}
     },
     "HOSTS" :
     {
-	 "lyosdhcal10":[
+	 "lyosdhcal12":[
 	    {
 		"NAME":"ShmDriver",
 		"ARGS" : [
@@ -79,19 +75,6 @@
 		    "DQM4HEP_PLUGIN_DLL=${DQM4ILC_DLL}:${DQMSDHCAL_DLL_DIR}/libDQMSDHCALCommon.so"
 		],
 		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_shm_driver"
-	    },
-	     
-	    {
-		"NAME":"MonitorElementCollector2",
-		"ARGS" : [
-		    "--collector-name", "${ME_COLLECTOR_NAME2}",
-		    "--verbosity", "DEBUG",
-		    "--logger-config", "${LOGGER_FILE}"
-		],
-		"ENV" : [
-		    "DIM_DNS_NODE=${DQM_DNS_NODE}"
-		],
-		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_monitor_element_collector"
 	    },
 	    {
 		"NAME":"DQMRunControl",
@@ -120,20 +103,6 @@
 		],
 		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_event_collector"
 	    },
-	    // {
-	    // 	"NAME":"EventCollector_2",
-	    // 	"ARGS" : [
-	    // 	    "--collector-name", "${EVENT_COLLECTOR_NAME_2}",
-	    // 	    "--streamer", "${EVENT_STREAMER_NAME}",
-	    // 	    "--verbosity", "DEBUG",
-	    // 	    "--logger-config", "${LOGGER_FILE}"
-	    // 	],
-	    // 	"ENV" : [
-	    // 	    "DQM4HEP_PLUGIN_DLL=${DQM4ILC_DLL}",
-	    // 	    "DIM_DNS_NODE=${DQM_DNS_NODE}"
-	    // 	],
-	    // 	"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_event_collector"
-	    // },
 	    {
 		"NAME":"MonitorElementCollector",
 		"ARGS" : [
@@ -146,21 +115,6 @@
 		],
 		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_monitor_element_collector"
 	    },
-	    // {
-	    // 	"NAME":"LcioFileService",
-	    // 	"ARGS" : [
-	    // 	    "--lcio-files", "${LCIO_FILE_NAME}",
-	    // 	    "--collector-name", "${EVENT_COLLECTOR_NAME}",
-	    // 	    "--verbosity", "DEBUG",
-	    // 	    "--sleep-time", "100",
-	    // 	    "--skip-event", "1",
-	    // 	    "--logger-config", "${LOGGER_FILE}"
-	    // 	],
-	    // 	"ENV" : [
-	    // 	    "DIM_DNS_NODE=${DQM_DNS_NODE}"
-	    // 	],
-	    // 	"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_lcio_file_service"
-	    // },
 	    {
 	    	"NAME":"ShmPublisher",
 	    	"ARGS" : [
@@ -198,28 +152,6 @@
 		    "DQM4HEP_PLUGIN_DLL=${DQM4ILC_DLL}:${DQMSDHCAL_DLL_DIR}/libAsicAnalysisModule.so"
 		],
 		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_analysis_module"	
-	    },
-	    {
-		"NAME":"ECalAnalysisModule",
-		"ARGS" : [
-		    "--verbosity", "DEBUG",
-		    "--steering-file", "${DQMSDHCAL_CONFIG_DIR}/ECalAnalysisModule.xml",
-		    "--parameter", "module.name=ECalAnalysis",
-		    "--parameter", "cycle.type=EventCounterCycle",
-		    "--parameter", "cycle.value=3",
-		    "--parameter", "archiver.open=true",
-		    "--parameter", "archiver.directory=${ARCHIVER_DIRECTORY}",
-		    "--parameter", "network.runcontrol.name=${RUN_CONTROL_NAME}",
-		    "--parameter", "network.eventcollector.parameter.collectorName=${EVENT_COLLECTOR_NAME}",
-		    "--parameter", "network.eventcollector.parameter.streamerName=${EVENT_STREAMER_NAME}",
-		    "--parameter", "network.monitorelementcollector.name=${ME_COLLECTOR_NAME}",
-		    "--logger-config", "${LOGGER_FILE}"
-		],
-		"ENV" : [
-		    "DIM_DNS_NODE=${DQM_DNS_NODE}",
-		    "DQM4HEP_PLUGIN_DLL=${DQM4ILC_DLL}:${DQMSDHCAL_DLL_DIR}/libECalAnalysisModule.so"
-		],
-		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_analysis_module"
 	    },
 	    {
 		"NAME":"EventDisplayModule",
@@ -354,23 +286,6 @@
 		    "DQM4HEP_PLUGIN_DLL=${DQM4ILC_DLL}:${DQMSDHCAL_DLL_DIR}/libRawAnalysisModule.so"
 		],
 		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_analysis_module"
-	    },
-	    {
-		"NAME":"SlowControlModule",
-		"ARGS" : [
-		    "--verbosity", "DEBUG",
-		    "--steering-file", "${DQMSDHCAL_CONFIG_DIR}/SlowControlModule.xml",
-		    "--parameter", "module.name=SlowControl",
-		    "--parameter", "monitorelementcollector.name=${ME_COLLECTOR_NAME2}",
-		    "--parameter", "archiver.open=true",
-		    "--parameter", "archiver.directory=${ARCHIVER_DIRECTORY}",
-		    "--logger-config", "${LOGGER_FILE}"
-		],
-		"ENV" : [
-		    "DIM_DNS_NODE=${DQM_DNS_NODE}",
-		    "DQM4HEP_PLUGIN_DLL=${DQM4ILC_DLL}:${DQMSDHCAL_DLL_DIR}/libSlowControlModule.so"
-		],
-		"PROGRAM" : "${DQM4HEP_BIN_DIR}/dqm4hep_start_standalone_module"
 	    }
 	]
     }
