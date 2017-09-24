@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <dqm4hep>
     <monitoring>
-        <dimDnsNode value="lyosdhcal12" />
+        <!-- <dimDnsNode value="lyosdhcal10" /> -->
         <view>
             <meView>
                 <collector name="me_collector">
@@ -58,7 +58,7 @@
                         <item path="/" name="AsicOccupancyAll" checked="0" />
                         <item path="/" name="AsicOccupancyChamber" checked="1" />
                         <item path="/" name="AsicOccupancyDIF" checked="0" />
-                        <item path="/" name="HitFrequencyMap" checked="1" />
+                        <item path="/" name="DifAsicHitFrequencyMap" checked="1" />
                     </module>
                 </collector>
             </meView>
@@ -211,7 +211,7 @@
                         <monitorElement collector="me_collector" module="RawDataAnalysis" path="Noise/Layer47" name="ChamberHitsMap1_layer47" />
                     </canvas>
                     <canvas x="0" y="600" w="400" h="250">
-                        <monitorElement collector="me_collector" module="RawDataAnalysis" path="" name="HitFrequencyMap" />
+                        <monitorElement collector="me_collector" module="RawDataAnalysis" path="" name="DifAsicHitFrequencyMap" />
                     </canvas>
                     <canvas x="400" y="600" w="400" h="250">
                         <monitorElement collector="me_collector" module="RawDataAnalysis" path="" name="AsicOccupancyChamber" />

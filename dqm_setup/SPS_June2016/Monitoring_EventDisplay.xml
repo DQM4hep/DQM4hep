@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 <dqm4hep>
     <monitoring>
-        <dimDnsNode value="lyosdhcal12" />
+        <!-- <dimDnsNode value="lyosdhcal12" /> -->
         <view>
             <meView>
                 <collector name="me_collector">
