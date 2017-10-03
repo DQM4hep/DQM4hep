@@ -15,6 +15,10 @@ FIND_PATH(
     PATH_SUFFIXES jsoncpp
 )
 
+IF( JSONCPP_INCLUDE_DIRS )
+  MESSAGE( STATUS "Found JSONCPP: ${JSONCPP_INCLUDE_DIRS}" )
+ENDIF()
+
 # Get the GCC compiler version
 EXEC_PROGRAM(
     ${CMAKE_CXX_COMPILER}
@@ -26,8 +30,12 @@ EXEC_PROGRAM(
 FIND_LIBRARY (
     JSONCPP_LIBRARY
     NAMES libjsoncpp${CMAKE_SHARED_LIBRARY_SUFFIX}
-    PATHS ${JSONCPP_DIR}/lib /usr/lib /usr/local/lib /opt/jsoncpp/lib /opt/local/lib 
+    PATHS ${JSONCPP_DIR}/lib /usr/lib /usr/local/lib /opt/jsoncpp/lib /opt/local/lib
 )
+
+IF( JSONCPP_LIBRARY )
+  MESSAGE( STATUS "Found JSONCPP: ${JSONCPP_LIBRARY}" )
+ENDIF()
 
 IF (JSONCPP_LIBRARY AND JSONCPP_INCLUDE_DIRS)
     SET(JSONCPP_LIBRARIES ${JSONCPP_LIBRARY})
