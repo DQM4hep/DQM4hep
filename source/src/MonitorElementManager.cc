@@ -180,13 +180,20 @@ namespace dqm4hep {
           throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
         }
 
-        if(!pObject->Class()->InheritsFrom("TNamed"))
+        if(!pObject->InheritsFrom("TNamed"))
         {
           dqm_error( "Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call SetName())!", pObject->ClassName() );
           throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
         }
 
         pMonitorElement = new MonitorElement(ptrObject);
+
+        if(nullptr != m_storage.findObject(path, [&](MonitorElement *obj){ return obj->name() == pObject->GetName(); }) )
+        {
+          dqm_error( "Monitor element '{0}' in directory '{1}' already booked !", pObject->GetName(), path );
+          throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
+        }
+
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
         pMonitorElement->setPath(path);
       }
