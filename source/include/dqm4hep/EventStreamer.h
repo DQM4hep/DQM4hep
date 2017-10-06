@@ -30,7 +30,7 @@
 #define DQM4HEP_EVENTSTREAMER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
+#include <dqm4hep/StatusCodes.h>
 
 namespace xdrstream {
   class IODevice;

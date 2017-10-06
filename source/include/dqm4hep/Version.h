@@ -30,11 +30,11 @@
 #define DQM4HEP_VERSION_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
 
 // -- xdrstream headers
-#include "xdrstream/xdrstream.h"
+#include <xdrstream/xdrstream.h>
 
 namespace dqm4hep {
 

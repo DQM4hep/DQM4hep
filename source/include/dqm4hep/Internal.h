@@ -71,7 +71,7 @@
 #endif
 
 // -- dqm4hep headers
-#include "DQMCoreConfig.h"
+#include <DQMCoreConfig.h>
 
 //-------------------------------------------------------------------------------------------------
 

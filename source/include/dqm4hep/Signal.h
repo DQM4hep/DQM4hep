@@ -26,8 +26,8 @@
 */
 
 
-#ifndef SIGNAL_H
-#define SIGNAL_H
+#ifndef DQM4HEP_SIGNAL_H
+#define DQM4HEP_SIGNAL_H
 
 namespace dqm4hep {
 
@@ -499,4 +499,4 @@ namespace dqm4hep {
 
 }
 
-#endif  //  SIGNAL_H
+#endif  //  DQM4HEP_SIGNAL_H

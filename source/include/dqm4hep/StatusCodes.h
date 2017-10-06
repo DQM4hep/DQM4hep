@@ -28,12 +28,12 @@
 #ifndef DQM4HEP_STATUS_CODES_H
 #define DQM4HEP_STATUS_CODES_H
 
+// -- std headers
 #include <exception>
 #include <string>
-
 #if defined(__GNUC__) && defined(BACKTRACE)
-    #include <cstdlib>
-    #include <execinfo.h>
+#include <cstdlib>
+#include <execinfo.h>
 #endif
 
 #define RETURN_RESULT_IF(StatusCode1, Operator, Command)		\

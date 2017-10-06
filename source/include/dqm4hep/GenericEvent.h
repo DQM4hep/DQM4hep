@@ -30,12 +30,12 @@
 #define DQM4HEP_GENERICEVENT_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/EventStreamer.h"
-#include "dqm4hep/Event.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/EventStreamer.h>
+#include <dqm4hep/Event.h>
 
 // -- xdrstream headers
-#include "xdrstream/xdrstream.h"
+#include <xdrstream/xdrstream.h>
 
 namespace dqm4hep {
 

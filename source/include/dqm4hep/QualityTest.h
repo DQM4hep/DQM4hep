@@ -29,14 +29,14 @@
 #define DQM4HEP_QUALITYTEST_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
 
 // -- json headers
 #include <json/json.h>
 
 // -- root headers
-#include "TObject.h"
+#include <TObject.h>
 
 namespace dqm4hep {
 

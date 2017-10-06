@@ -52,7 +52,7 @@ distribution.
 #include <sstream>
 #define TIXML_STRING		std::string
 #else
-#include "dqm4hep/tinystr.h"
+#include <dqm4hep/tinystr.h>
 #define TIXML_STRING		TiXmlString
 #endif
 
@@ -123,7 +123,7 @@ namespace dqm4hep {
 	If you return 'true' from a Visit method, recursive parsing will continue. If you return
 	false, <b>no children of this node or its sibilings</b> will be Visited.
 
-	All flavors of Visit methods have a default implementation that returns 'true' (continue 
+	All flavors of Visit methods have a default implementation that returns 'true' (continue
 	visiting). You need to only override methods that are interesting to you.
 
 	Generally Accept() is called on the TiXmlDocument, although all nodes suppert Visiting.
@@ -212,7 +212,7 @@ namespace dqm4hep {
 		or the string class (TiXmlString in non-STL mode, std::string
 		in STL mode.) Either or both cfile and str can be null.
 
-		This is a formatted print, and will insert 
+		This is a formatted print, and will insert
 		tabs and newlines.
 
 		(For an unformatted stream, use the << operator.)
@@ -716,7 +716,7 @@ namespace dqm4hep {
       virtual TiXmlDeclaration*       ToDeclaration() { return 0; } ///< Cast to a more defined type. Will return null if not of the requested type.
 
       /** Create an exact duplicate of this node and return it. The memory must be deleted
-		by the caller. 
+		by the caller.
        */
       virtual TiXmlNode* Clone() const = 0;
 
@@ -731,7 +731,7 @@ namespace dqm4hep {
 		The interface has been based on ideas from:
 
 		- http://www.saxproject.org/
-		- http://c2.com/cgi/wiki?HierarchicalVisitorPattern 
+		- http://c2.com/cgi/wiki?HierarchicalVisitorPattern
 
 		Which are both good references for "visiting".
 
@@ -828,7 +828,7 @@ namespace dqm4hep {
 
       /** QueryIntValue examines the value string. It is an alternative to the
 		IntValue() method with richer error checking.
-		If the value is an integer, it is stored in 'value' and 
+		If the value is an integer, it is stored in 'value' and
 		the call returns TIXML_SUCCESS. If it is not
 		an integer, it returns TIXML_WRONG_TYPE.
 
@@ -984,7 +984,7 @@ namespace dqm4hep {
 
       /** QueryIntAttribute examines the attribute - it is an alternative to the
 		Attribute() method with richer error checking.
-		If the attribute is an integer, it is stored in 'value' and 
+		If the attribute is an integer, it is stored in 'value' and
 		the call returns TIXML_SUCCESS. If it is not
 		an integer, it returns TIXML_WRONG_TYPE. If the attribute
 		does not exist, then TIXML_NO_ATTRIBUTE is returned.
@@ -1099,23 +1099,23 @@ namespace dqm4hep {
 		const char* str = fooElement->GetText();
 		@endverbatim
 
-		'str' will be a pointer to "This is text". 
+		'str' will be a pointer to "This is text".
 
 		Note that this function can be misleading. If the element foo was created from
 		this XML:
 		@verbatim
-		<foo><b>This is text</b></foo> 
+		<foo><b>This is text</b></foo>
 		@endverbatim
 
 		then the value of str would be null. The first child node isn't a text node, it is
 		another element. From this XML:
 		@verbatim
-		<foo>This is <b>text</b></foo> 
+		<foo>This is <b>text</b></foo>
 		@endverbatim
 		GetText() will return "This is ".
 
-		WARNING: GetText() accesses a child node - don't become confused with the 
-				 similarly named TiXmlHandle::Text() and TiXmlNode::ToText() which are 
+		WARNING: GetText() accesses a child node - don't become confused with the
+				 similarly named TiXmlHandle::Text() and TiXmlNode::ToText() which are
 				 safe type casts on the referenced node.
        */
       const char* GetText() const;
@@ -1206,7 +1206,7 @@ namespace dqm4hep {
 
     /** XML text. A text node can have 2 ways to output the next. "normal" output
 	and CDATA. It will default to the mode it was parsed from the XML file and
-	you generally want to leave it alone, but you can change the output mode with 
+	you generally want to leave it alone, but you can change the output mode with
 	SetCDATA() and query it with CDATA().
      */
     class TiXmlText : public TiXmlNode
@@ -1570,7 +1570,7 @@ namespace dqm4hep {
 	<Document>
 	@endverbatim
 
-	Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very 
+	Assuming you want the value of "attributeB" in the 2nd "Child" element, it's very
 	easy to write a *lot* of code that looks like:
 
 	@verbatim
@@ -1590,7 +1590,7 @@ namespace dqm4hep {
 	@endverbatim
 
 	And that doesn't even cover "else" cases. TiXmlHandle addresses the verbosity
-	of such code. A TiXmlHandle checks for null	pointers so it is perfectly safe 
+	of such code. A TiXmlHandle checks for null	pointers so it is perfectly safe
 	and correct to use:
 
 	@verbatim
@@ -1611,7 +1611,7 @@ namespace dqm4hep {
 	What they should not be used for is iteration:
 
 	@verbatim
-	int i=0; 
+	int i=0;
 	while ( true )
 	{
 		TiXmlElement* child = docHandle.FirstChild( "Document" ).FirstChild( "Element" ).Child( "Child", i ).ToElement();
@@ -1622,8 +1622,8 @@ namespace dqm4hep {
 	}
 	@endverbatim
 
-	It seems reasonable, but it is in fact two embedded while loops. The Child method is 
-	a linear walk to find the element, so this code would iterate much more than it needs 
+	It seems reasonable, but it is in fact two embedded while loops. The Child method is
+	a linear walk to find the element, so this code would iterate much more than it needs
 	to. Instead, prefer:
 
 	@verbatim

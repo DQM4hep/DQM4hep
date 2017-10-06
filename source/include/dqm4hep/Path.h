@@ -30,8 +30,8 @@
 #define DQM4HEP_PATH_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
 
 namespace dqm4hep {
 

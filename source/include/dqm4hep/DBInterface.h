@@ -26,12 +26,12 @@
  */
 
 
-#ifndef DQMDBINTERFACE_H
-#define DQMDBINTERFACE_H
+#ifndef DQM4HEP_DBINTERFACE_H
+#define DQM4HEP_DBINTERFACE_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Logging.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Logging.h>
 
 // -- mysql headers
 #include <mysql.h>

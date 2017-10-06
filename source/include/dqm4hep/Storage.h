@@ -30,9 +30,9 @@
 #define DQM4HEP_STORAGE_H
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
-#include "dqm4hep/Directory.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/Directory.h>
 
 namespace dqm4hep {
 
