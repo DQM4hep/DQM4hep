@@ -17,10 +17,10 @@
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -45,6 +45,10 @@ namespace dqm4hep {
     class XmlHelper
     {
     public:
+      /**
+       */
+      static StatusCode readXmlFile(const std::string &fileName, TiXmlDocument &document, StringMap &constants, bool processIncludes = true);
+
       /** Read a value from an xml element
        */
       template <typename T>
@@ -95,22 +99,22 @@ namespace dqm4hep {
       // /** Create a quality test. Works if the quality test factory has been registered first
       //  */
       // static StatusCode createQualityTest(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
-      // 
+      //
       // /** Create a monitor element from a xml handle
       //  */
       // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
       //     MonitorElementPtr &monitorElement);
-      // 
+      //
       // /** Create a monitor element from a xml handle
       //  */
       // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
       //     const std::string &strSuffix, MonitorElementPtr &monitorElement);
-      // 
+      //
       // /** Create a monitor element from a xml handle
       //  */
       // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
       //     unsigned int suffix, MonitorElementPtr &monitorElement);
-      // 
+      //
       // /** Create a monitor element from a xml handle and configure name, path and title from parameters (see DQM4HEP::replace())
       //  */
       // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
@@ -119,6 +123,13 @@ namespace dqm4hep {
       /** Replace all xml attribute recursively from the parameters map
        */
       static StatusCode replaceAllXmlAttributes(TiXmlElement *pXmlElement, const ParameterMap &parameters);
+
+    private:
+      static StatusCode processConstants(const std::string &fileName, TiXmlElement *parent, StringMap &constants, bool parseIncludes = true);
+      static StatusCode processConstant(TiXmlElement *parent, StringMap &constants);
+      static StatusCode performConstantReplacement(std::string &value, const StringMap &constants);
+      static StatusCode processIncludeElements(const std::string &fileName, TiXmlElement* element , const StringMap& constants);
+      static StatusCode processIncludeElement(const std::string &fileName, TiXmlElement* element , const StringMap& constants , TiXmlDocument &document);
     };
 
     //-------------------------------------------------------------------------------------------------
