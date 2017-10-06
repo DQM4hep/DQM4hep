@@ -124,10 +124,13 @@ namespace dqm4hep {
        */
       static StatusCode replaceAllXmlAttributes(TiXmlElement *pXmlElement, const ParameterMap &parameters);
 
+      /** Perform replace of pattern ${constant} into value string
+       */
+      static StatusCode performConstantReplacement(std::string &value, const StringMap &constants);
+
     private:
       static StatusCode processConstants(const std::string &fileName, TiXmlElement *parent, StringMap &constants, bool parseIncludes = true);
       static StatusCode processConstant(TiXmlElement *parent, StringMap &constants);
-      static StatusCode performConstantReplacement(std::string &value, const StringMap &constants);
       static StatusCode processIncludeElements(const std::string &fileName, TiXmlElement* element , const StringMap& constants);
       static StatusCode processIncludeElement(const std::string &fileName, TiXmlElement* element , const StringMap& constants , TiXmlDocument &document);
     };
