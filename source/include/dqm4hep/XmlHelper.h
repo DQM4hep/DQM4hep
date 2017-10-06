@@ -45,7 +45,21 @@ namespace dqm4hep {
     class XmlHelper
     {
     public:
-      /**
+      /** Read XML file.
+       *  A constants section could possibly processed in the root element if found
+       *  and may contains constant elements inside :
+       *  @code
+       *  <constants>
+       *    <constant name="MyConstant"> 42 <constant>
+       *    <constant name="MySuperConstant"> ${MyConstant} is the answer <constant>
+       *  </constants>
+       *  @endcode
+       *  Include elements such as :
+       *  @code
+       *  <include ref="another_file_name.xml">
+       *  @endcode
+       *  could be parsed if the flag processIncludes is set to true. The content
+       *  of this file is processed as a raw replacment
        */
       static StatusCode readXmlFile(const std::string &fileName, TiXmlDocument &document, StringMap &constants, bool processIncludes = true);
 
