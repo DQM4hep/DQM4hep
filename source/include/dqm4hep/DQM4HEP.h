@@ -165,6 +165,7 @@ namespace dqm4hep {
     typedef std::set<std::string>                               StringSet;
     typedef std::map<std::string, std::string>                  ParameterMap;
     typedef std::pair<std::string, std::string>                 StringPair;
+    typedef std::map<std::string, std::string>                  StringMap;
 
     typedef std::vector<MonitorElement*>                        MonitorElementList;
     typedef std::map<const std::string, MonitorElement*>        MonitorElementMap;
