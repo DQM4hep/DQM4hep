@@ -5,22 +5,22 @@
  * Creation date : ven. f�vr. 20 2015
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -30,14 +30,14 @@
 #define DQM4HEP_DIRECTORY_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
-#include "dqm4hep/CoreTool.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/Path.h"
 
 namespace dqm4hep {
 
   namespace core {
-  
+
     /** Directory class.
      *
      *  A directory is the owner of its sub-directories.
@@ -51,7 +51,7 @@ namespace dqm4hep {
     {
     public:
       typedef std::vector<T*> ObjectList;
-      
+
       /** Default constructor
        */
       Directory();
@@ -147,7 +147,7 @@ namespace dqm4hep {
       std::vector<Directory<T>*>      m_subdirs;
       ObjectList                      m_contents;
     };
-    
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
@@ -160,7 +160,7 @@ namespace dqm4hep {
     {
       /* nop */
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -172,7 +172,7 @@ namespace dqm4hep {
     {
       /* nop */
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -180,7 +180,7 @@ namespace dqm4hep {
     {
       this->clear();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -190,7 +190,7 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline Directory<T> *Directory<T>::parent() const
     {
@@ -211,13 +211,13 @@ namespace dqm4hep {
     inline Directory<T> *Directory<T>::mkdir(const std::string &dirName)
     {
       Directory<T> *pDirectory = nullptr;
-      
+
       this->find(dirName, pDirectory);
-      
+
       if(nullptr != pDirectory)
         return pDirectory;
-      
-      if(dirName.find("/") != std::string::npos || CoreTool::containsSpecialCharacters(dirName) || dirName.empty())
+
+      if(dirName.find("/") != std::string::npos || dqm4hep::core::containsSpecialCharacters(dirName) || dirName.empty())
         return nullptr;
 
       Directory<T> *pNewDirectory = new Directory<T>(dirName, this);
@@ -225,13 +225,13 @@ namespace dqm4hep {
 
       return pNewDirectory;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline bool Directory<T>::hasChild(const std::string &dirName) const
     {
-      if(dirName.find("/") != std::string::npos || CoreTool::containsSpecialCharacters(dirName) || dirName.empty())
+      if(dirName.find("/") != std::string::npos || dqm4hep::core::containsSpecialCharacters(dirName) || dirName.empty())
         return false;
 
       for(typename std::vector<Directory<T>*>::const_iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
@@ -245,9 +245,9 @@ namespace dqm4hep {
 
       return false;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline StatusCode Directory<T>::find(const std::string &dirName, Directory<T> *&pDirectory) const
     {
@@ -267,7 +267,7 @@ namespace dqm4hep {
 
       return STATUS_CODE_NOT_FOUND;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -283,9 +283,9 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline T *Directory<T>::find(F function) const
@@ -297,7 +297,7 @@ namespace dqm4hep {
 
       return nullptr;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -305,37 +305,37 @@ namespace dqm4hep {
     {
       if(nullptr == pObject)
         return false;
-      
+
       for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
           endIter != iter ; ++iter)
         if(pObject == *iter)
           return true;
-      
+
       return false;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     template <typename F>
     inline bool Directory<T>::contains(F function) const
-    {    
+    {
       for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
           endIter != iter ; ++iter)
         if(function(*iter))
           return true;
-      
+
       return false;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline StatusCode Directory<T>::remove(T *pObject)
     {
       if(nullptr == pObject)
         return STATUS_CODE_INVALID_PTR;
-        
+
       for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
           endIter != iter ; ++iter)
       {
@@ -346,12 +346,12 @@ namespace dqm4hep {
           return STATUS_CODE_SUCCESS;
         }
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline StatusCode Directory<T>::remove(F function)
@@ -367,20 +367,20 @@ namespace dqm4hep {
           return STATUS_CODE_SUCCESS;
         }
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline const typename Directory<T>::ObjectList &Directory<T>::contents() const
     {
       return m_contents;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline StatusCode Directory<T>::rmdir(const std::string &dirName)
     {
@@ -396,10 +396,10 @@ namespace dqm4hep {
           return STATUS_CODE_SUCCESS;
         }
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -411,15 +411,15 @@ namespace dqm4hep {
         (*iter)->clear();
         delete *iter;
       }
-        
+
       for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
           endIter != iter ; ++iter)
         delete *iter;
-      
+
       m_subdirs.clear();
       m_contents.clear();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -446,7 +446,7 @@ namespace dqm4hep {
 
       return fullPath;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -454,7 +454,7 @@ namespace dqm4hep {
     {
       return (nullptr == m_pParent);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -462,9 +462,9 @@ namespace dqm4hep {
     {
       return (m_subdirs.empty() && m_contents.empty());
     }
-    
+
   }
 
-} 
+}
 
 #endif  //  DQM4HEP_DIRECTORY_H

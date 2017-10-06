@@ -30,12 +30,12 @@
 #define DQM4HEP_MONITORELEMENTMANAGER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/XmlHelper.h"
 #include "dqm4hep/Storage.h"
 #include "dqm4hep/Directory.h"
 #include "dqm4hep/MonitorElement.h"
-#include "dqm4hep/CoreTool.h"
 #include "dqm4hep/QualityTest.h"
 #include "dqm4hep/Logging.h"
 

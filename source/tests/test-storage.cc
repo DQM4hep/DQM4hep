@@ -26,9 +26,9 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/Logging.h"
-
 #include "dqm4hep/Storage.h"
 
 // -- std headers
@@ -65,45 +65,45 @@ int main(int argc, char* argv[])
   Logger::createLogger("test-storage", {Logger::coloredConsole()});
   Logger::setMainLogger("test-storage");
   Logger::setLogLevel(spdlog::level::debug);
-  
+
   Storage_t storage;
-  
+
   assert_test(storage.mkdir("/heroes/best") == STATUS_CODE_SUCCESS);
   assert_test(storage.mkdir("/heroes/worst") == STATUS_CODE_SUCCESS);
-  
+
   ObjectList list;
   storage.getObjects(list);
   assert_test(list.size() == 0);
-  
+
   Object *pObject = nullptr;
-  
+
   assert_test(storage.cd("/heroes/worst") == STATUS_CODE_SUCCESS);
   pObject = new Object("Batman"); storage.add(pObject);
   pObject = new Object("SuperLezard"); storage.add(pObject);
   pObject = new Object("ConcombreMan"); storage.add(pObject);
-  
+
   storage.getObjects(list);
   assert_test(list.size() == 3);
   list.clear();
-  
+
   assert_test(storage.pwd() == "worst");
-  
+
   assert_test(storage.cd("/heroes/best") == STATUS_CODE_SUCCESS);
   pObject = new Object("Superman"); storage.add(pObject);
   pObject = new Object("Spiderman"); storage.add(pObject);
   pObject = new Object("Me"); storage.add(pObject);
-  
+
   storage.getObjects(list);
   assert_test(list.size() == 6);
-  
+
   assert_test(storage.dirExists("/heroes/best"));
   assert_test(!storage.dirExists("best"));
   assert_test(storage.dirExists("/heroes"));
-  
+
   assert_test(storage.goUp() == STATUS_CODE_SUCCESS);
   assert_test(storage.pwd() == "heroes");
-  
+
   assert_test(storage.rmdir("/heroes/worst") == STATUS_CODE_SUCCESS);
-  
+
   return 0;
 }

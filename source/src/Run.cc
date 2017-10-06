@@ -5,22 +5,22 @@
  * Creation date : dim. mars 29 2015
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -28,7 +28,6 @@
 
 #include "dqm4hep/Run.h"
 #include "dqm4hep/StreamingHelper.h"
-#include "dqm4hep/CoreTool.h"
 
 namespace dqm4hep {
 
@@ -36,10 +35,10 @@ namespace dqm4hep {
 
     Run::Run(int runNumber, const std::string &description, const std::string &detectorName) :
         m_runNumber(runNumber),
-        m_startTime(CoreTool::now()),
+        m_startTime(dqm4hep::core::now()),
         m_endTime(),
         m_detectorName(detectorName),
-        m_description(description),        
+        m_description(description),
         m_parametersMap()
     {
       /* nop */
@@ -101,30 +100,30 @@ namespace dqm4hep {
 
       return xdrstream::XDR_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     void Run::toJson(Json::Value &value) const
     {
       Json::Value::Int64 startTime = std::chrono::system_clock::to_time_t(m_startTime);
       Json::Value::Int64 endTime = std::chrono::system_clock::to_time_t(m_endTime);
-      
+
       value["runNumber"] = m_runNumber;
       value["startTime"] = startTime;
       value["endTime"] = endTime;
       value["detector"] = m_detectorName;
       value["description"] = m_description;
-      
+
       Json::Value parametersValue;
-      
+
       for(const auto &parameter : m_parametersMap)
         parametersValue[parameter.first] = parameter.second;
-      
+
       value["parameters"] = parametersValue;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     void Run::fromJson(const Json::Value &value)
     {
       m_runNumber = value.get("runNumber", 0).asInt();
@@ -134,11 +133,11 @@ namespace dqm4hep {
       m_endTime = std::chrono::system_clock::from_time_t(endTime);
       m_detectorName = value.get("detector", "").asString();
       m_description = value.get("description", "").asString();
-      
+
       m_parametersMap.clear();
       Json::Value parametersValue(value.get("parameters", Json::Value(Json::objectValue)));
       auto members = parametersValue.getMemberNames();
-      
+
       for( const auto &parameter : members )
         m_parametersMap[parameter] = parametersValue[parameter].asString();
     }

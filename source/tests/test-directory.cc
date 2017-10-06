@@ -26,7 +26,8 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/Logging.h"
 
 #include "dqm4hep/Directory.h"
@@ -66,7 +67,7 @@ int main(int argc, char* argv[])
 
   Directory_t root("root");
   Directory_t *heroes = root.mkdir("heroes");
-  
+
   Object *pObject = nullptr;
   pObject = new Object("superman"); heroes->add(pObject);
   pObject = new Object("spiderman"); heroes->add(pObject);
@@ -75,16 +76,16 @@ int main(int argc, char* argv[])
 
   heroes->remove(pObject);
   assert_test(heroes->contents().size() == 2);
-  
+
   root.clear();
   assert_test(root.isEmpty());
-  
+
   Directory_t *pBibouDir = root.mkdir("bibou");
   pBibouDir->add(new Object("toto"));
   pBibouDir->add(new Object("tata"));
   pBibouDir->add(new Object("tutu"));
   assert_test(pBibouDir->contents().size() == 3);
-  
+
   pBibouDir->remove( [](Object *pObject){ return pObject->name() == "toto"; } );
   assert_test(pBibouDir->contents().size() == 2);
   Path bibouPath = pBibouDir->fullPath();
@@ -100,6 +101,6 @@ int main(int argc, char* argv[])
   assert_test(root.hasChild("bibou"));
   assert_test(root.mkdir("bibou") == pBibouDir);
   assert_test(pBibouDir->parent() == &root);
-  
+
   return 0;
 }

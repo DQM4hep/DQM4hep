@@ -30,7 +30,6 @@
 #include "dqm4hep/MonitorElement.h"
 #include "dqm4hep/Storage.h"
 #include "dqm4hep/Directory.h"
-#include "dqm4hep/CoreTool.h"
 #include "dqm4hep/PluginManager.h"
 #include "dqm4hep/QualityTest.h"
 

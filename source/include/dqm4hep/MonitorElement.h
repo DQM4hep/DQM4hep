@@ -30,7 +30,8 @@
 #define DQM4HEP_MONITORELEMENT_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/PtrHandler.h"
 
 // -- root headers
@@ -156,7 +157,7 @@ namespace dqm4hep {
 
       /** Add a quality test
        */
-      StatusCode addQualityTest(QualityTest *pQualityTest);
+      StatusCode addQualityTest(QTest *pQualityTest);
 
       /** Remove a quality test
        */
@@ -174,7 +175,7 @@ namespace dqm4hep {
       std::string             m_path;               ///< The monitor element path
       PtrHandler<TObject>     m_monitorObject;      ///< The monitored object
       PtrHandler<TObject>     m_referenceObject;    ///< The reference object
-      QualityTestMap          m_qualityTests;       ///< The list of assigned quality tests
+      QTestMap                m_qualityTests;       ///< The list of assigned quality tests
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -445,7 +446,7 @@ namespace dqm4hep {
     inline void TScalarObject<std::string>::Draw(Option_t *option)
     {
       StringVector lines;
-      DQM4HEP::tokenize( m_scalar , lines , "\n" );
+      dqm4hep::core::tokenize( m_scalar , lines , "\n" );
 
       if(0 == m_pPaveText)
       {

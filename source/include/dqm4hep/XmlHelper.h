@@ -30,7 +30,8 @@
 #define DQM4HEP_XMLHELPER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/tinyxml.h"
 #include "dqm4hep/Logging.h"
 
@@ -160,7 +161,7 @@ namespace dqm4hep {
       if (NULL == pXmlElement)
         return STATUS_CODE_NOT_FOUND;
 
-      if (!DQM4HEP::stringToType(pXmlElement->GetText(), t))
+      if (!dqm4hep::core::stringToType(pXmlElement->GetText(), t))
         return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;
@@ -205,13 +206,13 @@ namespace dqm4hep {
         return STATUS_CODE_NOT_FOUND;
 
       StringVector tokens;
-      DQM4HEP::tokenize(pXmlElement->GetText(), tokens);
+      dqm4hep::core::tokenize(pXmlElement->GetText(), tokens);
 
       for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
       {
         T t;
 
-        if (!DQM4HEP::stringToType(*iter, t))
+        if (!dqm4hep::core::stringToType(*iter, t))
           return STATUS_CODE_FAILURE;
 
         vector.push_back(t);
@@ -241,13 +242,13 @@ namespace dqm4hep {
         std::vector<T> rowVector;
 
         StringVector tokens;
-        DQM4HEP::tokenize(pXmlRowElement->GetText(), tokens);
+        dqm4hep::core::tokenize(pXmlRowElement->GetText(), tokens);
 
         for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
         {
           T t;
 
-          if (!DQM4HEP::stringToType(*iter, t))
+          if (!dqm4hep::core::stringToType(*iter, t))
             return STATUS_CODE_FAILURE;
 
           rowVector.push_back(t);
@@ -274,7 +275,7 @@ namespace dqm4hep {
 
       std::string attributeStr(pAttributePtr);
 
-      if(!DQM4HEP::stringToType(attributeStr, attributeValue))
+      if(!dqm4hep::core::stringToType(attributeStr, attributeValue))
         return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;
@@ -325,7 +326,7 @@ namespace dqm4hep {
         if(name != parameterName)
           continue;
 
-        if (!DQM4HEP::stringToType(pXmlElement->GetText(), t))
+        if (!dqm4hep::core::stringToType(pXmlElement->GetText(), t))
           return STATUS_CODE_FAILURE;
 
         return STATUS_CODE_SUCCESS;
@@ -362,13 +363,13 @@ namespace dqm4hep {
           continue;
 
         StringVector tokens;
-        DQM4HEP::tokenize(pXmlElement->GetText(), tokens);
+        dqm4hep::core::tokenize(pXmlElement->GetText(), tokens);
 
         for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
         {
           T t;
 
-          if (!DQM4HEP::stringToType(*iter, t))
+          if (!dqm4hep::core::stringToType(*iter, t))
             return STATUS_CODE_FAILURE;
 
           vector.push_back(t);

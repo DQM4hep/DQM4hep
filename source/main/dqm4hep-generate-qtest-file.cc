@@ -25,12 +25,13 @@
  * @copyright CNRS , IPNL
  *
  * Create a quality test template file a ROOT file.
- * Parses the different directories and populate the 
+ * Parses the different directories and populate the
  * qtest file with found objects.
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/Logging.h"
 #include "dqm4hep/XmlHelper.h"
 #include "dqm4hep/Path.h"
@@ -59,11 +60,11 @@ void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirec
 {
   TIter iter(pDirectory->GetListOfKeys());
   TKey *pTKey(0);
-  
+
   while( (pTKey = (TKey*) iter()) )
   {
     pDirectory->cd();
-    
+
     if(pTKey->IsFolder())
     {
       pDirectory->cd(pTKey->GetName());
@@ -101,7 +102,7 @@ int main(int argc, char* argv[])
       , ""
       , "string");
   pCommandLine->add(rootFileArg);
-  
+
   TCLAP::ValueArg<std::string> qtestFileArg(
       "o"
       , "output-qtest-file"
@@ -116,28 +117,28 @@ int main(int argc, char* argv[])
 
   Path fullRootFilePath(rootFileArg.getValue());
   fullRootFilePath = std::string(gSystem->GetWorkingDirectory()) + fullRootFilePath;
-  
+
   // Create the output xml document
   TiXmlDocument document;
-  
+
   TiXmlElement *pRootElement = new TiXmlElement("dqm4hep");
   TiXmlDeclaration *pDeclaration = new TiXmlDeclaration( "1.0", "", "" );
   TiXmlElement *pQTestsXmlElement = new TiXmlElement("qtests");
   TiXmlComment *pQTestsXmlComment = new TiXmlComment("Create your quality tests here");
-  
+
   document.LinkEndChild(pDeclaration);
   document.LinkEndChild(pRootElement);
   pRootElement->LinkEndChild(pQTestsXmlElement);
   pQTestsXmlElement->LinkEndChild(pQTestsXmlComment);
-  
+
   // Populate the xml structure
   TFile *pTFile = new TFile(fullRootFilePath.getPath().c_str(), "READ");
   Path path("/");
   CreateElementsFromDirectory(fullRootFilePath.getPath(), pTFile, path, pRootElement);
-  
+
   // save xml output file
   document.SaveFile(qtestFileArg.getValue());
-  
+
   delete pTFile;
 
   return 0;

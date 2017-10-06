@@ -30,7 +30,8 @@
 #define DQM4HEP_LOGGER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 
 // -- std headers
 #include <string>
@@ -38,6 +39,7 @@
 #include <fstream>
 #include <memory>
 
+// -- spdlog headers
 #include "spdlog/logger.h"
 #include "spdlog/spdlog.h"
 

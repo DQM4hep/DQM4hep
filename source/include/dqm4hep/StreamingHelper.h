@@ -5,22 +5,22 @@
  * Creation date : lun. ao�t 17 2015
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -30,7 +30,8 @@
 #define DQM4HEP_STREAMINGHELPER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 
 // -- xdrstream headers
 #include "xdrstream/xdrstream.h"
@@ -381,28 +382,6 @@ namespace dqm4hep {
 
       return xdrstream::XDR_SUCCESS;
     }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /** ME_REQUEST_COMPARE struct
-     */
-    struct ME_REQUEST_COMPARE
-    {
-    public:
-      ME_REQUEST_COMPARE(const std::string &s) : m_str(s) {}
-
-      bool operator ()(const MonitorElementRequest::value_type &p)
-      {
-        if(p.first == m_str)
-          return true;
-        else
-          return false;
-      }
-
-    private:
-      std::string       m_str;
-    };
 
   }
 

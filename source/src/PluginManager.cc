@@ -74,7 +74,7 @@ namespace dqm4hep {
       std::string libraryConcatenateList( pPluginDllEnv );
       StringVector libraryList;
 
-      DQM4HEP::tokenize( libraryConcatenateList, libraryList, ":" );
+      dqm4hep::core::tokenize( libraryConcatenateList, libraryList, ":" );
 
       // load the shared libraries
       return this->loadLibraries( libraryList );

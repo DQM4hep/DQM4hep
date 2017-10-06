@@ -5,22 +5,22 @@
  * Creation date : jeu. f�vr. 19 2015
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -30,7 +30,8 @@
 #define DQM4HEP_STORAGE_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/Directory.h"
 
 namespace dqm4hep {
@@ -64,43 +65,43 @@ namespace dqm4hep {
       template <typename F>
       T *findObject(const std::string &dirName, F function) const;
       bool containsObject(const T *pObject) const;
-      bool containsObject(const std::string &dirName, const T *pObject) const;  
+      bool containsObject(const std::string &dirName, const T *pObject) const;
       template <typename F>
       void iterate(F function) const;
       void getObjects(std::vector<T*> &objectList) const;
       void clear();
-      
+
     private:
       template <typename F>
       bool iterate(const Directory<T> *pDirectory, F function) const;
-      
+
     private:
       Directory<T>          *m_pRootDirectory;
       Directory<T>          *m_pCurrentDirectory;
     };
-    
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline Storage<T>::Storage() :
       m_pRootDirectory(new Directory<T>("")),
       m_pCurrentDirectory(m_pRootDirectory)
     {
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline Storage<T>::~Storage()
     {
       delete m_pRootDirectory;
       m_pRootDirectory = nullptr;
-      m_pCurrentDirectory = nullptr;      
+      m_pCurrentDirectory = nullptr;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline StatusCode Storage<T>::mkdir(const std::string &dirName)
     {
@@ -142,17 +143,17 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline void Storage<T>::cd()
     {
       m_pCurrentDirectory = m_pRootDirectory;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline StatusCode Storage<T>::cd(const std::string &dirName)
     {
@@ -216,7 +217,7 @@ namespace dqm4hep {
     {
       return m_pCurrentDirectory->name();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -243,7 +244,7 @@ namespace dqm4hep {
 
       if(pDirectory == m_pRootDirectory)
         return STATUS_CODE_NOT_ALLOWED;
-        
+
 
       std::string fullPathDirName = pDirectory->fullPath().getPath();
       std::string currentFullPathDirName = m_pCurrentDirectory->fullPath().getPath();
@@ -252,15 +253,15 @@ namespace dqm4hep {
       // this mean that the directory that we try
       // to remove is a parent of the current one.
       if(pos == 0 || pos != std::string::npos)
-        return STATUS_CODE_FAILURE;        
+        return STATUS_CODE_FAILURE;
 
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pDirectory->parent()->rmdir(pDirectory->name()));
 
       return STATUS_CODE_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline StatusCode Storage<T>::find(const std::string &dirName, Directory<T> *&pDirectory) const
     {
@@ -307,7 +308,7 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -323,7 +324,7 @@ namespace dqm4hep {
     {
       return m_pCurrentDirectory;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -331,7 +332,7 @@ namespace dqm4hep {
     {
       return m_pCurrentDirectory->add(pObject);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -342,16 +343,16 @@ namespace dqm4hep {
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, pDirectory));
       return pDirectory->add(pObject);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline StatusCode Storage<T>::remove(F function)
     {
       return m_pCurrentDirectory->remove(function);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
@@ -362,94 +363,94 @@ namespace dqm4hep {
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, pDirectory));
       return pDirectory->remove(function);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline T *Storage<T>::findObject(F function) const
     {
       return m_pCurrentDirectory->find(function);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline T *Storage<T>::findObject(const std::string &dirName, F function) const
     {
       Directory<T> *pDirectory = NULL;
-      
+
       if(this->find(dirName, pDirectory))
         return nullptr;
-        
+
       return pDirectory->find(function);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline bool Storage<T>::containsObject(const T *pObject) const
     {
       return m_pCurrentDirectory->containsObject(pObject);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline bool Storage<T>::containsObject(const std::string &dirName, const T *pObject) const
     {
       Directory<T> *pDirectory = NULL;
-      
+
       if(this->find(dirName, pDirectory))
         return false;
-        
+
       return pDirectory->containsObject(pObject);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline bool Storage<T>::iterate(const Directory<T> *pDirectory, F function) const
     {
-      auto contents(pDirectory->contents()); 
-      
+      auto contents(pDirectory->contents());
+
       for (auto &obj : contents)
         if(!function(pDirectory, obj))
           return false;
-      
+
       auto subdirs(pDirectory->subdirs());
-      
+
       for(const auto &dir : subdirs)
         if(!this->iterate(dir, function))
           return false;
-      
+
       return true;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     template <typename F>
     inline void Storage<T>::iterate(F function) const
     {
       this->iterate(m_pRootDirectory, function);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline void Storage<T>::getObjects(std::vector<T*> &objectList) const
     {
       this->iterate([&](const Directory<T> *pDirectory, T *pObject){
-        objectList.push_back(pObject); 
+        objectList.push_back(pObject);
         return true;
       });
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
     inline void Storage<T>::clear()
     {

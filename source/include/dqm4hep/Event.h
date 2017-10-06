@@ -5,22 +5,22 @@
  * Creation date : jeu. mars 26 2015
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -30,12 +30,11 @@
 #define DQM4HEP_EVENT_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 
 // -- xdrstream headers
 #include "xdrstream/xdrstream.h"
-
-// TODO rename write/read with writeBase/readBase
 
 namespace dqm4hep {
 
@@ -189,7 +188,7 @@ namespace dqm4hep {
       /** Whether the event wrapper owns the real event implementation
        */
       bool isOwner() const;
-      
+
       /** The implementation of this method may delete the real event implementation if needed.
        *  ATTN : do not forget the check the event ownership using the isOwner() method
        */
@@ -369,16 +368,16 @@ namespace dqm4hep {
     inline void EventBase<T>::clear()
     {
       Event::clear();
-      
+
       if(0 != m_pEvent && this->isOwner())
         delete m_pEvent;
 
       m_pEvent = nullptr;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    template <typename T> 
+
+    template <typename T>
     inline bool EventBase<T>::isOwner() const
     {
       return m_isOwner;
@@ -386,6 +385,6 @@ namespace dqm4hep {
 
   }
 
-} 
+}
 
 #endif  //  DQM4HEP_EVENT_H

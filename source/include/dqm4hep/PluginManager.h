@@ -29,7 +29,8 @@
 #define DQM4HEP_PLUGINMANAGER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/Singleton.h"
 #include "dqm4hep/Plugin.h"
 #include "dqm4hep/Logging.h"

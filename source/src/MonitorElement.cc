@@ -220,7 +220,7 @@ namespace dqm4hep {
       if(m_qualityTests.end() != iter)
         return STATUS_CODE_ALREADY_PRESENT;
 
-      m_qualityTests.insert(QualityTestMap::value_type(name, pQualityTest));
+      m_qualityTests.insert(QTestMap::value_type(name, pQualityTest));
 
       return STATUS_CODE_SUCCESS;
     }

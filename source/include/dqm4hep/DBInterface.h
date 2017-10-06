@@ -5,22 +5,22 @@
  * Creation date : lun. janv. 11 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -30,7 +30,7 @@
 #define DQMDBINTERFACE_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
 #include "dqm4hep/Logging.h"
 
 // -- mysql headers
@@ -180,7 +180,7 @@ namespace dqm4hep {
 
       MYSQL_ROW row = mysql_fetch_row(pMySQLResult);
 
-      if(!DQM4HEP::stringToType(row[0], result))
+      if(!dqm4hep::core::stringToType(row[0], result))
       {
         mysql_free_result(pMySQLResult);
         return STATUS_CODE_FAILURE;
@@ -219,7 +219,7 @@ namespace dqm4hep {
       {
         T value = T();
 
-        if(!DQM4HEP::stringToType(row[0], value))
+        if(!dqm4hep::core::stringToType(row[0], value))
           continue;
 
         result.push_back(value);
@@ -261,6 +261,6 @@ namespace dqm4hep {
 
   }
 
-} 
+}
 
 #endif  //  DQM4HEP_DBINTERFACE_H

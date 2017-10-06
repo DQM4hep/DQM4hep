@@ -356,7 +356,7 @@ namespace dqm4hep {
         std::string value(paramIter->second);
 
         StringVector xmlElementNames;
-        DQM4HEP::tokenize(key, xmlElementNames, ".");
+        dqm4hep::core::tokenize(key, xmlElementNames, ".");
 
         TiXmlElement *pCurrentElement = pXmlElement;
         bool keyIsParameter = false;
@@ -378,7 +378,7 @@ namespace dqm4hep {
 
             std::string eltIdStr = subKey.substr( posStart+1 , subKey.size() - (posStart+1) -1 );
 
-            if( ! DQM4HEP::stringToType( eltIdStr , eltId ) )
+            if( ! dqm4hep::core::stringToType( eltIdStr , eltId ) )
             {
               dqm_error( "Couldn't convert '{0}' to array id in key '{1}' !", eltIdStr, subKey);
               return STATUS_CODE_FAILURE;

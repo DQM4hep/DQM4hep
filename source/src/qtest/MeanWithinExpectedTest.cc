@@ -26,21 +26,22 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/DQM4HEP.h"
+#include "dqm4hep/StatusCodes.h"
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/QualityTest.h"
 #include "dqm4hep/PluginManager.h"
 #include "dqm4hep/Logging.h"
 #include "dqm4hep/XmlHelper.h"
 #include "dqm4hep/MonitorElement.h"
 
-// -- root headers 
+// -- root headers
 #include <TH1.h>
 #include <TMath.h>
 
 namespace dqm4hep {
 
   namespace core {
-    
+
     /** MeanWithinExpectedTest class
      */
     class MeanWithinExpectedTest : public QualityTest
@@ -63,7 +64,7 @@ namespace dqm4hep {
       float               m_meanDeviationLower;
       float               m_meanDeviationUpper;
     };
-    
+
     typedef MeanWithinExpectedTest::Factory MeanWithinExpectedTestFactory;
 
     //-------------------------------------------------------------------------------------------------
@@ -73,7 +74,7 @@ namespace dqm4hep {
     {
       return new MeanWithinExpectedTest(name);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
@@ -121,7 +122,7 @@ namespace dqm4hep {
       {
         report.m_message = "Out of expected range";
       }
-      
+
       const float chi = (mean - m_expectedMean)/range;
       const float probability = TMath::Prob(chi*chi, 1);
       report.m_isSuccessful = true;
@@ -143,7 +144,7 @@ namespace dqm4hep {
 
       return true;
     }
-    
+
     DQM_PLUGIN_DECL( MeanWithinExpectedTestFactory, "MeanWithinExpectedTest" );
   }
 
