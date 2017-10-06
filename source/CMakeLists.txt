@@ -38,7 +38,6 @@ ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT
                    DEPENDS ${LIB_HEADERS_PKG}
 )
 
-# AUX_SOURCE_DIRECTORY( src SRC_FILES )
 SET( SRC_FILES ${SRC_FILES} src/QualityTest.cc )
 SET( SRC_FILES ${SRC_FILES} src/Logger.cc )
 SET( SRC_FILES ${SRC_FILES} src/DBInterface.cc )
@@ -56,21 +55,15 @@ SET( SRC_FILES ${SRC_FILES} src/Run.cc )
 SET( SRC_FILES ${SRC_FILES} src/Version.cc )
 SET( SRC_FILES ${SRC_FILES} src/MonitorElement.cc )
 SET( SRC_FILES ${SRC_FILES} src/MonitorElementManager.cc )
-
 AUX_SOURCE_DIRECTORY( src/qtest SRC_FILES )
 
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
+INSTALL( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib )
+INSTALL( FILES ${ROOT_PCM_FILE_NAME} DESTINATION lib )
 
-INSTALL(
-        TARGETS ${PROJECT_NAME}
-        LIBRARY DESTINATION lib
-)
 
-INSTALL(
-	FILES ${ROOT_PCM_FILE_NAME}
-	DESTINATION lib
-)
-
+# -------------------------------------------------
+# build all binaries in main directory
 FILE(GLOB MAIN_SRCS "main/*.cc")
 
 FOREACH( MAIN_SRC ${MAIN_SRCS} )
@@ -84,6 +77,8 @@ FOREACH( MAIN_SRC ${MAIN_SRCS} )
 ENDFOREACH()
 
 
+# -------------------------------------------------
+# build unit test binaries
 IF( BUILD_TESTS )
   ENABLE_TESTING()
   FILE(GLOB TEST_SRCS "tests/*.cc")
@@ -100,5 +95,6 @@ IF( BUILD_TESTS )
   ENDFOREACH()
 ENDIF()
 
-
+# -------------------------------------------------
+# install headers
 INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
