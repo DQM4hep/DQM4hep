@@ -30,9 +30,9 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
-#include "dqm4hep/PluginManager.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/PluginManager.h>
 
 using namespace std;
 using namespace dqm4hep::core;

@@ -30,15 +30,15 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
-#include "dqm4hep/Logging.h"
-#include "dqm4hep/XmlHelper.h"
-#include "dqm4hep/Path.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/Logging.h>
+#include <dqm4hep/XmlHelper.h>
+#include <dqm4hep/Path.h>
 
 // -- tclap headers
-#include "tclap/CmdLine.h"
-#include "tclap/Arg.h"
+#include <tclap/CmdLine.h>
+#include <tclap/Arg.h>
 
 // -- std headers
 #include <iostream>
@@ -46,6 +46,7 @@
 #include <sstream>
 #include <signal.h>
 
+// -- root headers
 #include <TFile.h>
 #include <TDirectory.h>
 #include <TSystem.h>
