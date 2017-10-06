@@ -71,7 +71,7 @@ namespace dqm4hep {
         // need to process includes in constants section since some
         // constants may be defined in includes and could then be
         // used in next constant values
-        else if ( std::string( child->Value() ) == "include" ) {
+        else if ( std::string( child->Value() ) == "include" && parseIncludes ) {
 
           // process the include and returns the first and last elements found in the include
           TiXmlDocument document ;
