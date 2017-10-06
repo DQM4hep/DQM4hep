@@ -1,7 +1,7 @@
-/// \file test-monitor-elements.cc
+/// \file test-directory.cc
 /*
  *
- * test-monitor-elements.cc main source file template automatically generated
+ * test-directory.cc main source file template automatically generated
  * Creation date : mer. nov. 5 2014
  *
  * This file is part of DQM4HEP libraries.
@@ -26,11 +26,10 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
-#include "dqm4hep/Logging.h"
-
-#include "dqm4hep/Directory.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/Logging.h>
+#include <dqm4hep/Directory.h>
 
 // -- std headers
 #include <iostream>

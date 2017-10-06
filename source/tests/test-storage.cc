@@ -1,7 +1,7 @@
-/// \file test-monitor-elements.cc
+/// \file test-storage.cc
 /*
  *
- * test-monitor-elements.cc main source file template automatically generated
+ * test-storage.cc main source file template automatically generated
  * Creation date : mer. nov. 5 2014
  *
  * This file is part of DQM4HEP libraries.
@@ -26,10 +26,10 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
-#include "dqm4hep/Logging.h"
-#include "dqm4hep/Storage.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/Logging.h>
+#include <dqm4hep/Storage.h>
 
 // -- std headers
 #include <iostream>
