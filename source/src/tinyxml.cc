@@ -29,7 +29,7 @@ distribution.
 #include <iostream>
 #endif
 
-#include "dqm4hep/tinyxml.h" // Altered path
+#include <dqm4hep/tinyxml.h> // Altered path
 
 namespace dqm4hep {
 
@@ -734,7 +734,7 @@ namespace dqm4hep {
         attrib->SetDoubleValue( val );
       }
     }
-#endif 
+#endif
 
 
     void TiXmlElement::SetAttribute( const char * cname, const char * cvalue )
@@ -1549,7 +1549,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     }
 
 
-#ifdef TIXML_USE_STL	
+#ifdef TIXML_USE_STL
     std::istream& operator>> (std::istream & in, TiXmlNode & base)
     {
       TIXML_STRING tag;
@@ -1562,7 +1562,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 #endif
 
 
-#ifdef TIXML_USE_STL	
+#ifdef TIXML_USE_STL
     std::ostream& operator<< (std::ostream & out, const TiXmlNode & base)
     {
       TiXmlPrinter printer;
@@ -1844,4 +1844,3 @@ TiXmlAttribute* TiXmlAttribute::Previous()
   }
 
 }
-

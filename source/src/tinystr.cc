@@ -29,7 +29,7 @@ distribution.
 
 #ifndef TIXML_USE_STL
 
-#include "dqm4hep/tinystr.h" // Altered path
+#include <dqm4hep/tinystr.h> // Altered path
 
 namespace dqm4hep {
 

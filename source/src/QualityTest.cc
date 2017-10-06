@@ -25,9 +25,9 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/QualityTest.h"
-#include "dqm4hep/Logging.h"
-#include "dqm4hep/MonitorElement.h"
+#include <dqm4hep/QualityTest.h>
+#include <dqm4hep/Logging.h>
+#include <dqm4hep/MonitorElement.h>
 
 namespace dqm4hep {
 

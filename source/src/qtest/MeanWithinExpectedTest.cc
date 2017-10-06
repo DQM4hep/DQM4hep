@@ -26,13 +26,13 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/StatusCodes.h"
-#include "dqm4hep/Internal.h"
-#include "dqm4hep/QualityTest.h"
-#include "dqm4hep/PluginManager.h"
-#include "dqm4hep/Logging.h"
-#include "dqm4hep/XmlHelper.h"
-#include "dqm4hep/MonitorElement.h"
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/QualityTest.h>
+#include <dqm4hep/PluginManager.h>
+#include <dqm4hep/Logging.h>
+#include <dqm4hep/XmlHelper.h>
+#include <dqm4hep/MonitorElement.h>
 
 // -- root headers
 #include <TH1.h>

@@ -25,13 +25,14 @@
  * @copyright CNRS , IPNL
  */
 
+// -- dqm4hep headers
+#include <dqm4hep/Logger.h>
 
-#include "dqm4hep/Logger.h"
-
-#include "spdlog/sinks/stdout_sinks.h"
-#include "spdlog/sinks/ansicolor_sink.h"
-#include "spdlog/logger.h"
-#include "spdlog/sinks/sink.h"
+// -- spdlog headers
+#include <spdlog/sinks/stdout_sinks.h>
+#include <spdlog/sinks/ansicolor_sink.h>
+#include <spdlog/logger.h>
+#include <spdlog/sinks/sink.h>
 
 namespace dqm4hep {
 
