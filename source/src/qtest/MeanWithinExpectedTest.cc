@@ -116,15 +116,16 @@ namespace dqm4hep {
 
       if(m_meanDeviationLower < mean && mean < m_meanDeviationUpper)
       {
-        report.m_message = "Within expected range";
+        report.m_message = "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
       }
       else
       {
-        report.m_message = "Out of expected range";
+        report.m_message = "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
       }
 
       const float chi = (mean - m_expectedMean)/range;
       const float probability = TMath::Prob(chi*chi, 1);
+      report.m_quality = probability;
       report.m_isSuccessful = true;
 
       return STATUS_CODE_SUCCESS;
