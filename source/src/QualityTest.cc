@@ -84,7 +84,7 @@ namespace dqm4hep {
       value["monitorElementType"] = m_monitorElementType;
       value["monitorElementPath"] = m_monitorElementPath;
       value["message"] = m_message;
-      value["quality"] = static_cast<int>(m_quality);
+      value["quality"] = m_quality;
       value["successful"] = m_isSuccessful;
       value["extra"] = m_extraInfos;
     }
