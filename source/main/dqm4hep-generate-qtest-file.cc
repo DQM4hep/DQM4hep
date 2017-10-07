@@ -76,8 +76,7 @@ void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirec
     }
     else
     {
-      TiXmlElement *pXmlElement = new TiXmlElement("fileElement");
-      pXmlElement->SetAttribute("file", fileName);
+      TiXmlElement *pXmlElement = new TiXmlElement("monitorElement");
       pXmlElement->SetAttribute("path", currentPath.getPath());
       pXmlElement->SetAttribute("name", pTKey->GetName());
       TiXmlComment *pQTestsXmlComment = new TiXmlComment("Quality tests to execute ...");
