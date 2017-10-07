@@ -16,7 +16,7 @@ void GenerateData()
 {
   std::vector<TObject*> writeObject;
   TFile *pTFile = new TFile("test_samples.root", "RECREATE");
-  
+
   TDirectory *pSubDir = pTFile->mkdir("Gaussians");
   pSubDir->cd();
 
@@ -46,7 +46,7 @@ void GenerateData()
   //
   // Double gaussian with same mean but different RMS
   //
-  TH1F *pDblGaus_Mean15_RMS2_RMS5 = new TH1F("DblGaus_Mean5_RMS2_RMS5", "Random gaus(15, 2)+gaus(15, 5)", 300, 0, 30);
+  TH1F *pDblGaus_Mean15_RMS2_RMS5 = new TH1F("DblGaus_Mean15_RMS2_RMS5", "Random gaus(15, 2)+gaus(15, 5)", 300, 0, 30);
   writeObject.push_back(pDblGaus_Mean15_RMS2_RMS5);
 
   for(unsigned int i=0 ; i<10000 ; i++)
@@ -67,7 +67,7 @@ void GenerateData()
       pGaus_Mean15_RMS1_ExpBck->Fill(gRandom->Gaus(15, 1));
     pGaus_Mean15_RMS1_ExpBck->Fill(gRandom->Exp(12));
   }
-  
+
   pTFile->cd();
 
   //
@@ -121,8 +121,8 @@ void GenerateData()
   }
 
   delete pCosFunction;
-  
-  
+
+
 
 
   // //
