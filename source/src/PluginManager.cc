@@ -63,7 +63,7 @@ namespace dqm4hep {
 
       if( pPluginDllEnv == 0 )
       {
-        dqm_warning( "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
+        dqm_debug( "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
             "Set it before loading shared libraries. \n"
             "Example : export DQM4HEP_PLUGIN_DLL=libPlugin1.so:libPlugin2.so" );
 
