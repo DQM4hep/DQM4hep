@@ -26,6 +26,7 @@ where OPTIONS can be :
 - INSTALL_DOC [ON/OFF] to install [doxygen](www.doxygen.org) code documentation (default is OFF)
 
 <img src="https://www.gnu.org/graphics/gplv3-127x51.png" align="right" />
+
 ## License and Copyright
 Copyright (C), dqm4hep-core Authors
 
