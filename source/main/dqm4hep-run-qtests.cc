@@ -112,6 +112,15 @@ int main(int argc, char* argv[])
       , "string");
   pCommandLine->add(qualityThresholdsArg);
 
+  TCLAP::ValueArg<std::string> outputJsonFileArg(
+      "o"
+      , "output-json"
+      , "The json output file to store the quality test reports"
+      , false
+      , ""
+      , "string");
+  pCommandLine->add(outputJsonFileArg);
+
   // parse command line
   pCommandLine->parse(argc, argv);
 
@@ -252,12 +261,29 @@ int main(int argc, char* argv[])
 
   const QReportContainer &reports(reportStorage.reports());
 
+  Json::Value jsonRoot;
+  Json::Value jsonMetadata; Json::Value jsonHostInfo; Json::Value jsonQReports(Json::arrayValue);
+  std::string date; timeToHMS(time(0), date);
+  StringMap hostInfos; fillHostInfo(hostInfos);
+  for(auto iter : hostInfos) jsonHostInfo[iter.first] = iter.second;
+
+  jsonMetadata["host"] = jsonHostInfo;
+  jsonMetadata["date"] = date;
+  jsonRoot["meta"] = jsonMetadata;
+
+  unsigned int jsonIndex(0);
+
   std::cout << bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left << "STATUS" << setw(10) << std::left << "QUALITY" << "MESSAGE" << reset << std::endl;
 
   for(const auto &iter : reports)
   {
     for(const auto &iter2 : iter.second)
     {
+      Json::Value jsonQReport;
+      iter2.second.toJson(jsonQReport);
+      jsonQReports[jsonIndex] = jsonQReport;
+      jsonIndex++;
+
       if(!iter2.second.m_isSuccessful)
       {
         std::cout << redBck << white << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << setw(10) << std::left << "FAIL" << setw(10) << std::left << "none" << iter2.second.m_message << reset << std::endl;
@@ -283,6 +309,18 @@ int main(int argc, char* argv[])
         }
       }
     }
+  }
+
+  jsonRoot["qreports"] = jsonQReports;
+
+  if(outputJsonFileArg.isSet())
+  {
+    const std::string jsonFileName(outputJsonFileArg.getValue());
+    Json::StyledWriter writer;
+    std::ofstream jsonFile;
+    jsonFile.open(jsonFileName.c_str());
+    jsonFile << writer.write(jsonRoot);
+    jsonFile.close();
   }
 
   return 0;
