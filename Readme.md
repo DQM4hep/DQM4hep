@@ -1,20 +1,17 @@
 <img src="https://travis-ci.org/DQM4HEP/dqm4hep-core.svg?branch=master" align="left" />
 
-# DQM4HEP Core library, a Data Quality Monitoring for High Energy Physics
-
-dqm4hep-core is distributed under the [GPLv3 License](http://www.gnu.org/licenses/gpl-3.0.en.html)
-
-[![License](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+# DQM4HEP Core library, a Data Quality Monitoring framework for High Energy Physics
 
 ## Installation
 
 The building process is managed by [CMake](http://cmake.org).
 
 Dependencies :
+- c++11 compiler
 - [ROOT](https://github.com/root-project/root), version 6 required
 - [jsoncpp](https://github.com/open-source-parsers/jsoncpp) that can installed via the github repo or using apt like tools (package libjsoncpp-dev)
 - [xdrstream](https://github.com/dqm4hep/xdrstream) a serialization library
-- [MySQL](https://www.mysql.com/fr/downloads/) client library (package limysqlclient-dev)
+- [MySQL](https://www.mysql.com/fr/downloads/) client library (package libmysqlclient-dev)
 
 In the top level directory :
 
@@ -28,6 +25,7 @@ make
 where OPTIONS can be :
 - INSTALL_DOC [ON/OFF] to install [doxygen](www.doxygen.org) code documentation (default is OFF)
 
+<img src="https://www.gnu.org/graphics/gplv3-127x51.png" align="right" />
 ## License and Copyright
 Copyright (C), dqm4hep-core Authors
 
