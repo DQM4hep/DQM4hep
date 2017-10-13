@@ -1,0 +1,35 @@
+#!/bin/sh
+
+envFile="/home/acqilc/dqmsoftware/dqm4hep/dqm4hepenv"
+[ -f ${envFile} ] && . ${envFile}
+
+if [ -z "$DIM_DNS_NODE" ] ;  then
+  echo "DIM_DNS_NODE is not set, please set it in ${envFile}" >&2
+  exit 1
+fi
+
+
+if [ -z "$DQM4HEP_DIR" ] ;  then
+  echo "DQM4HEP_DIR is not set, please set it in ${envFile}" >&2
+  exit 1
+fi
+
+if [ -z "$DIM_DIR" ] ;  then
+  echo "DIM_DIR is not set, please set it in ${envFile}" >&2
+  exit 1
+fi
+
+
+
+if [ $# -eq 1 ]
+then
+    runControlName="$1"
+fi
+
+
+if [ -z "$runControlName" ] ;  then
+  echo "No runControlName defined, default for SDHCAL should be SDHCALRunControl" >&2
+  exit 1
+fi
+
+${DQM4HEP_DIR}/bin/dqm4hep_start_run_control_interface -r ${runControlName} &

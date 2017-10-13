@@ -1,0 +1,26 @@
+{
+	"OpenArchive" : true,
+	"ArchiveDirectory" : "/tmp",
+	"Network" :
+	{
+		"RunControl" : "SDHCALRunControl",
+		"DataCollector" : "RawbinDataCollector",
+		"EventStreamer" : "LCIOStreamer",
+		"MonitorElementCollector" : "MECollector"
+	},
+	"Cycle" :
+	{
+		"Type" : "TimerCycle",
+		"Value" : 10,
+		"Timeout" : 5
+	},
+	"Module" :
+	{
+		"Type" : "ExampleModule",
+		"Name" : "MyExampleModule",
+		"Settings" :
+		{
+			"ConfigFile" : "/opt/dqmsdhcal/SDHCALMONITOR/Tracking/xml/m3_avril2015.xml"
+		}
+	}
+}

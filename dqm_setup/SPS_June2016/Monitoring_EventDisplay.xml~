@@ -1,0 +1,100 @@
+<?xml version="1.0" ?>
+<dqm4hep>
+    <monitoring>
+        <dimDnsNode value="lyosdhcal9" />
+        <view>
+            <meView>
+                <collector name="me_collector">
+                    <module name="EventDisplay">
+                        <item path="/BeamMuons/Profiles/" name="LastProfileXY" checked="1" />
+                        <item path="/BeamMuons/Profiles/" name="LastProfileZX" checked="1" />
+                        <item path="/BeamMuons/Profiles/" name="LastProfileZY" checked="1" />
+                        <item path="/ChargedHadrons/Profiles/" name="LastProfileXY" checked="1" />
+                        <item path="/ChargedHadrons/Profiles/" name="LastProfileZX" checked="1" />
+                        <item path="/ChargedHadrons/Profiles/" name="LastProfileZY" checked="1" />
+                        <item path="/CosmicMuons/Profiles/" name="LastProfileXY" checked="1" />
+                        <item path="/CosmicMuons/Profiles/" name="LastProfileZX" checked="1" />
+                        <item path="/CosmicMuons/Profiles/" name="LastProfileZY" checked="1" />
+                        <item path="/EmShowers/Profiles/" name="LastProfileXY" checked="1" />
+                        <item path="/EmShowers/Profiles/" name="LastProfileZX" checked="1" />
+                        <item path="/EmShowers/Profiles/" name="LastProfileZY" checked="1" />
+                        <item path="/NeutralHadrons/Profiles/" name="LastProfileXY" checked="0" />
+                        <item path="/NeutralHadrons/Profiles/" name="LastProfileZX" checked="0" />
+                        <item path="/NeutralHadrons/Profiles/" name="LastProfileZY" checked="0" />
+                        <item path="/Noise/Profiles/" name="LastProfileXY" checked="1" />
+                        <item path="/Noise/Profiles/" name="LastProfileZX" checked="1" />
+                        <item path="/Noise/Profiles/" name="LastProfileZY" checked="1" />
+                        <item path="/Others/Profiles/" name="LastProfileXY" checked="1" />
+                        <item path="/Others/Profiles/" name="LastProfileZX" checked="1" />
+                        <item path="/Others/Profiles/" name="LastProfileZY" checked="1" />
+                    </module>
+                </collector>
+            </meView>
+            <canvasView>
+                <canvasArea name="Muons">
+                    <canvas x="-2" y="61" w="539" h="339">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="BeamMuons/Profiles" name="LastProfileZX" />
+                    </canvas>
+                    <canvas x="559" y="60" w="498" h="339">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="BeamMuons/Profiles" name="LastProfileZY" />
+                    </canvas>
+                    <canvas x="1082" y="12" w="460" h="413">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="BeamMuons/Profiles" name="LastProfileXY" />
+                    </canvas>
+                    <canvas x="0" y="432" w="541" h="333">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="CosmicMuons/Profiles" name="LastProfileZX" />
+                    </canvas>
+                    <canvas x="564" y="435" w="497" h="335">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="CosmicMuons/Profiles" name="LastProfileZY" />
+                    </canvas>
+                    <canvas x="1081" y="425" w="464" h="413">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="CosmicMuons/Profiles" name="LastProfileXY" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Showers">
+                    <canvas x="8" y="52" w="543" h="337">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="ChargedHadrons/Profiles" name="LastProfileZX" />
+                    </canvas>
+                    <canvas x="557" y="52" w="499" h="338">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="ChargedHadrons/Profiles" name="LastProfileZY" />
+                    </canvas>
+                    <canvas x="1059" y="3" w="494" h="430">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="ChargedHadrons/Profiles" name="LastProfileXY" />
+                    </canvas>
+                    <canvas x="9" y="481" w="542" h="332">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="EmShowers/Profiles" name="LastProfileZX" />
+                    </canvas>
+                    <canvas x="559" y="479" w="501" h="332">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="EmShowers/Profiles" name="LastProfileZY" />
+                    </canvas>
+                    <canvas x="1061" y="434" w="504" h="418">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="EmShowers/Profiles" name="LastProfileXY" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Noise and others">
+                    <canvas x="10" y="83" w="500" h="324">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="Others/Profiles" name="LastProfileZX" />
+                    </canvas>
+                    <canvas x="529" y="81" w="509" h="326">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="Others/Profiles" name="LastProfileZY" />
+                    </canvas>
+                    <canvas x="1075" y="53" w="400" h="365">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="Others/Profiles" name="LastProfileXY" />
+                    </canvas>
+                    <canvas x="13" y="470" w="499" h="300">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="Noise/Profiles" name="LastProfileZX" />
+                    </canvas>
+                    <canvas x="532" y="470" w="506" h="300">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="Noise/Profiles" name="LastProfileZY" />
+                    </canvas>
+                    <canvas x="1079" y="445" w="400" h="350">
+                        <monitorElement collector="me_collector" module="EventDisplay" path="Noise/Profiles" name="LastProfileXY" />
+                    </canvas>
+                </canvasArea>
+            </canvasView>
+        </view>
+        <controller>
+            <collector value="me_collector" />
+        </controller>
+    </monitoring>
+</dqm4hep>

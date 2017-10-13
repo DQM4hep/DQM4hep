@@ -37,7 +37,7 @@ IF( USE_MASTER )
 	SET( DQMCore_version              "master" )
 	SET( DQMViz_version               "master" )
 	SET( DQM4ILC_version              "master" )
-	SET( JsonCpp_version              "0.10.5" )
+	SET( JsonCpp_version              "1.8.3" )
 	SET( DIMJC_version                "master" )
 	SET( levbdim_version              "master" )
 	SET( Mongoose_version             "master" )
@@ -47,7 +47,7 @@ ELSE()
 	SET( DQMCore_version              "v02-03-00" )
 	SET( DQMViz_version               "v02-01-00" )
 	SET( DQM4ILC_version              "v01-02-00" )
-	SET( JsonCpp_version              "0.10.5" )
+	SET( JsonCpp_version              "1.8.3" )
 	SET( DIMJC_version                "v01-02-00" )
 	SET( levbdim_version              "v01-00-00" )
 	SET( Mongoose_version             "master" )
@@ -61,13 +61,13 @@ ENDIF()
 # ----- download settings -----
 SET( xdrstream_repository           "https://github.com/DQM4HEP/xdrstream.git" )
 SET( xdrlcio_repository             "https://github.com/DQM4HEP/xdrlcio.git" )
-SET( DQMCore_repository             "https://github.com/DQM4HEP/DQMCore.git" )
-SET( DQMViz_repository              "https://github.com/DQM4HEP/DQMViz.git" )
-SET( DQM4ILC_repository             "https://github.com/DQM4HEP/DQM4ILC.git" )
-SET( JsonCpp_repository             "https://github.com/DQM4HEP/jsoncpp.git" )
+SET( DQMCore_repository             "https://github.com/apingault/DQMCore.git" )
+SET( DQMViz_repository              "https://github.com/apingault/DQMViz.git" )
+SET( DQM4ILC_repository             "https://github.com/apingault/DQM4ILC.git" )
+SET( JsonCpp_repository             "https://github.com/open-source-parsers/jsoncpp.git" )
 SET( DIM_repository                 "https://github.com/DQM4HEP/dim.git" )
-SET( DIMJC_repository               "https://github.com/DQM4HEP/dimjc.git" )
-SET( levbdim_repository             "https://github.com/DQM4HEP/levbdim.git" )
+SET( DIMJC_repository               "https://github.com/apingault/dimjc.git" )
+SET( levbdim_repository             "https://github.com/apingault/levbdim.git" )
 SET( Mongoose_repository            "https://github.com/DQM4HEP/mongoose-cpp.git" )
 SET( LOG4CXX_repository             "http://svn.apache.org/repos/asf/incubator/log4cxx/trunk" )
 SET( APR_repository                 "https://github.com/apache/apr.git" )
@@ -90,12 +90,13 @@ SET( APR_package_depends "" )
 SET( APRUTIL_package_depends "" )
 
 # ----- additional cmake args -----
-IF ( NOT APPLE )
+# IF ( NOT APPLE )
 	SET( JsonCpp_additional_cmake_args  -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON )
-ENDIF ( NOT APPLE )
+# ENDIF ( NOT APPLE )
 
 SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_WARNING_AS_ERROR=OFF )
 
+SET ( Mongoose_additional_cmake_args ${Mongoose_additional_cmake_args} -DEXAMPLES=OFF -DWEBSOCKET=OFF -DHAS_JSONCPP=ON )
 
 # ----- CLANG 7.0+ gives an error for #define private public -----
 # ----- error: keyword is hidden by macro definition [-Werror,-Wkeyword-macro] -----
@@ -103,14 +104,16 @@ SET( JsonCpp_additional_cmake_args ${JsonCpp_additional_cmake_args} -DJSONCPP_WI
 # --- Errors also on Travis CI
 SET( levbdim_additional_cmake_args
   ${levbdim_additional_cmake_args}
-  "-DCMAKE_CXX_FLAGS= -Wno-macro-redefined -Wno-format"
+  "-DCMAKE_CXX_FLAGS= ${CMAKE_CXX_FLAGS} -Wno-macro-redefined -Wno-format -Wno-vla-extension -Wno-variadic-macros"
   )
+  # vla in filetailer.cxx (might explains crashes when opening logs on osx)
+  # variadic macros in fsmjob.cxx
 
 # ----- DQM4ILC complains about unusedParameter and shadow (found in Marlin package) [-Werror,-Wunused-parameter -Wshadow]
 # ----- Also complains about effc++ warning from xdrstream : need to be taken care off in a future release
 SET( DQM4ILC_additional_cmake_args
   ${DQM4ILC_additional_cmake_args}
-  "-DCMAKE_CXX_FLAGS= -Wno-unused-parameter -Wno-shadow -Wno-effc++"
+  "-DCMAKE_CXX_FLAGS= ${CMAKE_CXX_FLAGS} -Wno-unused-parameter -Wno-shadow -Wno-effc++"
   )
 
 # ----- dim os detection -----
@@ -179,6 +182,12 @@ MESSAGE( STATUS "BUILD_EVB: ${BUILD_EVB}" )
 OPTION( BUILD_HTTP "Whether to compile the http supprt of DQMCore" OFF )
 MESSAGE( STATUS "BUILD_HTTP: ${BUILD_HTTP}" )
 
+OPTION( FORCE_DIM_INSTALL "Whether to look for present dim install or force install a standalone one " OFF )
+MESSAGE( STATUS "FORCE_DIM_INSTALL: ${FORCE_DIM_INSTALL}" )
+
+OPTION( FORCE_DIMJC_INSTALL "Whether to look for present dim install or force install a standalone one " OFF )
+MESSAGE( STATUS "FORCE_DIMJC_INSTALL: ${FORCE_DIMJC_INSTALL}" )
+
 # ----------------------------------------------------------------------------
 
 IF( DIM_GUI )
@@ -221,10 +230,13 @@ ExternalProject_Add( xdrstream
     PREFIX xdrstream
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrstream
     LIST_SEPARATOR %
+    UPDATE_COMMAND ""
 )
 
 # ----- DIM package -----
-FIND_PACKAGE( DIM QUIET )
+IF ( NOT FORCE_DIM_INSTALL )
+  FIND_PACKAGE( DIM QUIET )
+ENDIF()
 
 IF ( NOT DIM_FOUND )
 	SET ( DIMDIR ${CMAKE_CURRENT_SOURCE_DIR}/dim )
@@ -241,6 +253,7 @@ IF ( NOT DIM_FOUND )
 	    CONFIGURE_COMMAND ""
 	    BUILD_COMMAND ${DIMDIR}/external-project/build-command ${DIM_OS} ${DIM_GUI_FLAG}
 	    INSTALL_COMMAND ${DIMDIR}/external-project/install-command ${CMAKE_INSTALL_PREFIX}/bin ${CMAKE_INSTALL_PREFIX}/lib ${CMAKE_INSTALL_PREFIX}/include
+      UPDATE_COMMAND ""
 	)
 
 	SET( dim_package_depends "dim" )
@@ -369,31 +382,50 @@ IF ( BUILD_DQM4ILC )
     SET (DQM4ILC_DEP Marlin GEAR)
     FOREACH (DEP ${DQM4ILC_DEP})
       IF (${DEP}_DIR)
-	SET( DQM4ILC_additional_cmake_args
-	  ${DQM4ILC_additional_cmake_args}
-	  -D${DEP}_DIR=${${DEP}_DIR}
-	  )
+	       SET( DQM4ILC_additional_cmake_args
+	          ${DQM4ILC_additional_cmake_args}
+	          -D${DEP}_DIR=${${DEP}_DIR}
+	         )
       ENDIF()
     ENDFOREACH()
 ENDIF()
 
 # ----- JsonCpp package -----
-FIND_PACKAGE( JSONCPP QUIET )
+SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
 
-IF ( NOT JSONCPP_FOUND )
-	SET ( JSONCPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/jsoncpp )
+ExternalProject_Add( jsoncpp
+    GIT_REPOSITORY ${JsonCpp_repository}
+    GIT_TAG ${JsonCpp_version}
+    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
+	  PREFIX jsoncpp
+    LIST_SEPARATOR %
+    SOURCE_DIR ${JSONCPP_DIR}
+    UPDATE_COMMAND ""
+)
+SET( jsoncpp_package_depends "jsoncpp" )
+LIST( APPEND Mongoose_additional_cmake_args "-DJSONCPP_DIR=${JSONCPP_DIR}" )
 
-	ExternalProject_Add( jsoncpp
-	    GIT_REPOSITORY ${JsonCpp_repository}
-	    GIT_TAG ${JsonCpp_version}
-	    CMAKE_ARGS ${common_cmake_args} ${JsonCpp_additional_cmake_args}
-		PREFIX jsoncpp
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${JSONCPP_DIR}
-	)
 
-	SET( jsoncpp_package_depends "jsoncpp" )
-
+# ----- Mongoose package -----
+IF ( BUILD_EVB OR BUILD_HTTP )
+  
+  SET ( Mongoose_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongoose-cpp )
+  
+  ExternalProject_Add( Mongoose
+    DEPENDS ${jsoncpp_package_depends}
+    GIT_REPOSITORY ${Mongoose_repository}
+    GIT_TAG ${Mongoose_version}
+    CMAKE_ARGS ${common_cmake_args} ${Mongoose_additional_cmake_args}
+    PREFIX mongoose-cpp
+    LIST_SEPARATOR %
+    SOURCE_DIR ${Mongoose_DIR}
+    UPDATE_COMMAND ""
+  )
+  
+  SET( Mongoose_package_depends "Mongoose" )
+  
+  LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${Mongoose_DIR}" )
+  
 ENDIF()
 
 # ----- levbdim package -----
@@ -401,35 +433,17 @@ IF ( BUILD_EVB )
 	SET ( levbdim_DIR ${CMAKE_CURRENT_SOURCE_DIR}/levbdim )
 
 	ExternalProject_Add( levbdim
-		DEPENDS ${jsoncpp_package_depends} ${dim_package_depends}
+		DEPENDS ${jsoncpp_package_depends} ${dim_package_depends} ${Mongoose_package_depends}
 	    GIT_REPOSITORY ${levbdim_repository}
 	    GIT_TAG ${levbdim_version}
 	    CMAKE_ARGS ${common_cmake_args} ${levbdim_additional_cmake_args}
-		PREFIX levbdim
+		  PREFIX levbdim
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${levbdim_DIR}
+      UPDATE_COMMAND ""
 	)
 
 	SET( levbdim_package_depends "levbdim" )
-
-ENDIF()
-
-# ----- Mongoose package -----
-IF ( BUILD_HTTP )
-	SET ( Mongoose_DIR ${CMAKE_CURRENT_SOURCE_DIR}/mongoose-cpp )
-
-	ExternalProject_Add( Mongoose
-	    GIT_REPOSITORY ${Mongoose_repository}
-	    GIT_TAG ${Mongoose_version}
-	    CMAKE_ARGS ${common_cmake_args} ${Mongoose_additional_cmake_args}
-		PREFIX mongoose-cpp
-	    LIST_SEPARATOR %
-	    SOURCE_DIR ${Mongoose_DIR}
-	)
-
-      SET( Mongoose_package_depends "Mongoose" )
-
-      LIST( APPEND DQMCore_additional_cmake_args "-DMongoose_DIR=${CMAKE_INSTALL_PREFIX}" )
 
 ENDIF()
 
@@ -442,10 +456,13 @@ ExternalProject_Add( DQMCore
     PREFIX DQMCore
     LIST_SEPARATOR %
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMCore
+    UPDATE_COMMAND ""
 )
 
 # ----- DIMJC package -----
-FIND_PACKAGE( DIMJC QUIET )
+IF ( NOT FORCE_DIMJC_INSTALL )
+  FIND_PACKAGE( DIMJC QUIET )
+ENDIF()
 
 IF ( NOT DIMJC_FOUND )
 	SET ( DIMJC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/dimjc )
@@ -458,6 +475,7 @@ IF ( NOT DIMJC_FOUND )
 	    PREFIX dimjc
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${DIMJC_DIR}
+      UPDATE_COMMAND ""
 	)
 
 	SET( dimjc_package_depends "dimjc" )
@@ -482,6 +500,7 @@ IF( BUILD_DQM4ILC )
 	    PREFIX xdrlcio
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/xdrlcio
+        UPDATE_COMMAND ""
     )
 
     SET( xdrlcio_package_depends "xdrlcio" )
@@ -498,6 +517,7 @@ IF( BUILD_DQM4ILC )
 	    PREFIX DQM4ILC
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQM4ILC
+        UPDATE_COMMAND ""
     )
 
 ENDIF()
@@ -520,6 +540,7 @@ IF( BUILD_DQMVIZ )
 	    PREFIX DQMViz
 	    LIST_SEPARATOR %
 	    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/DQMViz
+        UPDATE_COMMAND ""
     )
 
 ENDIF()

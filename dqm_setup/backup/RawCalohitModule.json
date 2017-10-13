@@ -1,0 +1,47 @@
+{
+	"OpenArchive" : false,
+	"ArchiveDirectory" : "/tmp",
+	"Network" :
+	{
+		"RunControl" : "SDHCALRunControl",
+		"DataCollector" : "RawCalohitDataCollector",
+		"EventStreamer" : "LCIOStreamer",
+		"MonitorElementCollector" : "MECollector"
+	},
+	"Cycle" :
+	{
+		"Type" : "TimerCycle",
+		"Value" : 10,
+		"Timeout" : 5
+	},
+	"Module" :
+	{
+		"Settings" :
+		{
+		"ShouldProcessStreamout" : false,
+		"ShouldProcessTrivent" : true,
+		"Trivent" :
+		{
+        	"InputCollectionName" : "DHCALRawHits",
+        	"OutputCollectionName" : "SDHCAL_HIT",
+       		"GeometryFile" : "/home/acqilc/dqm_setup/TriventGeom.xml",
+        	"LayerCut" : 3,
+        	"NoiseCut" : 10,
+        	"TimeWindow" : 2,
+        	"LayerGap" : 0.9,
+        	"ElecNoiseCut" : 100000,
+        	"Time2PreviousEventCut" : 0,
+        	"GainCorrectionMode" : false,
+        	"CherenkovWindow" : 20,
+        	"CherenkovLenght" : 1,
+        	"CherenkovDifId" : 1, // 0 means no cherenkov written in file
+        	"TreatCherenkov" : false, // whether to treat the cherenkov dif
+        	"CellSizeU" : 10.408, // SDHCAL pad size
+        	"CellSizeV" : 10.408, // SDHCAL pad size
+        	"LayerThickness" : 26.131 // 26.131 for SDHCAL ; 55 at GIF++
+		},
+		"NActiveLayers" : 48,
+		"ExpectedNTracksPerAsicOverRun" : 10000			
+		}
+	}
+}

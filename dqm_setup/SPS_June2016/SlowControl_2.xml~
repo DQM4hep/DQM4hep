@@ -1,0 +1,343 @@
+<?xml version="1.0" ?>
+<dqm4hep>
+    <monitoring>
+        <dimDnsNode value="lyosdhcal9" />
+        <view>
+            <meView>
+                <collector name="me_collector">
+                    <module name="SlowControl">
+                        <item path="/ByLayer/Current/" name="IReadLayer_0" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_1" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_10" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_11" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_12" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_13" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_14" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_15" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_16" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_17" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_18" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_19" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_2" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_20" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_21" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_22" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_23" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_24" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_25" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_26" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_27" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_28" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_29" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_3" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_30" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_31" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_32" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_33" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_34" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_35" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_36" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_37" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_38" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_39" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_4" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_40" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_41" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_42" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_43" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_44" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_45" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_46" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_47" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_48" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_49" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_5" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_50" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_51" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_52" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_53" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_54" checked="0" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_55" checked="0" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_6" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_7" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_8" checked="1" />
+                        <item path="/ByLayer/Current/" name="IReadLayer_9" checked="1" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_0" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_1" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_10" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_11" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_12" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_13" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_14" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_15" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_16" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_17" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_18" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_19" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_2" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_20" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_21" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_22" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_23" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_24" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_25" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_26" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_27" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_28" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_29" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_3" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_30" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_31" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_32" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_33" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_34" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_35" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_36" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_37" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_38" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_39" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_4" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_40" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_41" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_42" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_43" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_44" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_45" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_46" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_47" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_48" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_49" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_5" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_50" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_51" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_52" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_53" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_54" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_55" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_6" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_7" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_8" checked="0" />
+                        <item path="/ByLayer/HV/" name="VReadLayer_9" checked="0" />
+                        <item path="/Global/" name="GlobalPressure" checked="1" />
+                        <item path="/Global/" name="GlobalTemperature" checked="1" />
+                        <item path="/Global/" name="IRead" checked="1" />
+                        <item path="/Global/" name="ISet" checked="1" />
+                        <item path="/Global/" name="ISetIReadDiff" checked="1" />
+                        <item path="/Global/" name="LowVoltage" checked="1" />
+                        <item path="/Global/" name="VRead" checked="1" />
+                        <item path="/Global/" name="VSeVtReadDiff" checked="1" />
+                        <item path="/Global/" name="VSet" checked="1" />
+                    </module>
+                </collector>
+            </meView>
+            <canvasView>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="ISetIReadDiff" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="VSeVtReadDiff" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="VSet" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="LowVoltage" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="GlobalPressure" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="VRead" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="GlobalTemperature" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="ISet" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="Global" name="IRead" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_0" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_1" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_2" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_3" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_4" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_5" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_6" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_7" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_8" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_9" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_10" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_11" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_12" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_13" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_14" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_15" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_16" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_17" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_18" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_19" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_20" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_21" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_22" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_23" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_24" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_25" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_26" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_27" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_28" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_29" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_30" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_31" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_32" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_33" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_34" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_35" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_36" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_37" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_38" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_39" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_40" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_41" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_42" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_43" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_44" />
+                    </canvas>
+                </canvasArea>
+                <canvasArea name="Canvas area">
+                    <canvas x="0" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_45" />
+                    </canvas>
+                    <canvas x="400" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_46" />
+                    </canvas>
+                    <canvas x="800" y="0" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_47" />
+                    </canvas>
+                    <canvas x="0" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_48" />
+                    </canvas>
+                    <canvas x="400" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_49" />
+                    </canvas>
+                    <canvas x="800" y="250" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_50" />
+                    </canvas>
+                    <canvas x="0" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_51" />
+                    </canvas>
+                    <canvas x="400" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_52" />
+                    </canvas>
+                    <canvas x="800" y="500" w="400" h="250">
+                        <monitorElement collector="me_collector" module="SlowControl" path="ByLayer/Current" name="IReadLayer_53" />
+                    </canvas>
+                </canvasArea>
+            </canvasView>
+        </view>
+        <controller>
+            <collector value="me_collector" />
+        </controller>
+    </monitoring>
+</dqm4hep>
