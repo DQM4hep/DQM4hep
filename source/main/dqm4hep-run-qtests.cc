@@ -210,10 +210,12 @@ int main(int argc, char* argv[])
   {
     for(TiXmlElement *monitorElement = rootElement->FirstChildElement("monitorElement") ; monitorElement ; monitorElement = monitorElement->NextSiblingElement("monitorElement"))
     {
-      std::string path, name;
+      std::string path, name, reference;
       THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
         XmlHelper::getAttribute(monitorElement, "path", path));
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(monitorElement, "name", name));
+      THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
+        XmlHelper::getAttribute(monitorElement, "reference", reference));
 
       TObject *pTObject(nullptr);
       Path fullName(path); fullName += name;
@@ -232,6 +234,12 @@ int main(int argc, char* argv[])
 
       MonitorElement *pMonitorElement(nullptr);
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->handleMonitorElement(path, pTObject, pMonitorElement));
+
+      if(!reference.empty())
+      {
+        dqm_debug( "Monitor element '{0}' read, reference file '{1}'", name, reference );
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->attachReference(pMonitorElement, reference));
+      }
 
       for(TiXmlElement *qtest = monitorElement->FirstChildElement("qtest") ; qtest ; qtest = qtest->NextSiblingElement("qtest"))
       {
