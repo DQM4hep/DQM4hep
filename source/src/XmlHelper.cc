@@ -53,6 +53,7 @@ namespace dqm4hep {
       }
 
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::processIncludeElements( fileName, root, constants ));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::replaceConstants( root, constants ));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -255,6 +256,40 @@ namespace dqm4hep {
       if( !loadOkay ) {
         dqm_error( "XMLParser::processIncludeElement error in file [{0}, row: {1}, col: {2}] : {3}", refFileName, document.ErrorRow(), document.ErrorCol(), document.ErrorDesc() );
         return STATUS_CODE_FAILURE;
+      }
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //----------------------------------------------------------------------------------------------------
+
+    StatusCode XmlHelper::replaceConstants(TiXmlElement* element, const StringMap &constants)
+    {
+      if(constants.empty())
+        return STATUS_CODE_SUCCESS;
+
+      // replace constants in all attributes
+      for(TiXmlAttribute *attribute = element->FirstAttribute(); attribute ; attribute = attribute->Next())
+      {
+        std::string value(attribute->ValueStr());
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::performConstantReplacement(value, constants));
+        attribute->SetValue(value);
+      }
+
+      for(TiXmlNode *node = element->FirstChild() ; node ; node = node->NextSibling())
+      {
+        if(node->Type() == TiXmlNode::TINYXML_ELEMENT)
+        {
+          TiXmlElement *child = node->ToElement();
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::replaceConstants(child, constants));
+        }
+        else if(node->Type() == TiXmlNode::TINYXML_TEXT)
+        {
+          TiXmlText *child = node->ToText();
+          std::string value(child->ValueStr());
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::performConstantReplacement(value, constants));
+          child->SetValue(value);
+        }
       }
 
       return STATUS_CODE_SUCCESS;

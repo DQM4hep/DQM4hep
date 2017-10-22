@@ -146,6 +146,7 @@ namespace dqm4hep {
       static StatusCode processConstant(TiXmlElement *parent, StringMap &constants);
       static StatusCode processIncludeElements(const std::string &fileName, TiXmlElement* element , const StringMap& constants);
       static StatusCode processIncludeElement(const std::string &fileName, TiXmlElement* element , const StringMap& constants , TiXmlDocument &document);
+      static StatusCode replaceConstants(TiXmlElement* element, const StringMap &constants);
     };
 
     //-------------------------------------------------------------------------------------------------
