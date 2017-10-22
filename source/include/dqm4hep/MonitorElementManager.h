@@ -187,6 +187,14 @@ namespace dqm4hep {
       StatusCode bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
           allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
+      /**
+       * @brief  Open root file, find reference object and attach it to the monitor element
+       *
+       * @param  pMonitorElement the monitor element to attach the reference
+       * @param  fileName        the root file name contaning the reference
+       */
+      StatusCode attachReference(MonitorElement *pMonitorElement, const std::string &fileName);
+
     public:
 
       ///////////////////////

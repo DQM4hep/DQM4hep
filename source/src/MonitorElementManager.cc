@@ -333,6 +333,38 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElementManager::attachReference(MonitorElement *pMonitorElement, const std::string &fileName)
+    {
+      if(nullptr == pMonitorElement)
+        return STATUS_CODE_INVALID_PTR;
+
+      Path fullName = pMonitorElement->path();
+      fullName += pMonitorElement->name();
+      dqm_debug( "MonitorElementManager::attachReference: looking for element {0}", fullName.getPath() );
+
+      std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
+
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject(nullptr);
+
+      if(pMonitorElement->path() == "/")
+        pTObject = (TObject *) rootFile->Get(pMonitorElement->name().c_str());
+      else
+        pTObject = (TObject *) rootFile->Get(fullName.getPath().c_str());
+
+      TObject::SetObjectStat(objectStat);
+
+      if(!pTObject)
+        return STATUS_CODE_NOT_FOUND;
+
+      pMonitorElement->setReferenceObject(pTObject);
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     void MonitorElementManager::getMonitorElements(std::vector<MonitorElement*> &monitorElements) const
