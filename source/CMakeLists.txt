@@ -38,6 +38,7 @@ ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT
                    DEPENDS ${LIB_HEADERS_PKG}
 )
 
+SET( SRC_FILES ${SRC_FILES} src/Archiver.cc )
 SET( SRC_FILES ${SRC_FILES} src/QualityTest.cc )
 SET( SRC_FILES ${SRC_FILES} src/Logger.cc )
 SET( SRC_FILES ${SRC_FILES} src/DBInterface.cc )
