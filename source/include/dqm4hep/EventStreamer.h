@@ -77,7 +77,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode EventStreamer::write(const Event *const pObject, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice)
+    StatusCode EventStreamer::write(const Event *const pObject, const std::string &/*subEventIdentifier*/, xdrstream::IODevice *pDevice)
     {
       return this->write(pObject, pDevice);
     }
