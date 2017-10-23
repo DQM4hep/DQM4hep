@@ -39,6 +39,7 @@
 // -- tclap headers
 #include <tclap/CmdLine.h>
 #include <tclap/Arg.h>
+#include <tclap/ValuesConstraint.h>
 
 // -- root headers
 #include <TFile.h>
@@ -121,10 +122,21 @@ int main(int argc, char* argv[])
       , "string");
   pCommandLine->add(outputJsonFileArg);
 
+  StringVector verbosities(Logger::logLevels());
+  TCLAP::ValuesConstraint<std::string> verbosityConstraint(verbosities);
+  TCLAP::ValueArg<std::string> verbosityArg(
+      "v"
+      , "verbosity"
+      , "The logging verbosity"
+      , false
+      , "info"
+      , &verbosityConstraint);
+  pCommandLine->add(verbosityArg);
+
   // parse command line
   pCommandLine->parse(argc, argv);
 
-  Logger::setLoggerPattern(Logger::mainLogger()->name(), "[%l] %v");
+  Logger::setLogLevel( Logger::logLevelFromString( verbosityArg.getValue() ) );
 
   StringVector qthresholds;
   tokenize(qualityThresholdsArg.getValue(), qthresholds, ":");
