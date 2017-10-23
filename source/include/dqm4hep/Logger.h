@@ -151,6 +151,18 @@ namespace dqm4hep {
       static std::string logLevelToString(Level level);
 
       /**
+       * Convert std::string to log level
+       * @param  level the log level string
+       * @return       the log level
+       */
+      static Level logLevelFromString(const std::string &level);
+
+      /**
+       * Get the log levels list as strings
+       */
+      static StringVector logLevels();
+
+      /**
        * Set the logger log format pattern
        *
        * %v 	The actual text to log

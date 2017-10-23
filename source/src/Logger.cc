@@ -114,6 +114,43 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    Logger::Level Logger::logLevelFromString(const std::string &level)
+    {
+      if(level == "trace")
+        return spdlog::level::trace;
+      if(level == "debug")
+        return spdlog::level::debug;
+      if(level == "info")
+        return spdlog::level::info;
+      if(level == "warning")
+        return spdlog::level::warn;
+      if(level == "error")
+        return spdlog::level::err;
+      if(level == "critical")
+        return spdlog::level::critical;
+      if(level == "off")
+        return spdlog::level::off;
+
+      throw StatusCodeException(STATUS_CODE_NOT_FOUND);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    StringVector Logger::logLevels()
+    {
+      return StringVector({
+        logLevelToString(spdlog::level::trace),
+        logLevelToString(spdlog::level::debug),
+        logLevelToString(spdlog::level::info),
+        logLevelToString(spdlog::level::warn),
+        logLevelToString(spdlog::level::err),
+        logLevelToString(spdlog::level::critical),
+        logLevelToString(spdlog::level::off)
+      });
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     void Logger::setLoggerPattern(const std::string &logger, const std::string &pattern)
     {
       LoggerPtr logger_ptr = Logger::logger(logger);
