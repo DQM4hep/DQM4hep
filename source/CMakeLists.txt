@@ -94,6 +94,21 @@ IF( BUILD_TESTS )
     )
     ADD_TEST( ${TEST_SRC_WITHOUT_EXT}-test ${PROJECT_BINARY_DIR}/bin/${TEST_SRC_WITHOUT_EXT} )
   ENDFOREACH()
+
+  CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/quality-test-test.in"
+      "${PROJECT_BINARY_DIR}/bin/quality-test-test" @ONLY )
+
+  INSTALL(
+  	FILES ${PROJECT_BINARY_DIR}/bin/quality-test-test
+  	DESTINATION bin/tests
+      PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE
+  )
+
+  ADD_TEST( quality-test-test ${CMAKE_INSTALL_PREFIX}/bin/tests/quality-test-test )
+
 ENDIF()
 
 # -------------------------------------------------
