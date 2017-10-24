@@ -19,7 +19,8 @@ In the top level directory :
 mkdir build
 cd build
 cmake [-DOPTIONS=...] ..
-make
+make install
+ctest # to check your installation
 ```
 
 where OPTIONS can be :
