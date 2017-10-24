@@ -133,10 +133,29 @@ int main(int argc, char* argv[])
       , &verbosityConstraint);
   pCommandLine->add(verbosityArg);
 
+  StringVector qualityExits( {"ignore", "failure", "warning", "error"} );
+  std::map<std::string, unsigned int> qualityExitMap({
+    {"ignore",  0},
+    {"failure", 1},
+    {"warning", 2},
+    {"error",   3}
+  });
+  TCLAP::ValuesConstraint<std::string> qualityExitsConstraint(qualityExits);
+  TCLAP::ValueArg<std::string> qualityExitArg(
+      "e"
+      , "exit-on"
+      , "Returns 1 at end qtest if at least on of the qtest has a quality lower than the 'warning' or 'error' thresholds"
+      , false
+      , "ignore"
+      , &qualityExitsConstraint);
+  pCommandLine->add(qualityExitArg);
+
   // parse command line
   pCommandLine->parse(argc, argv);
 
   Logger::setLogLevel( Logger::logLevelFromString( verbosityArg.getValue() ) );
+
+  const unsigned int qualityExit( qualityExitMap.find(qualityExitArg.getValue())->second );
 
   StringVector qthresholds;
   tokenize(qualityThresholdsArg.getValue(), qthresholds, ":");
@@ -292,6 +311,7 @@ int main(int argc, char* argv[])
   jsonRoot["meta"] = jsonMetadata;
 
   unsigned int jsonIndex(0);
+  bool returnFailure(false);
 
   std::cout << bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left << "STATUS" << setw(10) << std::left << "QUALITY" << "MESSAGE" << reset << std::endl;
 
@@ -307,6 +327,9 @@ int main(int argc, char* argv[])
       if(!iter2.second.m_isSuccessful)
       {
         std::cout << redBck << white << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << setw(10) << std::left << "FAIL" << setw(10) << std::left << "none" << iter2.second.m_message << reset << std::endl;
+
+        if(qualityExit >= 1)
+          returnFailure = true;
       }
       else
       {
@@ -317,10 +340,16 @@ int main(int argc, char* argv[])
 
         if(quality < qLimit1)
         {
+          if(qualityExit >= 3)
+            returnFailure = true;
+
           std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << red << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
         }
         else if(qLimit1 <= quality && quality < qLimit2)
         {
+          if(qualityExit >= 2)
+            returnFailure = true;
+
           std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << yellow << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
         }
         else
@@ -341,6 +370,12 @@ int main(int argc, char* argv[])
     jsonFile.open(jsonFileName.c_str());
     jsonFile << writer.write(jsonRoot);
     jsonFile.close();
+  }
+
+  if(returnFailure)
+  {
+    dqm_warning("Option --return-on {0} was given => return 1 !", qualityExitArg.getValue());
+    return 1;
   }
 
   return 0;
