@@ -1,0 +1,37 @@
+<?xml version="1.0" ?>
+<dqm4hep>
+    <constants>
+      <constant name="GaussiansDirectory">/Gaussians</constant>
+    </constants>
+
+    <!-- MeanWithinExpectedTest qtests -->
+    <qtests>
+      <qtest type="MeanWithinExpectedTest" name="MeanAround10Long">
+        <ExpectedMean>10</ExpectedMean>
+        <MeanDeviationLower>8</MeanDeviationLower>
+        <MeanDeviationUpper>12</MeanDeviationUpper>
+      </qtest>
+      <qtest type="MeanWithinExpectedTest" name="MeanAround10Short">
+        <ExpectedMean>10</ExpectedMean>
+        <MeanDeviationLower>9.5</MeanDeviationLower>
+        <MeanDeviationUpper>10.5</MeanDeviationUpper>
+      </qtest>
+      <qtest type="MeanWithinExpectedTest" name="MeanAround15Short">
+        <ExpectedMean>15</ExpectedMean>
+        <MeanDeviationLower>14.5</MeanDeviationLower>
+        <MeanDeviationUpper>15.5</MeanDeviationUpper>
+      </qtest>
+    </qtests>
+
+    <!-- All monitor elements and qtests to process -->
+    <monitorElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
+      <qtest name="MeanAround10Long" />
+    </monitorElement>
+    <monitorElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2_bck">
+      <qtest name="MeanAround10Short" />
+    </monitorElement>
+    <monitorElement path="${GaussiansDirectory}" name="DblGaus_Mean5_RMS2_RMS5">
+      <qtest name="MeanAround15Short" />
+    </monitorElement>
+
+</dqm4hep>
