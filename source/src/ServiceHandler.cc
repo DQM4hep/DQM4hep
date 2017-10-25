@@ -61,9 +61,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void ServiceHandler::receiveServiceUpdated(const std::string &contents)
+    void ServiceHandler::receiveServiceUpdated(const Buffer &data)
     {
-      m_updateSignal.process(contents);
+      m_updateSignal.process(data);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -86,8 +86,9 @@ namespace dqm4hep {
       if(nullptr == data || size == 0)
         return;
 
-      std::string contents(data, size);
-      m_pHandler->receiveServiceUpdated(contents);
+      // std::string contents(data, size);
+      Buffer buffer(data, size);
+      m_pHandler->receiveServiceUpdated(buffer);
     }
 
   }

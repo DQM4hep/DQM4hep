@@ -51,7 +51,7 @@ namespace dqm4hep {
     {
       friend class Server;
     public:
-      typedef Signal<const std::string &, std::string &> RequestSignal;
+      typedef Signal<const Buffer &, Buffer &> RequestSignal;
 
       /**
        * Get the request name
@@ -71,7 +71,7 @@ namespace dqm4hep {
        * @param name the request handler name
        */
       template <typename Controller>
-      RequestHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &request, std::string &response));
+      RequestHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response));
 
       /**
        * Destructor
@@ -129,7 +129,7 @@ namespace dqm4hep {
        * @param request  [description]
        * @param response [description]
        */
-      void handleRequest(const std::string &request, std::string &response);
+      void handleRequest(const Buffer &request, Buffer &response);
 
     private:
       std::string                     m_name;             ///< The request handler name
@@ -143,7 +143,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline RequestHandler::RequestHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &request, std::string &response)) :
+    inline RequestHandler::RequestHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response)) :
       m_name(name),
       m_pServer(pServer),
       m_pRpc(nullptr)
@@ -159,7 +159,7 @@ namespace dqm4hep {
     {
       friend class Server;
     public:
-      typedef Signal<const std::string &> CommandSignal;
+      typedef Signal<const Buffer &> CommandSignal;
 
       /**
        * Get the request name
@@ -179,7 +179,7 @@ namespace dqm4hep {
        * @param name the request handler name
        */
       template <typename Controller>
-      CommandHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command));
+      CommandHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command));
 
       /**
        * Constructor
@@ -245,7 +245,7 @@ namespace dqm4hep {
        * @param request  [description]
        * @param response [description]
        */
-      void handleCommand(const std::string &command);
+      void handleCommand(const Buffer &command);
 
     private:
       std::string                     m_name;             ///< The command handler name
@@ -259,7 +259,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline CommandHandler::CommandHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command)) :
+    inline CommandHandler::CommandHandler(Server *pServer, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command)) :
       m_name(name),
       m_pServer(pServer),
       m_pCommand(nullptr)

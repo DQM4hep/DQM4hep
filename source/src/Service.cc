@@ -35,36 +35,43 @@ namespace dqm4hep {
     Service::Service(Server *pServer, const std::string &name) :
       m_pService(nullptr),
       m_name(name),
-      m_pServer(pServer),
-      m_charContent((char*)m_content.c_str())
+      m_pServer(pServer)
     {
       /* nop */
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     Service::~Service()
     {
       this->disconnectService();
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     const std::string &Service::name() const
     {
       return m_name;
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     Server *Service::server() const
     {
       return m_pServer;
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     void Service::connectService()
     {
       if(!this->isServiceConnected())
       {
-        m_content.clear();
-        m_charContent = (char*)m_content.c_str();
-        m_pService = new DimService((char*)m_name.c_str(), "C", (char*)m_charContent, m_content.size());
+        m_pService = new DimService((char*)m_name.c_str(), "C", (char*)NullData::buffer, NullData::size);
       }
     }
+
+    //-------------------------------------------------------------------------------------------------
 
     void Service::disconnectService()
     {
@@ -75,9 +82,62 @@ namespace dqm4hep {
       }
     }
 
+    //-------------------------------------------------------------------------------------------------
+
     bool Service::isServiceConnected() const
     {
       return (m_pService != nullptr);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Service::sendBuffer(const void *ptr, size_t size)
+    {
+      Buffer buffer(ptr, size);
+      this->sendData(buffer, std::vector<int>());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Service::sendBuffer(const void *ptr, size_t size, int clientId)
+    {
+      Buffer buffer(ptr, size);
+      this->sendData(buffer, std::vector<int>(1, clientId));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Service::sendBuffer(const void *ptr, size_t size, const std::vector<int> &clientIds)
+    {
+      Buffer buffer(ptr, size);
+      this->sendData(buffer, clientIds);
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void Service::sendData(const Buffer &buffer, const std::vector<int> &clientIds)
+    {
+      if(!this->isServiceConnected())
+        throw; // TODO implement exceptions
+
+      if(clientIds.empty())
+      {
+        m_pService->updateService((void*)buffer.begin(), buffer.size());
+        m_pService->itsData = (void*)NullData::buffer;
+        m_pService->itsSize = NullData::size;
+      }
+      else
+      {
+        std::vector<int> clientIdList(clientIds);
+
+        if(clientIdList.back() != 0)
+          clientIdList.push_back(0);
+
+        int *clientIdsArray = &clientIdList[0];
+        m_pService->selectiveUpdateService((void*)buffer.begin(), buffer.size(), clientIdsArray);
+        m_pService->itsData = (void*)NullData::buffer;
+        m_pService->itsSize = NullData::size;
+      }
     }
 
   }

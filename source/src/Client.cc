@@ -35,7 +35,7 @@ namespace dqm4hep {
 
     Client::Client()
     {
-      /* nop */
+      DimClient::setNoDataCopy();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -52,11 +52,11 @@ namespace dqm4hep {
 
     void Client::queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const
     {
-      std::string value;
+      Buffer value;
       this->sendRequest("/" + serverName + "/info", "", value);
 
       Json::Reader reader;
-      reader.parse(value, serverInfo);
+      reader.parse(value.begin(), value.end(), serverInfo);
     }
 
     //-------------------------------------------------------------------------------------------------

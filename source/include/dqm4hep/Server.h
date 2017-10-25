@@ -108,7 +108,7 @@ namespace dqm4hep {
        */
       template <typename Controller >
       void createRequestHandler(const std::string &name,
-          Controller *pController, void (Controller::*function)(const std::string &request, std::string &response));
+          Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response));
 
       /**
        * Create a new command handler
@@ -119,7 +119,7 @@ namespace dqm4hep {
        */
       template <typename Controller>
       void createCommandHandler(const std::string &name,
-          Controller *pController, void (Controller::*function)(const std::string &command));
+          Controller *pController, void (Controller::*function)(const Buffer &command));
 
       /**
        * Whether the target service is registered in this server
@@ -194,7 +194,7 @@ namespace dqm4hep {
       void stopCommandHandler(const std::string &name, Controller *pController);
 
       template <typename Controller>
-      void stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command));
+      void stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command));
 
       /**
        * Get a created service in this server
@@ -257,7 +257,7 @@ namespace dqm4hep {
        * @param request the request
        * @param response the response to receive
        */
-      void handleServerInfoRequest(const std::string &request, std::string &response);
+      void handleServerInfoRequest(const Buffer &, Buffer &response);
 
       RequestHandler *requestHandler(const std::string &name) const;
 
@@ -282,7 +282,7 @@ namespace dqm4hep {
 
     template <typename Controller>
     inline void Server::createRequestHandler(const std::string &name,
-        Controller *pController, void (Controller::*function)(const std::string &request, std::string &response))
+        Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response))
     {
       auto findIter = m_requestHandlerMap.find(name);
 
@@ -311,7 +311,7 @@ namespace dqm4hep {
 
     template <typename Controller>
     inline void Server::createCommandHandler(const std::string &name,
-        Controller *pController, void (Controller::*function)(const std::string &command))
+        Controller *pController, void (Controller::*function)(const Buffer &command))
     {
       auto findIter = m_commandHandlerMap.find(name);
 
@@ -362,7 +362,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const std::string &command))
+    inline void Server::stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command))
     {
       auto findIter = m_commandHandlerMap.find(name);
 
@@ -374,7 +374,7 @@ namespace dqm4hep {
           m_commandHandlerMap.erase(findIter);
       }
     }
-    
+
   }
 
 }

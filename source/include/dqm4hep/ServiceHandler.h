@@ -45,13 +45,13 @@ namespace dqm4hep {
     class Client;
 
     /**
-     * 
+     *
      */
     class ServiceHandler
     {
       friend class Client;
     public:
-      typedef Signal<const std::string &> UpdateSignal;
+      typedef Signal<const Buffer &> UpdateSignal;
 
       /**
        * Get the service name
@@ -77,7 +77,7 @@ namespace dqm4hep {
        * @param name the service name
        */
       template <typename Controller>
-      ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &contents));
+      ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &));
 
       /**
        * Destructor
@@ -108,7 +108,7 @@ namespace dqm4hep {
        * [receiveServiceUpdated description]
        * @param contents [description]
        */
-      void receiveServiceUpdated(const std::string &contents);
+      void receiveServiceUpdated(const Buffer &);
 
     private:
       std::string                    m_name;             ///< The request handler name
@@ -121,7 +121,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const std::string &contents)) :
+    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &)) :
       m_name(name),
       m_pClient(pClient),
       m_serviceInfo(this)

@@ -90,7 +90,7 @@ namespace dqm4hep {
 
       //-------------------------------------------------------------------------------------------------
 
-      void RequestHandler::handleRequest(const std::string &request, std::string &response)
+      void RequestHandler::handleRequest(const Buffer &request, Buffer &response)
       {
         m_requestSignal.process(request, response);
       }
@@ -111,14 +111,14 @@ namespace dqm4hep {
       {
         char *data = (char*)this->getData();
         int size = this->getSize();
-        std::string request;
+        Buffer request;
 
         if(nullptr != data && size != 0)
-          request.assign(data, size);
+          request.adopt(data, size);
 
-        std::string response;
+        Buffer response;
         m_pHandler->handleRequest(request, response);
-        this->setData((void*)response.c_str(), response.size());
+        this->setData((void*)response.begin(), response.size());
       }
 
       //-------------------------------------------------------------------------------------------------
@@ -190,7 +190,7 @@ namespace dqm4hep {
 
       //-------------------------------------------------------------------------------------------------
 
-      void CommandHandler::handleCommand(const std::string &command)
+      void CommandHandler::handleCommand(const Buffer &command)
       {
         m_commandSignal.process(command);
       }
@@ -215,7 +215,7 @@ namespace dqm4hep {
         if(nullptr == data || size == 0)
           return;
 
-        std::string command(data, size);
+        Buffer command(data, size);
         m_pHandler->handleCommand(command);
       }
 

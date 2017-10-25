@@ -60,22 +60,55 @@ namespace dqm4hep {
       Server *server() const;
 
       /**
-       *
+       * Send a simple value
        */
       template <typename T>
-      void update(const T &value);
+      void send(const T &value);
 
       /**
-       *
+       * Send an array of simple values
        */
       template <typename T>
-      void update(const T &value, int clientId);
+      void sendArray(const T *value, size_t nElements);
 
       /**
-       *
+       * Send a raw buffer. The buffer is owned by the caller
+       */
+      void sendBuffer(const void *ptr, size_t size);
+
+      /**
+       * Send a simple value to a specific client
        */
       template <typename T>
-      void update(const T &value, const std::vector<int> &clientIds);
+      void send(const T &value, int clientId);
+
+      /**
+       * Send an array of simple values to a specific client
+       */
+      template <typename T>
+      void sendArray(const T *value, size_t nElements, int clientId);
+
+      /**
+       * Send a raw buffer to a specific client. The buffer is owned by the caller
+       */
+      void sendBuffer(const void *ptr, size_t size, int clientId);
+
+      /**
+       * Send a simple value to a specific list of clients
+       */
+      template <typename T>
+      void send(const T &value, const std::vector<int> &clientIds);
+
+      /**
+       * Send an array of simple values to a specific list of clients
+       */
+      template <typename T>
+      void sendArray(const T *value, size_t nElements, const std::vector<int> &clientIds);
+
+      /**
+       * Send a raw buffer to a specific list of clients. The buffer is owned by the caller
+       */
+      void sendBuffer(const void *ptr, size_t size, const std::vector<int> &clientIds);
 
     private:
       /**
@@ -106,59 +139,70 @@ namespace dqm4hep {
        */
       bool isServiceConnected() const;
 
+      /**
+       *
+       */
+      void sendData(const Buffer &buffer, const std::vector<int> &clientIds);
+
     private:
       DimService           *m_pService;         ///< The service implementation
       std::string           m_name;             ///< The service name
       Server               *m_pServer;          ///< The server in which the service is declared
-      std::string           m_content;
-      char *                m_charContent;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::update(const T &value)
+    inline void Service::send(const T &value)
     {
-      this->update(value, std::vector<int>());
+      Buffer buffer(value);
+      this->sendData(buffer, std::vector<int>());
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::update(const T &value, int clientId)
+    inline void Service::sendArray(const T *value, size_t nElements)
     {
-      this->update(value, std::vector<int>(1, clientId));
+      Buffer buffer(value, nElements);
+      this->sendData(buffer, std::vector<int>());
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::update(const T &value, const std::vector<int> &clientIds)
+    inline void Service::send(const T &value, int clientId)
     {
-      if(!this->isServiceConnected())
-        throw; // TODO implement exceptions
+      Buffer buffer(value);
+      this->sendData(buffer, std::vector<int>(1, clientId));
+    }
 
-      if(!convert<T>::encode(m_content, value))
-        throw; // TODO implement exceptions
+    //-------------------------------------------------------------------------------------------------
 
-      m_charContent = (char*)m_content.c_str();
+    template <typename T>
+    inline void Service::sendArray(const T *value, size_t nElements, int clientId)
+    {
+      Buffer buffer(value, nElements);
+      this->sendData(buffer, std::vector<int>(1, clientId));
+    }
 
-      if(clientIds.empty())
-      {
-        m_pService->updateService((void*)m_charContent, m_content.size());
-      }
-      else
-      {
-        std::vector<int> clientIdList(clientIds);
+    //-------------------------------------------------------------------------------------------------
 
-        if(clientIdList.back() != 0)
-          clientIdList.push_back(0);
+    template <typename T>
+    inline void Service::send(const T &value, const std::vector<int> &clientIds)
+    {
+      Buffer buffer(value);
+      this->sendData(buffer, clientIds);
+    }
 
-        int *clientIdsArray = &clientIdList[0];
-        m_pService->selectiveUpdateService((void*)m_charContent, m_content.size(), clientIdsArray);
-      }
+    //-------------------------------------------------------------------------------------------------
 
+    template <typename T>
+    inline void Service::sendArray(const T *value, size_t nElements, const std::vector<int> &clientIds)
+    {
+      Buffer buffer(value, nElements);
+      this->sendData(buffer, clientIds);
     }
 
   }

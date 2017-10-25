@@ -348,7 +348,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::handleServerInfoRequest(const std::string &/*request*/, std::string &response)
+    void Server::handleServerInfoRequest(const Buffer &/*request*/, Buffer &response)
     {
       Json::Value responseValue, serverInfo;
       serverInfo["name"] = m_name;
@@ -409,7 +409,9 @@ namespace dqm4hep {
       responseValue["commandHandlers"] = commandHandlerList;
 
       Json::FastWriter writer;
-      response = writer.write(responseValue);
+      std::string jsonResponse = writer.write(responseValue);
+
+      response.adopt(jsonResponse.c_str(), jsonResponse.size());
     }
 
     //-------------------------------------------------------------------------------------------------

@@ -94,8 +94,8 @@ namespace dqm4hep {
        * @param request the request to send
        * @param response the response to receive from the server
        */
-      template <typename Request, typename Response>
-      void sendRequest(const std::string &name, const Request &request, Response &response) const;
+      template <typename Request>
+      void sendRequest(const std::string &name, const Request &request, Buffer &response) const;
 
       /**
        * Send a command.
@@ -122,13 +122,13 @@ namespace dqm4hep {
        * @endcode
        */
       template <typename Controller>
-      void subscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const std::string &value));
+      void subscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const Buffer &));
 
       /**
        *
        */
       template <typename Controller>
-      void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const std::string &value));
+      void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const Buffer &));
 
       /**
        * Whether this client already registered a service subscription
@@ -158,35 +158,56 @@ namespace dqm4hep {
     inline void Client::sendRequest(const std::string &name, const Request &request) const
     {
       DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      std::string contents;
-
-      if(!convert<Request>::encode(contents, request))
-        throw; // TODO implement exceptions
-
-      rpcInfo.setData((void*)request.c_str(), contents.size());
+      Buffer contents(request);
+      rpcInfo.setData((void*)contents.begin(), contents.size());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename Request, typename Response>
-    inline void Client::sendRequest(const std::string &name, const Request &request, Response &response) const
+    template <>
+    inline void Client::sendRequest(const std::string &name, const Buffer &request) const
     {
       DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      std::string contents, contentResponse;
+      Buffer contents(request.begin(), request.size());
+      rpcInfo.setData((void*)contents.begin(), contents.size());
+    }
 
-      if(!convert<Request>::encode(contents, request))
-        throw; // TODO implement exceptions
+    //-------------------------------------------------------------------------------------------------
 
-      rpcInfo.setData((void*)contents.c_str(), contents.size());
+    template <typename Request>
+    inline void Client::sendRequest(const std::string &name, const Request &request, Buffer &response) const
+    {
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
+      Buffer contents(request);
 
+      // send request
+      rpcInfo.setData((void*)contents.begin(), contents.size());
+
+      // wait for answer from server
       char *data = (char*)rpcInfo.getData();
       int size = rpcInfo.getSize();
 
-      if(nullptr != data && size != 0)
-        contentResponse.assign(data, size);
+      if(nullptr != data && 0 != size)
+        response.adopt(data, size);
+    }
 
-      if(!convert<Response>::decode(contentResponse, response))
-        throw; // TODO implement exceptions
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Client::sendRequest(const std::string &name, const Buffer &request, Buffer &response) const
+    {
+      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
+      Buffer contents(request.begin(), request.size());
+
+      // send request
+      rpcInfo.setData((void*)contents.begin(), contents.size());
+
+      // wait for answer from server
+      char *data = (char*)rpcInfo.getData();
+      int size = rpcInfo.getSize();
+
+      if(nullptr != data && 0 != size)
+        response.adopt(data, size);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -194,25 +215,37 @@ namespace dqm4hep {
     template <typename Command>
     inline void Client::sendCommand(const std::string &name, const Command &command, bool blocking) const
     {
-      std::string contents;
-
-      if(!convert<Command>::encode(contents, command))
-        throw; // TODO implement exceptions
+      Buffer buffer(command);
 
       if(blocking)
       {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)contents.c_str(), contents.size());
+        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)buffer.begin(), buffer.size());
       }
       else
       {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)contents.c_str(), contents.size());
+        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)buffer.begin(), buffer.size());
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <>
+    inline void Client::sendCommand(const std::string &name, const Buffer &buffer, bool blocking) const
+    {
+      if(blocking)
+      {
+        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)buffer.begin(), buffer.size());
+      }
+      else
+      {
+        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)buffer.begin(), buffer.size());
       }
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Client::subscribe(const std::string &name, Controller *pController, void (Controller::*function)(const std::string &value))
+    inline void Client::subscribe(const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &))
     {
       auto findIter = m_serviceHandlerMap.find(name);
 
@@ -230,7 +263,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const std::string &value))
+    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const Buffer &))
     {
       for(auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end() ; endIter != iter ; ++iter)
       {

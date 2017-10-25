@@ -34,16 +34,19 @@ using namespace dqm4hep::net;
 class MyPrintClass
 {
 public:
-  void print(const std::string &request, std::string &response)
+  void print(const Buffer &request, Buffer &response)
   {
-    response = "Hello world !";
-    std::cout << "Received : " << request << std::endl;
-    std::cout << "Sending : " << response << std::endl;
+    std::string requestStr(request.begin(), request.size());
+    std::string responseStr = "Hello world !";
+    response.adopt(responseStr.c_str(), responseStr.size());
+    std::cout << "Received : " << requestStr << std::endl;
+    std::cout << "Sending : " << responseStr << std::endl;
   }
 
-  void printCommand(const std::string &command)
+  void printCommand(const Buffer &command)
   {
-    std::cout << "Received command : " << command << std::endl;
+    std::string commandStr(command.begin(), command.size());
+    std::cout << "Received command : " << commandStr << std::endl;
   }
 };
 
@@ -66,10 +69,12 @@ int main(int argc, char **argv)
   while(1)
   {
     intVal = rand();
-    pIntService->update(intVal);
+    std::cout << "Sending int = " << intVal << std::endl;
+    pIntService->send(intVal);
 
     floatVal = intVal*0.78;
-    pFloatService->update(floatVal);
+    std::cout << "Sending float = " << floatVal << std::endl;
+    pFloatService->send(floatVal);
 
     sleep(5);
   }

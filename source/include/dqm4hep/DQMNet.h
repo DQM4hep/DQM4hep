@@ -44,416 +44,47 @@ namespace dqm4hep {
 
   namespace net {
 
-    namespace experimental {
-
-      template <bool owner>
-      class BufferT;
-
-      template <>
-      class BufferT<true>
-      {
-        BufferT(const BufferT<true> &) = delete;
-        BufferT<true> &operator =(const BufferT<true> &) = delete;
-      public:
-        ///< Default constructor
-        inline BufferT() :
-          m_pBuffer(nullptr),
-          m_bufferSize(0)
-        {
-          /* nop */
-        }
-
-        ///< Deep buffer copy constructor
-        inline BufferT(const char *ptr, uint32_t size) :
-          m_pBuffer(nullptr),
-          m_bufferSize(0)
-        {
-          this->copy(ptr, size);
-        }
-
-        ///< Ownership transfer constructor
-        inline BufferT(char *ptr, uint32_t size) :
-          m_pBuffer(nullptr),
-          m_bufferSize(0)
-        {
-          this->adopt(ptr, size);
-        }
-
-        ///< Move constructor
-        inline BufferT(BufferT<true> &&buffer)
-        {
-          m_pBuffer = buffer.m_pBuffer;
-          m_bufferSize = buffer.m_bufferSize;
-          buffer.m_pBuffer = nullptr;
-          buffer.m_bufferSize = 0;
-        }
-
-        ///< Destructor
-        inline ~BufferT()
-        {
-          this->clear();
-        }
-
-        ///< Deep copy of raw buffer
-        inline void copy(const char *ptr, uint32_t size)
-        {
-          this->clear();
-          m_pBuffer = new char[size];
-          m_bufferSize = size;
-          memcpy(m_pBuffer, ptr, size);
-        }
-
-        ///< Adopt the raw buffer. Raw buffer ownership is taken
-        inline void adopt(char *ptr, uint32_t size)
-        {
-          this->clear();
-          m_pBuffer = ptr;
-          m_bufferSize = size;
-        }
-
-        ///< Clear the raw buffer. Delete it using delete operator
-        inline void clear()
-        {
-          if(nullptr != m_pBuffer) delete [] m_pBuffer;
-          m_bufferSize = 0;
-        }
-
-        ///< Return the raw buffer ptr
-        inline const char *ptr() const
-        {
-          return m_pBuffer;
-        }
-
-        ///< The raw buffer size
-        inline uint32_t size() const
-        {
-          return m_bufferSize;
-        }
-
-      private:
-        uint32_t        m_bufferSize;       ///< The buffer size
-        char *          m_pBuffer;          ///< The raw buffer as a char array
-      };
-
-      template <>
-      class BufferT<false>
-      {
-      public:
-        ///< Default constructor
-        inline BufferT() :
-          m_pBuffer(nullptr),
-          m_bufferSize(0)
-        {
-          /* nop */
-        }
-
-        ///< Handler constructor
-        inline BufferT(char *ptr, uint32_t size) :
-          m_pBuffer(nullptr),
-          m_bufferSize(0)
-        {
-          this->handle(ptr, size);
-        }
-
-        ///< Move constructor
-        inline BufferT(BufferT<false> &&buffer)
-        {
-          m_pBuffer = buffer.m_pBuffer;
-          m_bufferSize = buffer.m_bufferSize;
-          buffer.m_pBuffer = nullptr;
-          buffer.m_bufferSize = 0;
-        }
-
-        ///< Destructor
-        inline ~BufferT()
-        {
-          this->clear();
-        }
-
-        ///< Adopt the raw buffer. Raw buffer ownership is NOT taken
-        inline void handle(char *ptr, uint32_t size)
-        {
-          this->clear();
-          m_pBuffer = ptr;
-          m_bufferSize = size;
-        }
-
-        ///< Clear the raw buffer.
-        ///< Set the raw buffer pointer to nullptr without calling delete
-        inline void clear()
-        {
-          m_pBuffer = nullptr;
-          m_bufferSize = 0;
-        }
-
-        ///< Return the raw buffer ptr
-        inline const char *ptr() const
-        {
-          return m_pBuffer;
-        }
-
-        ///< The raw buffer size
-        inline uint32_t size() const
-        {
-          return m_bufferSize;
-        }
-
-      private:
-        uint32_t        m_bufferSize;       ///< The buffer size
-        char *          m_pBuffer;          ///< The raw buffer as a char array
-      };
-
-      typedef BufferT<true> Buffer;
-      typedef BufferT<false> BufferHandler;
-
-      inline std::string &tolower(std::string& str) {
-        std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-        return str;
-      }
-
-      template <typename T>
-      struct convert;
-
-      namespace conversion {
-        inline bool isInfinity(const std::string &input) {
-          return input == ".inf" || input == ".Inf" || input == ".INF" ||
-          input == "+.inf" || input == "+.Inf" || input == "+.INF";
-        }
-
-        inline bool isNegativeInfinity(const std::string &input) {
-          return input == "-.inf" || input == "-.Inf" || input == "-.INF";
-        }
-
-        inline bool isNan(const std::string &input) {
-          return input == ".nan" || input == ".NaN" || input == ".NAN";
-        }
-      }
-
-      // std::string spec
-      template <>
-      struct convert<std::string>
-      {
-        static bool encode(Buffer &lhs, const std::string &rhs)
-        {
-          lhs.copy(rhs.c_str(), rhs.size());
-          return true;
-        }
-
-        static bool decode(const BufferHandler &lhs, std::string &rhs)
-        {
-          rhs.assign(lhs.ptr(), lhs.size());
-          return true;
-        }
-      };
-
-      // Json::Value spec
-      template <>
-      struct convert<Json::Value>
-      {
-        static bool encode(Buffer &lhs, const Json::Value &rhs)
-        {
-          Json::FastWriter writer;
-          std::string jsonString(writer.write(rhs));
-          lhs.copy(jsonString.c_str(), jsonString.size());
-          return true;
-        }
-
-        static bool decode(const BufferHandler &lhs, Json::Value &rhs)
-        {
-          Json::Reader reader;
-          return reader.parse(lhs.ptr(), lhs.ptr()+lhs.size(), rhs);
-        }
-      };
-
-
-      // C-strings can only be encoded
-      template <>
-      struct convert<const char*> {
-        static bool encode(Buffer &lhs, const char*const& rhs) { lhs.copy(rhs, strlen(rhs)); return true; }
-      };
-
-      template <>
-      struct convert<char*> {
-        static bool encode(Buffer &lhs, const char*& rhs) { lhs.copy(rhs, strlen(rhs)); return true; }
-      };
-
-      template <std::size_t N>
-      struct convert<const char[N]> {
-        static bool encode(Buffer &lhs, const char (&rhs)[N]) { lhs.copy(rhs, strlen(rhs)); return true; }
-      };
-
-      template <std::size_t N>
-      struct convert<char[N]> {
-        static bool encode(Buffer &lhs, const char (&rhs)[N]) { lhs.copy(rhs, strlen(rhs)); return true; }
-      };
-
-      // thank you yaml-cpp !
-      #define DQMNET_DEFINE_CONVERT_STREAMING_EXP(Type, negative_op) \
-      template <> \
-      struct convert<Type> \
-      { \
-        static bool encode(Buffer &lhs, const Type &rhs) \
-        { \
-          std::stringstream stream; \
-          stream.precision(std::numeric_limits<Type>::digits10 + 1); \
-          stream << rhs; \
-          std::string streamStr(stream.str()); \
-          lhs.copy(streamStr.c_str(), streamStr.size()); \
-          return true; \
-        } \
-        static bool decode(const BufferHandler &lhs, Type &rhs) \
-        { \
-          std::string str(lhs.ptr(), lhs.size()); \
-          std::stringstream stream(str); \
-          stream.unsetf(std::ios::dec); \
-          if ((stream >> std::noskipws >> rhs) && (stream >> std::ws).eof()) \
-            return true; \
-          if (std::numeric_limits<Type>::has_infinity) { \
-            if (conversion::isInfinity(str)) { \
-              rhs = std::numeric_limits<Type>::infinity(); \
-              return true; \
-            } \
-            else if (conversion::isNegativeInfinity(str)) { \
-              rhs = negative_op std::numeric_limits<Type>::infinity(); \
-              return true; \
-            } \
-          } \
-          if (std::numeric_limits<Type>::has_quiet_NaN && conversion::isNan(str)) { \
-            rhs = std::numeric_limits<Type>::quiet_NaN(); \
-            return true; \
-          } \
-          return false; \
-        } \
-      }
-
-      #define DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(type) DQMNET_DEFINE_CONVERT_STREAMING_EXP(type, -)
-      #define DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP(type) DQMNET_DEFINE_CONVERT_STREAMING_EXP(type, +)
-
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(int);
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(short);
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(long);
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(long long);
-      DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP(unsigned);
-      DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP(unsigned short);
-      DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP(unsigned long);
-      DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP(unsigned long long);
-
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(char);
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(signed char);
-      DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP(unsigned char);
-
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(float);
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(double);
-      DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP(long double);
-
-      #undef DQMNET_DEFINE_CONVERT_STREAMING_SIGNED_EXP
-      #undef DQMNET_DEFINE_CONVERT_STREAMING_UNSIGNED_EXP
-      #undef DQMNET_DEFINE_CONVERT_STREAMING_EXP
-
-      // bool spec
-      template <>
-      struct convert<bool>
-      {
-        static bool encode(Buffer &lhs, bool rhs)
-        {
-          lhs.copy(rhs ? "true" : "false", rhs ? 4 : 5);
-          return true;
-        }
-
-        static bool decode(const BufferHandler &lhs, bool &rhs)
-        {
-          static const struct {
-              std::string truename, falsename;
-          } names[] = {
-                {"y", "n"}, {"yes", "no"}, {"true", "false"}, {"on", "off"}
-          };
-
-          std::string value(lhs.ptr(), lhs.size());
-          tolower(value);
-
-          for (unsigned i = 0; i < sizeof(names) / sizeof(names[0]); i++) {
-            if (names[i].truename == value) {
-              rhs = true;
-              return true;
-            }
-
-            if (names[i].falsename == value) {
-              rhs = false;
-              return true;
-            }
-          }
-          return false;
-        }
-      };
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    /**
-     * Buffer struct.
-     *
-     * Simple structure to handle a buffer
-     */
-    struct Buffer
+    ///< For handling client-size buffer in user callbacks ...
+    class Buffer
     {
-      Buffer() :
-        m_bufferSize(0),
-        m_pBuffer(nullptr),
-        m_owner(false)
-      {
-        /* nop */
-      }
+    public:
+      ///< Handle builtin data types or structures
+      template <typename T>
+      Buffer(const T &var) { this->adopt((const char*)(&var), sizeof(T)); }
+      ///< Handles array
+      template <typename T>
+      Buffer(const T *var, size_t nElements) { this->adopt((const char*)(var), sizeof(T)*nElements); }
+      ///< Default constructor
+      Buffer() { this->adopt(nullptr, 0); }
 
-      ~Buffer()
-      {
-        if(nullptr != m_pBuffer && m_owner)
-          delete [] m_pBuffer;
-      }
+      Buffer(const Buffer&) = delete;
+      Buffer(Buffer&&) = delete;
+      Buffer &operator=(const Buffer&) = delete;
+      Buffer &&operator=(Buffer &&) = delete;
 
-      void setBuffer(char *data, uint32_t size, bool owner = false)
-      {
-        if(nullptr == data || 0 == size)
-          return;
+      inline const char *begin() const { return m_pBuffer; }
+      inline const char *end() const { return m_pBuffer+m_size; }
+      inline size_t size() const { return m_size; }
+      inline void adopt(const char *buffer, size_t size) { m_pBuffer = buffer; m_size = size; }
+    private:
+      const char *m_pBuffer = nullptr;
+      size_t m_size = 0;
+    };
 
-        if(nullptr != m_pBuffer && m_owner)
-        {
-          delete [] m_pBuffer;
-          m_pBuffer = nullptr;
-        }
+    ///< Specialization for char buffer
+    template <>
+    inline Buffer::Buffer(const std::string &var) { this->adopt(var.c_str(), var.size()); }
+    ///< Specialization for char buffer
+    template <>
+    inline Buffer::Buffer(const char *var, size_t bsize) { this->adopt(var, bsize); }
+    ///< Specialization for raw void buffer
+    template <>
+    inline Buffer::Buffer(const void *var, size_t bsize) { this->adopt((const char*)(var), bsize); }
 
-        if(owner)
-        {
-          m_pBuffer = new char[size];
-          m_bufferSize = size;
-          memcpy(m_pBuffer, data, size);
-        }
-        else
-        {
-          m_pBuffer = data;
-          m_bufferSize = size;
-        }
-
-        m_owner = owner;
-      }
-
-      uint32_t        m_bufferSize;       ///< The buffer size
-      char *          m_pBuffer;          ///< The raw buffer as a char array
-      bool            m_owner;
+    struct NullData
+    {
+      static const char buffer[2];
+      static const size_t size;
     };
 
     inline std::string &tolower(std::string& str) {
@@ -497,31 +128,31 @@ namespace dqm4hep {
       }
     };
 
-    // Buffer spec
-    template <>
-    struct convert<Buffer>
-    {
-      static bool encode(std::string &lhs, const Buffer &rhs)
-      {
-        lhs.clear();
-
-        if(nullptr == rhs.m_pBuffer || 0 == rhs.m_bufferSize)
-          return false;
-
-        lhs.assign(rhs.m_pBuffer, rhs.m_bufferSize);
-        return true;
-      }
-
-      static bool decode(const std::string &lhs, Buffer &rhs)
-      {
-        char *data = const_cast<char*>(lhs.c_str());
-        size_t size = lhs.size();
-
-        rhs.setBuffer(data, size, true);
-
-        return true;
-      }
-    };
+    // // Buffer spec
+    // template <>
+    // struct convert<Buffer>
+    // {
+    //   static bool encode(std::string &lhs, const Buffer &rhs)
+    //   {
+    //     lhs.clear();
+    //
+    //     if(nullptr == rhs.m_pBuffer || 0 == rhs.m_bufferSize)
+    //       return false;
+    //
+    //     lhs.assign(rhs.m_pBuffer, rhs.m_bufferSize);
+    //     return true;
+    //   }
+    //
+    //   static bool decode(const std::string &lhs, Buffer &rhs)
+    //   {
+    //     char *data = const_cast<char*>(lhs.c_str());
+    //     size_t size = lhs.size();
+    //
+    //     rhs.setBuffer(data, size, true);
+    //
+    //     return true;
+    //   }
+    // };
 
     // std::string spec
     template <>

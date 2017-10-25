@@ -69,7 +69,7 @@ class ServiceForwarding
 public:
   ServiceForwarding(const std::string &serviceName, WsServer &server);
   std::unordered_set<std::shared_ptr<WsServer::Connection>> &connections();
-  void forward(const std::string &contents);
+  void forward(const Buffer &contents);
 
 private:
   std::string                                                  m_serviceName;
@@ -96,16 +96,16 @@ std::unordered_set<std::shared_ptr<WsServer::Connection>> &ServiceForwarding::co
 
 //----------------------------------------------------------------------------------
 
-void ServiceForwarding::forward(const std::string &contents)
+void ServiceForwarding::forward(const Buffer &contents)
 {
   auto connections = this->connections();
 
   auto message_stream = std::make_shared<WsServer::SendStream>();
   *message_stream << m_serviceName;
   *message_stream << std::string(MAX_NAME-m_serviceName.size(), ' ');
-  *message_stream << contents;
+  message_stream->write(contents.begin(), contents.size());
 
-  std::cout << "Sending service data. Service : " << m_serviceName << " , data : " << contents << std::endl;
+  // std::cout << "Sending service data. Service : " << m_serviceName << " , data : " << contents << std::endl;
   m_server.forward(connections, message_stream);
 }
 
