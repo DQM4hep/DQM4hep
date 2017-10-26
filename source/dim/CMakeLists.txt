@@ -35,7 +35,7 @@ IF( UNIX )
     SET( DIM_CFLAGS "${DIM_CFLAGS} -DMIPSEL -DPROTOCOL=1 -Dunix -Ddarwin -fPIC" )
   ENDIF()
 ELSE()
-  MESSAGE( SEND_ERROR "UNIX plateform only ! Consider buying a decent OS please ..." )
+  MESSAGE( SEND_ERROR "UNIX platform only ! Consider buying a decent OS please ..." )
 ENDIF()
 
 SET( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${DIM_CFLAGS}" )
