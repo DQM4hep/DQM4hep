@@ -20,8 +20,8 @@ addons:
     sources:
     - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
     packages:
-      - libqt4-dev
-      - qt4-qmake
+      # - libqt4-dev
+      # - qt4-qmake
       - libboost-thread-dev
       - libboost-system-dev 
       - libboost-filesystem-dev
@@ -56,14 +56,15 @@ env:
     - INSTALL_DOC: ON
     - BUILD_EXAMPLES: ON
     - BUILD_EVB: ON
+      USE_MASTER: OFF
     - BUILD_HTTP: ON
-      USE_MASTER: ON # Need master DQMCore branch for now
+      USE_MASTER: OFF
     - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
       INSTALL_DOC: ON
       BUILD_EXAMPLES: ON
       BUILD_EVB: ON
       BUILD_HTTP: ON
-      USE_MASTER: ON # Need master DQMCore branch for now
+      USE_MASTER: OFF
       USE_COVERITY: true
       
 matrix:

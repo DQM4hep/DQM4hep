@@ -1,0 +1,24 @@
+{
+	"OpenArchive" : false,
+	"ArchiveDirectory" : "/tmp",
+	"Network" :
+	{
+		"RunControl" : "SDHCALRunControl",
+		"DataCollector" : "sdhcal_data_collector",
+		"EventStreamer" : "LCIOqStreamer",
+		"MonitorElementCollector" : "sdhcal_me_Collector"
+	},
+	"Cycle" :
+	{
+		"Type" : "TimerCycle",
+		"Value" : 10,
+		"Timeout" : 5
+	},
+	"Module" :
+	{
+		"Settings" :
+		{
+			"ConfigFile" : "/home/acqilc/dqm_setup/ConfigMonitoringLaurent.xml"
+		}
+	}
+}

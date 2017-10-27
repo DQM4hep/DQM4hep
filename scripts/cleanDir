@@ -1,0 +1,4 @@
+#!/bin/sh
+
+rm -rf bin build dim* DQM4ILC/ DQMCore DQMViz/ include jsoncpp levbdim lib mongoose-cpp/ web xdr* *Config*.cmake;
+mkdir build; cd build
