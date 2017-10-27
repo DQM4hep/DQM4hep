@@ -5,22 +5,22 @@
  * Creation date : sam. d�c. 3 2016
  *
  * This file is part of DQM4HEP libraries.
- * 
+ *
  * DQM4HEP is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * DQM4HEP is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with DQM4HEP.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
@@ -46,9 +46,13 @@ int main(int argc, char **argv)
   Json::Value serverInfo;
   client.queryServerInfo(serverName, serverInfo);
 
-  Json::StyledWriter writer;
-  std::cout << writer.write(serverInfo) << std::endl;
+  Json::StreamWriterBuilder builder;
+  builder["indentation"] = "  ";
+  std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+  std::ostringstream jsonResponse;
+  writer->write(serverInfo, &jsonResponse);
+
+  std::cout << jsonResponse.str() << std::endl;
 
   return 0;
 }
-
