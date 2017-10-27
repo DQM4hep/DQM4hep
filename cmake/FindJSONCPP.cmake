@@ -9,11 +9,16 @@
 #  also defined, but not for general use are
 #  JSONCPP_LIBRARY, where to find the jsoncpp library.
 
-FIND_PATH(
-    JSONCPP_INCLUDE_DIRS json/json.h
-    PATHS ${JSONCPP_DIR}/include /usr/local/include /usr/include /opt/local/include
-    PATH_SUFFIXES jsoncpp
-)
+IF( NOT JSONCPP_DIR )
+  FIND_PATH(
+      JSONCPP_INCLUDE_DIRS json/json.h
+      PATHS ${JSONCPP_DIR}/include /usr/local/include /usr/include /opt/local/include
+      PATH_SUFFIXES json
+  )
+ELSE()
+  # FIXME Remove this hardcoded shit !
+  SET( JSONCPP_INCLUDE_DIRS ${JSONCPP_DIR}/include )
+ENDIF()
 
 IF( JSONCPP_INCLUDE_DIRS )
   MESSAGE( STATUS "Found JSONCPP: ${JSONCPP_INCLUDE_DIRS}" )
