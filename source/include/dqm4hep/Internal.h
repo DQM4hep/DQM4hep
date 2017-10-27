@@ -195,10 +195,10 @@ namespace dqm4hep {
 
       std::cout << "#######################################################" << std::endl;
       std::cout << "#" << std::endl;
-      std::cout << "#                    DQM4HEP" << std::endl;
+      std::cout << "#                    DQM4HEP (DQMCore)" << std::endl;
       std::cout << "#   (Data Quality Monitoring For High Energy Physics)" << std::endl;
       std::cout << "#" << std::endl;
-      std::cout << "#      Version    : " << DQM4HEP_VERSION_STR << std::endl;
+      std::cout << "#      Version    : " << DQMCore_VERSION_STR << std::endl;
       std::cout << "#      Started at : " << timeStr ;
       std::cout << "#      Author     : R. Ete, A. Pingault" << std::endl;
       std::cout << "#      Mail       : <dqm4hep@gmail.com> " << std::endl;
