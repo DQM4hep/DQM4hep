@@ -55,10 +55,17 @@ template <>
 inline void ServicePrinter::printT<Json::Value>(const Buffer &buffer)
 {
   Json::Value value;
-  Json::Reader reader;
-  reader.parse(buffer.begin(), buffer.end(), value);
-  Json::StyledWriter writer;
-  std::cout << m_serviceName << " : " << writer.write(value) << std::endl;
+  Json::CharReaderBuilder readerBuilder;
+  std::unique_ptr<Json::CharReader> reader(readerBuilder.newCharReader());
+  reader->parse(buffer.begin(), buffer.end(), &value, nullptr);
+
+  Json::StreamWriterBuilder builder;
+  builder["indentation"] = "  "; // Styled writer !
+  std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+  std::ostringstream jsonResponse;
+  writer->write(value, &jsonResponse);
+
+  std::cout << "=== " << m_serviceName << " ===" << std::endl << jsonResponse.str() << std::endl;
 }
 
 inline void ServicePrinter::print(const Buffer &buffer)
