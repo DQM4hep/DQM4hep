@@ -44,7 +44,7 @@ FIND_PATH( DQMNet_INCLUDE_DIRS
 
 
 # ---------- libraries --------------------------------------------------------
-INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroCheckPackageLibs.cmake" )
+INCLUDE( "@DQM4HEP_CMAKE_MODULES_ROOT@/MacroCheckPackageLibs.cmake" )
 
 # only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
 # additional components are set by cmake in variable PKG_FIND_COMPONENTS
@@ -53,7 +53,7 @@ CHECK_PACKAGE_LIBS( DQMNet DQMNet dim )
 
 
 # ---------- dependencies -----------------------------------------------------
-INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroExportPackageDeps.cmake" )
+INCLUDE( "@DQM4HEP_CMAKE_MODULES_ROOT@/MacroExportPackageDeps.cmake" )
 # exports following package dependencies (if set)
 # first argument of macro should be the package name
 SET( DQMNet_DEPENDS_INCLUDE_DIRS  @DQMNet_DEPENDS_INCLUDE_DIRS@ )
