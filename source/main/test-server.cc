@@ -37,10 +37,14 @@ public:
   void print(const Buffer &request, Buffer &response)
   {
     std::string requestStr(request.begin(), request.size());
-    std::string responseStr = "Hello world !";
-    response.adopt(responseStr.c_str(), responseStr.size());
     std::cout << "Received : " << requestStr << std::endl;
+
+    std::string responseStr = "Hello world !";
     std::cout << "Sending : " << responseStr << std::endl;
+
+    auto model = response.createModel<std::string>();
+    model->move(std::move(responseStr));
+    response.setModel(model);
   }
 
   void printCommand(const Buffer &command)

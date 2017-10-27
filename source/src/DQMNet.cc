@@ -33,8 +33,8 @@ namespace dqm4hep {
 
   namespace net {
 
-    const char NullData::buffer[] = "\0";
-    const size_t NullData::size = 1;
+    const char NullBuffer::buffer[] = "\0";
+    const size_t NullBuffer::size = 1;
 
   }
 

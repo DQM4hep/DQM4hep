@@ -87,7 +87,8 @@ namespace dqm4hep {
         return;
 
       // std::string contents(data, size);
-      Buffer buffer(data, size);
+      Buffer buffer;
+      buffer.adopt(data, size);
       m_pHandler->receiveServiceUpdated(buffer);
     }
 

@@ -42,15 +42,17 @@ int main(int argc, char **argv)
 
   std::string name(argv[1]);
   std::string request;
-  Buffer response;
 
   for(int i=2 ; i<argc ; i++)
     request += argv[i] + std::string(" ");
 
   Client client;
-  client.sendRequest(name, request, response);
+  Buffer requestBuffer;
+  requestBuffer.adopt(request.c_str(), request.size());
 
-  std::cout << response.begin() << std::endl;
+  client.sendRequest(name, requestBuffer, [](const Buffer &response){
+    std::cout << std::string(response.begin(), response.size()) << std::endl;
+  });
 
   return 0;
 }

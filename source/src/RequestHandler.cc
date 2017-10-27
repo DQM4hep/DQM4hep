@@ -215,7 +215,8 @@ namespace dqm4hep {
         if(nullptr == data || size == 0)
           return;
 
-        Buffer command(data, size);
+        Buffer command;
+        command.adopt(data, size);
         m_pHandler->handleCommand(command);
       }
 

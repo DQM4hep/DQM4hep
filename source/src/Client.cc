@@ -52,11 +52,11 @@ namespace dqm4hep {
 
     void Client::queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const
     {
-      Buffer value;
-      this->sendRequest("/" + serverName + "/info", "", value);
-
-      Json::Reader reader;
-      reader.parse(value.begin(), value.end(), serverInfo);
+      Buffer request;
+      this->sendRequest("/" + serverName + "/info", request, [&serverInfo](const Buffer &value){
+        Json::Reader reader;
+        reader.parse(value.begin(), value.end(), serverInfo);
+      });
     }
 
     //-------------------------------------------------------------------------------------------------

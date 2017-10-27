@@ -67,7 +67,7 @@ namespace dqm4hep {
     {
       if(!this->isServiceConnected())
       {
-        m_pService = new DimService((char*)m_name.c_str(), "C", (char*)NullData::buffer, NullData::size);
+        m_pService = new DimService((char*)m_name.c_str(), "C", (char*)NullBuffer::buffer, NullBuffer::size);
       }
     }
 
@@ -93,7 +93,8 @@ namespace dqm4hep {
 
     void Service::sendBuffer(const void *ptr, size_t size)
     {
-      Buffer buffer(ptr, size);
+      Buffer buffer;
+      buffer.adopt((const char*)ptr, size);
       this->sendData(buffer, std::vector<int>());
     }
 
@@ -101,7 +102,8 @@ namespace dqm4hep {
 
     void Service::sendBuffer(const void *ptr, size_t size, int clientId)
     {
-      Buffer buffer(ptr, size);
+      Buffer buffer;
+      buffer.adopt((const char*)ptr, size);
       this->sendData(buffer, std::vector<int>(1, clientId));
     }
 
@@ -109,7 +111,8 @@ namespace dqm4hep {
 
     void Service::sendBuffer(const void *ptr, size_t size, const std::vector<int> &clientIds)
     {
-      Buffer buffer(ptr, size);
+      Buffer buffer;
+      buffer.adopt((const char*)ptr, size);
       this->sendData(buffer, clientIds);
     }
 
@@ -123,8 +126,8 @@ namespace dqm4hep {
       if(clientIds.empty())
       {
         m_pService->updateService((void*)buffer.begin(), buffer.size());
-        m_pService->itsData = (void*)NullData::buffer;
-        m_pService->itsSize = NullData::size;
+        m_pService->itsData = (void*)NullBuffer::buffer;
+        m_pService->itsSize = NullBuffer::size;
       }
       else
       {
@@ -135,8 +138,8 @@ namespace dqm4hep {
 
         int *clientIdsArray = &clientIdList[0];
         m_pService->selectiveUpdateService((void*)buffer.begin(), buffer.size(), clientIdsArray);
-        m_pService->itsData = (void*)NullData::buffer;
-        m_pService->itsSize = NullData::size;
+        m_pService->itsData = (void*)NullBuffer::buffer;
+        m_pService->itsSize = NullBuffer::size;
       }
     }
 

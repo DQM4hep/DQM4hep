@@ -44,23 +44,22 @@ namespace dqm4hep {
 
   namespace net {
 
-    ///< For handling client-size buffer in user callbacks ...
-    class Buffer
+    struct NullBuffer
+    {
+      static const char buffer[2];
+      static const size_t size;
+    };
+
+    class RawBuffer
     {
     public:
-      ///< Handle builtin data types or structures
-      template <typename T>
-      Buffer(const T &var) { this->adopt((const char*)(&var), sizeof(T)); }
-      ///< Handles array
-      template <typename T>
-      Buffer(const T *var, size_t nElements) { this->adopt((const char*)(var), sizeof(T)*nElements); }
       ///< Default constructor
-      Buffer() { this->adopt(nullptr, 0); }
+      RawBuffer() { this->adopt(nullptr, 0); }
 
-      Buffer(const Buffer&) = delete;
-      Buffer(Buffer&&) = delete;
-      Buffer &operator=(const Buffer&) = delete;
-      Buffer &&operator=(Buffer &&) = delete;
+      RawBuffer(const RawBuffer&) = delete;
+      RawBuffer(RawBuffer&&) = delete;
+      RawBuffer &operator=(const RawBuffer&) = delete;
+      RawBuffer &&operator=(RawBuffer &&) = delete;
 
       inline const char *begin() const { return m_pBuffer; }
       inline const char *end() const { return m_pBuffer+m_size; }
@@ -71,24 +70,109 @@ namespace dqm4hep {
       size_t m_size = 0;
     };
 
-    ///< Specialization for char buffer
-    template <>
-    inline Buffer::Buffer(const std::string &var) { this->adopt(var.c_str(), var.size()); }
-    ///< Specialization for char buffer
-    template <>
-    inline Buffer::Buffer(const char *var, size_t bsize) { this->adopt(var, bsize); }
-    ///< Specialization for raw void buffer
-    template <>
-    inline Buffer::Buffer(const void *var, size_t bsize) { this->adopt((const char*)(var), bsize); }
-
-    struct NullData
+    class BufferModel
     {
-      static const char buffer[2];
-      static const size_t size;
+    public:
+      ///< Constructor
+      BufferModel() {}
+      ///< Get the raw buffer
+      const RawBuffer &raw() const { return m_rawBuffer; }
+      ///< Handle the buffer. The buffer is still owned by the user
+      void handle(const char *buffer, size_t size) { m_rawBuffer.adopt(buffer, size); }
+    protected:
+      RawBuffer      m_rawBuffer;
     };
 
-    //----------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------
+    template <typename T>
+    class BufferModelT : public BufferModel
+    {
+    public:
+      ///< Constructor
+      BufferModelT() { m_rawBuffer.adopt((const char*)&m_value, sizeof(m_value)); }
+      ///< Copy the value for further use
+      void copy(const T &value) { m_value = T(value); m_rawBuffer.adopt((const char*)&m_value, sizeof(m_value)); }
+      ///< Move the value for further use
+      void move(T &&value) { m_value = std::move(value); m_rawBuffer.adopt((const char*)&m_value, sizeof(m_value)); }
+    private:
+      T           m_value;
+    };
+
+    template <>
+    class BufferModelT<std::string> : public BufferModel
+    {
+    public:
+      ///< Constructor
+      BufferModelT() { m_value.assign(NullBuffer::buffer, NullBuffer::size); m_rawBuffer.adopt(m_value.c_str(), m_value.size()); }
+      ///< Copy the value for further use
+      void copy(const std::string &value) { m_value = value; m_rawBuffer.adopt(m_value.c_str(), m_value.size()); }
+      ///< Move the value for further use
+      void move(std::string &&value) { m_value = std::move(value); m_rawBuffer.adopt(m_value.c_str(), m_value.size()); }
+    private:
+      std::string          m_value;
+    };
+
+    typedef std::shared_ptr<BufferModel> BufferModelPtr;
+
+    ///< For handling client-size buffer in user callbacks ...
+    class Buffer
+    {
+    public:
+      ///< Default constructor
+      inline Buffer()
+      {
+        this->adopt(NullBuffer::buffer, NullBuffer::size);
+      }
+
+      template <typename T>
+      inline std::shared_ptr<BufferModelT<T>> createModel()
+      {
+        return std::make_shared<BufferModelT<T>>();
+      }
+
+      inline std::shared_ptr<BufferModel> createModel()
+      {
+        return std::make_shared<BufferModel>();
+      }
+
+      inline void setModel(std::shared_ptr<BufferModel> model)
+      {
+        if( ! model )
+          return;
+
+        m_model = model;
+      }
+
+      inline const char *begin() const
+      {
+        return m_model->raw().begin();
+      }
+
+      inline const char *end() const
+      {
+        return m_model->raw().end();
+      }
+
+      inline size_t size() const
+      {
+        return m_model->raw().size();
+      }
+
+      inline void adopt(const char *buffer, size_t size)
+      {
+        auto model = this->createModel();
+        model->handle(buffer, size);
+        this->setModel(model);
+      }
+
+      Buffer(const Buffer&) = delete;
+      Buffer(Buffer&&) = delete;
+      Buffer &operator=(const Buffer&) = delete;
+      Buffer &&operator=(Buffer &&) = delete;
+
+    private:
+      BufferModelPtr     m_model;
+    };
+
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
 

@@ -156,7 +156,10 @@ namespace dqm4hep {
     template <typename T>
     inline void Service::send(const T &value)
     {
-      Buffer buffer(value);
+      Buffer buffer;
+      auto model = buffer.createModel<T>();
+      model->copy(value);
+      buffer.setModel(model);
       this->sendData(buffer, std::vector<int>());
     }
 

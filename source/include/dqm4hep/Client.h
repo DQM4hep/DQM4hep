@@ -92,10 +92,10 @@ namespace dqm4hep {
 
        * @param name the request name
        * @param request the request to send
-       * @param response the response to receive from the server
+       * @param operation the callback operation to perform on data reception
        */
-      template <typename Request>
-      void sendRequest(const std::string &name, const Request &request, Buffer &response) const;
+      template <typename Operation>
+      void sendRequest(const std::string &name, const Buffer &request, Operation operation) const;
 
       /**
        * Send a command.
@@ -118,7 +118,7 @@ namespace dqm4hep {
        * // the class callback method
        * void MyClass::myfunction(const int &integer) { ... }
        * Client *pClient = new Client();
-       * pClient->subscribe<int>("service-type", "service-name", pMyClassInstance, &MyClass::myfunction)
+       * pClient->subscribe(service-name", pMyClassInstance, &MyClass::myfunction)
        * @endcode
        */
       template <typename Controller>
@@ -158,7 +158,10 @@ namespace dqm4hep {
     inline void Client::sendRequest(const std::string &name, const Request &request) const
     {
       DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      Buffer contents(request);
+      Buffer contents;
+      auto model = contents.createModel<Request>();
+      model->copy(request);
+      contents.setModel(model);
       rpcInfo.setData((void*)contents.begin(), contents.size());
     }
 
@@ -168,46 +171,58 @@ namespace dqm4hep {
     inline void Client::sendRequest(const std::string &name, const Buffer &request) const
     {
       DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      Buffer contents(request.begin(), request.size());
+      Buffer contents;
+      contents.adopt(request.begin(), request.size());
       rpcInfo.setData((void*)contents.begin(), contents.size());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename Request>
-    inline void Client::sendRequest(const std::string &name, const Request &request, Buffer &response) const
-    {
-      DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      Buffer contents(request);
-
-      // send request
-      rpcInfo.setData((void*)contents.begin(), contents.size());
-
-      // wait for answer from server
-      char *data = (char*)rpcInfo.getData();
-      int size = rpcInfo.getSize();
-
-      if(nullptr != data && 0 != size)
-        response.adopt(data, size);
-    }
+    // template <typename Request, typename Operation>
+    // inline void Client::sendRequest(const std::string &name, const Request &request, Operation operation) const
+    // {
+    //   DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
+    //
+    //   Buffer contents;
+    //   auto model = contents.createModel<Request>();
+    //   model->copy(request);
+    //   contents.setModel(model);
+    //
+    //   // send request
+    //   rpcInfo.setData((void*)contents.begin(), contents.size());
+    //
+    //   // wait for answer from server
+    //   char *data = (char*)rpcInfo.getData();
+    //   int size = rpcInfo.getSize();
+    //
+    //   Buffer response;
+    //
+    //   if(nullptr != data && 0 != size)
+    //     response.adopt(data, size);
+    //
+    //   operation(response);
+    // }
 
     //-------------------------------------------------------------------------------------------------
 
-    template <>
-    inline void Client::sendRequest(const std::string &name, const Buffer &request, Buffer &response) const
+    template <typename Operation>
+    inline void Client::sendRequest(const std::string &name, const Buffer &request, Operation operation) const
     {
       DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-      Buffer contents(request.begin(), request.size());
 
       // send request
-      rpcInfo.setData((void*)contents.begin(), contents.size());
+      rpcInfo.setData((void*)request.begin(), request.size());
 
       // wait for answer from server
       char *data = (char*)rpcInfo.getData();
       int size = rpcInfo.getSize();
 
+      Buffer response;
+
       if(nullptr != data && 0 != size)
         response.adopt(data, size);
+
+      operation(response);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -215,15 +230,18 @@ namespace dqm4hep {
     template <typename Command>
     inline void Client::sendCommand(const std::string &name, const Command &command, bool blocking) const
     {
-      Buffer buffer(command);
+      Buffer contents;
+      auto model = contents.createModel<Command>();
+      model->copy(command);
+      contents.setModel(model);
 
       if(blocking)
       {
-        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)buffer.begin(), buffer.size());
+        DimClient::sendCommand(const_cast<char*>(name.c_str()), (void*)contents.begin(), contents.size());
       }
       else
       {
-        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)buffer.begin(), buffer.size());
+        DimClient::sendCommandNB(const_cast<char*>(name.c_str()), (void*)contents.begin(), contents.size());
       }
     }
 
