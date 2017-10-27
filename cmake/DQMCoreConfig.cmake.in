@@ -44,7 +44,7 @@ FIND_PATH( DQMCore_INCLUDE_DIRS
 
 
 # ---------- libraries --------------------------------------------------------
-INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroCheckPackageLibs.cmake" )
+INCLUDE( "MacroCheckPackageLibs.cmake" )
 
 # only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
 # additional components are set by cmake in variable PKG_FIND_COMPONENTS
@@ -53,7 +53,7 @@ CHECK_PACKAGE_LIBS( DQMCore DQMCore )
 
 
 # ---------- dependencies -----------------------------------------------------
-INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroExportPackageDeps.cmake" )
+INCLUDE( "MacroExportPackageDeps.cmake" )
 # exports following package dependencies (if set)
 # first argument of macro should be the package name
 SET( DQMCore_DEPENDS_INCLUDE_DIRS  @DQMCore_DEPENDS_INCLUDE_DIRS@ )
@@ -82,4 +82,3 @@ IF( DQMCore_FOUND )
     ENDIF()
 
 ENDIF()
-
