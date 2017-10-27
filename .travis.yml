@@ -11,7 +11,7 @@ addons:
       - libmysqlclient-dev
 
 script:
-  - ./travis-ci.d/compile_and_test.sh
+  - ./.travis-ci.d/compile_and_test.sh
 
 before_install:
   - ./.travis-ci.d/install_dependencies.sh
