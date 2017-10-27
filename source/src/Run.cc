@@ -66,6 +66,18 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    void Run::reset()
+    {
+      m_runNumber = 0;
+      m_startTime = TimePoint();
+      m_endTime = TimePoint();
+      m_detectorName.clear();
+      m_description.clear();
+      m_parametersMap.clear();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     xdrstream::Status Run::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
         xdrstream::xdr_version_t version)
     {

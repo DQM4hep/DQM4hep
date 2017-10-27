@@ -121,6 +121,10 @@ namespace dqm4hep {
        */
       StringVector getParameterKeys() const;
 
+      /** Reset the run
+       */
+       void reset();
+
       xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
           xdrstream::xdr_version_t version = 0);
 
