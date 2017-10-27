@@ -408,10 +408,12 @@ namespace dqm4hep {
 
       responseValue["commandHandlers"] = commandHandlerList;
 
-      Json::FastWriter writer;
-      std::string jsonResponse = writer.write(responseValue);
+      Json::StreamWriterBuilder builder;
+      std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+      std::ostringstream jsonResponse;
+      writer->write(responseValue, &jsonResponse);
 
-      response.adopt(jsonResponse.c_str(), jsonResponse.size());
+      response.adopt(jsonResponse.str().c_str(), jsonResponse.str().size());
     }
 
     //-------------------------------------------------------------------------------------------------
