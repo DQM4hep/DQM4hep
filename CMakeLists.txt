@@ -27,7 +27,7 @@ ENDIF()
 ###############################
 # Dependencies
 LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
-INCLUDE( default_settings )
+INCLUDE( dqm4hep_settings )
 
 ###############################
 # Define options
