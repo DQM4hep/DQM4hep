@@ -9,24 +9,25 @@ INCLUDE( MacroDisplayStandardVariables )
 INCLUDE( MacroGeneratePackageConfigFiles )
 
 
-# include default settings
-INCLUDE( default_install_prefix )
-INCLUDE( default_build_type )
-INCLUDE( default_enable_ctest )
-INCLUDE( default_library_versioning )
-INCLUDE( default_build_output_directories )
-INCLUDE( default_rpath_settings )
+# include dqm4hep settings
+INCLUDE( dqm4hep_install_prefix )
+INCLUDE( dqm4hep_build_type )
+INCLUDE( dqm4hep_enable_ctest )
+INCLUDE( dqm4hep_library_versioning )
+INCLUDE( dqm4hep_build_output_directories )
+INCLUDE( dqm4hep_rpath_settings )
 #INCLUDE( build_32bit_compatible )
 
+SET( DQM4HEP_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
 
 # uninstall target may only be created once per project
 # otherwise problems occur due to duplicate targets. even
 # setting CMAKE_POLICY(SET CMP0002 OLD) causes an error
 # calling 'make uninstall'
-IF( NOT _default_settings_loaded )
+IF( NOT _dqm4hep_settings_loaded )
 
-    INCLUDE( default_uninstall_target )
+    INCLUDE( dqm4hep_uninstall_target )
 
-    SET( _default_settings_loaded TRUE )
+    SET( _dqm4hep_settings_loaded TRUE )
 
 ENDIF()
