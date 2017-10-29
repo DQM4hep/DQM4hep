@@ -54,8 +54,9 @@ namespace dqm4hep {
     {
       Buffer request;
       this->sendRequest("/" + serverName + "/info", request, [&serverInfo](const Buffer &value){
-        Json::Reader reader;
-        reader.parse(value.begin(), value.end(), serverInfo);
+        Json::CharReaderBuilder readerBuilder;
+        std::unique_ptr<Json::CharReader> reader(readerBuilder.newCharReader());
+        reader->parse(buffer.begin(), buffer.end(), &serverInfo, nullptr);
       });
     }
 
