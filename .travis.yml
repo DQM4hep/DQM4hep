@@ -4,12 +4,6 @@ sudo: required
 os:
   - linux
 
-addons:
-  apt:
-    packages:
-      - libjsoncpp-dev
-      - libmysqlclient-dev
-
 script:
   - ./.travis-ci.d/compile_and_test.sh
 
