@@ -98,10 +98,10 @@ namespace dqm4hep {
       template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
       template <typename S> friend bool operator !=(const S *lhs, const PtrHandler<S> &rhs);
       template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const S *rhs);
-      template <typename S> friend bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs);
-      template <typename S> friend bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs);
+      template <typename S> friend bool operator ==(std::nullptr_t lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, std::nullptr_t rhs);
+      template <typename S> friend bool operator !=(std::nullptr_t lhs, const PtrHandler<S> &rhs);
+      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, std::nullptr_t rhs);
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -251,7 +251,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator ==(nullptr_t lhs, const PtrHandler<S> &rhs)
+    inline bool operator ==(std::nullptr_t lhs, const PtrHandler<S> &rhs)
     {
       return lhs == rhs.m_ptr;
     }
@@ -259,7 +259,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator ==(const PtrHandler<S> &lhs, nullptr_t rhs)
+    inline bool operator ==(const PtrHandler<S> &lhs, std::nullptr_t rhs)
     {
       return lhs.m_ptr == rhs;
     }
@@ -267,7 +267,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator !=(nullptr_t lhs, const PtrHandler<S> &rhs)
+    inline bool operator !=(std::nullptr_t lhs, const PtrHandler<S> &rhs)
     {
       return lhs != rhs.m_ptr;
     }
@@ -275,7 +275,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator !=(const PtrHandler<S> &lhs, nullptr_t rhs)
+    inline bool operator !=(const PtrHandler<S> &lhs, std::nullptr_t rhs)
     {
       return lhs.m_ptr != rhs;
     }
