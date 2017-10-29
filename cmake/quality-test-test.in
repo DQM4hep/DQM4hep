@@ -6,4 +6,4 @@ rootFile="test_samples.root"
 qTestFile="test_samples.xml"
 
 # the qtest runner
-@CMAKE_INSTALL_PREFIX@/bin/dqm4hep-run-qtests --exit-on failure --quality-thresolds 0.7:0.9 --input-root-file ${rootFile} --input-qtest-file ${qTestFile}
+@PROJECT_BINARY_DIR@/bin/dqm4hep-run-qtests --exit-on failure --quality-thresolds 0.7:0.9 --input-root-file ${rootFile} --input-qtest-file ${qTestFile}
