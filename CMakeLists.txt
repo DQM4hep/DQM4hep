@@ -28,6 +28,7 @@ ENDIF()
 # Dependencies
 LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 INCLUDE( dqm4hep_settings )
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ###############################
 # Define options
