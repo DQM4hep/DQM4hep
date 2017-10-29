@@ -365,10 +365,16 @@ int main(int argc, char* argv[])
   if(outputJsonFileArg.isSet())
   {
     const std::string jsonFileName(outputJsonFileArg.getValue());
-    Json::StyledWriter writer;
+
+    Json::StreamWriterBuilder builder;
+    builder["indentation"] = "  ";
+    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
+    std::ostringstream jsonResponse;
+    writer->write(jsonRoot, &jsonResponse);
+
     std::ofstream jsonFile;
     jsonFile.open(jsonFileName.c_str());
-    jsonFile << writer.write(jsonRoot);
+    jsonFile << jsonResponse.str();
     jsonFile.close();
   }
 
