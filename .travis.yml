@@ -15,9 +15,10 @@ script:
 
 before_install:
   - ./.travis-ci.d/install_dependencies.sh
-  compiler:
-    - gcc
-    - llvm
+
+compiler:
+  - gcc
+  - llvm
 
 # Don't send e-mail notifications
 notifications:
