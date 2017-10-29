@@ -21,7 +21,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-ldd ./lib/libDQMCore.so
+ldd ./lib/*.so
+ldd ./bin/*
 
 ctest -V
 
