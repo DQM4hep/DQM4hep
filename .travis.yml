@@ -12,7 +12,7 @@ before_install:
 
 compiler:
   - gcc
-  - llvm
+  - clang
 
 # Don't send e-mail notifications
 notifications:
