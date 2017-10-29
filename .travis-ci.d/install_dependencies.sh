@@ -20,7 +20,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-make install -j4 VERBOSE=1
+make install VERBOSE=1
 
 if [ $? -ne 0 ]; then
     echo "Failed to run json make"
