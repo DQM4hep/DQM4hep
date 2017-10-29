@@ -1,34 +1,26 @@
 language: cpp
-
-sudo: not required
-
-script:
-  - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew update; fi"
-  - "if [ ${TRAVIS_OS_NAME} = 'osx' ]; then brew install jsoncpp; fi"
-  - if [ "$CXX" = "g++" ]; then export CXX="g++-4.8" CC="gcc-4.8"; fi
-  - mkdir build
-  - cd build
-  - cmake ..
-  - make VERBOSE=1 install
+dist: trusty
+sudo: required
+os:
+  - linux
 
 addons:
   apt:
-    sources:
-    - ubuntu-toolchain-r-test
     packages:
-    - gcc-4.8
-    - g++-4.8
-    - clang
-    - libjsoncpp-dev
+      - libjsoncpp-dev
+      - libmysqlclient-dev
 
-matrix:
-  include:
-    - os: linux
-      compiler: clang
-    - os: linux
-      compiler: gcc
-    - os: osx
-      compiler: clang
+script:
+  - ./.travis-ci.d/compile_and_test.sh
 
+before_install:
+  - ./.travis-ci.d/install_dependencies.sh
+  compiler:
+    - gcc
+    - llvm
+
+# Don't send e-mail notifications
 notifications:
-  email: false
+  email:
+    on_success: never
+    on_failure: always
