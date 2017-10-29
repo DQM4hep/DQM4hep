@@ -53,7 +53,7 @@ namespace dqm4hep {
     void Client::queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const
     {
       Buffer request;
-      this->sendRequest("/" + serverName + "/info", request, [&serverInfo](const Buffer &value){
+      this->sendRequest("/" + serverName + "/info", request, [&serverInfo](const Buffer &buffer){
         Json::CharReaderBuilder readerBuilder;
         std::unique_ptr<Json::CharReader> reader(readerBuilder.newCharReader());
         reader->parse(buffer.begin(), buffer.end(), &serverInfo, nullptr);
