@@ -143,14 +143,16 @@ namespace dqm4hep {
       std::string                            m_detectorName;
       std::string                            m_description;
       std::map<std::string, std::string>     m_parametersMap;
-
-      friend std::ostream &operator <<(std::ostream &, const Run &);
+      
+      template <typename T>
+      friend T &operator <<(T &, const Run &);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline std::ostream &operator <<(std::ostream &out, const Run &run)
+    template <typename T>
+    inline T &operator <<(T &out, const Run &run)
     {
       out << "Run :\n"
           "  -> run number : " << run.getRunNumber() << "\n"
