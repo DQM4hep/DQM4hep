@@ -62,7 +62,7 @@ fi
 cd ../doc
 git clone https://github.com/DQM4HEP/dqm4hep-doxygen.git
 cd dqm4hep-doxygen
-git checkout gh-pages
+git checkout -b gh-pages
 
 # create the documentation directory
 mkdir -p doxygen/${doxygenDirectory}
