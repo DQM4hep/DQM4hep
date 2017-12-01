@@ -77,4 +77,4 @@ cp -r $TRAVIS_BUILD_DIR/build/docbuild/html/* .
 # commit the new doc
 git add ./*
 git -c user.name='travis' -c user.email='travis' commit -m "Updated ${doxygenDirectory} doxygen documentation, build commit: $TRAVIS_COMMIT"
-git push -f -q https://dqm4hep:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen gh-pages &2>/dev/null
+git push -f -q https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen gh-pages &2>/dev/null
