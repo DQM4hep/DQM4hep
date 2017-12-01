@@ -60,7 +60,7 @@ fi
 
 # get the doxygen package
 cd ../doc
-git clone https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen.git --branch=gh-pages &2>/dev/null
+git clone https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen.git --branch=gh-pages
 cd dqm4hep-doxygen
 
 # create the documentation directory
