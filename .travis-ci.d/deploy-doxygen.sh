@@ -4,14 +4,14 @@ doxygenDirectory=""
 repository=$(basename $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 username=$(dirname $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 
-if [ ! "${CXX}" -eq "gcc" ] || [ ! "${TRAVIS_OS_NAME}" -eq "linux" ]
+if [ ! "${CXX}" = "gcc" ] || [ ! "${TRAVIS_OS_NAME}" = "linux" ]
 then
   echo "Build and push doxygen only one per push"
   exit 0
 fi
 
 # check correct user name
-if [ ! "${username}" -eq "dqm4hep" ]
+if [ ! "${username}" = "dqm4hep" ]
 then
   echo "Invalid username for pushing doxygen !"
   echo "Username: ${username}, repository: ${repository}"
@@ -19,13 +19,13 @@ then
 fi
 
 # check if PR
-if [ ! "$TRAVIS_PULL_REQUEST" -eq "false" ]
+if [ ! "$TRAVIS_PULL_REQUEST" = "false" ]
 then
   echo "Doxygen not deployed on pull request !"
   exit 0
 fi
 
-if [ "$TRAVIS_BRANCH" -eq "master" ]
+if [ "$TRAVIS_BRANCH" = "master" ]
 then # master branch case
   doxygenDirectory="${repository}/master"
 elif [ ! -z "$TRAVIS_TAG" ]
