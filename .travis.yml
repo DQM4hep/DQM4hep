@@ -15,6 +15,9 @@ script:
 before_install:
   - ./.travis-ci.d/install_dependencies.sh
 
+after_success:
+  - ./.travis-ci.d/deploy-doxygen.sh
+
 compiler:
   - gcc
   - clang
