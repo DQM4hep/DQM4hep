@@ -69,7 +69,7 @@ cd doxygen/${doxygenDirectory}
 rm -rf *
 
 # copy the new one in place
-cp -r $TRAVIS_BUILD_DIR/doc/html/* .
+cp -r $TRAVIS_BUILD_DIR/build/docbuild/html/* .
 
 # commit the new doc
 git add ./*
