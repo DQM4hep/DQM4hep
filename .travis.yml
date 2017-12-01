@@ -8,6 +8,7 @@ addons:
   apt:
     packages:
       - libmysqlclient-dev
+      - doxygen
 
 script:
   - ./.travis-ci.d/compile_and_test.sh
