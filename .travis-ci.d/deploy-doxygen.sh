@@ -4,7 +4,7 @@ doxygenDirectory=""
 repository=$(basename $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 username=$(dirname $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 
-if [ ! "${CXX}" = "gcc" ] || [ ! "${TRAVIS_OS_NAME}" = "linux" ]
+if [ ! "${CXX}" = "g++" ] || [ ! "${TRAVIS_OS_NAME}" = "linux" ]
 then
   echo "Build and push doxygen only one per push"
   exit 0
