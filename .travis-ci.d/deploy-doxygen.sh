@@ -78,4 +78,4 @@ git add ./*
 git -c user.name='travis' -c user.email='travis' commit -m "Updated ${doxygenDirectory} doxygen documentation, build commit: $TRAVIS_COMMIT"
 git remote rm origin
 git remote add origin https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen.git
-git push -fq origin gh-pages &2>/dev/null
+git push -fq origin gh-pages >/dev/null 2>&1
