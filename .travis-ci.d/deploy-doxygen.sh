@@ -1,6 +1,7 @@
 #!/bin/bash
 
 doxygenDirectory=""
+pkgVersion=""
 repository=$(basename $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 username=$(dirname $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 
@@ -28,8 +29,10 @@ fi
 if [ "$TRAVIS_BRANCH" = "master" ]
 then # master branch case
   doxygenDirectory="${repository}/master"
+  pkgVersion="master"
 elif [ ! -z "$TRAVIS_TAG" ]
 then # pushed a tag
+  pkgVersion="$TRAVIS_TAG"
   doxygenDirectory="${repository}/$TRAVIS_TAG"
 else
   echo "Not on a valid branch for pushing doxygen !"
@@ -62,6 +65,10 @@ fi
 cd ../doc
 git clone https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen.git --branch=gh-pages
 cd dqm4hep-doxygen
+
+# add (if not exists) the package version to the web page
+python doxygen.py --input meta.json --output meta.json --add-pkg --pkg-name ${repository} --pkg-version ${pkgVersion}
+git add meta.json 
 
 # create the documentation directory
 mkdir -p doxygen/${doxygenDirectory}
