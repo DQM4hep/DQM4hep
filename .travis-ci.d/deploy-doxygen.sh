@@ -38,8 +38,6 @@ fi
 
 cd "$TRAVIS_BUILD_DIR"
 
-source dependencies/root/bin/thisroot.sh
-
 cd build
 
 # activate doxygen building target
