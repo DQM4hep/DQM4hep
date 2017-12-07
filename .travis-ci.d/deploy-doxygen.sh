@@ -61,6 +61,10 @@ cd ../doc
 git clone https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen.git --branch=gh-pages
 cd dqm4hep-doxygen
 
+# add (if not exists) the package version to the web page
+python doxygen.py --input meta.json --output meta.json --add-pkg --pkg-name ${repository} --pkg-version ${pkgVersion}
+git add meta.json 
+
 # create the documentation directory
 mkdir -p doxygen/${doxygenDirectory}
 cd doxygen/${doxygenDirectory}
