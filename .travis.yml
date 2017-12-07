@@ -7,7 +7,6 @@ os:
 addons:
   apt:
     packages:
-      - libmysqlclient-dev
       - doxygen
 
 script:
