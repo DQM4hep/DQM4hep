@@ -4,12 +4,21 @@ sudo: required
 os:
   - linux
 
+addons:
+  apt:
+    packages:
+      - libmysqlclient-dev
+      - doxygen
+
 script:
   - ./.travis-ci.d/compile_and_test.sh
 
 before_install:
   - ./.travis-ci.d/install_dependencies.sh
 
+after_success:
+  - ./.travis-ci.d/deploy-doxygen.sh
+  
 compiler:
   - gcc
   - clang
