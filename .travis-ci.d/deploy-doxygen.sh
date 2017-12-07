@@ -1,6 +1,7 @@
 #!/bin/bash
 
 doxygenDirectory=""
+pkgVersion=""
 repository=$(basename $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 username=$(dirname $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 
@@ -28,8 +29,10 @@ fi
 if [ "$TRAVIS_BRANCH" = "master" ]
 then # master branch case
   doxygenDirectory="${repository}/master"
+  pkgVersion="master"
 elif [ ! -z "$TRAVIS_TAG" ]
 then # pushed a tag
+  pkgVersion="$TRAVIS_TAG"
   doxygenDirectory="${repository}/$TRAVIS_TAG"
 else
   echo "Not on a valid branch for pushing doxygen !"
