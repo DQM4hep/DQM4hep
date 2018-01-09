@@ -41,7 +41,7 @@
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if (statusCode Operator StatusCode1)				\
   {									\
-    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
     dqm_error( "    in function: {0}", __FUNCTION__ ); \
     dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     return statusCode;						\
@@ -55,7 +55,7 @@
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
   {									\
-    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
     dqm_error( "    in function: {0}", __FUNCTION__ ); \
     dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     return statusCode;						\
@@ -69,7 +69,7 @@
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if (statusCode Operator StatusCode1)				\
   {									\
-    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
     dqm_error( "    in function: {0}", __FUNCTION__ ); \
     dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     throw dqm4hep::core::StatusCodeException(statusCode);			\
@@ -83,7 +83,7 @@
   const dqm4hep::core::StatusCode statusCode(Command);			\
   if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
   {									\
-    dqm_error( "{0} return {1}, "#Command, dqm4hep::core::statusCodeToString(statusCode) ); \
+    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
     dqm_error( "    in function: {0}", __FUNCTION__ ); \
     dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
     throw dqm4hep::core::StatusCodeException(statusCode);			\
