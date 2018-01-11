@@ -3,8 +3,9 @@
 # Create the db, the users, and the basic tables
 
 
-echo "Configuration of MySQL database for DQM4HEP"
+echo "Configuration of MySQL database for DQM4HEP (admin script)"
 echo "Please follow instructions. Values in [] are defaults if nothing answered"
+echo "This script requires to have the mysql root password on the host you want to setup your db"
 echo ""
 
 LOCALHOST=`hostname`
@@ -77,37 +78,17 @@ fi
 
 
 echo "Database creation - existing databases will NOT be destroyed"
-mysql -h $DQM4HEP_DB_MYSQL_HOST -u root $PASSWORD -e "CREATE DATABASE DQM4HEP ;"
 
-# Create account
-read -p "Please enter a username and password to be created to access DQM4HEP databases (space separated) [DQM4HEP DQM4HEP] : " DQM4HEP_DB_MYSQL_USER DQM4HEP_DB_MYSQL_PWD
-if [ "$DQM4HEP_DB_MYSQL_USER" = "" ]; then  DQM4HEP_DB_MYSQL_USER=DQM4HEP; fi
-if [ "$DQM4HEP_DB_MYSQL_PWD" = "" ]; then  DQM4HEP_DB_MYSQL_PWD=DQM4HEP; fi
+read -p "Please enter the database name to create [DQM4HEP] : " DQM4HEP_DB_MYSQL_DB
+if [ "$DQM4HEP_DB_MYSQL_DB" = "" ]; then  DQM4HEP_DB_MYSQL_DB=DQM4HEP; fi
+mysql -h $DQM4HEP_DB_MYSQL_HOST -u root $PASSWORD -e "CREATE DATABASE IF NOT EXISTS $DQM4HEP_DB_MYSQL_DB ;"
 
-HERE=`hostname -f`
+if [ "$?" != "0" ]; then 
+  echo "Couldn't create database !"
+  exit 1
+fi
 
-mysql -h $DQM4HEP_DB_MYSQL_HOST -u root $PASSWORD -e "
-  grant all privileges on DQM4HEP.* to \"$DQM4HEP_DB_MYSQL_USER\"@\"%\" identified by \"$DQM4HEP_DB_MYSQL_PWD\";
-  grant all privileges on DQM4HEP.* to \"$DQM4HEP_DB_MYSQL_USER\"@\"localhost\" identified by \"$DQM4HEP_DB_MYSQL_PWD\";
-  grant all privileges on DQM4HEP.* to \"$DQM4HEP_DB_MYSQL_USER\"@\"$HERE\" identified by \"$DQM4HEP_DB_MYSQL_PWD\";
-"
-
-echo "Creating configuration tables"
-
-mysql DQM4HEP -u $DQM4HEP_DB_MYSQL_USER -p$DQM4HEP_DB_MYSQL_PWD -h $DQM4HEP_DB_MYSQL_HOST -e \
-"
-CREATE TABLE IF NOT EXISTS CONFIG_FILES (
-	FILE_NAME VARCHAR(255) NOT NULL PRIMARY KEY,
-	DESCRIPTION LONGTEXT,
-	CONTENTS LONGTEXT NOT NULL
-);
-"
-
-echo "DQM4HEP MySQL server accounts and database were succesfully created"
-
-
-
-
-
+echo "DQM4HEP MySQL database was succesfully created"
+exit 0
 
 
