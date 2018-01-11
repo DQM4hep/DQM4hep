@@ -45,104 +45,181 @@ namespace dqm4hep {
     class DBInterface
     {
     public:
-      /** Constructor
+      /** 
+       *  @brief  Constructor
        */
       DBInterface();
 
-      /** Constructor. Connect to data base
+      /** 
+       *  @brief  Constructor. Connect to database
+       *
+       *  @param  host the host name
+       *  @param  user the db user name
+       *  @param  password the user password (if any)
+       *  @param  database the database name to use
        */
       DBInterface(const std::string &host, const std::string &user, const std::string &password, const std::string &database);
 
-      /** Destructor
+      /** 
+       *  @brief  Destructor
        */
       virtual ~DBInterface();
 
-      // GENERAL DATABASE
-      // INTERFACE IMPLEMENTATION
-
-      /** Connect to the mysql server
+      /** 
+       *  @brief  Connect to the mysql server
        */
       StatusCode connect();
 
-      /** Disconnect from the database
+      /** 
+       *  @brief  Disconnect from the database
        */
       StatusCode disconnect();
 
-      /** Connect to the database.
-       *  Not possible if a connection is being handled.
-       *  Use disconnect() first and then connect()
+      /** 
+       *  @brief  Connect to the database.
+       *          Not possible if a connection is being handled.
+       *          Use disconnect() first and then connect()
+       *
+       *  @param  host the host name
+       *  @param  user the db user name
+       *  @param  password the user password (if any)
+       *  @param  database the database name to use
        */
       StatusCode connect(const std::string &host, const std::string &user, const std::string &password, const std::string &database);
 
-      /** Set host, user, password and database.
-       *  Not possible if a connection is being handled.
-       *  Use disconnect() first and then connect()
+      /** 
+       *  @brief  Set host, user, password and database.
+       *          Not possible if a connection is being handled.
+       *          Use disconnect() first and then connect()
+       *
+       *  @param  host the host name
+       *  @param  user the db user name
+       *  @param  password the user password (if any)
+       *  @param  database the database name to use
        */
       StatusCode set(const std::string &host, const std::string &user, const std::string &password, const std::string &database);
 
-      /** Get the host
+      /** 
+       *  @brief  Get the host name
        */
       const std::string &getHost() const;
 
-      /** Get the user name
+      /** 
+       *  @brief  Get the user name
        */
       const std::string &getUser() const;
 
-      /** Get the password
+      /** 
+       *  @brief  Get the password
        */
       const std::string &getPassword() const;
 
-      /** Get the data base name
+      /** 
+       *  @brief  Get the data base name
        */
       const std::string &getDataBase() const;
 
-      /** Send query to database
-       *  The result is not converted.
+      /** 
+       *  @brief  Send query to database
+       *          The result is not converted.
+       *
+       *  @param  query the mysql query
+       *  @param  pResult the result to handle as raw pointer
        */
       StatusCode queryRaw(const std::string &query, void *&pResult);
 
-      /** Send query to database.
-       *  The result is streamed in type T using DQM4HEP::stringToType()
+      /** 
+       *  @brief  The result is streamed in type T using DQM4HEP::stringToType()
+       *
+       *  @param  query the mysql query
+       *  @param  result the result to handle in the specified type
        */
       template <typename T>
       StatusCode query(const std::string &query, T &result);
 
-      /** Send query to database.
-       *  The result is streamed in a vector.
-       *  Each value of the vector is streamed using DQM4HEP::stringToType()
+      /** 
+       *  @brief  Send query to database.
+       *          The result is streamed in a vector.
+       *          Each value of the vector is streamed using DQM4HEP::stringToType()
+       *
+       *  @param  query the mysql query
+       *  @param  result the result to handle as a vector of specified type
        */
       template <typename T>
       StatusCode queryVector(const std::string &query, std::vector<T> &result);
 
-      /** Send query to database
-       *  The result is passed in the handler function for user parsing
+      /** 
+       *  @brief  Send query to database
+       *          The result is passed in the handler function for user parsing
+       *
+       *  @param  query the mysql query
+       *  @param  handler a function to handle the mysql query result (lambda or static function)
        */
       template <typename Handler>
       StatusCode queryAndHandle(const std::string &query, Handler handler);
 
-      /** Execute the query (no result expected)
+      /** 
+       *  @brief  Execute the query (no result expected)
+       *
+       *  @param  query the mysql query
        */
       StatusCode execute(const std::string &query);
 
-      /** Whether a connection is being handled
+      /** 
+       *  @brief  Whether a connection is being handled
        */
       bool isConnected();
 
-      // DQM4HEP SPECIFIC
-      // DATABASE INTERFACE
-
-      /** Query a config file content stored in the DQM4HEP data base (table CONFIG_FILES)
+      /**
+       *  @brief  Create a new parameter table
+       *  
+       *  @param  table the table name
+       *  @param  ifNotExists whether to check for table existence on creation
+       *  @param  dropExistingTable whether to drop the existing table before creating
        */
-      StatusCode queryConfigFileContent(const std::string &configFileName, std::string &fileContents);
+      StatusCode createParameterTable(const std::string &table, bool ifNotExists = true, bool dropExistingTable = false);
 
-      /** Query a config file description
+      /**
+       *  @brief  Empty a parameter table (uses the TRUNCATE statement)
+       *  
+       *  @param  table the table name
        */
-      StatusCode queryConfigFileDescription(const std::string &configFileName, std::string &fileDescription);
+      StatusCode emptyParameterTable(const std::string &table);
+      
+      /**
+       *  @brief  Set the parameters in the table.
+       *          The parameter table must exist.
+       *          
+       *  @param  table the parameter table name 
+       *  @param  parameterValueMap a map of parameter name -> value to upload
+       */
+      StatusCode setParameters(const std::string &table, const StringMap &parameterValueMap);
+      
+      /**
+       *  @brief  Backup a parameter table under the specified name.
+       *          A copy of the existing table is done.
+       *          The parameter table must exist !
+       *          The original table is left unchanged
+       *          
+       * @param  table the parameter table name to backup
+       * @param  backupTable the new parameter table name
+       */
+      StatusCode backupParameterTable(const std::string &table, const std::string &backupTable);
 
-      /** Insert a new new config file entry in the database
+      /**
+       *  @brief  Dump the parameter table in standard output
+       *  
+       *  @param  table the parameter table name
        */
-      StatusCode insertConfigFile(const std::string &localFileName, const std::string &fileNameEntry,
-          const std::string &fileDescription = "", bool forceReplace = false);
+      StatusCode dumpParameterTable(const std::string &table);
+      
+      /**
+       *  @brief  Extract all parameters from the specified table
+       *   
+       *  @param  table the parameter table name
+       *  @param  parameterValueMap the map of parameter name -> value to receive
+       */
+      StatusCode getTableParameters(const std::string &table, StringMap &parameterValueMap);
 
     private:
       MYSQL                       *m_pMySQL;

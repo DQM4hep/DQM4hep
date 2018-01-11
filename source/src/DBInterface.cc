@@ -30,6 +30,7 @@
 
 // -- std headers
 #include <fstream>
+#include <iomanip>
 
 namespace dqm4hep {
 
@@ -79,7 +80,7 @@ namespace dqm4hep {
         }
 
         // create connection to database
-        if(NULL == mysql_real_connect(m_pMySQL, m_host.c_str(), m_user.c_str(), m_password.c_str(),
+        if(NULL == mysql_real_connect(m_pMySQL, m_host.c_str(), m_user.c_str(), m_password.empty() ? NULL : m_password.c_str(),
             NULL, 0, NULL, 0))
         {
           dqm_error( "Couldn't initialize mysql connection : {0}", mysql_error(m_pMySQL) );
@@ -235,145 +236,150 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode DBInterface::queryConfigFileContent(const std::string &configFileName, std::string &fileContents)
+    StatusCode DBInterface::createParameterTable(const std::string &table, bool ifNotExists, bool dropExistingTable)
     {
-      if(configFileName.empty())
-        return STATUS_CODE_INVALID_PARAMETER;
-
       if(!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
-
-      // select DQM4HEP database
-      if(m_database != "dqm4hep")
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute("USE DQM4HEP ;"));
-
-      std::string queryUse = "USE " + m_database + " ;";
-
-      std::stringstream query;
-      query << "SELECT CONTENTS FROM CONFIG_FILES WHERE FILE_NAME=\"" << configFileName << "\" ;";
-
-      void *pFileContent = NULL;
-      StatusCode statusCode = this->queryRaw(query.str(), pFileContent);
-
-      if(statusCode != STATUS_CODE_SUCCESS)
+        
+      if(table.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+        
+      if(dropExistingTable)
       {
-        // select again the current database
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
-
-        return statusCode;
+        std::stringstream query;
+        query << "DROP TABLE IF EXISTS " << table << ";";
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
       }
+      
+      std::stringstream query;
+      query << "CREATE TABLE ";
 
-      fileContents = (char *) pFileContent;
+      if(ifNotExists)
+        query << " IF NOT EXISTS ";
 
-      // select again the current database
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
-
+      query << table
+            << " ( "
+            << "parameter VARCHAR(256) NOT NULL,"
+            << "value MEDIUMTEXT NOT NULL,"
+            << "last_update DATETIME NOT NULL,"
+            << "PRIMARY KEY (parameter) ) ENGINE=INNODB;"; 
+      
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+      
       return STATUS_CODE_SUCCESS;
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    StatusCode DBInterface::queryConfigFileDescription(const std::string &configFileName, std::string &fileDescription)
+    
+    StatusCode DBInterface::emptyParameterTable(const std::string &table)
     {
-      if(configFileName.empty())
-        return STATUS_CODE_INVALID_PARAMETER;
-
       if(!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
-
-      // select DQM4HEP database
-      if(m_database != "dqm4hep")
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute("USE DQM4HEP ;"));
-
-      std::string queryUse = "USE " + m_database + " ;";
-
+        
+      if(table.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+        
+      return this->execute("TRUNCATE TABLE " + table + " ;");
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode DBInterface::setParameters(const std::string &table, const StringMap &parameterValueMap)
+    {
+      if(!this->isConnected())
+        return STATUS_CODE_NOT_INITIALIZED;
+        
+      if(table.empty() || parameterValueMap.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+      
       std::stringstream query;
-      query << "SELECT DESCRIPTION FROM CONFIG_FILES WHERE FILE_NAME=\"" << configFileName << "\" ;";
-
-      void *pFileDescription = NULL;
-      StatusCode statusCode = this->queryRaw(query.str(), pFileDescription);
-
-      if(statusCode != STATUS_CODE_SUCCESS)
+      query << "REPLACE INTO " 
+            << table
+            << " (parameter, value, last_update) VALUES ";
+      
+      bool firstEntry = true;
+      
+      for(auto pvPair : parameterValueMap)
       {
-        // select again the current database
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
-
-        return statusCode;
+        std::stringstream entry;
+        entry << "( \"" << pvPair.first << "\", \"" << pvPair.second << "\", NOW()) ";
+        
+        if(!firstEntry)
+          query << " , ";
+        
+        query << entry.str();
+        firstEntry = false;
       }
-
-      fileDescription = (char *) pFileDescription;
-
-      // select again the current database
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
-
+      
+      query << " ;";
+      
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+      
       return STATUS_CODE_SUCCESS;
     }
-
+    
     //-------------------------------------------------------------------------------------------------
-
-    StatusCode DBInterface::insertConfigFile(const std::string &localFileName, const std::string &fileNameEntry,
-        const std::string &fileDescription, bool forceReplace)
+    
+    StatusCode DBInterface::backupParameterTable(const std::string &table, const std::string &backupTable)
     {
-      if(localFileName.empty() || fileNameEntry.empty())
-        return STATUS_CODE_INVALID_PARAMETER;
-
       if(!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
-
-      std::ifstream ifile;
-      ifile.open(localFileName.c_str(), std::ios::in);
-
-      if(!ifile.is_open())
-      {
-        dqm_error( "Couln't open file '{0}' !", localFileName );
-        return STATUS_CODE_FAILURE;
-      }
-
-      std::string fileContents;
-
-      while(!ifile.eof())
-      {
-        std::string str;
-        getline(ifile, str);
-        fileContents += str + "\n";
-      }
-
-      if(fileContents.empty())
-        return STATUS_CODE_FAILURE;
-
-      std::string queryUse = "USE " + m_database + " ;";
-
-      // construct the mysql query
+        
+      if(table.empty() || backupTable.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+      
       std::stringstream query;
-
-      if(forceReplace)
-        query << "REPLACE ";
-      else
-        query << "INSERT ";
-
-      query << "INTO CONFIG_FILES VALUES "
-          << "('" << fileNameEntry << "' ,"
-          << "'" << fileDescription << "' ,"
-          << "'" << fileContents << "') ;";
-
-      // select DQM4HEP database
-      if(m_database != "dqm4hep")
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute("USE DQM4HEP ;"));
-
-      StatusCode statusCode = this->execute(query.str());
-
-      if(STATUS_CODE_SUCCESS != statusCode)
-      {
-        // select again the current database
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
-
-        return statusCode;
-      }
-
-      // select again the current database
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(queryUse));
-
-      return STATUS_CODE_SUCCESS;
+      query << "CREATE TABLE " << backupTable << " LIKE " << table << "; INSERT " << backupTable << " SELECT * FROM " << table << ";";
+      return this->execute(query.str());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode DBInterface::dumpParameterTable(const std::string &table)
+    {
+      if(!this->isConnected())
+        return STATUS_CODE_NOT_INITIALIZED;
+        
+      if(table.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+        
+      std::stringstream query;
+      query << "SELECT parameter, value, last_update FROM " << table << ";";
+            
+      return this->queryAndHandle(query.str(), [](MYSQL_RES *result){
+        
+        std::cout << std::setw(50) << std::left << "Parameter" << std::setw(50) << std::left << "Value" << std::setw(20) << std::left << "Last update" << std::endl;
+        std::cout << std::string(120, '-') << std::endl;
+        
+        int num_fields = mysql_num_fields(result);      
+        MYSQL_ROW row;
+      
+        while ((row = mysql_fetch_row(result)))
+          std::cout << std::setw(50) << std::left << row[0] << std::setw(50) << std::left << row[1] << std::setw(20) << std::left << row[2] << std::endl;
+      });
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode DBInterface::getTableParameters(const std::string &table, StringMap &parameterValueMap)
+    {
+      if(!this->isConnected())
+        return STATUS_CODE_NOT_INITIALIZED;
+        
+      if(table.empty())
+        return STATUS_CODE_INVALID_PARAMETER;
+        
+      std::stringstream query;
+      query << "SELECT parameter, value FROM " << table << ";";
+            
+      return this->queryAndHandle(query.str(), [&parameterValueMap](MYSQL_RES *result){
+        
+        int num_fields = mysql_num_fields(result);      
+        MYSQL_ROW row;
+      
+        while ((row = mysql_fetch_row(result)))
+          parameterValueMap[row[0]] = row[1];
+      });
     }
 
   }
