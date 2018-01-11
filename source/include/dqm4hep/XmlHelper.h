@@ -39,114 +39,115 @@ namespace dqm4hep {
 
   namespace core {
 
-    /** XmlHelper class
+    /** 
+     *  @brief  XmlHelper class
      */
     class XmlHelper
     {
     public:
-      /** Read XML file.
-       *  A constants section could possibly processed in the root element if found
-       *  and may contains constant elements inside :
-       *  @code
-       *  <constants>
-       *    <constant name="MyConstant"> 42 <constant>
-       *    <constant name="MySuperConstant"> ${MyConstant} is the answer <constant>
-       *  </constants>
-       *  @endcode
-       *  Include elements such as :
-       *  @code
-       *  <include ref="another_file_name.xml">
-       *  @endcode
-       *  could be parsed if the flag processIncludes is set to true. The content
-       *  of this file is processed as a raw replacment
-       */
-      static StatusCode readXmlFile(const std::string &fileName, TiXmlDocument &document, StringMap &constants, bool processIncludes = true);
-
-      /** Read a value from an xml element
+      /** 
+       *  @brief  Read a value from an xml handle
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  xmlElementName the xml element name
+       *  @param  t the value to receive
        */
       template <typename T>
       static StatusCode readValue(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, T &t);
 
-      /** Read a vector of values from a (space separated) list in an xml element
+      /** 
+       *  @brief  Read a vector of values from a (space separated) list in an xml handle
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  xmlElementName the xml element name
+       *  @param  vector the vector of values to receive
        */
       template <typename T>
       static StatusCode readVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, std::vector<T> &vector);
 
-      /** Read a two-dimensional array of values into a vector of vectors. Each row of values must be contained
+      /** 
+       *  @brief  Read a two-dimensional array of values into a vector of vectors. Each row of values must be contained
        *          within <rowname></rowname> xml tags, whilst the values in the row must be space separated
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  xmlElementName the xml element name
+       *  @param  rowName the element tag of each row
+       *  @param  vector the vector of values to receive (matrix like)
        */
       template <typename T>
       static StatusCode read2DVectorOfValues(const TiXmlHandle &xmlHandle, const std::string &xmlElementName, const std::string &rowName,
           std::vector< std::vector<T> > &vector);
 
-      /** Get the attribute of the xml element
+      /** 
+       *  @brief  Get the attribute of the xml element
+       *
+       *  @param  pXmlElement the xml element
+       *  @param  attributeName the attribute name
+       *  @param  attributeValue the attribute value to receive
        */
       template <typename T>
       static StatusCode getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, T &attributeValue);
 
-      /** Get the attribute of the xml element and use a validator to validate the value
+      /** 
+       *  @brief  Get the attribute of the xml element and use a predicate to validate the value
+       *
+       *  @param  pXmlElement the xml element
+       *  @param  attributeName the attribute name
+       *  @param  attributeValue the attribute value to receive
+       *  @param  validator a unary predicate to validate the attribute value
        */
       template <typename T, typename Validator>
       static StatusCode getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, T &attributeValue, Validator validator);
 
-      /** Read a parameter value from an xml element
+      /** 
+       *  @brief  Read a parameter value from an xml element.
+       *          Looks for a xml element <parameter> with the attributes 'name' (mandatory) and 'value'.
+       *          If the attribute 'value' is not found the inner text in the element is use instead.
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  parameterName the parameter name
+       *  @param  t the parameter value to receive
        */
       template <typename T>
       static StatusCode readParameterValue(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t);
 
-      /** Read a parameter value from an xml element and use a validator to validate the value
+      /** 
+       *  @brief  Read a parameter value from an xml element and use a predicate to validate the value
+       *          Looks for a xml element <parameter> with the attributes 'name' (mandatory) and 'value'.
+       *          If the attribute 'value' is not found the inner text in the element is use instead.
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  parameterName the parameter name
+       *  @param  t the parameter value to receive
+       *  @param  validator a unary predicate to validate the parameter value
        */
       template <typename T, typename Validator>
       static StatusCode readParameterValue(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t, Validator validator);
 
-      /** Read a vector of values for a parameter from a (space separated) list in an xml element
+      /** 
+       *  @brief  Read a vector of values for a parameter from a (space separated) list in an xml element
+       *          Looks for a xml element <parameter> with the attributes 'name' (mandatory) and 'value'.
+       *          If the attribute 'value' is not found the inner text in the element is use instead.
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  parameterName the parameter name
+       *  @param  vector the parameter values to receive
        */
       template <typename T>
       static StatusCode readParameterValues(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector);
 
-      /** Read a vector of values for a parameter from a (space separated) list in an xml element
+      /** 
+       *  @brief  Read a vector of values for a parameter from a (space separated) list in an xml element
+       *          Looks for a xml element <parameter> with the attributes 'name' (mandatory) and 'value'.
+       *          If the attribute 'value' is not found the inner text in the element is use instead.
+       *
+       *  @param  xmlHandle the xml handle
+       *  @param  parameterName the parameter name
+       *  @param  vector the parameter values to receive
+       *  @param  validator a unary predicate to validate the parameter values
        */
       template <typename T, typename Validator>
       static StatusCode readParameterValues(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector, Validator validator);
-
-      // /** Create a quality test. Works if the quality test factory has been registered first
-      //  */
-      // static StatusCode createQualityTest(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &qualityTestName);
-      //
-      // /** Create a monitor element from a xml handle
-      //  */
-      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-      //     MonitorElementPtr &monitorElement);
-      //
-      // /** Create a monitor element from a xml handle
-      //  */
-      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-      //     const std::string &strSuffix, MonitorElementPtr &monitorElement);
-      //
-      // /** Create a monitor element from a xml handle
-      //  */
-      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-      //     unsigned int suffix, MonitorElementPtr &monitorElement);
-      //
-      // /** Create a monitor element from a xml handle and configure name, path and title from parameters (see DQM4HEP::replace())
-      //  */
-      // static StatusCode bookMonitorElement(const Module *const pModule, const TiXmlHandle &xmlHandle, const std::string &meStringId,
-      //     MonitorElementPtr &monitorElement, const ParameterMap &parameters);
-
-      /** Replace all xml attribute recursively from the parameters map
-       */
-      static StatusCode replaceAllXmlAttributes(TiXmlElement *pXmlElement, const ParameterMap &parameters);
-
-      /** Perform replace of pattern ${constant} into value string
-       */
-      static StatusCode performConstantReplacement(std::string &value, const StringMap &constants);
-
-    private:
-      static StatusCode processConstants(const std::string &fileName, TiXmlElement *parent, StringMap &constants, bool parseIncludes = true);
-      static StatusCode processConstant(TiXmlElement *parent, StringMap &constants);
-      static StatusCode processIncludeElements(const std::string &fileName, TiXmlElement* element , const StringMap& constants);
-      static StatusCode processIncludeElement(const std::string &fileName, TiXmlElement* element , const StringMap& constants , TiXmlDocument &document);
-      static StatusCode replaceConstants(TiXmlElement* element, const StringMap &constants);
     };
 
     //-------------------------------------------------------------------------------------------------
