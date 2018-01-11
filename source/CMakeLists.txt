@@ -47,6 +47,7 @@ SET( SRC_FILES ${SRC_FILES} src/tinyxml.cc )
 SET( SRC_FILES ${SRC_FILES} src/tinyxmlerror.cc )
 SET( SRC_FILES ${SRC_FILES} src/tinyxmlparser.cc )
 SET( SRC_FILES ${SRC_FILES} src/XmlHelper.cc )
+SET( SRC_FILES ${SRC_FILES} src/XMLParser.cc )
 SET( SRC_FILES ${SRC_FILES} src/Event.cc )
 SET( SRC_FILES ${SRC_FILES} src/Path.cc )
 SET( SRC_FILES ${SRC_FILES} src/PluginManager.cc )
@@ -93,7 +94,14 @@ IF( BUILD_TESTS )
         TARGETS ${TEST_SRC_WITHOUT_EXT}
         RUNTIME DESTINATION bin/tests
     )
-    ADD_TEST( ${TEST_SRC_WITHOUT_EXT}-test ${PROJECT_BINARY_DIR}/bin/${TEST_SRC_WITHOUT_EXT} )
+    
+    SET( TEST_ARGS "" )
+    
+    IF( ${TEST_SRC_WITHOUT_EXT} STREQUAL "test-xmlparser" )
+      SET( TEST_ARGS "${PROJECT_SOURCE_DIR}/tests/test_xmlparser.xml" )
+    ENDIF()
+    
+    ADD_TEST( ${TEST_SRC_WITHOUT_EXT}-test ${PROJECT_BINARY_DIR}/bin/${TEST_SRC_WITHOUT_EXT} ${TEST_ARGS} )
   ENDFOREACH()
 
   CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/quality-test-test.in"
