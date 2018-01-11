@@ -33,7 +33,7 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/PluginManager.h>
-#include <dqm4hep/XmlHelper.h>
+#include <dqm4hep/XMLParser.h>
 #include <dqm4hep/MonitorElementManager.h>
 
 // -- tclap headers
@@ -200,18 +200,21 @@ int main(int argc, char* argv[])
 
   const std::string qtestFile(qtestFileArg.getValue());
   const std::string rootFileName(rootFileArg.getValue());
-  TiXmlDocument document; StringMap constants;
-
+  
+  XMLParser parser;
+  
   try
   {
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readXmlFile(qtestFile, document, constants));
+    parser.parse(qtestFile);
   }
   catch(StatusCodeException &e)
   {
     dqm_error( "While reading qtest file : Caught {0}", e.toString() );
     return e.getStatusCode();
   }
-
+  
+  TiXmlDocument &document(parser.document()); 
+  StringMap constants;
   TiXmlElement *rootElement = document.RootElement();
   TiXmlElement *qTestsElement = rootElement->FirstChildElement("qtests");
 
