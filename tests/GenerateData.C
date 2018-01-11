@@ -31,6 +31,19 @@ void GenerateData()
 
 
   //
+  // Generate random gaussian distribution
+  //
+  TH1F *pGaus_Mean8_RMS2 = new TH1F("Gaus_Mean8_RMS2", "Random gaus(8, 2)", 80, 0, 20);
+  writeObject.push_back(pGaus_Mean8_RMS2);
+
+  for(unsigned int i=0 ; i<10000 ; i++) {
+    if(rand() / float(RAND_MAX) > 0.8)
+      pGaus_Mean8_RMS2->Fill(gRandom->Gaus(6, 1));
+    else
+      pGaus_Mean8_RMS2->Fill(gRandom->Gaus(10, 2));
+  }
+
+  //
   // Same as before but with uniform background
   //
   TH1F *pGaus_Mean10_RMS2_bck = new TH1F("Gaus_Mean10_RMS2_bck", "Random gaus(10, 2) with uniform background", 80, 0, 20);
