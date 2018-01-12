@@ -89,11 +89,14 @@ namespace dqm4hep {
 
         m_isConnected = true;
 
-        // select data base
-        std::stringstream query;
-        query << "USE " << m_database << " ;";
+        if(!m_database.empty())
+        {
+          // select data base
+          std::stringstream query;
+          query << "USE " << m_database << " ;";
 
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+          THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));          
+        }
       }
       catch(const StatusCodeException &exception)
       {
