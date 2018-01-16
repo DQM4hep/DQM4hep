@@ -126,13 +126,14 @@ int main(int argc, char* argv[])
     std::stringstream query;
     query << "select user from mysql.user where user=\"DQM4HEP\";";
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.queryAndHandle(query.str(), [&alreadyExists](MYSQL_RES *result){
-      alreadyExists = mysql_num_fields(result) > 0;  
+      alreadyExists = mysql_num_rows(result) > 0;
     }));
     
     if(!alreadyExists)
     {
       query.str("");
       query << "CREATE USER \"DQM4HEP\"@\"%\", \"DQM4HEP\"@\"localhost\", \"DQM4HEP\"@\"" << hostName << "\";";
+      dqm_info( "DQM4HEP user not doesn't exists yet. Creating ..." );
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.execute(query.str()));      
     }
 
