@@ -67,6 +67,15 @@ namespace dqm4hep {
       const StringMap &constants() const;
       
       /**
+       *  @brief  Get a constant value to specified type
+       *  
+       *  @param  name the constant name
+       *  @param  fallback fallback value if constant doesn't exists
+       */
+      template <typename T>
+      T constantAs(const std::string &name, const T &fallback = T()) const;
+      
+      /**
        *  @brief  Get the xml document
        */
       const TiXmlDocument &document() const;
@@ -180,6 +189,21 @@ namespace dqm4hep {
       StringMap                        m_constants = {};                    ///< The constants map
       DBInterfaceMap                   m_databases;                         ///< The map of databases 
     };
+    
+    //----------------------------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline T XMLParser::constantAs(const std::string &name, const T &fallback) const
+    {
+      T value(fallback);
+      auto iter = m_constants.find(name);
+      
+      if(m_constants.end() != iter)
+        dqm4hep::core::stringToType(iter->second, value);
+      
+      return value;
+    }
 
   }
 
