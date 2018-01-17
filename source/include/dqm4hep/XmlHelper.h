@@ -325,8 +325,13 @@ namespace dqm4hep {
 
         if(name != parameterName)
           continue;
+          
+        std::string value;
+        
+        if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(pXmlElement, "value", value))
+          value = pXmlElement->GetText() ? pXmlElement->GetText() : "";
 
-        if (!dqm4hep::core::stringToType(pXmlElement->GetText(), t))
+        if (!dqm4hep::core::stringToType(value, t))
           return STATUS_CODE_FAILURE;
 
         return STATUS_CODE_SUCCESS;
@@ -361,9 +366,14 @@ namespace dqm4hep {
 
         if(name != parameterName)
           continue;
+          
+        std::string value;
+        
+        if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(pXmlElement, "value", value))
+          value = pXmlElement->GetText() ? pXmlElement->GetText() : "";
 
         StringVector tokens;
-        dqm4hep::core::tokenize(pXmlElement->GetText(), tokens);
+        dqm4hep::core::tokenize(value, tokens);
 
         for (StringVector::const_iterator iter = tokens.begin(), iterEnd = tokens.end(); iter != iterEnd; ++iter)
         {
