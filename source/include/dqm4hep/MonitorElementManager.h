@@ -92,8 +92,10 @@ namespace dqm4hep {
      */
     class MonitorElementManager
     {
-      typedef std::map<const std::string, QualityTest *> QualityTestMap;
-      typedef std::map<const std::string, const QualityTestFactory *> QualityTestFactoryMap;
+      typedef std::shared_ptr<QualityTest> QualityTestPtr;
+      typedef std::shared_ptr<QualityTestFactory> QualityTestFactoryPtr;
+      typedef std::map<const std::string, QualityTestPtr> QualityTestMap;
+      typedef std::map<const std::string, const QualityTestFactoryPtr> QualityTestFactoryMap;
     public:
       /** Constructor
        */

@@ -227,7 +227,7 @@ namespace dqm4hep {
 
       /** Create a quality test
        */
-      virtual QualityTest *createQualityTest(const std::string &name) const = 0;
+      virtual QTestPtr createQualityTest(const std::string &name) const = 0;
     };
 
     //-------------------------------------------------------------------------------------------------

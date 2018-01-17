@@ -157,7 +157,7 @@ namespace dqm4hep {
 
       /** Add a quality test
        */
-      StatusCode addQualityTest(QTest *pQualityTest);
+      StatusCode addQualityTest(QTestPtr qualityTest);
 
       /** Remove a quality test
        */

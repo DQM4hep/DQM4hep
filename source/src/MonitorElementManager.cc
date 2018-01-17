@@ -67,15 +67,15 @@ namespace dqm4hep {
 
       for(auto factoryName : factoryNames)
       {
-        QualityTestFactory *pFactory(pPluginMgr->create<QualityTestFactory>(factoryName));
+        auto factory(pPluginMgr->create<QualityTestFactory>(factoryName));
 
-        if(nullptr == pFactory)
+        if(nullptr == factory)
         {
           dqm_error( "MonitorElementManager::MonitorElementManager: Couldn't create qtest factory '{0}'. This is normally not possible !", factoryName );
           continue;
         }
 
-        m_qualityTestFactoryMap.insert(QualityTestFactoryMap::value_type(factoryName, pFactory));
+        m_qualityTestFactoryMap.insert(QualityTestFactoryMap::value_type(factoryName, factory));
       }
     }
 
@@ -83,14 +83,6 @@ namespace dqm4hep {
 
     MonitorElementManager::~MonitorElementManager()
     {
-      for(QualityTestFactoryMap::iterator iter = m_qualityTestFactoryMap.begin(), endIter = m_qualityTestFactoryMap.end() ;
-          endIter != iter ; ++iter)
-        delete iter->second;
-
-      for(QualityTestMap::iterator iter = m_qualityTestMap.begin(), endIter = m_qualityTestMap.end() ;
-          endIter != iter ; ++iter)
-        delete iter->second;
-
       m_qualityTestFactoryMap.clear();
       m_qualityTestMap.clear();
     }
@@ -443,21 +435,13 @@ namespace dqm4hep {
       if(m_qualityTestFactoryMap.end() == findFactoryIter)
         return STATUS_CODE_NOT_FOUND;
 
-      QualityTest *const pQualityTest = findFactoryIter->second->createQualityTest(name);
+      QualityTestPtr qualityTest = findFactoryIter->second->createQualityTest(name);
 
-      try
-      {
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->readSettings(TiXmlHandle(pXmlElement)));
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pQualityTest->init());
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qualityTest->readSettings(TiXmlHandle(pXmlElement)));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qualityTest->init());
 
-        if(!m_qualityTestMap.insert(QualityTestMap::value_type(name, pQualityTest)).second)
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-      }
-      catch(const StatusCodeException &exception)
-      {
-        delete pQualityTest;
-        return exception.getStatusCode();
-      }
+      if(!m_qualityTestMap.insert(QualityTestMap::value_type(name, qualityTest)).second)
+        return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;
     }

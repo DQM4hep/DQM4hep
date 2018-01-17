@@ -50,7 +50,7 @@ namespace dqm4hep {
       class Factory : public QualityTestFactory
       {
       public:
-        QualityTest *createQualityTest(const std::string &name) const;
+        QTestPtr createQualityTest(const std::string &name) const;
       };
 
       MeanWithinExpectedTest(const std::string &name);
@@ -70,9 +70,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline QualityTest *MeanWithinExpectedTest::Factory::createQualityTest(const std::string &name) const
+    inline QTestPtr MeanWithinExpectedTest::Factory::createQualityTest(const std::string &name) const
     {
-      return new MeanWithinExpectedTest(name);
+      return std::shared_ptr<QTest>(new MeanWithinExpectedTest(name));
     }
 
     //-------------------------------------------------------------------------------------------------

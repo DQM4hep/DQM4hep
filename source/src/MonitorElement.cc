@@ -212,15 +212,15 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElement::addQualityTest(QualityTest *pQualityTest)
+    StatusCode MonitorElement::addQualityTest(QTestPtr qualityTest)
     {
-      const std::string &name(pQualityTest->name());
+      const std::string &name(qualityTest->name());
       auto iter = m_qualityTests.find(name);
 
       if(m_qualityTests.end() != iter)
         return STATUS_CODE_ALREADY_PRESENT;
 
-      m_qualityTests.insert(QTestMap::value_type(name, pQualityTest));
+      m_qualityTests.insert(QTestMap::value_type(name, qualityTest));
 
       return STATUS_CODE_SUCCESS;
     }

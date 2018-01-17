@@ -156,10 +156,11 @@ namespace dqm4hep {
     typedef std::vector<MonitorElement*>                        MonitorElementList;
     typedef std::map<const std::string, MonitorElement*>        MonitorElementMap;
     typedef QualityTest                                         QTest;
+    typedef std::shared_ptr<QualityTest>                        QTestPtr;
     typedef QualityTestReport                                   QReport;
     typedef std::map<std::string, QReport>                      QReportMap;
     typedef std::map<StringPair, QReportMap>                    QReportContainer;
-    typedef std::map<std::string, QTest*>                       QTestMap;
+    typedef std::map<std::string, QTestPtr>                     QTestMap;
 
     //-------------------------------------------------------------------------------------------------
 
