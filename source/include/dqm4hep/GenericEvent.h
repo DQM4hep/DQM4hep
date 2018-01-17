@@ -147,19 +147,15 @@ namespace dqm4hep {
       /** Factory method to create the corresponding event to this streamer.
        *  The event is expected to contains an allocated wrapped event
        */
-      Event *createEvent() const;
+      EventPtr createEvent() const;
 
       /** Serialize the event and store it into a data stream.
        */
-      StatusCode write(const Event *const pEvent, xdrstream::IODevice *pDevice);
+      StatusCode write(const EventPtr &event, xdrstream::IODevice *pDevice);
 
       /** De-serialize the lcio event.
        */
-      StatusCode read(Event *&pEvent, xdrstream::IODevice *pDevice);
-
-      /** Serialize the a part of the event and store it into a data stream.
-       */
-      StatusCode write(const Event *const pObject, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice);
+      StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice);
     };
 
     //-------------------------------------------------------------------------------------------------

@@ -129,21 +129,21 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    Event *GenericEventStreamer::createEvent() const
+    EventPtr GenericEventStreamer::createEvent() const
     {
-      return new EventBase<GenericEvent>(new GenericEvent());
+      return std::shared_ptr<Event>(new EventBase<GenericEvent>(new GenericEvent()));
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::write(const Event *const pEvent, xdrstream::IODevice *pDevice)
+    StatusCode GenericEventStreamer::write(const EventPtr &event, xdrstream::IODevice *pDevice)
     {
-      const GenericEvent *pGenericEvent = pEvent->getEvent<GenericEvent>();
+      const GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
 
       if(NULL == pGenericEvent)
         return STATUS_CODE_INVALID_PARAMETER;
 
-      if( ! XDR_TESTBIT( pEvent->writeBase(pDevice) , xdrstream::XDR_SUCCESS ) )
+      if( ! XDR_TESTBIT( event->writeBase(pDevice) , xdrstream::XDR_SUCCESS ) )
         return STATUS_CODE_FAILURE;
 
       // write event contents
@@ -165,50 +165,26 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::read(Event *&pEvent, xdrstream::IODevice *pDevice)
+    StatusCode GenericEventStreamer::read(EventPtr &event, xdrstream::IODevice *pDevice)
     {
-      pEvent = NULL;
+      event = this->createEvent();
+      GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
 
-      GenericEvent *pGenericEvent = new GenericEvent();
-      EventBase<GenericEvent> *pGenericEventBase = new EventBase<GenericEvent>();
-      pGenericEventBase->setEvent(pGenericEvent);
-
-      try
-      {
-        // read event info
-        if( ! XDR_TESTBIT( pGenericEventBase->readBase(pDevice) , xdrstream::XDR_SUCCESS ) )
-          return STATUS_CODE_FAILURE;
-
-        // write event contents
-        if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_intValues ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-
-        if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_floatValues ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-
-        if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_doubleValues ) , xdrstream::XDR_SUCCESS ) )
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-      }
-      catch(StatusCodeException &exception)
-      {
-        if( ! pGenericEventBase->isOwner() )
-          delete pGenericEvent;
-
-        delete pGenericEventBase;
-
+      // read event info
+      if( ! XDR_TESTBIT( event->readBase(pDevice) , xdrstream::XDR_SUCCESS ) )
         return STATUS_CODE_FAILURE;
-      }
 
-      pEvent = pGenericEventBase;
+      // write event contents
+      if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_intValues ) , xdrstream::XDR_SUCCESS ) )
+        return STATUS_CODE_FAILURE;
+
+      if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_floatValues ) , xdrstream::XDR_SUCCESS ) )
+        return STATUS_CODE_FAILURE;
+
+      if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_doubleValues ) , xdrstream::XDR_SUCCESS ) )
+        return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode GenericEventStreamer::write(const Event *const pEvent, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice)
-    {
-      return this->write(pEvent, pDevice);
     }
 
   }

@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Event.h>
 
 namespace xdrstream {
   class IODevice;
@@ -54,15 +55,15 @@ namespace dqm4hep {
       /** Factory method to create the corresponding event to this streamer.
        *  The event is expected to contains an allocated wrapped event
        */
-      virtual Event *createEvent() const = 0;
+      virtual EventPtr createEvent() const = 0;
 
-      /** Serialize a Event object and store it in the data stream
+      /** Serialize an event object and store it in the data stream
        */
-      virtual StatusCode write(const Event *const pObject, xdrstream::IODevice *pDevice) = 0;
+      virtual StatusCode write(const EventPtr &event, xdrstream::IODevice *pDevice) = 0;
 
-      /** De-serialize a Event given from the data stream
+      /** De-serialize an event given from the data stream
        */
-      virtual StatusCode read(Event *&pObject, xdrstream::IODevice *pDevice) = 0;
+      virtual StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice) = 0;
 
       /** Serialize a part of a Event object identified by the reg exp 'subEventIdentifier' and store it in the data stream
        *
@@ -71,15 +72,15 @@ namespace dqm4hep {
        *
        *  The identifier decoding has to be performed by the user, based on the event contents itself
        */
-      virtual StatusCode write(const Event *const pObject, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice);
+      virtual StatusCode write(const EventPtr &event, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode EventStreamer::write(const Event *const pObject, const std::string &/*subEventIdentifier*/, xdrstream::IODevice *pDevice)
+    StatusCode EventStreamer::write(const EventPtr &event, const std::string &/*subEventIdentifier*/, xdrstream::IODevice *pDevice)
     {
-      return this->write(pObject, pDevice);
+      return this->write(event, pDevice);
     }
 
   }
