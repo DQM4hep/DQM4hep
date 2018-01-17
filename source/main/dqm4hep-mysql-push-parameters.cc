@@ -116,7 +116,13 @@ int main(int argc, char* argv[])
     dbInterfaceMap[dbID] = metadata; 
   }
   
-  int nParameters(0);
+  if(dbInterfaceMap.empty())
+  {
+    dqm_error( "ERROR: no <db> tag found in <databases> tag !" );
+    return 1;
+  }
+  
+  int nParameters(0), nParametersTags(0);
   std::set<std::pair<std::string,std::string>> dbTables;
   
   for(TiXmlElement *parameters = root->FirstChildElement("parameters") ; parameters ; parameters = parameters->NextSiblingElement("parameters"))
@@ -160,6 +166,7 @@ int main(int argc, char* argv[])
     }
     
     StringMap parameterMap;
+    int nParameterTags(0);
     
     for(TiXmlElement *parameter = parameters->FirstChildElement("parameter") ; parameter ; parameter = parameter->NextSiblingElement("parameter"))
     {
@@ -178,6 +185,13 @@ int main(int argc, char* argv[])
       
       parameterMap[name] = value;
       nParameters++;
+      nParameterTags++;
+    }
+    
+    if(0 == nParameterTags)
+    {
+      dqm_error( "Tag <parameters> without <parameter> tag inside. Skipping ..." );
+      continue;
     }
     
     try
@@ -193,6 +207,14 @@ int main(int argc, char* argv[])
     
     std::pair<std::string,std::string> dbIdTable(dbID, dbTable);
     dbTables.insert(dbIdTable);
+    
+    nParametersTags++;
+  }
+  
+  if(0 == nParametersTags)
+  {
+    dqm_error( "ERROR: No <parameters> tag found !" );
+    return 1;
   }
   
   dqm_info( "Successfully pushed {0} parameter(s) into {1} db table(s)" , nParameters, dbTables.size() );
