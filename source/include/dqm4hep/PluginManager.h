@@ -89,7 +89,7 @@ namespace dqm4hep {
        *  to the user. Ownership of the plug-in transfered to the caller.
        */
       template <typename T>
-      T *create( const std::string &pluginName ) const;
+      std::shared_ptr<T> create( const std::string &pluginName ) const;
 
       /** Whether the plug-in is registered within the plug-in manager
        */
@@ -129,19 +129,19 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *PluginManager::create( const std::string &pluginName ) const
+    inline std::shared_ptr<T> PluginManager::create( const std::string &pluginName ) const
     {
       const Plugin *pPlugin = this->getPlugin( pluginName );
 
       if(!pPlugin)
-        return 0;
+        return std::shared_ptr<T>();
 
       Plugin *pClass = pPlugin->create();
 
       if(NULL == pClass)
-        return 0;
+        return std::shared_ptr<T>();
 
-      return dynamic_cast<T *>(pClass);
+      return std::shared_ptr<T>(dynamic_cast<T *>(pClass));
     }
 
     //-------------------------------------------------------------------------------------------------

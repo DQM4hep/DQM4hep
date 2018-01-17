@@ -100,6 +100,7 @@ namespace dqm4hep {
     class QualityTest;
     class QualityTestReport;
     class Path;
+    class Plugin;
 
     /** allocator_helper class
      */
@@ -120,6 +121,9 @@ namespace dqm4hep {
     // event
     typedef std::shared_ptr<Event>  EventPtr;
     typedef std::queue<EventPtr>    EventQueue;
+    
+    // plugin
+    typedef std::shared_ptr<Plugin> PluginPtr;
 
     // typedefs for streaming
     typedef char                  dqm_char;
