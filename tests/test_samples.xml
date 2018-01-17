@@ -30,7 +30,7 @@
     <monitorElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2_bck">
       <qtest name="MeanAround10Short" />
     </monitorElement>
-    <monitorElement path="${GaussiansDirectory}" name="DblGaus_Mean5_RMS2_RMS5">
+    <monitorElement path="${GaussiansDirectory}" name="DblGaus_Mean15_RMS2_RMS5">
       <qtest name="MeanAround15Short" />
     </monitorElement>
 
