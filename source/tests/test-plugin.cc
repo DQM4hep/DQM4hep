@@ -60,9 +60,9 @@ int main(int argc, char* argv[])
   Logger::setMainLogger("test-plugin");
   Logger::setLogLevel(spdlog::level::debug);
 
-  TestPlugin *pPlugin = PluginManager::instance()->create<TestPlugin>("TestPlugin");
-  assert_test(nullptr != pPlugin);
-  pPlugin->print();
+  auto plugin = PluginManager::instance()->create<TestPlugin>("TestPlugin");
+  assert_test(nullptr != plugin);
+  plugin->print();
 
   return 0;
 }
