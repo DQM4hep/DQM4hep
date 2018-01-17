@@ -155,17 +155,17 @@ namespace dqm4hep {
        *  WARNING : The ROOT object is owned by the framework.
        *  The caller must NOT delete the object
        */
-      StatusCode addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
+      StatusCode addMonitorElement(const std::string &path, TObject *pObject, MonitorElementPtr &monitorElement);
 
       /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
-      StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
+      StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement);
 
       /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
-      StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
+      StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement);
 
       /** Book a monitor element using the ROOT TClass facility.
        *  The className is passed to TClass::GetClass() to get the corresponding
@@ -174,19 +174,19 @@ namespace dqm4hep {
        *    - ROOT object is disabled so that object with same can be allocated safely memory leak
        *  The resulting monitored TObject is owned by the manager
        */
-      StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement);
+      StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement);
 
       /** Add a monitor element from an external source.
       *  WARNING : The ROOT object is NOT owned by the framework.
       *  The caller must delete the object on termination
        */
-      StatusCode handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement);
+      StatusCode handleMonitorElement(const std::string &path, TObject *pObject, MonitorElementPtr &monitorElement);
 
       /** Book a monitor element. The objectType must inherit TObject and have a ROOT dictionnary.
        *
        */
       template <typename ObjectType, typename ...Args>
-      StatusCode bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
+      StatusCode bookObject(const std::string &path, const std::string &name, MonitorElementPtr &monitorElement,
           allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
 
       /**
@@ -195,7 +195,7 @@ namespace dqm4hep {
        * @param  pMonitorElement the monitor element to attach the reference
        * @param  fileName        the root file name contaning the reference
        */
-      StatusCode attachReference(MonitorElement *pMonitorElement, const std::string &fileName);
+      StatusCode attachReference(MonitorElementPtr monitorElement, const std::string &fileName);
 
     public:
 
@@ -205,15 +205,15 @@ namespace dqm4hep {
 
       /** Get all the monitor elements already booked by this module in all the directories
        */
-      void getMonitorElements(std::vector<MonitorElement*> &monitorElements) const;
+      void getMonitorElements(MonitorElementList &monitorElements) const;
 
       /** Get the monitor element in the current directory (result by ptr reference)
        */
-      StatusCode getMonitorElement(const std::string &name, MonitorElement *&monitorElement) const;
+      StatusCode getMonitorElement(const std::string &name, MonitorElementPtr &monitorElement) const;
 
       /** Get the monitor element in the given directory (result by ptr reference)
        */
-      StatusCode getMonitorElement(const std::string &dirName, const std::string &name, MonitorElement *&monitorElement) const;
+      StatusCode getMonitorElement(const std::string &dirName, const std::string &name, MonitorElementPtr &monitorElement) const;
 
       ////////////////////////
       // DELETION INTERFACE //
@@ -260,7 +260,7 @@ namespace dqm4hep {
        */
       const Storage<MonitorElement> &getStorage() const;
 
-      typedef std::map<MonitorElement*, QualityTestMap>    MonitorElementToQTestMap;
+      typedef std::map<MonitorElementPtr, QualityTestMap>    MonitorElementToQTestMap;
 
       Storage<MonitorElement>        m_storage;
       QualityTestFactoryMap          m_qualityTestFactoryMap;
@@ -273,10 +273,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename ObjectType, typename ...Args>
-    StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name, MonitorElement *&pMonitorElement,
+    StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name, MonitorElementPtr &monitorElement,
         allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
     {
-      pMonitorElement = nullptr;
+      monitorElement = nullptr;
 
       if(!ObjectType::Class()->HasDictionary())
       {
@@ -309,7 +309,7 @@ namespace dqm4hep {
 
       ((TNamed*)pTObject)->SetName(name.c_str());
 
-      return this->addMonitorElement(path, pTObject, pMonitorElement);
+      return this->addMonitorElement(path, pTObject, monitorElement);
     }
 
   }

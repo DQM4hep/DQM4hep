@@ -64,42 +64,42 @@ int main(int argc, char* argv[])
   Logger::setMainLogger("test-directory");
   Logger::setLogLevel(spdlog::level::debug);
 
-  Directory_t root("root");
-  Directory_t *heroes = root.mkdir("heroes");
+  auto root = Directory_t::make_shared("root");
+  auto heroes = root->mkdir("heroes");
 
-  Object *pObject = nullptr;
-  pObject = new Object("superman"); heroes->add(pObject);
-  pObject = new Object("spiderman"); heroes->add(pObject);
-  pObject = new Object("batman"); heroes->add(pObject);
+  std::shared_ptr<Object> object;
+  object = std::make_shared<Object>("superman"); heroes->add(object);
+  object = std::make_shared<Object>("spiderman"); heroes->add(object);
+  object = std::make_shared<Object>("batman"); heroes->add(object);
   assert_test(heroes->contents().size() == 3);
 
-  heroes->remove(pObject);
+  heroes->remove(object);
   assert_test(heroes->contents().size() == 2);
 
-  root.clear();
-  assert_test(root.isEmpty());
+  root->clear();
+  assert_test(root->isEmpty());
 
-  Directory_t *pBibouDir = root.mkdir("bibou");
-  pBibouDir->add(new Object("toto"));
-  pBibouDir->add(new Object("tata"));
-  pBibouDir->add(new Object("tutu"));
+  auto pBibouDir = root->mkdir("bibou");
+  pBibouDir->add(std::make_shared<Object>("toto"));
+  pBibouDir->add(std::make_shared<Object>("tata"));
+  pBibouDir->add(std::make_shared<Object>("tutu"));
   assert_test(pBibouDir->contents().size() == 3);
 
-  pBibouDir->remove( [](Object *pObject){ return pObject->name() == "toto"; } );
+  pBibouDir->remove( [](std::shared_ptr<Object> object){ return object->name() == "toto"; } );
   assert_test(pBibouDir->contents().size() == 2);
   Path bibouPath = pBibouDir->fullPath();
   assert_test(bibouPath.getPath() == "/root/bibou");
   assert_test(!pBibouDir->isRoot());
-  assert_test(root.isRoot());
-  assert_test(!root.isEmpty());
+  assert_test(root->isRoot());
+  assert_test(!root->isEmpty());
   assert_test(!pBibouDir->isEmpty());
-  assert_test(pBibouDir->contains( [](Object *pObject){ return pObject->name() == "tata"; } ));
-  assert_test(!pBibouDir->contains( [](Object *pObject){ return pObject->name() == "teufteuf"; } ));
-  assert_test(pBibouDir->find( [](Object *pObject){ return pObject->name() == "tata"; } ) != nullptr);
-  assert_test(pBibouDir->find( [](Object *pObject){ return pObject->name() == "teufteuf"; } ) == nullptr);
-  assert_test(root.hasChild("bibou"));
-  assert_test(root.mkdir("bibou") == pBibouDir);
-  assert_test(pBibouDir->parent() == &root);
+  assert_test(pBibouDir->contains( [](std::shared_ptr<Object> object){ return object->name() == "tata"; } ));
+  assert_test(!pBibouDir->contains( [](std::shared_ptr<Object> object){ return object->name() == "teufteuf"; } ));
+  assert_test(pBibouDir->find( [](std::shared_ptr<Object> object){ return object->name() == "tata"; } ) != nullptr);
+  assert_test(pBibouDir->find( [](std::shared_ptr<Object> object){ return object->name() == "teufteuf"; } ) == nullptr);
+  assert_test(root->hasChild("bibou"));
+  assert_test(root->mkdir("bibou") == pBibouDir);
+  assert_test(pBibouDir->parent() == root);
 
   return 0;
 }

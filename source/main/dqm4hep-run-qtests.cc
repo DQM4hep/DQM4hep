@@ -239,14 +239,14 @@ int main(int argc, char* argv[])
 
   try
   {
-    for(TiXmlElement *monitorElement = rootElement->FirstChildElement("monitorElement") ; monitorElement ; monitorElement = monitorElement->NextSiblingElement("monitorElement"))
+    for(TiXmlElement *meElt = rootElement->FirstChildElement("monitorElement") ; meElt ; meElt = meElt->NextSiblingElement("monitorElement"))
     {
       std::string path, name, reference;
       THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
-        XmlHelper::getAttribute(monitorElement, "path", path));
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(monitorElement, "name", name));
+        XmlHelper::getAttribute(meElt, "path", path));
+      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
       THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
-        XmlHelper::getAttribute(monitorElement, "reference", reference));
+        XmlHelper::getAttribute(meElt, "reference", reference));
 
       TObject *pTObject(nullptr);
       Path fullName(path); fullName += name;
@@ -263,16 +263,16 @@ int main(int argc, char* argv[])
         throw StatusCodeException(STATUS_CODE_NOT_FOUND);
       }
 
-      MonitorElement *pMonitorElement(nullptr);
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->handleMonitorElement(path, pTObject, pMonitorElement));
+      MonitorElementPtr monitorElement;
+      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->handleMonitorElement(path, pTObject, monitorElement));
 
       if(!reference.empty())
       {
         dqm_debug( "Monitor element '{0}' read, reference file '{1}'", name, reference );
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->attachReference(pMonitorElement, reference));
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->attachReference(monitorElement, reference));
       }
 
-      for(TiXmlElement *qtest = monitorElement->FirstChildElement("qtest") ; qtest ; qtest = qtest->NextSiblingElement("qtest"))
+      for(TiXmlElement *qtest = meElt->FirstChildElement("qtest") ; qtest ; qtest = qtest->NextSiblingElement("qtest"))
       {
         std::string qTestName;
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));

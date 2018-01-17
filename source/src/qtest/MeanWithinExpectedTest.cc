@@ -56,8 +56,8 @@ namespace dqm4hep {
       MeanWithinExpectedTest(const std::string &name);
       ~MeanWithinExpectedTest() {}
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle);
-      StatusCode userRun(MonitorElement *pMonitorElement, QualityTestReport &report);
-      bool canRun(MonitorElement *pMonitorElement) const;
+      StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report);
+      bool canRun(MonitorElementPtr monitorElement) const;
 
     protected:
       float               m_expectedMean;
@@ -108,9 +108,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MeanWithinExpectedTest::userRun(MonitorElement *pMonitorElement, QualityTestReport &report)
+    StatusCode MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report)
     {
-      TH1 *pHistogram = pMonitorElement->objectTo<TH1>();
+      TH1 *pHistogram = monitorElement->objectTo<TH1>();
       const float mean(pHistogram->GetMean());
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
@@ -133,12 +133,12 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool MeanWithinExpectedTest::canRun(MonitorElement *pMonitorElement) const
+    bool MeanWithinExpectedTest::canRun(MonitorElementPtr monitorElement) const
     {
-      if(nullptr == pMonitorElement)
+      if(nullptr == monitorElement)
         return false;
 
-      TH1 *pHistogram = pMonitorElement->objectTo<TH1>();
+      TH1 *pHistogram = monitorElement->objectTo<TH1>();
 
       if(nullptr == pHistogram)
         return false;

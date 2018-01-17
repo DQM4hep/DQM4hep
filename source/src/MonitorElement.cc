@@ -41,6 +41,41 @@ ClassImp(dqm4hep::core::TDynamicGraph)
 namespace dqm4hep {
 
   namespace core {
+    
+    MonitorElementPtr MonitorElement::make_shared()
+    {
+      return std::shared_ptr<MonitorElement>(new MonitorElement());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorElementPtr MonitorElement::make_shared(TObject *pMonitorObject)
+    {
+      return std::shared_ptr<MonitorElement>(new MonitorElement(pMonitorObject));
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorElementPtr MonitorElement::make_shared(TObject *pMonitorObject, TObject *pReferenceObject)
+    {
+      return std::shared_ptr<MonitorElement>(new MonitorElement(pMonitorObject, pReferenceObject));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorElementPtr MonitorElement::make_shared(const PtrHandler<TObject> &monitorObject)
+    {
+      return std::shared_ptr<MonitorElement>(new MonitorElement(monitorObject));
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    MonitorElementPtr MonitorElement::make_shared(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject)
+    {
+      return std::shared_ptr<MonitorElement>(new MonitorElement(monitorObject, referenceObject));
+    }
+    
+    //-------------------------------------------------------------------------------------------------
 
     MonitorElement::MonitorElement() :
       m_path(""),
@@ -248,7 +283,7 @@ namespace dqm4hep {
         for(auto iter : m_qualityTests)
         {
           QReport report;
-          iter.second->run(this, report);
+          iter.second->run(this->shared_from_this(), report);
           reports.insert(QReportMap::value_type(iter.first, report));
         }
       }
@@ -273,7 +308,7 @@ namespace dqm4hep {
       if(m_qualityTests.end() == iter)
         return STATUS_CODE_NOT_FOUND;
 
-      iter->second->run(this, report);
+      iter->second->run(this->shared_from_this(), report);
 
       return STATUS_CODE_SUCCESS;
     }

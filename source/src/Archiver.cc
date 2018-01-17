@@ -144,7 +144,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::archive(Storage<MonitorElement> *pStorage, const std::string &dirName)
+    StatusCode Archiver::archive(MeStoragePtr storage, const std::string &dirName)
     {
       if(!this->isOpened())
         return STATUS_CODE_NOT_ALLOWED;
@@ -164,7 +164,7 @@ namespace dqm4hep {
         pDirectory = m_pArchiveFile;
       }
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveFill(pStorage->root(), pDirectory));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveFill(storage->root(), pDirectory));
 
       m_pArchiveFile->cd();
       m_pArchiveFile->Write();
@@ -195,33 +195,33 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::recursiveFill(Directory<MonitorElement> *pDirectory, TDirectory *pROOTDir)
+    StatusCode Archiver::recursiveFill(MonitorElementDir directory, TDirectory *pROOTDir)
     {
-      if(nullptr == pDirectory || nullptr == pROOTDir)
+      if(nullptr == directory || nullptr == pROOTDir)
         return STATUS_CODE_INVALID_PTR;
 
       pROOTDir->cd();
 
-      const std::vector<Directory<MonitorElement>*> &subDirList(pDirectory->subdirs());
+      const auto &subDirList(directory->subdirs());
 
       if(!subDirList.empty())
       {
         for(auto iter = subDirList.begin(), endIter = subDirList.end() ; endIter != iter ; ++iter)
         {
-          auto *pSubDir = *iter;
-          TDirectory *pROOTSubDir = pROOTDir->mkdir(pSubDir->name().c_str());
+          auto subDir = *iter;
+          TDirectory *pROOTSubDir = pROOTDir->mkdir(subDir->name().c_str());
 
           if(nullptr != pROOTSubDir)
           {
-            RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::recursiveFill(pSubDir, pROOTSubDir));
+            RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::recursiveFill(subDir, pROOTSubDir));
           }
         }
       }
 
       // write the monitor elements
-      if( ! pDirectory->isEmpty() )
+      if( ! directory->isEmpty() )
       {
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::writeMonitorElements(pDirectory, pROOTDir));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::writeMonitorElements(directory, pROOTDir));
       }
 
       return STATUS_CODE_SUCCESS;
@@ -229,14 +229,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::writeMonitorElements(Directory<MonitorElement> *pDirectory, TDirectory *pROOTDir)
+    StatusCode Archiver::writeMonitorElements(MonitorElementDir directory, TDirectory *pROOTDir)
     {
-      if(nullptr == pDirectory || nullptr == pROOTDir)
+      if(nullptr == directory || nullptr == pROOTDir)
         return STATUS_CODE_INVALID_PTR;
 
       pROOTDir->cd();
 
-      const auto &monitorElementList(pDirectory->contents());
+      const auto &monitorElementList(directory->contents());
 
       for(auto iter = monitorElementList.begin(), endIter = monitorElementList.end() ; endIter != iter ; ++iter)
       {
@@ -246,9 +246,7 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
-
-    //-------------------------------------------------------------------------------------------------
-
+    
   }
 
 }

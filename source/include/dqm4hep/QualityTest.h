@@ -181,7 +181,7 @@ namespace dqm4hep {
 
       /** Perform the quality test result and fill the quality test report
        */
-      void run(MonitorElement *pMonitorElement, QualityTestReport &report);
+      void run(MonitorElementPtr monitorElement, QualityTestReport &report);
 
       /** Read the settings from the xml handle
        */
@@ -194,16 +194,16 @@ namespace dqm4hep {
     protected:
       /** Runs a quality test on the given monitor element
        */
-      virtual StatusCode userRun(MonitorElement *pMonitorElement, QualityTestReport &report) = 0;
+      virtual StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) = 0;
 
       /** Whether the quality test can be run on the monitor element
        */
-      virtual bool canRun(MonitorElement *pMonitorElement) const = 0;
+      virtual bool canRun(MonitorElementPtr monitorElement) const = 0;
 
       /** Fill basic info in the qtest report.
        *  Must be called at start of qtest run
        */
-      void fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const;
+      void fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const;
 
     private:
       std::string           m_type;           ///< Quality test type (usually class name)

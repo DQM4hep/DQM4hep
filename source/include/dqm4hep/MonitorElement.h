@@ -51,30 +51,29 @@ namespace dqm4hep {
      *
      *  @author Remi Ete, DESY
      */
-    class MonitorElement
+    class MonitorElement : public std::enable_shared_from_this<MonitorElement>
     {
       friend class MonitorElementManager;
     public:
-
       /** Constructor
        */
-      MonitorElement();
+      static MonitorElementPtr make_shared();
 
       /** Constructor with ROOT object
        */
-      MonitorElement(TObject *pMonitorObject);
+      static MonitorElementPtr make_shared(TObject *pMonitorObject);
 
       /** Constructor with ROOT object and reference
        */
-      MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject);
+      static MonitorElementPtr make_shared(TObject *pMonitorObject, TObject *pReferenceObject);
 
       /** Constructor with ROOT object ptr
        */
-      MonitorElement(const PtrHandler<TObject> &monitorObject);
+      static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject);
 
       /** Constructor with ROOT object and reference ptr
        */
-      MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
+      static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);      
 
       /** Get the monitor element type (class name)
        */
@@ -151,6 +150,26 @@ namespace dqm4hep {
       void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
 
     private:
+      /** Constructor
+       */
+      MonitorElement();
+
+      /** Constructor with ROOT object
+       */
+      MonitorElement(TObject *pMonitorObject);
+
+      /** Constructor with ROOT object and reference
+       */
+      MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject);
+
+      /** Constructor with ROOT object ptr
+       */
+      MonitorElement(const PtrHandler<TObject> &monitorObject);
+
+      /** Constructor with ROOT object and reference ptr
+       */
+      MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
+      
       /** Set the monitor element object path
        */
       void setPath(const std::string &path);

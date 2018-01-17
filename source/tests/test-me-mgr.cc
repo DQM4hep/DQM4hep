@@ -53,20 +53,20 @@ int main(int argc, char* argv[])
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
-  MonitorElement *pMonitorElement = nullptr;
-  std::vector<MonitorElement*> monitorElements;
-  assert_test(STATUS_CODE_SUCCESS == meMgr->bookMonitorElement("TGraph", "/", "TestGraph", pMonitorElement));
+  MonitorElementPtr monitorElement;
+  MonitorElementList monitorElements;
+  assert_test(STATUS_CODE_SUCCESS == meMgr->bookMonitorElement("TGraph", "/", "TestGraph", monitorElement));
 
   meMgr->getMonitorElements(monitorElements);
   assert_test(monitorElements.size() == 1);
   monitorElements.clear();
 
-  assert_test(STATUS_CODE_ALREADY_PRESENT == meMgr->bookMonitorElement("TGraph", "/", "TestGraph", pMonitorElement));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->getMonitorElement("/", "TestGraph", pMonitorElement));
-  assert_test(STATUS_CODE_NOT_FOUND == meMgr->getMonitorElement("/", "TestGraph2", pMonitorElement));
+  assert_test(STATUS_CODE_ALREADY_PRESENT == meMgr->bookMonitorElement("TGraph", "/", "TestGraph", monitorElement));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->getMonitorElement("/", "TestGraph", monitorElement));
+  assert_test(STATUS_CODE_NOT_FOUND == meMgr->getMonitorElement("/", "TestGraph2", monitorElement));
 
   assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement("/", "TestGraph"));
-  assert_test(STATUS_CODE_NOT_FOUND == meMgr->getMonitorElement("/", "TestGraph", pMonitorElement));
+  assert_test(STATUS_CODE_NOT_FOUND == meMgr->getMonitorElement("/", "TestGraph", monitorElement));
 
 
 

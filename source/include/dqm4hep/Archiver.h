@@ -74,7 +74,7 @@ namespace dqm4hep {
 
       /** Archive the current state of the storage in the root TDirectory
        */
-      StatusCode archive(Storage<MonitorElement> *pStorage, const std::string &dirName = "");
+      StatusCode archive(MeStoragePtr storage, const std::string &dirName = "");
 
       /** Get the file name
        */
@@ -91,15 +91,15 @@ namespace dqm4hep {
     private:
       /** Fill recursively the TDirectory with the Directory
        */
-      static StatusCode recursiveFill(Directory<MonitorElement> *pDirectory, TDirectory *pROOTDir);
+      static StatusCode recursiveFill(MonitorElementDir directory, TDirectory *pROOTDir);
 
       /** Create TDirectories as labeled in the Directory
        */
-      static StatusCode createTDirectories(Directory<MonitorElement> *pDirectory, TDirectory *pROOTDir);
+      static StatusCode createTDirectories(MonitorElementDir directory, TDirectory *pROOTDir);
 
       /** Write the monitor elements contained in the Directory in the TDirectory
        */
-      static StatusCode writeMonitorElements(Directory<MonitorElement> *pDirectory, TDirectory *pROOTDir);
+      static StatusCode writeMonitorElements(MonitorElementDir directory, TDirectory *pROOTDir);
 
     private:
       // members

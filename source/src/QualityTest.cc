@@ -349,11 +349,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTest::run(MonitorElement *pMonitorElement, QualityTestReport &report)
+    void QualityTest::run(MonitorElementPtr monitorElement, QualityTestReport &report)
     {
-      this->fillBasicInfo(pMonitorElement, report);
+      this->fillBasicInfo(monitorElement, report);
 
-      if(!this->canRun(pMonitorElement))
+      if(!this->canRun(monitorElement))
       {
         report.m_message = "Couldn't run quality test: canRun() failed";
         report.m_quality = 0.f;
@@ -363,7 +363,7 @@ namespace dqm4hep {
 
       try
       {
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->userRun(pMonitorElement, report));
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->userRun(monitorElement, report));
       }
       catch(StatusCodeException &exception)
       {
@@ -393,14 +393,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTest::fillBasicInfo(MonitorElement *pMonitorElement, QualityTestReport &report) const
+    void QualityTest::fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const
     {
       report.m_qualityTestName = this->name();
       report.m_qualityTestType = this->type();
       report.m_qualityTestDescription = this->description();
-      report.m_monitorElementType = pMonitorElement->type();
-      report.m_monitorElementName = pMonitorElement->name();
-      report.m_monitorElementPath = pMonitorElement->path();
+      report.m_monitorElementType = monitorElement->type();
+      report.m_monitorElementName = monitorElement->name();
+      report.m_monitorElementPath = monitorElement->path();
       report.m_quality = 0.f;
       report.m_message = "";
       report.m_isSuccessful = false;

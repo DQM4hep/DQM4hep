@@ -101,6 +101,10 @@ namespace dqm4hep {
     class QualityTestReport;
     class Path;
     class Plugin;
+    template <typename T>
+    class Directory;
+    template <typename T>
+    class Storage;
 
     /** allocator_helper class
      */
@@ -153,14 +157,17 @@ namespace dqm4hep {
     typedef std::map<std::string, std::string>                  StringMap;
 
     // dqm4hep typedefs
-    typedef std::vector<MonitorElement*>                        MonitorElementList;
-    typedef std::map<const std::string, MonitorElement*>        MonitorElementMap;
+    typedef std::shared_ptr<MonitorElement>                     MonitorElementPtr;
+    typedef std::vector<MonitorElementPtr>                      MonitorElementList;
+    typedef std::map<const std::string, MonitorElementPtr>      MonitorElementMap;
+    typedef std::shared_ptr<Directory<MonitorElement>>          MonitorElementDir;
     typedef QualityTest                                         QTest;
     typedef std::shared_ptr<QualityTest>                        QTestPtr;
     typedef QualityTestReport                                   QReport;
     typedef std::map<std::string, QReport>                      QReportMap;
     typedef std::map<StringPair, QReportMap>                    QReportContainer;
     typedef std::map<std::string, QTestPtr>                     QTestMap;
+    typedef std::shared_ptr<Storage<MonitorElement>>            MeStoragePtr;
 
     //-------------------------------------------------------------------------------------------------
 

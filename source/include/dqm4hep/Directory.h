@@ -47,18 +47,21 @@ namespace dqm4hep {
      *  This interface doesn't allow moving sub-directories
      */
     template <typename T>
-    class Directory
+    class Directory : public std::enable_shared_from_this<Directory<T>>
     {
     public:
-      typedef std::vector<T*> ObjectList;
+      typedef std::shared_ptr<T> ObjectPtr;
+      typedef std::vector<ObjectPtr> ObjectList;
+      typedef std::shared_ptr<Directory<T>> DirectoryPtr;
+      typedef std::vector<DirectoryPtr> DirectoryList;
 
-      /** Default constructor
+      /** Factory method for simple constructor
        */
-      Directory();
-
-      /** Constructor with name and parent dir
+      static DirectoryPtr make_shared();
+      
+      /** Factory method for constructor with name and parent directory
        */
-      Directory(const std::string &name, Directory<T> *pParentDir = NULL);
+      static DirectoryPtr make_shared(const std::string &name, DirectoryPtr parent = nullptr);
 
       /** Destructor.
        *  Delete the subdirectories but not the contents
@@ -67,7 +70,7 @@ namespace dqm4hep {
 
       /** Create a new directory
        */
-      Directory<T> *mkdir(const std::string &dirName);
+      DirectoryPtr mkdir(const std::string &dirName);
 
       /** Returns the directory name
        */
@@ -75,11 +78,11 @@ namespace dqm4hep {
 
       /** Returns the parent directory
        */
-      Directory<T> *parent() const;
+      DirectoryPtr parent() const;
 
       /** Get the sub directory list
        */
-      const std::vector<Directory<T>*> &subdirs() const;
+      const DirectoryList &subdirs() const;
 
       /** Whether the directory contains the sub dir
        */
@@ -87,20 +90,20 @@ namespace dqm4hep {
 
       /** Find the sub directory by name
        */
-      StatusCode find(const std::string &dirName, Directory<T> *&pDirectory) const;
+      StatusCode find(const std::string &dirName, DirectoryPtr &directory) const;
 
       /** Add an object to the directory
        */
-      StatusCode add(T *pObject);
+      StatusCode add(ObjectPtr object);
 
       /** Find a monitor element with a given name in the directory
        */
       template <typename F>
-      T *find(F function) const;
+      ObjectPtr find(F function) const;
 
       /** Whether the directory contains the monitor element (search by ptr compare)
        */
-      bool containsObject(const T *pObject) const;
+      bool containsObject(const ObjectPtr &object) const;
 
       /** Whether the directory contains the monitor element (search by name compare)
        */
@@ -109,7 +112,7 @@ namespace dqm4hep {
 
       /** Remove the monitor element from the directory
        */
-      StatusCode remove(T *pObject);
+      StatusCode remove(ObjectPtr object);
 
       /** Remove the monitor element from the directory
        */
@@ -140,11 +143,20 @@ namespace dqm4hep {
       /** Whether the directory is empty
        */
       bool isEmpty() const;
+      
+    private:
+      /** Default constructor
+       */
+      Directory();
 
+      /** Constructor with name and parent dir
+       */
+      Directory(const std::string &name, DirectoryPtr parentDir = nullptr);
+      
     private:
       std::string                     m_name;
-      Directory                      *m_pParent;
-      std::vector<Directory<T>*>      m_subdirs;
+      DirectoryPtr                    m_parent;
+      DirectoryList                   m_subdirs;
       ObjectList                      m_contents;
     };
 
@@ -152,9 +164,25 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
+    inline typename Directory<T>::DirectoryPtr Directory<T>::make_shared()
+    {
+      return std::shared_ptr<Directory<T>>(new Directory<T>());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline typename Directory<T>::DirectoryPtr Directory<T>::make_shared(const std::string &name, DirectoryPtr parent)
+    {
+      return std::shared_ptr<Directory<T>>(new Directory<T>(name, parent));
+    }
+     
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
     inline Directory<T>::Directory() :
       m_name(""),
-      m_pParent(nullptr),
+      m_parent(nullptr),
       m_subdirs(),
       m_contents()
     {
@@ -164,9 +192,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Directory<T>::Directory(const std::string &name, Directory<T> *pParent) :
+    inline Directory<T>::Directory(const std::string &name, DirectoryPtr parent) :
       m_name(name),
-      m_pParent(pParent),
+      m_parent(parent),
       m_subdirs(),
       m_contents()
     {
@@ -192,15 +220,15 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Directory<T> *Directory<T>::parent() const
+    inline typename Directory<T>::DirectoryPtr Directory<T>::parent() const
     {
-      return m_pParent;
+      return m_parent;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline const std::vector<Directory<T>*> &Directory<T>::subdirs() const
+    inline const typename Directory<T>::DirectoryList &Directory<T>::subdirs() const
     {
       return m_subdirs;
     }
@@ -208,22 +236,22 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Directory<T> *Directory<T>::mkdir(const std::string &dirName)
+    inline typename Directory<T>::DirectoryPtr Directory<T>::mkdir(const std::string &dirName)
     {
-      Directory<T> *pDirectory = nullptr;
+      DirectoryPtr directory;
 
-      this->find(dirName, pDirectory);
+      this->find(dirName, directory);
 
-      if(nullptr != pDirectory)
-        return pDirectory;
+      if(nullptr != directory)
+        return directory;
 
       if(dirName.find("/") != std::string::npos || dqm4hep::core::containsSpecialCharacters(dirName) || dirName.empty())
         return nullptr;
 
-      Directory<T> *pNewDirectory = new Directory<T>(dirName, this);
-      m_subdirs.push_back(pNewDirectory);
+      auto newDirectory = Directory<T>::make_shared(dirName, this->shared_from_this());
+      m_subdirs.push_back(newDirectory);
 
-      return pNewDirectory;
+      return newDirectory;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -234,12 +262,11 @@ namespace dqm4hep {
       if(dirName.find("/") != std::string::npos || dqm4hep::core::containsSpecialCharacters(dirName) || dirName.empty())
         return false;
 
-      for(typename std::vector<Directory<T>*>::const_iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
-          endIter != iter ; ++iter)
+      for(auto iter = m_subdirs.begin(), endIter = m_subdirs.end() ; endIter != iter ; ++iter)
       {
-        Directory<T> *pDirectory = *iter;
+        auto directory = *iter;
 
-        if(pDirectory->name() == dirName)
+        if(directory->name() == dirName)
           return true;
       }
 
@@ -249,18 +276,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Directory<T>::find(const std::string &dirName, Directory<T> *&pDirectory) const
+    inline StatusCode Directory<T>::find(const std::string &dirName, DirectoryPtr &directory) const
     {
-      pDirectory = nullptr;
-
-      for(typename std::vector<Directory<T>*>::const_iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
-          endIter != iter ; ++iter)
+      directory = nullptr;
+      
+      for(auto iter = m_subdirs.begin(), endIter = m_subdirs.end() ; endIter != iter ; ++iter)
       {
-        Directory<T> *pDir = *iter;
+        auto dir = *iter;
 
-        if(pDir->name() == dirName)
+        if(dir->name() == dirName)
         {
-          pDirectory = pDir;
+          directory = dir;
           return STATUS_CODE_SUCCESS;
         }
       }
@@ -271,15 +297,15 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Directory<T>::add(T *pObject)
+    inline StatusCode Directory<T>::add(ObjectPtr object)
     {
-      if(nullptr == pObject)
+      if(nullptr == object)
         return STATUS_CODE_INVALID_PTR;
 
-      if(this->containsObject(pObject))
+      if(this->containsObject(object))
         return STATUS_CODE_ALREADY_PRESENT;
 
-      m_contents.push_back(pObject);
+      m_contents.push_back(object);
 
       return STATUS_CODE_SUCCESS;
     }
@@ -288,27 +314,25 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline T *Directory<T>::find(F function) const
+    inline typename Directory<T>::ObjectPtr Directory<T>::find(F function) const
     {
-      for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
-          endIter != iter ; ++iter)
+      for(auto iter = m_contents.begin(), endIter = m_contents.end() ; endIter != iter ; ++iter)
         if(function(*iter))
           return *iter;
 
-      return nullptr;
+      return ObjectPtr();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool Directory<T>::containsObject(const T *pObject) const
+    inline bool Directory<T>::containsObject(const ObjectPtr &object) const
     {
-      if(nullptr == pObject)
+      if(nullptr == object)
         return false;
 
-      for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
-          endIter != iter ; ++iter)
-        if(pObject == *iter)
+      for(auto iter = m_contents.begin(), endIter = m_contents.end() ; endIter != iter ; ++iter)
+        if(object == *iter)
           return true;
 
       return false;
@@ -320,8 +344,7 @@ namespace dqm4hep {
     template <typename F>
     inline bool Directory<T>::contains(F function) const
     {
-      for(typename ObjectList::const_iterator iter = m_contents.begin(), endIter = m_contents.end() ;
-          endIter != iter ; ++iter)
+      for(auto iter = m_contents.begin(), endIter = m_contents.end() ; endIter != iter ; ++iter)
         if(function(*iter))
           return true;
 
@@ -331,18 +354,16 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Directory<T>::remove(T *pObject)
+    inline StatusCode Directory<T>::remove(ObjectPtr object)
     {
-      if(nullptr == pObject)
+      if(nullptr == object)
         return STATUS_CODE_INVALID_PTR;
 
-      for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
-          endIter != iter ; ++iter)
+      for(auto iter = m_contents.begin(), endIter = m_contents.end() ; endIter != iter ; ++iter)
       {
-        if(pObject == *iter)
+        if(object == *iter)
         {
           m_contents.erase(iter);
-          delete pObject;
           return STATUS_CODE_SUCCESS;
         }
       }
@@ -356,14 +377,11 @@ namespace dqm4hep {
     template <typename F>
     inline StatusCode Directory<T>::remove(F function)
     {
-      for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
-          endIter != iter ; ++iter)
+      for(auto iter = m_contents.begin(), endIter = m_contents.end() ; endIter != iter ; ++iter)
       {
         if(function(*iter))
         {
-          T *pObject = *iter;
           m_contents.erase(iter);
-          delete pObject;
           return STATUS_CODE_SUCCESS;
         }
       }
@@ -384,15 +402,13 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode Directory<T>::rmdir(const std::string &dirName)
     {
-      for(typename std::vector<Directory<T>*>::iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
-          endIter != iter ; ++iter)
+      for(auto iter = m_subdirs.begin(), endIter = m_subdirs.end() ; endIter != iter ; ++iter)
       {
-        Directory<T> *pDir = *iter;
+        DirectoryPtr dir = *iter;
 
-        if(pDir->name() == dirName)
+        if(dir->name() == dirName)
         {
           m_subdirs.erase(iter);
-          delete pDir;
           return STATUS_CODE_SUCCESS;
         }
       }
@@ -405,16 +421,8 @@ namespace dqm4hep {
     template <typename T>
     inline void Directory<T>::clear()
     {
-      for(typename std::vector<Directory<T>*>::iterator iter = m_subdirs.begin(), endIter = m_subdirs.end() ;
-          endIter != iter ; ++iter)
-      {
+      for(auto iter = m_subdirs.begin(), endIter = m_subdirs.end() ; endIter != iter ; ++iter)
         (*iter)->clear();
-        delete *iter;
-      }
-
-      for(typename ObjectList::iterator iter = m_contents.begin(), endIter = m_contents.end() ;
-          endIter != iter ; ++iter)
-        delete *iter;
 
       m_subdirs.clear();
       m_contents.clear();
@@ -426,16 +434,16 @@ namespace dqm4hep {
     inline Path Directory<T>::fullPath() const
     {
       Path fullPath = this->name();
-      const Directory<T> *pDir = this;
+      DirectoryPtr dir = const_cast<Directory<T>*>(this)->shared_from_this();
 
       while(1)
       {
-        const Directory<T> *pParentDir = pDir->parent();
+        DirectoryPtr parentDir = dir->parent();
 
-        if(nullptr != pParentDir)
+        if(nullptr != parentDir)
         {
-          fullPath = pParentDir->name() + fullPath;
-          pDir = pParentDir;
+          fullPath = parentDir->name() + fullPath;
+          dir = parentDir;
         }
         else
         {
@@ -452,7 +460,7 @@ namespace dqm4hep {
     template <typename T>
     inline bool Directory<T>::isRoot() const
     {
-      return (nullptr == m_pParent);
+      return (nullptr == m_parent);
     }
 
     //-------------------------------------------------------------------------------------------------

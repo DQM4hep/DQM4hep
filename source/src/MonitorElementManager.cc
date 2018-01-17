@@ -152,10 +152,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement)
+    StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject, MonitorElementPtr &monitorElement)
     {
       PtrHandler<TObject> ptrObject(pObject, true);
-      pMonitorElement = nullptr;
+      monitorElement = nullptr;
 
       try
       {
@@ -177,25 +177,20 @@ namespace dqm4hep {
           throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
         }
 
-        pMonitorElement = new MonitorElement(ptrObject);
+        monitorElement = MonitorElement::make_shared(ptrObject);
 
-        if(nullptr != m_storage.findObject(path, [&](MonitorElement *obj){ return obj->name() == pObject->GetName(); }) )
+        if(nullptr != m_storage.findObject(path, [&](MonitorElementPtr obj){ return obj->name() == pObject->GetName(); }) )
         {
           dqm_error( "Monitor element '{0}' in directory '{1}' already booked !", pObject->GetName(), path );
           throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
         }
 
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
-        pMonitorElement->setPath(path);
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
+        monitorElement->setPath(path);
       }
       catch(StatusCodeException &e)
       {
-        if(nullptr != pMonitorElement)
-        {
-          delete pMonitorElement;
-          pMonitorElement = nullptr;
-        }
-        else
+        if(nullptr == monitorElement)
         {
           // TObject should have been owned by the MonitorElement
           // but creation failed, we need to delete it manually
@@ -206,12 +201,7 @@ namespace dqm4hep {
       }
       catch(...)
       {
-        if(nullptr != pMonitorElement)
-        {
-          delete pMonitorElement;
-          pMonitorElement = nullptr;
-        }
-        else
+        if(nullptr == monitorElement)
         {
           // TObject should have been owned by the MonitorElement
           // but creation failed, we need to delete it manually
@@ -226,55 +216,30 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject, MonitorElement *&pMonitorElement)
+    StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject, MonitorElementPtr &monitorElement)
     {
       PtrHandler<TObject> ptrObject(pObject, false);
-      pMonitorElement = nullptr;
-
-      try
-      {
-        pMonitorElement = new MonitorElement(ptrObject);
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, pMonitorElement));
-        pMonitorElement->setPath(path);
-      }
-      catch(StatusCodeException &e)
-      {
-        if(nullptr != pMonitorElement)
-        {
-          delete pMonitorElement;
-          pMonitorElement = nullptr;
-        }
-
-        return e.getStatusCode();
-      }
-      catch(...)
-      {
-        if(nullptr != pMonitorElement)
-        {
-          delete pMonitorElement;
-          pMonitorElement = nullptr;
-        }
-
-        return STATUS_CODE_FAILURE;
-      }
-
+      monitorElement = MonitorElement::make_shared(ptrObject);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
+      monitorElement->setPath(path);
+      
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
+    StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement)
     {
-      pMonitorElement = nullptr;
+      monitorElement = nullptr;
       std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
-      return this->readMonitorElement(rootFile.get(), path, name, pMonitorElement);
+      return this->readMonitorElement(rootFile.get(), path, name, monitorElement);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
+    StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement)
     {
-      pMonitorElement = nullptr;
+      monitorElement = nullptr;
 
       Path fullName = path;
       fullName += name;
@@ -288,14 +253,14 @@ namespace dqm4hep {
       if(!pTObject)
         return STATUS_CODE_NOT_FOUND;
 
-      return this->addMonitorElement(path, pTObject, pMonitorElement);
+      return this->addMonitorElement(path, pTObject, monitorElement);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElement *&pMonitorElement)
+    StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement)
     {
-      pMonitorElement = nullptr;
+      monitorElement = nullptr;
       TClass *pTClass = TClass::GetClass(className.c_str());
 
       if(!pTClass->IsTObject())
@@ -321,18 +286,18 @@ namespace dqm4hep {
         ((TNamed*)pTObject)->SetName(name.c_str());
       }
 
-      return this->addMonitorElement(path, pTObject, pMonitorElement);
+      return this->addMonitorElement(path, pTObject, monitorElement);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::attachReference(MonitorElement *pMonitorElement, const std::string &fileName)
+    StatusCode MonitorElementManager::attachReference(MonitorElementPtr monitorElement, const std::string &fileName)
     {
-      if(nullptr == pMonitorElement)
+      if(nullptr == monitorElement)
         return STATUS_CODE_INVALID_PTR;
 
-      Path fullName = pMonitorElement->path();
-      fullName += pMonitorElement->name();
+      Path fullName = monitorElement->path();
+      fullName += monitorElement->name();
       dqm_debug( "MonitorElementManager::attachReference: looking for element {0}", fullName.getPath() );
 
       std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
@@ -341,8 +306,8 @@ namespace dqm4hep {
       TObject::SetObjectStat(false);
       TObject *pTObject(nullptr);
 
-      if(pMonitorElement->path() == "/")
-        pTObject = (TObject *) rootFile->Get(pMonitorElement->name().c_str());
+      if(monitorElement->path() == "/")
+        pTObject = (TObject *) rootFile->Get(monitorElement->name().c_str());
       else
         pTObject = (TObject *) rootFile->Get(fullName.getPath().c_str());
 
@@ -351,7 +316,7 @@ namespace dqm4hep {
       if(!pTObject)
         return STATUS_CODE_NOT_FOUND;
 
-      pMonitorElement->setReferenceObject(pTObject);
+      monitorElement->setReferenceObject(pTObject);
 
       return STATUS_CODE_SUCCESS;
     }
@@ -359,17 +324,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    void MonitorElementManager::getMonitorElements(std::vector<MonitorElement*> &monitorElements) const
+    void MonitorElementManager::getMonitorElements(MonitorElementList &monitorElements) const
     {
       m_storage.getObjects(monitorElements);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::getMonitorElement(const std::string &name, MonitorElement* &monitorElement) const
+    StatusCode MonitorElementManager::getMonitorElement(const std::string &name, MonitorElementPtr &monitorElement) const
     {
       monitorElement = m_storage.findObject(
-        [&name](const MonitorElement *elt){
+        [&name](const MonitorElementPtr &elt){
           return (elt->name() == name);
         });
 
@@ -381,10 +346,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &name, MonitorElement* &monitorElement) const
+    StatusCode MonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &name, MonitorElementPtr &monitorElement) const
     {
       monitorElement = m_storage.findObject(dirName,
-        [&name](const MonitorElement *elt){
+        [&name](const MonitorElementPtr &elt){
           return (elt->name() == name);
         });
 
@@ -399,18 +364,18 @@ namespace dqm4hep {
 
     StatusCode MonitorElementManager::removeMonitorElement(const std::string &path, const std::string &name)
     {
-      MonitorElement *pMonitorElement(nullptr);
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
+      MonitorElementPtr monitorElement;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, monitorElement));
 
       // look in qtest map first
-      auto iter = m_monitorElementToQTestMap.find(pMonitorElement);
+      auto iter = m_monitorElementToQTestMap.find(monitorElement);
 
       if(m_monitorElementToQTestMap.end() != iter)
         m_monitorElementToQTestMap.erase(iter);
 
       // remove the element form storage. Call delete operator
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.remove(path, [&name](const MonitorElement *pMonitorElement){
-        return (pMonitorElement->name() == name);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.remove(path, [&name](const MonitorElementPtr &monitorElement){
+        return (monitorElement->name() == name);
       }));
 
       return STATUS_CODE_SUCCESS;
@@ -456,9 +421,9 @@ namespace dqm4hep {
       if(m_qualityTestMap.end() == findIter)
         return STATUS_CODE_NOT_FOUND;
 
-      MonitorElement *pMonitorElement(nullptr);
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->addQualityTest(findIter->second));
+      MonitorElementPtr monitorElement;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, monitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->addQualityTest(findIter->second));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -467,9 +432,9 @@ namespace dqm4hep {
 
     StatusCode MonitorElementManager::removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
     {
-      MonitorElement *pMonitorElement(nullptr);
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->removeQualityTest(qualityTestName));
+      MonitorElementPtr monitorElement;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, monitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->removeQualityTest(qualityTestName));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -480,9 +445,9 @@ namespace dqm4hep {
     {
       try
       {
-        m_storage.iterate([&reports](const Directory<MonitorElement> *, MonitorElement *pMonitorElement){
+        m_storage.iterate([&reports](const MonitorElementDir &, MonitorElementPtr monitorElement){
           QReportMap reportMap;
-          THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->runQualityTests(reportMap));
+          THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->runQualityTests(reportMap));
           reports.addReports(reportMap);
           return true;
         });
@@ -505,10 +470,10 @@ namespace dqm4hep {
 
     StatusCode MonitorElementManager::runQualityTests(const std::string &path, const std::string &name, QReportStorage &reports)
     {
-      MonitorElement *pMonitorElement(nullptr);
+      MonitorElementPtr monitorElement;
       QReportMap reportMap;
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->runQualityTests(reportMap));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, monitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->runQualityTests(reportMap));
       reports.addReports(reportMap);
 
       return STATUS_CODE_SUCCESS;
@@ -518,10 +483,10 @@ namespace dqm4hep {
 
     StatusCode MonitorElementManager::runQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName, QReportStorage &reports)
     {
-      MonitorElement *pMonitorElement(nullptr);
+      MonitorElementPtr monitorElement;
       QReport report;
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, pMonitorElement));
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, pMonitorElement->runQualityTest(qualityTestName, report));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, monitorElement));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElement->runQualityTest(qualityTestName, report));
       reports.addReport(report);
 
       return STATUS_CODE_SUCCESS;

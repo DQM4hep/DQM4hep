@@ -58,7 +58,7 @@ private:
 
 typedef Directory<Object> Directory_t;
 typedef Storage<Object> Storage_t;
-typedef std::vector<Object*> ObjectList;
+typedef Storage_t::ObjectList ObjectList;
 
 int main(int argc, char* argv[])
 {
@@ -75,12 +75,12 @@ int main(int argc, char* argv[])
   storage.getObjects(list);
   assert_test(list.size() == 0);
 
-  Object *pObject = nullptr;
+  std::shared_ptr<Object> object;
 
   assert_test(storage.cd("/heroes/worst") == STATUS_CODE_SUCCESS);
-  pObject = new Object("Batman"); storage.add(pObject);
-  pObject = new Object("SuperLezard"); storage.add(pObject);
-  pObject = new Object("ConcombreMan"); storage.add(pObject);
+  storage.add(std::make_shared<Object>("Batman"));
+  storage.add(std::make_shared<Object>("SuperLezard"));
+  storage.add(std::make_shared<Object>("ConcombreMan"));
 
   storage.getObjects(list);
   assert_test(list.size() == 3);
@@ -89,9 +89,9 @@ int main(int argc, char* argv[])
   assert_test(storage.pwd() == "worst");
 
   assert_test(storage.cd("/heroes/best") == STATUS_CODE_SUCCESS);
-  pObject = new Object("Superman"); storage.add(pObject);
-  pObject = new Object("Spiderman"); storage.add(pObject);
-  pObject = new Object("Me"); storage.add(pObject);
+  storage.add(std::make_shared<Object>("Superman"));
+  storage.add(std::make_shared<Object>("Spiderman"));
+  storage.add(std::make_shared<Object>("Me"));
 
   storage.getObjects(list);
   assert_test(list.size() == 6);
