@@ -69,10 +69,28 @@ int main(int argc, char* argv[])
   TiXmlElement *root = parser.document().RootElement();  
   assert_test(root != 0);
   
-  std::cout << *root << std::endl;
+  std::string user = parser.constantAs<std::string>("user");
+  assert_test(user == "superman");
   
-  for (auto constant : parser.constants())
-    dqm_debug( "Found constant: {0} = {1}", constant.first, constant.second );
+  int age = parser.constantAs<int>("age", 0);
+  assert_test(age == 32);
+  
+  std::string badguy = parser.constantAs<std::string>("badguy", "");
+  assert_test(badguy == "dracula");
+  
+  std::string notFound = parser.constantAs<std::string>("bibou", "missing");
+  assert_test(notFound == "missing");
+  
+  TiXmlElement *heroElement = root->FirstChildElement("hero");
+  
+  std::string heroName;
+  heroElement->QueryStringAttribute("name", &heroName);
+  assert_test(heroName == "superman");
+  
+  std::string heroPlanet;
+  heroElement->QueryStringAttribute("planet", &heroPlanet);
+  assert_test(heroPlanet == "krypton");
+  
 
   return 0;
 }

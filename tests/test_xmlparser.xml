@@ -1,0 +1,14 @@
+<dqm4hep>
+  
+  <constants>
+    <constant name="user" value="superman"/>
+    <constant name="planet" value="krypton"/>
+    <constant name="age" value="32"/>
+  </constants>
+  
+  <hero name="${user}" planet="${planet}">
+  </hero>
+  
+  <include ref="test_xmlparser_include.xml" />
+  
+</dqm4hep>
