@@ -83,7 +83,7 @@ namespace dqm4hep {
       std::string           m_monitorElementPath;
       std::string           m_message;
       float                 m_quality;
-      bool                  m_isSuccessful;
+      bool                  m_executed;
       Json::Value           m_extraInfos;
     };
 
@@ -195,10 +195,6 @@ namespace dqm4hep {
       /** Runs a quality test on the given monitor element
        */
       virtual StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) = 0;
-
-      /** Whether the quality test can be run on the monitor element
-       */
-      virtual bool canRun(MonitorElementPtr monitorElement) const = 0;
 
       /** Fill basic info in the qtest report.
        *  Must be called at start of qtest run

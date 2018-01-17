@@ -7,19 +7,19 @@
     <!-- MeanWithinExpectedTest qtests -->
     <qtests>
       <qtest type="MeanWithinExpectedTest" name="MeanAround10Long">
-        <ExpectedMean>10</ExpectedMean>
-        <MeanDeviationLower>8</MeanDeviationLower>
-        <MeanDeviationUpper>12</MeanDeviationUpper>
+        <parameter name="ExpectedMean" value="10"/>
+        <parameter name="MeanDeviationLower" value="8"/>
+        <parameter name="MeanDeviationUpper" value="12"/>
       </qtest>
       <qtest type="MeanWithinExpectedTest" name="MeanAround10Short">
-        <ExpectedMean>10</ExpectedMean>
-        <MeanDeviationLower>9.5</MeanDeviationLower>
-        <MeanDeviationUpper>10.5</MeanDeviationUpper>
+        <parameter name="ExpectedMean" value="10"/>
+        <parameter name="MeanDeviationLower" value="9.5"/>
+        <parameter name="MeanDeviationUpper" value="10.5"/>
       </qtest>
       <qtest type="MeanWithinExpectedTest" name="MeanAround15Short">
-        <ExpectedMean>15</ExpectedMean>
-        <MeanDeviationLower>14.5</MeanDeviationLower>
-        <MeanDeviationUpper>15.5</MeanDeviationUpper>
+        <parameter name="ExpectedMean" value="15"/>
+        <parameter name="MeanDeviationLower" value="14.5"/>
+        <parameter name="MeanDeviationUpper" value="15.5"/>
       </qtest>
     </qtests>
 

@@ -42,7 +42,7 @@ namespace dqm4hep {
       m_monitorElementPath(""),
       m_message(""),
       m_quality(0.f),
-      m_isSuccessful(true),
+      m_executed(true),
       m_extraInfos(Json::objectValue)
     {
       /* nop */
@@ -67,7 +67,7 @@ namespace dqm4hep {
       m_monitorElementPath = qreport.m_monitorElementPath;
       m_message = qreport.m_message;
       m_quality = qreport.m_quality;
-      m_isSuccessful = qreport.m_isSuccessful;
+      m_executed = qreport.m_executed;
       m_extraInfos = qreport.m_extraInfos;
 
       return *this;
@@ -85,7 +85,7 @@ namespace dqm4hep {
       value["monitorElementPath"] = m_monitorElementPath;
       value["message"] = m_message;
       value["quality"] = m_quality;
-      value["successful"] = m_isSuccessful;
+      value["executed"] = m_executed;
       value["extra"] = m_extraInfos;
     }
 
@@ -101,7 +101,7 @@ namespace dqm4hep {
       m_monitorElementPath = value.get("monitorElementPath", m_monitorElementPath).asString();
       m_message = value.get("message", m_message).asString();
       m_quality = value.get("quality", m_quality).asFloat();
-      m_isSuccessful = value.get("successful", m_isSuccessful).asBool();
+      m_executed = value.get("executed", m_executed).asBool();
       m_extraInfos = value.get("extra", m_extraInfos);
     }
 
@@ -353,17 +353,26 @@ namespace dqm4hep {
     {
       this->fillBasicInfo(monitorElement, report);
 
-      if(!this->canRun(monitorElement))
+      if(nullptr == monitorElement)
       {
-        report.m_message = "Couldn't run quality test: canRun() failed";
+        report.m_message = "Couldn't run quality test: monitor element pointer is nullptr";
         report.m_quality = 0.f;
-        report.m_isSuccessful = false;
+        report.m_executed = false;
+        return;
+      }
+      
+      if(nullptr == monitorElement->object())
+      {
+        report.m_message = "Couldn't run quality test: ROOT monitor object is nullptr";
+        report.m_quality = 0.f;
+        report.m_executed = false;
         return;
       }
 
       try
       {
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->userRun(monitorElement, report));
+        report.m_executed = true;
       }
       catch(StatusCodeException &exception)
       {
@@ -375,7 +384,7 @@ namespace dqm4hep {
           report.m_message = message;
 
         report.m_quality = 0.f;
-        report.m_isSuccessful = false;
+        report.m_executed = false;
       }
       catch(...)
       {
@@ -387,7 +396,7 @@ namespace dqm4hep {
           report.m_message = message;
 
         report.m_quality = 0.f;
-        report.m_isSuccessful = false;
+        report.m_executed = false;
       }
     }
 
@@ -398,12 +407,12 @@ namespace dqm4hep {
       report.m_qualityTestName = this->name();
       report.m_qualityTestType = this->type();
       report.m_qualityTestDescription = this->description();
-      report.m_monitorElementType = monitorElement->type();
-      report.m_monitorElementName = monitorElement->name();
-      report.m_monitorElementPath = monitorElement->path();
+      report.m_monitorElementType = monitorElement ? monitorElement->type() : "";
+      report.m_monitorElementName = monitorElement ? monitorElement->name() : "";
+      report.m_monitorElementPath = monitorElement ? monitorElement->path() : "";
       report.m_quality = 0.f;
       report.m_message = "";
-      report.m_isSuccessful = false;
+      report.m_executed = false;
       report.m_extraInfos.clear();
     }
 

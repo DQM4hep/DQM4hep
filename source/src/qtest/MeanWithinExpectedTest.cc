@@ -57,7 +57,6 @@ namespace dqm4hep {
       ~MeanWithinExpectedTest() {}
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle);
       StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report);
-      bool canRun(MonitorElementPtr monitorElement) const;
 
     protected:
       float               m_expectedMean;
@@ -91,18 +90,19 @@ namespace dqm4hep {
 
     StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle)
     {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readValue(xmlHandle,
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameterValue(xmlHandle,
           "ExpectedMean", m_expectedMean));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readValue(xmlHandle,
-          "MeanDeviationLower", m_meanDeviationLower));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameterValue(xmlHandle,
+          "MeanDeviationLower", m_meanDeviationLower, [this](const float &value){
+            return value < this->m_expectedMean;
+          }));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readValue(xmlHandle,
-          "MeanDeviationUpper", m_meanDeviationUpper));
-
-      if(m_meanDeviationLower > m_expectedMean || m_meanDeviationUpper < m_expectedMean)
-        return STATUS_CODE_INVALID_PARAMETER;
-
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameterValue(xmlHandle,
+          "MeanDeviationUpper", m_meanDeviationUpper, [this](const float &value){
+            return value > this->m_expectedMean;
+          }));
+          
       return STATUS_CODE_SUCCESS;
     }
 
@@ -111,6 +111,13 @@ namespace dqm4hep {
     StatusCode MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report)
     {
       TH1 *pHistogram = monitorElement->objectTo<TH1>();
+      
+      if(nullptr == pHistogram)
+      {
+        report.m_message = "ROOT monitor object is not a TH1 object !";
+        return STATUS_CODE_INVALID_PTR;
+      }
+      
       const float mean(pHistogram->GetMean());
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
@@ -126,24 +133,8 @@ namespace dqm4hep {
       const float chi = (mean - m_expectedMean)/range;
       const float probability = TMath::Prob(chi*chi, 1);
       report.m_quality = probability;
-      report.m_isSuccessful = true;
 
       return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    bool MeanWithinExpectedTest::canRun(MonitorElementPtr monitorElement) const
-    {
-      if(nullptr == monitorElement)
-        return false;
-
-      TH1 *pHistogram = monitorElement->objectTo<TH1>();
-
-      if(nullptr == pHistogram)
-        return false;
-
-      return true;
     }
 
     DQM_PLUGIN_DECL( MeanWithinExpectedTestFactory, "MeanWithinExpectedTest" );

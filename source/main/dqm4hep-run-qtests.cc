@@ -327,7 +327,7 @@ int main(int argc, char* argv[])
       jsonQReports[jsonIndex] = jsonQReport;
       jsonIndex++;
 
-      if(!iter2.second.m_isSuccessful)
+      if(!iter2.second.m_executed)
       {
         std::cout << redBck << white << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << setw(10) << std::left << "FAIL" << setw(10) << std::left << "none" << iter2.second.m_message << reset << std::endl;
 
