@@ -130,6 +130,7 @@ namespace dqm4hep {
       m_constants.clear();
       m_fileName.clear();
       m_document.Clear();
+      m_databases.clear();
     }
     
     //----------------------------------------------------------------------------------------------------
