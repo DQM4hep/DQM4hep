@@ -163,6 +163,11 @@ namespace dqm4hep {
         model->handle(buffer, size);
         this->setModel(model);
       }
+      
+      inline BufferModelPtr model() const
+      {
+        return m_model;
+      }
 
       Buffer(const Buffer&) = delete;
       Buffer(Buffer&&) = delete;
