@@ -287,6 +287,13 @@ namespace dqm4hep {
       auto findIter = m_commandHandlerMap.find(name);
       return (findIter == m_commandHandlerMap.end() ? nullptr : findIter->second);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    Signal<int> &Server::onClientExit()
+    {
+      return m_clientExitSignal;
+    }
 
     //-------------------------------------------------------------------------------------------------
 
@@ -495,6 +502,14 @@ namespace dqm4hep {
       }
 
       return false;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::clientExitHandler()
+    {
+      int clientID(DimServer::getClientId());
+      m_clientExitSignal.process(clientID);
     }
 
   }

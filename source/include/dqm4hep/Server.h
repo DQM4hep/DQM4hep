@@ -52,7 +52,7 @@ namespace dqm4hep {
      * All created services and request handlers are started after
      * server startup.
      */
-    class Server
+    class Server : public DimServer
     {
     public:
       /**
@@ -202,6 +202,11 @@ namespace dqm4hep {
        * @param name the service name
        */
       Service *service(const std::string &name) const;
+      
+      /**
+       *  @brief  Get the signal processed on client exit 
+       */
+      Signal<int> &onClientExit();
 
       /**
        * Get the dim dns node.
@@ -262,6 +267,8 @@ namespace dqm4hep {
       RequestHandler *requestHandler(const std::string &name) const;
 
       CommandHandler *commandHandler(const std::string &name) const;
+      
+      void clientExitHandler();
 
     private:
       typedef std::map<std::string, Service *>         ServiceMap;
@@ -274,6 +281,7 @@ namespace dqm4hep {
       RequestHandlerMap                              m_requestHandlerMap;    ///< The map of registered request handlers
       CommandHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
       RequestHandler                                 m_serverInfoHandler;    ///< The built-in request handler for server info
+      Signal<int>                                    m_clientExitSignal;     ///< The signal emitted whenever a client exits
     };
 
     //-------------------------------------------------------------------------------------------------
