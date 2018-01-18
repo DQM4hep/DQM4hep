@@ -124,12 +124,12 @@ namespace dqm4hep {
       }
 
       template <typename T>
-      inline std::shared_ptr<BufferModelT<T>> createModel()
+      inline std::shared_ptr<BufferModelT<T>> createModel() const
       {
         return std::make_shared<BufferModelT<T>>();
       }
 
-      inline std::shared_ptr<BufferModel> createModel()
+      inline std::shared_ptr<BufferModel> createModel() const
       {
         return std::make_shared<BufferModel>();
       }
