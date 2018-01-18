@@ -143,6 +143,13 @@ namespace dqm4hep {
        * @return             [description]
        */
       unsigned int numberOfSubscriptions(const std::string &serviceName) const;
+      
+      /**
+       *  @brief  Tell the specified server to be notified when this client exits
+       *
+       *  @param  serverName the server name to inform
+       */
+      void notifyServerOnExit(const std::string &serverName);
 
     private:
       typedef std::map<std::string, ServiceHandler *>      ServiceHandlerMap;

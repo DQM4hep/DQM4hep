@@ -73,6 +73,13 @@ namespace dqm4hep {
     {
       return m_serviceHandlerMap.count(serviceName);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Client::notifyServerOnExit(const std::string &serverName)
+    {
+      DimClient::setExitHandler(serverName.c_str());
+    }
 
   }
 
