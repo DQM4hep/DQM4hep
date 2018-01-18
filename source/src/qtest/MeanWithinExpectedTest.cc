@@ -90,15 +90,15 @@ namespace dqm4hep {
 
     StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle)
     {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameterValue(xmlHandle,
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle,
           "ExpectedMean", m_expectedMean));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameterValue(xmlHandle,
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle,
           "MeanDeviationLower", m_meanDeviationLower, [this](const float &value){
             return value < this->m_expectedMean;
           }));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameterValue(xmlHandle,
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle,
           "MeanDeviationUpper", m_meanDeviationUpper, [this](const float &value){
             return value > this->m_expectedMean;
           }));
