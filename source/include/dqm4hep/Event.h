@@ -331,9 +331,12 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline EventBase<T>::EventBase(T *pEvent)
+    inline EventBase<T>::EventBase(T *pEvent) :
+      Event(),
+      m_isOwner(true),
+      m_pEvent(pEvent)
     {
-      this->setEvent(pEvent);
+      /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -341,7 +344,7 @@ namespace dqm4hep {
     template <typename T>
     inline EventBase<T>::~EventBase()
     {
-      /* nop */
+      this->clear();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -368,7 +371,7 @@ namespace dqm4hep {
     inline void EventBase<T>::clear()
     {
       Event::clear();
-
+      
       if(0 != m_pEvent && this->isOwner())
         delete m_pEvent;
 
