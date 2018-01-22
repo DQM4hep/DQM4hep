@@ -119,10 +119,10 @@ namespace dqm4hep {
       typedef  std::map<std::string, DoubleVector> DoubleVectorMap;
       typedef  std::map<std::string, StringVector> StringVectorMap;
 
-      mutable IntVectorMap                    m_intValues;
-      mutable FloatVectorMap                  m_floatValues;
-      mutable DoubleVectorMap                 m_doubleValues;
-      mutable StringVectorMap                 m_stringValues;
+      mutable IntVectorMap                    m_intValues = {};
+      mutable FloatVectorMap                  m_floatValues = {};
+      mutable DoubleVectorMap                 m_doubleValues = {};
+      mutable StringVectorMap                 m_stringValues = {};
 
       friend class GenericEventStreamer;
     };
