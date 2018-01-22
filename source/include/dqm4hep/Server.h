@@ -30,11 +30,11 @@
 #define SERVER_H
 
 // -- dqm4hep headers
-#include "dqm4hep/Service.h"
-#include "dqm4hep/RequestHandler.h"
+#include <dqm4hep/Service.h>
+#include <dqm4hep/RequestHandler.h>
 
 // -- dim headers
-#include "dis.hxx"
+#include <dis.hxx>
 
 namespace dqm4hep {
 
@@ -56,150 +56,158 @@ namespace dqm4hep {
     {
     public:
       /**
-       * Constructor
+       *  @brief  Constructor
        *
-       * @param name the server name
+       *  @param  name the server name
        */
       Server(const std::string &name);
 
       /**
-       * Destructor
+       *  @brief  Destructor
        */
       ~Server();
 
       /**
-       * Get the server name
+       *  @brief  Get the server name
        */
       const std::string &name() const;
 
       /**
-       * Start serving services and handling requests
+       * @brief  Start serving services and handling requests
        */
       void start();
 
       /**
-       * Stop serving services and handling requests
+       *  @brief  Stop serving services and handling requests
        */
       void stop();
 
       /**
-       * Whether the server is running
+       *  @brief  Whether the server is running
        */
       bool isRunning() const;
 
       /**
-       * Close all service and request handlers.
-       * Called from destructor
+       *  @brief  Close all service and request handlers.
+       *          Called from destructor
        */
       void clear();
 
       /**
-       * Create a new service.
-       * @param name the service name
+       *  @brief  Create a new service.
+       *  
+       *  @param  name the service name
        */
       Service *createService(const std::string &name);
 
       /**
-       * Create a new request handler
+       *  @brief  Create a new request handler
        *
-       * @param name the request handler name
-       * @param pController the class instance that will handle the request
-       * @param function the class method that will treat the request and provide a response
+       *  @param  name the request handler name
+       *  @param  pController the class instance that will handle the request
+       *  @param  function the class method that will treat the request and provide a response
        */
       template <typename Controller >
       void createRequestHandler(const std::string &name,
           Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response));
 
       /**
-       * Create a new command handler
+       *  @brief  Create a new command handler
        *
-       * @param name the command handler name
-       * @param pController the class instance that will handle the command
-       * @param function the class method that will treat the command
+       *  @param  name the command handler name
+       *  @param  pController the class instance that will handle the command
+       *  @param  function the class method that will treat the command
        */
       template <typename Controller>
       void createCommandHandler(const std::string &name,
           Controller *pController, void (Controller::*function)(const Buffer &command));
 
       /**
-       * Whether the target service is registered in this server
+       *  @brief  Whether the target service is registered in this server
        *
-       * @param name the service name
+       *  @param  name the service name
        */
       bool isServiceRegistered(const std::string &name) const;
 
       /**
-       * Whether the request handler is registered in this server
+       *  @brief  Whether the request handler is registered in this server
        *
-       * @param type the request handler type
-       * @param name the request handler name
+       *  @param  name the request handler name
        */
       bool isRequestHandlerRegistered(const std::string &name) const;
 
       /**
-       * Whether the command handler is registered in this server
+       *  @brief  Whether the command handler is registered in this server
        *
-       * @param type the command handler type
-       * @param name the command handler name
+       *  @param  name the command handler name
        */
       bool isCommandHandlerRegistered(const std::string &name) const;
 
       /**
-       * Start a target service
+       *  @brief  Start a target service
        *
-       * @param name the service name
+       *  @param  name the service name
        */
       void startService(const std::string &name);
 
       /**
-       * Stop a target service
+       *  @brief  Stop a target service
        *
-       * @param name the service name
+       *  @param  name the service name
        */
       void stopService(const std::string &name);
 
       /**
-       * Start a target request handler
+       *  @brief  Start a target request handler
        *
-       * @param type the request handler type
-       * @param name the request handler name
+       *  @param  name the request handler name
        */
       void startRequestHandler(const std::string &name);
 
       /**
-       * Stop a target request handler
+       * @brief  Stop a target request handler
        *
-       * @param type the request handler type
-       * @param name the request handler name
+       *  @param  name the request handler name
        */
       void stopRequestHandler(const std::string &name);
 
       /**
-       * Start a target request handler
+       *  @brief  Start a target request handler
        *
-       * @param type the command type
-       * @param name the command name
+       *  @param name the command name
        */
       void startCommandHandler(const std::string &name);
 
       /**
-       * Stop a target command handler
+       *  @brief  Stop a target command handler
        *
-       * @param type the command handler type
-       * @param name the command handler name
+       *  @param  name the command handler name
        */
       void stopCommandHandler(const std::string &name);
 
+      /**
+       *  @brief  Stop a specific command handler
+       *
+       *  @param  name the command handler name
+       *  @param  pController the command handler controller
+       */
       template <typename Controller>
       void stopCommandHandler(const std::string &name, Controller *pController);
 
+      /**
+       *  @brief  Stop a specific command handler
+       *
+       *  @param  name the command handler name
+       *  @param  pController the command handler controller
+       *  @param  function the command handler function
+       */
       template <typename Controller>
       void stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command));
 
       /**
-       * Get a created service in this server
+       *  @brief  Get a created service in this server
        *
-       * @param name the service name
+       *  @param  name the service name
        */
       Service *service(const std::string &name) const;
       
@@ -207,73 +215,108 @@ namespace dqm4hep {
        *  @brief  Get the signal processed on client exit 
        */
       Signal<int> &onClientExit();
+      
+      /**
+       *  @brief  Get the client id. To be used inside callbacks
+       */
+      int clientId() const;
+      
+      /**
+       *  @brief  Create a new timer
+       *
+       *  @param  controller the object receiving the callback on timer timeout
+       *  @param  function the object method to callback on timer timeout
+       *  @param  nSeconds the number of seconds to wait before timeout
+       *  @param  singleShot whether the timer is single shot or repetitve
+       */
+      template <typename Controller>
+      void createTimer(Controller *controller, void (Controller::*function)(), int nSeconds, bool singleShot = true);
 
       /**
-       * Get the dim dns node.
-       *  First look at DimServer::getDnsNode() then
-       *  environment variable "DIM_DNS_NODE"
+      *  @brief  Get the dim dns node.
+       *         First look at DimServer::getDnsNode() then
+       *         environment variable "DIM_DNS_NODE"
        */
       static std::string dnsNode();
 
       /**
-       * Get the dim dns port
+       *  @brief  Get the dim dns port
        */
       static int dnsPort();
 
       /**
-       * Get the list of running servers
+       *  @brief  Get the list of running servers
        */
       static std::vector<std::string> runningServers();
 
       /**
-       * Whether the target server is already running on the network
+       *  @brief  Whether the target server is already running on the network
        *
-       * @param serverName the 'short' server name
+       *  @param  serverName the 'short' server name
        */
       static bool isServerRunning(const std::string &serverName);
 
       /**
-       * Whether the service is already running on the network
+       *  @brief  Whether the service is already running on the network
        *
-       * @param name the service name
+       *  @param  name the service name
        */
       static bool serviceAlreadyRunning(const std::string &name);
 
       /**
-       * Whether the request handler is already running on the network
+       *  @brief  Whether the request handler is already running on the network
        *
-       * @param type the request handler type
-       * @param name the request handler name
+       *  @param  name the request handler name
        */
       static bool requestHandlerAlreadyRunning(const std::string &name);
 
       /**
-       * Whether the command handler is already running on the network
+       *  @brief  Whether the command handler is already running on the network
        *
-       * @param type the command handler type
-       * @param name the command handler name
+       *  @param  name the command handler name
        */
       static bool commandHandlerAlreadyRunning(const std::string &name);
 
     private:
-      /**
-       * Callback function to treat the server info request
-       *
-       * @param request the request
-       * @param response the response to receive
-       */
+
       void handleServerInfoRequest(const Buffer &, Buffer &response);
-
       RequestHandler *requestHandler(const std::string &name) const;
-
       CommandHandler *commandHandler(const std::string &name) const;
-      
       void clientExitHandler();
+        
+      /**
+       *  @brief  Timer class
+       */
+      class Timer : private DimTimer, public std::enable_shared_from_this<Timer>
+      {
+      public:
+        Timer(Server *server);
+        ~Timer() {}
+        void setPeriod(int nSeconds);
+        int period() const;
+        void startTimer();
+        void stopTimer();
+        void setSingleShot(bool single);
+        bool singleShot() const;
+        Signal<void> &onTimeout();
+      
+      private:
+        void timerHandler();
+      private:
+        Signal<void>        m_timeoutSignal;
+        bool                m_singleShot = true;
+        Server             *m_pServer = nullptr;
+        int                 m_period = 10;
+      };
+      
+      void removeTimer(std::shared_ptr<Timer> timer);
 
     private:
+      friend class Timer;
       typedef std::map<std::string, Service *>         ServiceMap;
       typedef std::map<std::string, RequestHandler *>  RequestHandlerMap;
       typedef std::map<std::string, CommandHandler *>  CommandHandlerMap;
+      typedef std::vector<std::shared_ptr<Timer>>      TimerPtrVector;
 
       std::string                                    m_name;                 ///< The short server name
       bool                                           m_started;              ///< Whether the server has been started
@@ -282,6 +325,7 @@ namespace dqm4hep {
       CommandHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
       RequestHandler                                 m_serverInfoHandler;    ///< The built-in request handler for server info
       Signal<int>                                    m_clientExitSignal;     ///< The signal emitted whenever a client exits
+      TimerPtrVector                                 m_timers;               ///< The list of timers
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -381,6 +425,21 @@ namespace dqm4hep {
         if(!findIter->second->onCommand().hasConnection())
           m_commandHandlerMap.erase(findIter);
       }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename Controller>
+    inline void Server::createTimer(Controller *controller, void (Controller::*function)(), int nSeconds, bool singleShot)
+    {
+      auto timer = std::make_shared<Timer>(this);
+      timer->onTimeout().connect(controller, function);
+      timer->setSingleShot(singleShot);
+      timer->setPeriod(nSeconds);
+      m_timers.push_back(timer);
+      
+      if(this->isRunning())
+        timer->startTimer();
     }
 
   }

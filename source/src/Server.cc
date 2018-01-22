@@ -26,12 +26,14 @@
  */
 
 // -- dqm4hep headers
-#include "dqm4hep/Server.h"
+#include <dqm4hep/Server.h>
 
 // -- std headers
 #include <sys/utsname.h>
 #include <unistd.h>
-#include "dic.hxx"
+
+// -- dim headers
+#include <dic.hxx>
 
 namespace dqm4hep {
 
@@ -42,7 +44,7 @@ namespace dqm4hep {
         m_started(false),
         m_serverInfoHandler(this, "/" + m_name + "/info", this, &Server::handleServerInfoRequest)
     {
-      /* nop */
+      DimServer::addClientExitHandler(this);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -89,6 +91,10 @@ namespace dqm4hep {
         m_serverInfoHandler.startHandlingRequest();
 
       DimServer::start(const_cast<char*>(m_name.c_str()));
+      
+      for(auto timer : m_timers)
+        timer->startTimer();
+      
       m_started = true;
     }
 
@@ -119,6 +125,11 @@ namespace dqm4hep {
 
       if(m_serverInfoHandler.isHandlingRequest())
         m_serverInfoHandler.stopHandlingRequest();
+        
+      for(auto timer : m_timers)
+        timer->stopTimer();
+      
+      m_timers.clear();
 
       DimServer::stop();
       m_started = false;
@@ -293,6 +304,13 @@ namespace dqm4hep {
     Signal<int> &Server::onClientExit()
     {
       return m_clientExitSignal;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    int Server::clientId() const
+    {
+      return DimServer::getClientId();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -509,9 +527,95 @@ namespace dqm4hep {
     void Server::clientExitHandler()
     {
       int clientID(DimServer::getClientId());
+      std::cout << "Client " << clientID << " exits" << std::endl;
       m_clientExitSignal.process(clientID);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::removeTimer(std::shared_ptr<Timer> timer)
+    {
+      auto findIter = std::find(m_timers.begin(), m_timers.end(), timer);
+      
+      if(m_timers.end() != findIter)
+        m_timers.erase(findIter);
+    }
 
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    Server::Timer::Timer(Server *server) :
+      DimTimer(),
+      m_pServer(server)
+    {
+      /* nop */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::Timer::setPeriod(int nSeconds)
+    {
+      m_period = nSeconds;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    int Server::Timer::period() const
+    {
+      return m_period;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::Timer::startTimer()
+    {
+      DimTimer::start(m_period);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::Timer::stopTimer()
+    {
+      DimTimer::stop();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::Timer::setSingleShot(bool single)
+    {
+      m_singleShot = single;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    bool Server::Timer::singleShot() const
+    {
+      return m_singleShot;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    Signal<void> &Server::Timer::onTimeout()
+    {
+      return m_timeoutSignal;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Server::Timer::timerHandler()
+    {
+      m_timeoutSignal.process();
+      
+      if(!this->singleShot())
+      {
+        this->startTimer();
+      }  
+      else
+      {
+        m_pServer->removeTimer(this->shared_from_this());
+      }
+    }
+    
   }
 
 }
