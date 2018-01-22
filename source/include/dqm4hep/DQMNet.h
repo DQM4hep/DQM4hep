@@ -168,9 +168,13 @@ namespace dqm4hep {
       {
         return m_model;
       }
+      
+      Buffer(Buffer&& buffer)
+      {
+        m_model = std::move(buffer.m_model);
+      }
 
       Buffer(const Buffer&) = delete;
-      Buffer(Buffer&&) = delete;
       Buffer &operator=(const Buffer&) = delete;
       Buffer &&operator=(Buffer &&) = delete;
 
