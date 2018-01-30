@@ -103,26 +103,15 @@ namespace dqm4hep {
       StatusCode getValues(const std::string &key, T &vals) const;
 
     private:
-      /** Workhorse of GenericEvent::setValues(key, vals)
-       */
-      template <typename T>
-      StatusCode setValuesPrivate(const std::string &key, std::map<std::string, T > &valuesMap, const T &vals);
-
-      /** Workhorse of GenericEvent::getValues(key, vals)
-       */
-      template <typename T>
-      StatusCode getValuesPrivate(const std::string &key, std::map<std::string, T > &valuesMap, T &vals) const;
-
-    private:
       typedef  std::map<std::string, IntVector> IntVectorMap;
       typedef  std::map<std::string, FloatVector> FloatVectorMap;
       typedef  std::map<std::string, DoubleVector> DoubleVectorMap;
       typedef  std::map<std::string, StringVector> StringVectorMap;
 
-      mutable IntVectorMap                    m_intValues = {};
-      mutable FloatVectorMap                  m_floatValues = {};
-      mutable DoubleVectorMap                 m_doubleValues = {};
-      mutable StringVectorMap                 m_stringValues = {};
+      IntVectorMap                    m_intValues = {};
+      FloatVectorMap                  m_floatValues = {};
+      DoubleVectorMap                 m_doubleValues = {};
+      StringVectorMap                 m_stringValues = {};
 
       friend class GenericEventStreamer;
     };
@@ -157,41 +146,6 @@ namespace dqm4hep {
        */
       StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice);
     };
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    StatusCode GenericEvent::setValues(const std::string &key, const T &vals)
-    {
-      return STATUS_CODE_FAILURE;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    StatusCode GenericEvent::getValues(const std::string &key, T &vals) const
-    {
-      return STATUS_CODE_FAILURE;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline StatusCode GenericEvent::setValuesPrivate(const std::string &key, std::map<std::string, T > &valuesMap, const T &vals)
-    {
-      valuesMap[ key ] = vals;
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename T>
-    inline StatusCode GenericEvent::getValuesPrivate(const std::string &key, std::map<std::string, T > &valuesMap, T &vals) const
-    {
-      vals = valuesMap[ key ];
-      return STATUS_CODE_SUCCESS;
-    }
 
   }
 
