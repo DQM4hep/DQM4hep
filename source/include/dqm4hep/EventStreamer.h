@@ -50,7 +50,7 @@ namespace dqm4hep {
     public:
       /** Destructor
        */
-      virtual ~EventStreamer() {}
+      virtual ~EventStreamer() = default;
 
       /** Factory method to create the corresponding event to this streamer.
        *  The event is expected to contains an allocated wrapped event

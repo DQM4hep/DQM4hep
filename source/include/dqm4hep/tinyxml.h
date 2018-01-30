@@ -135,7 +135,7 @@ namespace dqm4hep {
     class TiXmlVisitor
     {
     public:
-      virtual ~TiXmlVisitor() {}
+      virtual ~TiXmlVisitor() = default;
 
       /// Visit a document.
       virtual bool VisitEnter( const TiXmlDocument& /*doc*/ )			{ return true; }
@@ -206,7 +206,7 @@ namespace dqm4hep {
 
     public:
       TiXmlBase()	:	userData(0)		{}
-      virtual ~TiXmlBase()			{}
+      virtual ~TiXmlBase()			= default;
 
       /**	All TinyXml classes can print themselves to a filestream
 		or the string class (TiXmlString in non-STL mode, std::string
@@ -1171,7 +1171,7 @@ namespace dqm4hep {
       TiXmlComment( const TiXmlComment& );
       void operator=( const TiXmlComment& base );
 
-      virtual ~TiXmlComment()	{}
+      virtual ~TiXmlComment()	= default;
 
       /// Returns a copy of this Comment.
       virtual TiXmlNode* Clone() const;
@@ -1222,7 +1222,7 @@ namespace dqm4hep {
         SetValue( initValue );
         cdata = false;
     }
-      virtual ~TiXmlText() {}
+      virtual ~TiXmlText() = default;
 
 #ifdef TIXML_USE_STL
       /// Constructor.
@@ -1303,7 +1303,7 @@ namespace dqm4hep {
       TiXmlDeclaration( const TiXmlDeclaration& copy );
       void operator=( const TiXmlDeclaration& copy );
 
-      virtual ~TiXmlDeclaration()	{}
+      virtual ~TiXmlDeclaration()	= default;
 
       /// Version. Will return an empty string if none was found.
       const char *Version() const			{ return version.c_str (); }
@@ -1355,7 +1355,7 @@ namespace dqm4hep {
     {
     public:
       TiXmlUnknown() : TiXmlNode( TiXmlNode::TINYXML_UNKNOWN )	{}
-      virtual ~TiXmlUnknown() {}
+      virtual ~TiXmlUnknown() = default;
 
       TiXmlUnknown( const TiXmlUnknown& copy ) : TiXmlNode( TiXmlNode::TINYXML_UNKNOWN )		{ copy.CopyTo( this ); }
       void operator=( const TiXmlUnknown& copy )										{ copy.CopyTo( this ); }
@@ -1406,7 +1406,7 @@ namespace dqm4hep {
       TiXmlDocument( const TiXmlDocument& copy );
       void operator=( const TiXmlDocument& copy );
 
-      virtual ~TiXmlDocument() {}
+      virtual ~TiXmlDocument() = default;
 
       /** Load a file using the current document value.
 		Returns true if successful. Will delete any existing

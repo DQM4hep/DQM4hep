@@ -54,7 +54,7 @@ namespace dqm4hep {
       };
 
       MeanWithinExpectedTest(const std::string &name);
-      ~MeanWithinExpectedTest() {}
+      ~MeanWithinExpectedTest() = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle);
       StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report);
 

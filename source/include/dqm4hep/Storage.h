@@ -99,8 +99,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline Storage<T>::~Storage()
-    {
-    }
+    = default;
 
     //-------------------------------------------------------------------------------------------------
 
