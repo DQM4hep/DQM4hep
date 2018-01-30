@@ -37,7 +37,7 @@ namespace dqm4hep {
   namespace core {
 
     DBInterface::DBInterface() :
-        m_pMySQL(NULL),
+        m_pMySQL(nullptr),
         m_isConnected(false)
     {
 
@@ -46,7 +46,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     DBInterface::DBInterface(const std::string &host, const std::string &user, const std::string &password, const std::string &database) :
-		    m_pMySQL(NULL),
+		    m_pMySQL(nullptr),
 		    m_isConnected(false)
     {
       this->set(host, user, password, database);
@@ -71,7 +71,7 @@ namespace dqm4hep {
       try
       {
         // create mysql instance
-        m_pMySQL = mysql_init(NULL);
+        m_pMySQL = mysql_init(nullptr);
 
         if(!m_pMySQL)
         {
@@ -80,8 +80,8 @@ namespace dqm4hep {
         }
 
         // create connection to database
-        if(NULL == mysql_real_connect(m_pMySQL, m_host.c_str(), m_user.c_str(), m_password.empty() ? NULL : m_password.c_str(),
-            NULL, 0, NULL, 0))
+        if(nullptr == mysql_real_connect(m_pMySQL, m_host.c_str(), m_user.c_str(), m_password.empty() ? nullptr : m_password.c_str(),
+            nullptr, 0, nullptr, 0))
         {
           dqm_error( "Couldn't initialize mysql connection : {0}", mysql_error(m_pMySQL) );
           throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -183,7 +183,7 @@ namespace dqm4hep {
 
     StatusCode DBInterface::queryRaw(const std::string &query, void *&pResult)
     {
-      pResult = NULL;
+      pResult = nullptr;
 
       if(!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
@@ -208,7 +208,7 @@ namespace dqm4hep {
 
       mysql_free_result(pMySQLResult);
 
-      if(NULL == pResult)
+      if(nullptr == pResult)
         return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;

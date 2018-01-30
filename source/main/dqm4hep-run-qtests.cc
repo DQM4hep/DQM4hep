@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
 
   Json::Value jsonRoot;
   Json::Value jsonMetadata; Json::Value jsonHostInfo; Json::Value jsonQReports(Json::arrayValue);
-  std::string date; timeToHMS(time(0), date);
+  std::string date; timeToHMS(time(nullptr), date);
   StringMap hostInfos; fillHostInfo(hostInfos);
   for(auto iter : hostInfos) jsonHostInfo[iter.first] = iter.second;
 

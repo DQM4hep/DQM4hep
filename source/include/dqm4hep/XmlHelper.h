@@ -158,7 +158,7 @@ namespace dqm4hep {
     {
       const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
-      if (NULL == pXmlElement)
+      if (nullptr == pXmlElement)
         return STATUS_CODE_NOT_FOUND;
 
       if (!dqm4hep::core::stringToType(pXmlElement->GetText(), t))
@@ -174,7 +174,7 @@ namespace dqm4hep {
     {
       const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
-      if (NULL == pXmlElement)
+      if (nullptr == pXmlElement)
         return STATUS_CODE_NOT_FOUND;
 
       const std::string xmlElementString = pXmlElement->GetText();
@@ -202,7 +202,7 @@ namespace dqm4hep {
     {
       const TiXmlElement *const pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
-      if (NULL == pXmlElement)
+      if (nullptr == pXmlElement)
         return STATUS_CODE_NOT_FOUND;
 
       StringVector tokens;
@@ -229,15 +229,15 @@ namespace dqm4hep {
     {
       TiXmlElement *pXmlElement = xmlHandle.FirstChild(xmlElementName).Element();
 
-      if (NULL == pXmlElement)
+      if (nullptr == pXmlElement)
         return STATUS_CODE_NOT_FOUND;
 
       TiXmlElement *pXmlRowElement = TiXmlHandle(pXmlElement).FirstChild(rowName).Element();
 
-      if (NULL == pXmlRowElement)
+      if (nullptr == pXmlRowElement)
         return STATUS_CODE_NOT_FOUND;
 
-      for ( ; NULL != pXmlRowElement; pXmlRowElement = pXmlRowElement->NextSiblingElement(rowName))
+      for ( ; nullptr != pXmlRowElement; pXmlRowElement = pXmlRowElement->NextSiblingElement(rowName))
       {
         std::vector<T> rowVector;
 
@@ -265,12 +265,12 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode XmlHelper::getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, T &attributeValue)
     {
-      if(NULL == pXmlElement)
+      if(nullptr == pXmlElement)
         return STATUS_CODE_INVALID_PTR;
 
       const char *pAttributePtr(pXmlElement->Attribute(attributeName.c_str()));
 
-      if(NULL == pAttributePtr)
+      if(nullptr == pAttributePtr)
         return STATUS_CODE_NOT_FOUND;
 
       std::string attributeStr(pAttributePtr);
@@ -299,12 +299,12 @@ namespace dqm4hep {
     template <>
     inline StatusCode XmlHelper::getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName, std::string &attributeValue)
     {
-      if(NULL == pXmlElement)
+      if(nullptr == pXmlElement)
         return STATUS_CODE_INVALID_PTR;
 
       const char *pAttributePtr(pXmlElement->Attribute(attributeName.c_str()));
 
-      if(NULL == pAttributePtr)
+      if(nullptr == pAttributePtr)
         return STATUS_CODE_NOT_FOUND;
 
       attributeValue = pAttributePtr;
@@ -317,7 +317,7 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode XmlHelper::readParameter(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t)
     {
-      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("parameter").Element(); NULL != pXmlElement;
+      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("parameter").Element(); nullptr != pXmlElement;
           pXmlElement = pXmlElement->NextSiblingElement("parameter"))
       {
         std::string name;
@@ -358,7 +358,7 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode XmlHelper::readParameters(const TiXmlHandle &xmlHandle, const std::string &parameterName, std::vector<T> &vector)
     {
-      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("parameter").Element(); NULL != pXmlElement;
+      for (TiXmlElement *pXmlElement = xmlHandle.FirstChild("parameter").Element(); nullptr != pXmlElement;
           pXmlElement = pXmlElement->NextSiblingElement("parameter"))
       {
         std::string name;

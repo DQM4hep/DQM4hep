@@ -60,7 +60,7 @@ using namespace dqm4hep::core;
 void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirectory, const Path &currentPath, TiXmlElement *pParentElement)
 {
   TIter iter(pDirectory->GetListOfKeys());
-  TKey *pTKey(0);
+  TKey *pTKey(nullptr);
 
   while( (pTKey = (TKey*) iter()) )
   {

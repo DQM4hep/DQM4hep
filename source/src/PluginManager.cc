@@ -61,7 +61,7 @@ namespace dqm4hep {
       // get the environment plug-in dll variable
       char *pPluginDllEnv = getenv( "DQM4HEP_PLUGIN_DLL" );
 
-      if( pPluginDllEnv == 0 )
+      if( pPluginDllEnv == nullptr )
       {
         dqm_debug( "Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
             "Set it before loading shared libraries. \n"
@@ -102,9 +102,9 @@ namespace dqm4hep {
       // the library basename, i.e. /path/to/libBlah.so --> libBlah.so
       std::string libBaseName( libraryName.substr( idx + 1 ) );
 
-      char *real_path = realpath( libraryName.c_str(), NULL );
+      char *real_path = realpath( libraryName.c_str(), nullptr );
 
-      if( NULL != real_path )
+      if( nullptr != real_path )
       {
         dqm_info( "<!-- Loading shared library : {0} ({1})-->", real_path, libBaseName );
 
@@ -118,7 +118,7 @@ namespace dqm4hep {
 
       void *pLibPointer = dlopen( libraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL );
 
-      if( pLibPointer == 0 )
+      if( pLibPointer == nullptr )
       {
         dqm_error( "<!-- ERROR loading shared library : {0}\n    ->    {1} -->", libraryName, dlerror() );
         return STATUS_CODE_FAILURE;
@@ -132,7 +132,7 @@ namespace dqm4hep {
     const Plugin *PluginManager::getPlugin( const std::string &pluginName ) const
     {
       if( ! isPluginRegistered( pluginName ) )
-        return 0;
+        return nullptr;
 
       return m_pluginMap.find( pluginName )->second;
     }
@@ -164,14 +164,14 @@ namespace dqm4hep {
     StatusCode PluginManager::registerPlugin( Plugin *pPlugin )
     {
       // null ptr case
-      if( NULL == pPlugin )
+      if( nullptr == pPlugin )
         return STATUS_CODE_INVALID_PTR;
 
       // check if the plug is already registered
       if( isPluginRegistered( pPlugin->pluginName() ) )
       {
         delete pPlugin;
-        pPlugin = NULL;
+        pPlugin = nullptr;
         return STATUS_CODE_ALREADY_PRESENT;
       }
 
@@ -179,7 +179,7 @@ namespace dqm4hep {
       if( ! m_pluginMap.insert( PluginMap::value_type( pPlugin->pluginName(), pPlugin ) ).second )
       {
         delete pPlugin;
-        pPlugin = NULL;
+        pPlugin = nullptr;
 
         return STATUS_CODE_FAILURE;
       }

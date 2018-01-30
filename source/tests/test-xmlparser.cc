@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
   assert_test(parseOkay);
 
   TiXmlElement *root = parser.document().RootElement();  
-  assert_test(root != 0);
+  assert_test(root != nullptr);
   
   std::string user = parser.constantAs<std::string>("user");
   assert_test(user == "superman");

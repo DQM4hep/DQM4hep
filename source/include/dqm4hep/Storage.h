@@ -207,7 +207,7 @@ namespace dqm4hep {
     template <typename T>
     inline bool Storage<T>::dirExists(const std::string &dirName) const
     {
-      DirectoryPtr directory = NULL;
+      DirectoryPtr directory = nullptr;
       return (this->find(dirName, directory) == STATUS_CODE_SUCCESS);
     }
 
@@ -240,7 +240,7 @@ namespace dqm4hep {
       if(dirName.empty())
         return STATUS_CODE_NOT_ALLOWED;
 
-      DirectoryPtr directory = NULL;
+      DirectoryPtr directory = nullptr;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
 
       if(directory == m_rootDirectory)
@@ -360,7 +360,7 @@ namespace dqm4hep {
     template <typename F>
     inline StatusCode Storage<T>::remove(const std::string &dirName, F function)
     {
-      DirectoryPtr directory = NULL;
+      DirectoryPtr directory = nullptr;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
       return directory->remove(function);
     }

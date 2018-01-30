@@ -192,7 +192,7 @@ namespace dqm4hep {
     {
       const GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
 
-      if(NULL == pGenericEvent)
+      if(nullptr == pGenericEvent)
         return STATUS_CODE_INVALID_PARAMETER;
 
       if( ! XDR_TESTBIT( event->writeBase(pDevice) , xdrstream::XDR_SUCCESS ) )

@@ -208,7 +208,7 @@ namespace dqm4hep {
       const EventBase<T> *const pEventBase(dynamic_cast<const EventBase<T> *const>(this));
 
       if(nullptr == pEventBase)
-        return 0;
+        return nullptr;
 
       return pEventBase->getEvent();
     }
@@ -372,7 +372,7 @@ namespace dqm4hep {
     {
       Event::clear();
       
-      if(0 != m_pEvent && this->isOwner())
+      if(nullptr != m_pEvent && this->isOwner())
         delete m_pEvent;
 
       m_pEvent = nullptr;

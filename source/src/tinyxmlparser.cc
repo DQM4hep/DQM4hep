@@ -319,7 +319,7 @@ namespace dqm4hep {
     {
       if ( !p || !*p )
       {
-        return 0;
+        return nullptr;
       }
       if ( encoding == TIXML_ENCODING_UTF8 )
       {
@@ -436,7 +436,7 @@ namespace dqm4hep {
         }
         return p;
       }
-      return 0;
+      return nullptr;
     }
 
     const char* TiXmlBase::GetEntity( const char* p, char* value, int* length, TiXmlEncoding encoding )
@@ -455,12 +455,12 @@ namespace dqm4hep {
         if ( *(p+2) == 'x' )
         {
           // Hexadecimal.
-          if ( !*(p+3) ) return 0;
+          if ( !*(p+3) ) return nullptr;
 
           const char* q = p+3;
           q = strchr( q, ';' );
 
-          if ( !q || !*q ) return 0;
+          if ( !q || !*q ) return nullptr;
 
           delta = q-p;
           --q;
@@ -474,7 +474,7 @@ namespace dqm4hep {
             else if ( *q >= 'A' && *q <= 'F' )
               ucs += mult * (*q - 'A' + 10 );
             else
-              return 0;
+              return nullptr;
             mult *= 16;
             --q;
           }
@@ -482,12 +482,12 @@ namespace dqm4hep {
         else
         {
           // Decimal.
-          if ( !*(p+2) ) return 0;
+          if ( !*(p+2) ) return nullptr;
 
           const char* q = p+2;
           q = strchr( q, ';' );
 
-          if ( !q || !*q ) return 0;
+          if ( !q || !*q ) return nullptr;
 
           delta = q-p;
           --q;
@@ -497,7 +497,7 @@ namespace dqm4hep {
             if ( *q >= '0' && *q <= '9' )
               ucs += mult * (*q - '0');
             else
-              return 0;
+              return nullptr;
             mult *= 10;
             --q;
           }
@@ -653,7 +653,7 @@ namespace dqm4hep {
 
       if ( !StreamTo( in, '<', tag ) )
       {
-        SetError( TIXML_ERROR_PARSING_EMPTY, 0, 0, TIXML_ENCODING_UNKNOWN );
+        SetError( TIXML_ERROR_PARSING_EMPTY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return;
       }
 
@@ -665,7 +665,7 @@ namespace dqm4hep {
           int c = in->get();
           if ( c <= 0 )
           {
-            SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+            SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
             break;
           }
           (*tag) += (char) c;
@@ -681,9 +681,9 @@ namespace dqm4hep {
           if ( node )
           {
             node->StreamIn( in, tag );
-            bool isElement = node->ToElement() != 0;
+            bool isElement = node->ToElement() != nullptr;
             delete node;
-            node = 0;
+            node = nullptr;
 
             // If this is the root element, we're done. Parsing will be
             // done by the >> operator.
@@ -694,13 +694,13 @@ namespace dqm4hep {
           }
           else
           {
-            SetError( TIXML_ERROR, 0, 0, TIXML_ENCODING_UNKNOWN );
+            SetError( TIXML_ERROR, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
             return;
           }
         }
       }
       // We should have returned sooner.
-      SetError( TIXML_ERROR, 0, 0, TIXML_ENCODING_UNKNOWN );
+      SetError( TIXML_ERROR, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
     }
 
 #endif
@@ -714,8 +714,8 @@ namespace dqm4hep {
       // here is skipping white space.
       if ( !p || !*p )
       {
-        SetError( TIXML_ERROR_DOCUMENT_EMPTY, 0, 0, TIXML_ENCODING_UNKNOWN );
-        return 0;
+        SetError( TIXML_ERROR_DOCUMENT_EMPTY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+        return nullptr;
       }
 
       // Note that, for a document, this needs to come
@@ -751,8 +751,8 @@ namespace dqm4hep {
       p = SkipWhiteSpace( p, encoding );
       if ( !p )
       {
-        SetError( TIXML_ERROR_DOCUMENT_EMPTY, 0, 0, TIXML_ENCODING_UNKNOWN );
-        return 0;
+        SetError( TIXML_ERROR_DOCUMENT_EMPTY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+        return nullptr;
       }
 
       while ( p && *p )
@@ -791,8 +791,8 @@ namespace dqm4hep {
 
       // Was this empty?
       if ( !firstChild ) {
-        SetError( TIXML_ERROR_DOCUMENT_EMPTY, 0, 0, encoding );
-        return 0;
+        SetError( TIXML_ERROR_DOCUMENT_EMPTY, nullptr, nullptr, encoding );
+        return nullptr;
       }
 
       // All is well.
@@ -821,19 +821,19 @@ namespace dqm4hep {
 
     TiXmlNode* TiXmlNode::Identify( const char* p, TiXmlEncoding encoding )
     {
-      TiXmlNode* returnNode = 0;
+      TiXmlNode* returnNode = nullptr;
 
       p = SkipWhiteSpace( p, encoding );
       if( !p || !*p || *p != '<' )
       {
-        return 0;
+        return nullptr;
       }
 
       p = SkipWhiteSpace( p, encoding );
 
       if ( !p || !*p )
       {
-        return 0;
+        return nullptr;
       }
 
       // What is this thing?
@@ -915,7 +915,7 @@ namespace dqm4hep {
         {
           TiXmlDocument* document = GetDocument();
           if ( document )
-            document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+            document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
           return;
         }
         (*tag) += (char) c ;
@@ -977,7 +977,7 @@ namespace dqm4hep {
             {
               TiXmlDocument* document = GetDocument();
               if ( document )
-                document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+                document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
               return;
             }
 
@@ -1017,7 +1017,7 @@ namespace dqm4hep {
             {
               TiXmlDocument* document = GetDocument();
               if ( document )
-                document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+                document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
               return;
             }
             assert( c == '>' );
@@ -1035,7 +1035,7 @@ namespace dqm4hep {
               return;
             node->StreamIn( in, tag );
             delete node;
-            node = 0;
+            node = nullptr;
 
             // No return: go around from the beginning: text, closing tag, or node.
           }
@@ -1051,8 +1051,8 @@ namespace dqm4hep {
 
       if ( !p || !*p )
       {
-        if ( document ) document->SetError( TIXML_ERROR_PARSING_ELEMENT, 0, 0, encoding );
-        return 0;
+        if ( document ) document->SetError( TIXML_ERROR_PARSING_ELEMENT, nullptr, nullptr, encoding );
+        return nullptr;
       }
 
       if ( data )
@@ -1064,7 +1064,7 @@ namespace dqm4hep {
       if ( *p != '<' )
       {
         if ( document ) document->SetError( TIXML_ERROR_PARSING_ELEMENT, p, data, encoding );
-        return 0;
+        return nullptr;
       }
 
       p = SkipWhiteSpace( p+1, encoding );
@@ -1076,7 +1076,7 @@ namespace dqm4hep {
       if ( !p || !*p )
       {
         if ( document )	document->SetError( TIXML_ERROR_FAILED_TO_READ_ELEMENT_NAME, pErr, data, encoding );
-        return 0;
+        return nullptr;
       }
 
       TIXML_STRING endTag ("</");
@@ -1091,7 +1091,7 @@ namespace dqm4hep {
         if ( !p || !*p )
         {
           if ( document ) document->SetError( TIXML_ERROR_READING_ATTRIBUTES, pErr, data, encoding );
-          return 0;
+          return nullptr;
         }
         if ( *p == '/' )
         {
@@ -1100,7 +1100,7 @@ namespace dqm4hep {
           if ( *p  != '>' )
           {
             if ( document ) document->SetError( TIXML_ERROR_PARSING_EMPTY, p, data, encoding );
-            return 0;
+            return nullptr;
           }
           return (p+1);
         }
@@ -1115,7 +1115,7 @@ namespace dqm4hep {
             // We were looking for the end tag, but found nothing.
             // Fix for [ 1663758 ] Failure to report error on bad XML
             if ( document ) document->SetError( TIXML_ERROR_READING_END_TAG, p, data, encoding );
-            return 0;
+            return nullptr;
           }
 
           // We should find the end tag now
@@ -1132,12 +1132,12 @@ namespace dqm4hep {
               return p;
             }
             if ( document ) document->SetError( TIXML_ERROR_READING_END_TAG, p, data, encoding );
-            return 0;
+            return nullptr;
           }
           else
           {
             if ( document ) document->SetError( TIXML_ERROR_READING_END_TAG, p, data, encoding );
-            return 0;
+            return nullptr;
           }
         }
         else
@@ -1146,7 +1146,7 @@ namespace dqm4hep {
           auto  attrib = new TiXmlAttribute();
           if ( !attrib )
           {
-            return 0;
+            return nullptr;
           }
 
           attrib->SetDocument( document );
@@ -1157,7 +1157,7 @@ namespace dqm4hep {
           {
             if ( document ) document->SetError( TIXML_ERROR_PARSING_ELEMENT, pErr, data, encoding );
             delete attrib;
-            return 0;
+            return nullptr;
           }
 
           // Handle the strange case of double attributes:
@@ -1170,7 +1170,7 @@ namespace dqm4hep {
           {
             if ( document ) document->SetError( TIXML_ERROR_PARSING_ELEMENT, pErr, data, encoding );
             delete attrib;
-            return 0;
+            return nullptr;
           }
 
           attributeSet.Add( attrib );
@@ -1197,7 +1197,7 @@ namespace dqm4hep {
 
           if ( !textNode )
           {
-            return 0;
+            return nullptr;
           }
 
           if ( TiXmlBase::IsWhiteSpaceCondensed() )
@@ -1235,7 +1235,7 @@ namespace dqm4hep {
             }
             else
             {
-              return 0;
+              return nullptr;
             }
           }
         }
@@ -1245,7 +1245,7 @@ namespace dqm4hep {
 
       if ( !p )
       {
-        if ( document ) document->SetError( TIXML_ERROR_READING_ELEMENT_VALUE, 0, 0, encoding );
+        if ( document ) document->SetError( TIXML_ERROR_READING_ELEMENT_VALUE, nullptr, nullptr, encoding );
       }
       return p;
     }
@@ -1261,7 +1261,7 @@ namespace dqm4hep {
         {
           TiXmlDocument* document = GetDocument();
           if ( document )
-            document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+            document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
           return;
         }
         (*tag) += (char) c;
@@ -1289,7 +1289,7 @@ namespace dqm4hep {
       if ( !p || !*p || *p != '<' )
       {
         if ( document ) document->SetError( TIXML_ERROR_PARSING_UNKNOWN, p, data, encoding );
-        return 0;
+        return nullptr;
       }
       ++p;
       value = "";
@@ -1302,7 +1302,7 @@ namespace dqm4hep {
 
       if ( !p )
       {
-        if ( document )	document->SetError( TIXML_ERROR_PARSING_UNKNOWN, 0, 0, encoding );
+        if ( document )	document->SetError( TIXML_ERROR_PARSING_UNKNOWN, nullptr, nullptr, encoding );
       }
       if ( *p == '>' )
         return p+1;
@@ -1319,7 +1319,7 @@ namespace dqm4hep {
         {
           TiXmlDocument* document = GetDocument();
           if ( document )
-            document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+            document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
           return;
         }
 
@@ -1355,7 +1355,7 @@ namespace dqm4hep {
       if ( !StringEqual( p, startTag, false, encoding ) )
       {
         document->SetError( TIXML_ERROR_PARSING_COMMENT, p, data, encoding );
-        return 0;
+        return nullptr;
       }
       p += strlen( startTag );
 
@@ -1394,7 +1394,7 @@ namespace dqm4hep {
     const char* TiXmlAttribute::Parse( const char* p, TiXmlParsingData* data, TiXmlEncoding encoding )
     {
       p = SkipWhiteSpace( p, encoding );
-      if ( !p || !*p ) return 0;
+      if ( !p || !*p ) return nullptr;
 
       if ( data )
       {
@@ -1407,13 +1407,13 @@ namespace dqm4hep {
       if ( !p || !*p )
       {
         if ( document ) document->SetError( TIXML_ERROR_READING_ATTRIBUTES, pErr, data, encoding );
-        return 0;
+        return nullptr;
       }
       p = SkipWhiteSpace( p, encoding );
       if ( !p || !*p || *p != '=' )
       {
         if ( document ) document->SetError( TIXML_ERROR_READING_ATTRIBUTES, p, data, encoding );
-        return 0;
+        return nullptr;
       }
 
       ++p;	// skip '='
@@ -1421,7 +1421,7 @@ namespace dqm4hep {
       if ( !p || !*p )
       {
         if ( document ) document->SetError( TIXML_ERROR_READING_ATTRIBUTES, p, data, encoding );
-        return 0;
+        return nullptr;
       }
 
       const char* end;
@@ -1455,7 +1455,7 @@ namespace dqm4hep {
             // We did not have an opening quote but seem to have a
             // closing one. Give up and throw an error.
             if ( document ) document->SetError( TIXML_ERROR_READING_ATTRIBUTES, p, data, encoding );
-            return 0;
+            return nullptr;
           }
           value += *p;
           ++p;
@@ -1478,7 +1478,7 @@ namespace dqm4hep {
         {
           TiXmlDocument* document = GetDocument();
           if ( document )
-            document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+            document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
           return;
         }
 
@@ -1517,7 +1517,7 @@ namespace dqm4hep {
         if ( !StringEqual( p, startTag, false, encoding ) )
         {
           document->SetError( TIXML_ERROR_PARSING_CDATA, p, data, encoding );
-          return 0;
+          return nullptr;
         }
         p += strlen( startTag );
 
@@ -1542,7 +1542,7 @@ namespace dqm4hep {
         p = ReadText( p, &value, ignoreWhite, end, false, encoding );
         if ( p )
           return p-1;	// don't truncate the '<'
-        return 0;
+        return nullptr;
       }
     }
 
@@ -1556,7 +1556,7 @@ namespace dqm4hep {
         {
           TiXmlDocument* document = GetDocument();
           if ( document )
-            document->SetError( TIXML_ERROR_EMBEDDED_NULL, 0, 0, TIXML_ENCODING_UNKNOWN );
+            document->SetError( TIXML_ERROR_EMBEDDED_NULL, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
           return;
         }
         (*tag) += (char) c;
@@ -1578,8 +1578,8 @@ namespace dqm4hep {
       TiXmlDocument* document = GetDocument();
       if ( !p || !*p || !StringEqual( p, "<?xml", true, _encoding ) )
       {
-        if ( document ) document->SetError( TIXML_ERROR_PARSING_DECLARATION, 0, 0, _encoding );
-        return 0;
+        if ( document ) document->SetError( TIXML_ERROR_PARSING_DECLARATION, nullptr, nullptr, _encoding );
+        return nullptr;
       }
       if ( data )
       {
@@ -1626,7 +1626,7 @@ namespace dqm4hep {
             ++p;
         }
       }
-      return 0;
+      return nullptr;
     }
 
     bool TiXmlText::Blank() const

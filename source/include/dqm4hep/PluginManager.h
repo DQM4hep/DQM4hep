@@ -138,7 +138,7 @@ namespace dqm4hep {
 
       Plugin *pClass = pPlugin->create();
 
-      if(NULL == pClass)
+      if(nullptr == pClass)
         return std::shared_ptr<T>();
 
       return std::shared_ptr<T>(dynamic_cast<T *>(pClass));

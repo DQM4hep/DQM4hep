@@ -345,7 +345,7 @@ namespace dqm4hep {
     template <typename T>
     TScalarObject<T>::TScalarObject(const T &scalar) :
     m_scalar(scalar),
-    m_pPaveText(0)
+    m_pPaveText(nullptr)
     {
 
     }
@@ -355,10 +355,10 @@ namespace dqm4hep {
     template <typename T>
     TScalarObject<T>::~TScalarObject()
     {
-      if(0 != m_pPaveText)
+      if(nullptr != m_pPaveText)
       {
         delete m_pPaveText;
-        m_pPaveText = 0;
+        m_pPaveText = nullptr;
       }
     }
 
@@ -367,7 +367,7 @@ namespace dqm4hep {
     template <typename T>
     void TScalarObject<T>::Clear(Option_t *option)
     {
-      if(0 != m_pPaveText)
+      if(nullptr != m_pPaveText)
         m_pPaveText->Clear(option);
 
       m_scalar = 0;
@@ -380,7 +380,7 @@ namespace dqm4hep {
     {
       std::string scalarStr = ToString();
 
-      if(0 == m_pPaveText)
+      if(nullptr == m_pPaveText)
       {
         m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
         m_pPaveText->SetFillColor(0);
@@ -426,7 +426,7 @@ namespace dqm4hep {
     void TScalarObject<T>::Init()
     {
       m_scalar = 0;
-      m_pPaveText = 0;
+      m_pPaveText = nullptr;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -436,7 +436,7 @@ namespace dqm4hep {
     template <>
     inline void TScalarObject<std::string>::Clear(Option_t *option)
     {
-      if(NULL != m_pPaveText)
+      if(nullptr != m_pPaveText)
         m_pPaveText->Clear(option);
 
       m_scalar.clear();
@@ -456,7 +456,7 @@ namespace dqm4hep {
     inline void TScalarObject<std::string>::Init()
     {
       m_scalar = "";
-      m_pPaveText = 0;
+      m_pPaveText = nullptr;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -467,7 +467,7 @@ namespace dqm4hep {
       StringVector lines;
       dqm4hep::core::tokenize( m_scalar , lines , "\n" );
 
-      if(0 == m_pPaveText)
+      if(nullptr == m_pPaveText)
       {
         m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
         m_pPaveText->SetFillColor(0);

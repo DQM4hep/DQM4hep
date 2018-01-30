@@ -44,7 +44,7 @@ namespace dqm4hep {
     Archiver::Archiver() :
         m_fileName(""),
         m_openingMode(""),
-        m_pArchiveFile(NULL),
+        m_pArchiveFile(nullptr),
         m_isOpened(false)
     {
       /* nop */
@@ -113,7 +113,7 @@ namespace dqm4hep {
 
       m_pArchiveFile = new TFile(m_fileName.c_str(), openingMode.c_str());
 
-      if(NULL == m_pArchiveFile)
+      if(nullptr == m_pArchiveFile)
       {
         dqm_error( "Couldn't open archive '{0}' !", m_fileName );
         return STATUS_CODE_FAILURE;
@@ -134,7 +134,7 @@ namespace dqm4hep {
       m_pArchiveFile->Close();
       delete m_pArchiveFile;
 
-      m_pArchiveFile = NULL;
+      m_pArchiveFile = nullptr;
 
       m_isOpened = false;
       m_openingMode = "";
