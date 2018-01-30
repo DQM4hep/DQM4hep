@@ -250,7 +250,7 @@ namespace dqm4hep {
     template <typename T>
     inline void Run::getParameter(const std::string &key, T &value) const
     {
-      std::map<std::string, std::string>::const_iterator findIter = m_parametersMap.find(key);
+      auto findIter = m_parametersMap.find(key);
 
       if(m_parametersMap.end() == findIter)
         return;
@@ -271,7 +271,7 @@ namespace dqm4hep {
     template <>
     inline void Run::getParameter(const std::string &key, std::string &value) const
     {
-      std::map<std::string, std::string>::const_iterator findIter = m_parametersMap.find(key);
+      auto findIter = m_parametersMap.find(key);
 
       if(m_parametersMap.end() == findIter)
         return;

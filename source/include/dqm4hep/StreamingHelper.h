@@ -141,7 +141,7 @@ namespace dqm4hep {
       uint32_t nWrite = stlContainer.size();
       XDR_STREAM( pDevice->write( & nWrite ) )
 
-      for( typename T::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
+      for( auto iter = stlContainer.begin(), endIter = stlContainer.end() ;
           endIter != iter ; ++iter)
         XDR_STREAM( pDevice->write( & ( *iter ) ) )
 
@@ -178,7 +178,7 @@ namespace dqm4hep {
       uint32_t nWrite = stlContainer.size();
       XDR_STREAM( pDevice->write( & nWrite ) )
 
-      for( typename std::map<KeyType, ValueType>::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
+      for( auto iter = stlContainer.begin(), endIter = stlContainer.end() ;
           endIter != iter ; ++iter)
       {
         XDR_STREAM( pDevice->write( & ( iter->first ) ) )
@@ -218,7 +218,7 @@ namespace dqm4hep {
       uint32_t nWrite = stlContainer.size();
       XDR_STREAM( pDevice->write( & nWrite ) )
 
-      for( typename std::map<KeyType, std::vector<VectorType> >::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
+      for( auto iter = stlContainer.begin(), endIter = stlContainer.end() ;
           endIter != iter ; ++iter)
       {
         XDR_STREAM( pDevice->write( & ( iter->first ) ) )
@@ -278,7 +278,7 @@ namespace dqm4hep {
 
       for( uint32_t i= 0 ; i<nRead ; i++ )
       {
-        T *pObject = new T();
+        auto pObject = new T();
         XDR_STREAM( pObject->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
         stlContainer.insert( stlContainer.end() , pObject );
       }
@@ -314,7 +314,7 @@ namespace dqm4hep {
         KeyType key;
         XDR_STREAM( pDevice->read( & key ) )
 
-        ValueType *pObject = new ValueType();
+        auto pObject = new ValueType();
         XDR_STREAM( pObject->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
 
         typename std::map<KeyType, ValueType>::value_type value( key , pObject );
@@ -355,7 +355,7 @@ namespace dqm4hep {
         KeyType key;
         XDR_STREAM( pDevice->read( & key ) )
 
-        ValueType *pObject = new ValueType();
+        auto pObject = new ValueType();
         XDR_STREAM( pObject->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
 
         typename std::multimap<KeyType, ValueType>::value_type value( key , pObject );

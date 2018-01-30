@@ -867,7 +867,7 @@ namespace dqm4hep {
 #ifdef DEBUG_PARSER
         TIXML_LOG( "XML parsing CDATA\n" );
 #endif
-        TiXmlText* text = new TiXmlText( "" );
+        auto  text = new TiXmlText( "" );
         text->SetCDATA( true );
         returnNode = text;
       }
@@ -1143,7 +1143,7 @@ namespace dqm4hep {
         else
         {
           // Try to read an attribute:
-          TiXmlAttribute* attrib = new TiXmlAttribute();
+          auto  attrib = new TiXmlAttribute();
           if ( !attrib )
           {
             return 0;
@@ -1193,7 +1193,7 @@ namespace dqm4hep {
         if ( *p != '<' )
         {
           // Take what we have, make a text element.
-          TiXmlText* textNode = new TiXmlText( "" );
+          auto  textNode = new TiXmlText( "" );
 
           if ( !textNode )
           {

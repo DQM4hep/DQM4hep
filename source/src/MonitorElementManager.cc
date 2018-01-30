@@ -390,12 +390,12 @@ namespace dqm4hep {
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
 
-      QualityTestMap::iterator findIter = m_qualityTestMap.find(name);
+      auto findIter = m_qualityTestMap.find(name);
 
       if(m_qualityTestMap.end() != findIter)
         return STATUS_CODE_ALREADY_PRESENT;
 
-      QualityTestFactoryMap::iterator findFactoryIter = m_qualityTestFactoryMap.find(type);
+      auto findFactoryIter = m_qualityTestFactoryMap.find(type);
 
       if(m_qualityTestFactoryMap.end() == findFactoryIter)
         return STATUS_CODE_NOT_FOUND;
@@ -416,7 +416,7 @@ namespace dqm4hep {
 
     StatusCode MonitorElementManager::addQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName)
     {
-      QualityTestMap::iterator findIter = m_qualityTestMap.find(qualityTestName);
+      auto findIter = m_qualityTestMap.find(qualityTestName);
 
       if(m_qualityTestMap.end() == findIter)
         return STATUS_CODE_NOT_FOUND;

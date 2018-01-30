@@ -126,17 +126,17 @@ int main(int argc, char* argv[])
     std::string outputFile(xmlOutputFileArg.getValue());      
     TiXmlDocument document;
     
-    TiXmlDeclaration *decl = new TiXmlDeclaration( "1.0", "", "" );
+    auto decl = new TiXmlDeclaration( "1.0", "", "" );
     document.LinkEndChild( decl );
     
-    TiXmlElement *root = new TiXmlElement("dqm4hep");
+    auto root = new TiXmlElement("dqm4hep");
     document.LinkEndChild( root );
     
     // database info
-    TiXmlElement *databases = new TiXmlElement("databases");
+    auto databases = new TiXmlElement("databases");
     root->LinkEndChild( databases );
     
-    TiXmlElement *db = new TiXmlElement("db");
+    auto db = new TiXmlElement("db");
     db->SetAttribute("id", "mydb");
     db->SetAttribute("host", dbHostArg.getValue());
     db->SetAttribute("user", "DQM4HEP");
@@ -144,14 +144,14 @@ int main(int argc, char* argv[])
     databases->LinkEndChild( db );
 
     // parameters
-    TiXmlElement *parameters = new TiXmlElement("parameters");
+    auto parameters = new TiXmlElement("parameters");
     parameters->SetAttribute("db", "mydb");
     parameters->SetAttribute("table", dbTableArg.getValue());
     root->LinkEndChild( parameters );
     
     for(auto iter : parameterMap)
     {
-      TiXmlElement *parameter = new TiXmlElement("parameter");
+      auto parameter = new TiXmlElement("parameter");
       parameter->SetAttribute("name", iter.first);
       parameter->SetAttribute("value", iter.second);
       parameters->LinkEndChild(parameter);

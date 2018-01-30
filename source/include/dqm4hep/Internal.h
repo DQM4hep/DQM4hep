@@ -242,7 +242,7 @@ namespace dqm4hep {
      */
     inline void timeToHMS(time_t t, int &hours, int &minutes, int &seconds)
     {
-      struct tm *pTmTime = new tm();
+      auto pTmTime = new tm();
       localtime_r(&t, pTmTime);
       hours = pTmTime->tm_hour;
       minutes = pTmTime->tm_min;
@@ -326,7 +326,7 @@ namespace dqm4hep {
     {
       StringVector specialCharacterList = dqm4hep::core::getSpecialCharacterList();
 
-      for(StringVector::iterator iter = specialCharacterList.begin(), endIter = specialCharacterList.end() ;
+      for(auto iter = specialCharacterList.begin(), endIter = specialCharacterList.end() ;
           endIter != iter ; ++iter)
       {
         if(str.find(*iter) != std::string::npos)

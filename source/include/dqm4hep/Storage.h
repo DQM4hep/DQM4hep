@@ -118,7 +118,7 @@ namespace dqm4hep {
       DirectoryPtr directory = !path.isRelative() ? m_rootDirectory : m_currentDirectory;
       StringVector directoryList = path.getSplitPath();
 
-      for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
+      for(auto iter = directoryList.begin(), endIter = directoryList.end() ;
           endIter != iter ; ++iter)
       {
         std::string dirName = *iter;
@@ -174,7 +174,7 @@ namespace dqm4hep {
       DirectoryPtr directory = !path.isRelative() ? m_rootDirectory : m_currentDirectory;
       StringVector directoryList = path.getSplitPath();
 
-      for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
+      for(auto iter = directoryList.begin(), endIter = directoryList.end() ;
           endIter != iter ; ++iter)
       {
         std::string dirName = *iter;
@@ -284,7 +284,7 @@ namespace dqm4hep {
       directory = !path.isRelative() ? m_rootDirectory : m_currentDirectory;
       StringVector directoryList = path.getSplitPath();
 
-      for(StringVector::iterator iter = directoryList.begin(), endIter = directoryList.end() ;
+      for(auto iter = directoryList.begin(), endIter = directoryList.end() ;
           endIter != iter ; ++iter)
       {
         std::string dirName = *iter;

@@ -594,7 +594,7 @@ namespace dqm4hep {
           {
             dqm_info( "Selected parameter '{0}' = '{1}'", parameterIter.first, parameterIter.second );
             
-            TiXmlElement *pParameterElement = new TiXmlElement("parameter");
+            auto pParameterElement = new TiXmlElement("parameter");
             pParameterElement->SetAttribute("name", parameterIter.first);
             pParameterElement->SetAttribute("value", parameterIter.second);
             pInsertAfter = pParentElement->InsertAfterChild(pInsertAfter, *pParameterElement);

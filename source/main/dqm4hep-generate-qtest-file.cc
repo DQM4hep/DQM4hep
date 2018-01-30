@@ -76,10 +76,10 @@ void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirec
     }
     else
     {
-      TiXmlElement *pXmlElement = new TiXmlElement("monitorElement");
+      auto pXmlElement = new TiXmlElement("monitorElement");
       pXmlElement->SetAttribute("path", currentPath.getPath());
       pXmlElement->SetAttribute("name", pTKey->GetName());
-      TiXmlComment *pQTestsXmlComment = new TiXmlComment("Quality tests to execute ...");
+      auto pQTestsXmlComment = new TiXmlComment("Quality tests to execute ...");
       pXmlElement->LinkEndChild(pQTestsXmlComment);
       pParentElement->LinkEndChild(pXmlElement);
     }
@@ -121,10 +121,10 @@ int main(int argc, char* argv[])
   // Create the output xml document
   TiXmlDocument document;
 
-  TiXmlElement *pRootElement = new TiXmlElement("dqm4hep");
-  TiXmlDeclaration *pDeclaration = new TiXmlDeclaration( "1.0", "", "" );
-  TiXmlElement *pQTestsXmlElement = new TiXmlElement("qtests");
-  TiXmlComment *pQTestsXmlComment = new TiXmlComment("Create your quality tests here");
+  auto pRootElement = new TiXmlElement("dqm4hep");
+  auto pDeclaration = new TiXmlDeclaration( "1.0", "", "" );
+  auto pQTestsXmlElement = new TiXmlElement("qtests");
+  auto pQTestsXmlComment = new TiXmlComment("Create your quality tests here");
 
   document.LinkEndChild(pDeclaration);
   document.LinkEndChild(pRootElement);
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
   pQTestsXmlElement->LinkEndChild(pQTestsXmlComment);
 
   // Populate the xml structure
-  TFile *pTFile = new TFile(fullRootFilePath.getPath().c_str(), "READ");
+  auto pTFile = new TFile(fullRootFilePath.getPath().c_str(), "READ");
   Path path("/");
   CreateElementsFromDirectory(fullRootFilePath.getPath(), pTFile, path, pRootElement);
 

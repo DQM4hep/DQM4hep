@@ -84,7 +84,7 @@ namespace dqm4hep {
 
     StatusCode PluginManager::loadLibraries( const StringVector &libraryNameList )
     {
-      for( StringVector::const_iterator iter = libraryNameList.begin(), endIter = libraryNameList.end() ;
+      for( auto iter = libraryNameList.begin(), endIter = libraryNameList.end() ;
           endIter != iter ; ++iter )
       {
         RETURN_RESULT_IF( STATUS_CODE_SUCCESS, !=, this->loadLibrary( *iter ) );
@@ -150,7 +150,7 @@ namespace dqm4hep {
     {
       StringVector pluginNameList;
 
-      for( PluginMap::const_iterator iter = m_pluginMap.begin(), endIter = m_pluginMap.end() ;
+      for( auto iter = m_pluginMap.begin(), endIter = m_pluginMap.end() ;
           endIter != iter ; ++iter )
       {
         pluginNameList.push_back( iter->first );

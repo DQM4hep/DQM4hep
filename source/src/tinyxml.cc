@@ -848,7 +848,7 @@ namespace dqm4hep {
 
     TiXmlNode* TiXmlElement::Clone() const
     {
-      TiXmlElement* clone = new TiXmlElement( Value() );
+      auto  clone = new TiXmlElement( Value() );
       if ( !clone )
         return 0;
 
@@ -988,7 +988,7 @@ namespace dqm4hep {
 	}
        */
 
-      char* buf = new char[ length+1 ];
+      auto  buf = new char[ length+1 ];
       buf[0] = 0;
 
       if ( fread( buf, length, 1, file ) != 1 ) {
@@ -1092,7 +1092,7 @@ namespace dqm4hep {
 
     TiXmlNode* TiXmlDocument::Clone() const
     {
-      TiXmlDocument* clone = new TiXmlDocument();
+      auto  clone = new TiXmlDocument();
       if ( !clone )
         return 0;
 
@@ -1277,7 +1277,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlNode* TiXmlComment::Clone() const
     {
-      TiXmlComment* clone = new TiXmlComment();
+      auto  clone = new TiXmlComment();
 
       if ( !clone )
         return 0;
@@ -1412,7 +1412,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlNode* TiXmlDeclaration::Clone() const
     {
-      TiXmlDeclaration* clone = new TiXmlDeclaration();
+      auto  clone = new TiXmlDeclaration();
 
       if ( !clone )
         return 0;
@@ -1444,7 +1444,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlNode* TiXmlUnknown::Clone() const
     {
-      TiXmlUnknown* clone = new TiXmlUnknown();
+      auto  clone = new TiXmlUnknown();
 
       if ( !clone )
         return 0;
