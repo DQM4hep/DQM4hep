@@ -175,7 +175,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      virtual ~EventBase();
+      ~EventBase() override;
 
       /** Returns the real event implementation
        */
@@ -192,7 +192,7 @@ namespace dqm4hep {
       /** The implementation of this method may delete the real event implementation if needed.
        *  ATTN : do not forget the check the event ownership using the isOwner() method
        */
-      void clear();
+      void clear() override;
 
     protected:
       T                    *m_pEvent;        ///< The real event implementation

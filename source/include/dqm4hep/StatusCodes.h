@@ -164,7 +164,7 @@ namespace dqm4hep {
 
       /** Constructor
        */
-      ~StatusCodeException() throw();
+      ~StatusCodeException() throw() override;
 
       /** Get status code
        */

@@ -131,20 +131,20 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~GenericEventStreamer();
+      ~GenericEventStreamer() override;
 
       /** Factory method to create the corresponding event to this streamer.
        *  The event is expected to contains an allocated wrapped event
        */
-      EventPtr createEvent() const;
+      EventPtr createEvent() const override;
 
       /** Serialize the event and store it into a data stream.
        */
-      StatusCode write(const EventPtr &event, xdrstream::IODevice *pDevice);
+      StatusCode write(const EventPtr &event, xdrstream::IODevice *pDevice) override;
 
       /** De-serialize the lcio event.
        */
-      StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice);
+      StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice) override;
     };
 
   }

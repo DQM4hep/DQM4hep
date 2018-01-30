@@ -50,13 +50,13 @@ namespace dqm4hep {
       class Factory : public QualityTestFactory
       {
       public:
-        QTestPtr createQualityTest(const std::string &name) const;
+        QTestPtr createQualityTest(const std::string &name) const override;
       };
 
       MeanWithinExpectedTest(const std::string &name);
-      ~MeanWithinExpectedTest() = default;
-      StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle);
-      StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report);
+      ~MeanWithinExpectedTest() override = default;
+      StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
+      StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
 
     protected:
       float               m_expectedMean;

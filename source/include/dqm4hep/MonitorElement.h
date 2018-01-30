@@ -238,15 +238,15 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~TScalarObject();
+      ~TScalarObject() override;
 
       /** Clear the scalar object
        */
-      void Clear(Option_t *option = "");
+      void Clear(Option_t *option = "") override;
 
       /** Draw the scalar object (using a TPaveText)
        */
-      void Draw(Option_t *option = "");
+      void Draw(Option_t *option = "") override;
 
       /** The scalar value
        */
@@ -268,7 +268,7 @@ namespace dqm4hep {
       T            m_scalar;       ///< The scalar value
       TPaveText   *m_pPaveText;    ///< The pave text on which to draw the scalar value
 
-      ClassDef(TScalarObject, 1);
+      ClassDefOverride(TScalarObject, 1);
     };
 
     typedef TScalarObject<dqm_int>     TScalarInt;
@@ -302,7 +302,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~TDynamicGraph();
+      ~TDynamicGraph() override;
 
       /** Set the range length.
        *  If kDynamicRange and kShrinkToRange bit are set
@@ -318,7 +318,7 @@ namespace dqm4hep {
 
       /** Draw dynamic graph. Apply dynamic range if bit set
        */
-      void Draw(Option_t *option = "");
+      void Draw(Option_t *option = "") override;
 
     private:
       /**
@@ -328,7 +328,7 @@ namespace dqm4hep {
     private:
       Double_t       m_rangeLength;
 
-      ClassDef(TDynamicGraph, 1);
+      ClassDefOverride(TDynamicGraph, 1);
     };
 
     //-------------------------------------------------------------------------------------------------

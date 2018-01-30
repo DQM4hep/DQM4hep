@@ -58,7 +58,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~Run();
+      ~Run() override;
 
       /** Get the run number
        */
@@ -126,7 +126,7 @@ namespace dqm4hep {
        void reset();
 
       xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-          xdrstream::xdr_version_t version = 0);
+          xdrstream::xdr_version_t version = 0) override;
 
       /** Convert run to json
        */

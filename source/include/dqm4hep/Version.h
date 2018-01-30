@@ -55,7 +55,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~Version();
+      ~Version() override;
 
       /** Get the major version number
        */
@@ -83,7 +83,7 @@ namespace dqm4hep {
 
       // from xdrstreamm::Streamable
       xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-          xdrstream::xdr_version_t version = 0);
+          xdrstream::xdr_version_t version = 0) override;
 
     private:
       unsigned int    m_major;
