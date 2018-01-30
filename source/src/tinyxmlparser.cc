@@ -1631,8 +1631,8 @@ namespace dqm4hep {
 
     bool TiXmlText::Blank() const
     {
-      for ( unsigned i=0; i<value.length(); i++ )
-        if ( !IsWhiteSpace( value[i] ) )
+      for (char i : value)
+        if ( !IsWhiteSpace( i ) )
           return false;
       return true;
     }
