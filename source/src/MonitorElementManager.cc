@@ -250,7 +250,7 @@ namespace dqm4hep {
       TObject *pTObject = pTFile->Get(fullName.getPath().c_str());
       TObject::SetObjectStat(objectStat);
 
-      if(!pTObject)
+      if(pTObject == nullptr)
         return STATUS_CODE_NOT_FOUND;
 
       return this->addMonitorElement(path, pTObject, monitorElement);
@@ -274,7 +274,7 @@ namespace dqm4hep {
       TObject *pTObject = (TObject*)pTClass->New();
       TObject::SetObjectStat(objectStat);
 
-      if(!pTObject)
+      if(pTObject == nullptr)
       {
         dqm_error( "MonitorElementManager::bookMonitorElement: Couldn't allocate ROOT class '{0}' from TClass facility", className );
         return STATUS_CODE_FAILURE;
@@ -313,7 +313,7 @@ namespace dqm4hep {
 
       TObject::SetObjectStat(objectStat);
 
-      if(!pTObject)
+      if(pTObject == nullptr)
         return STATUS_CODE_NOT_FOUND;
 
       monitorElement->setReferenceObject(pTObject);

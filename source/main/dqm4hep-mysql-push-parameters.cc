@@ -79,17 +79,17 @@ int main(int argc, char* argv[])
   TiXmlElement *root = document.RootElement();
   TiXmlElement *databases = root->FirstChildElement("databases");
     
-  if(!databases)
+  if(databases == nullptr)
   {
     dqm_error( "ERROR: no <databases> tag found in root element !" );
     return 1;
   }
   
-  for(TiXmlElement *db = databases->FirstChildElement("db") ; db ; db = db->NextSiblingElement("db"))
+  for(TiXmlElement *db = databases->FirstChildElement("db") ; db != nullptr ; db = db->NextSiblingElement("db"))
   {
     const char *dbID = db->Attribute("id");
     
-    if(!dbID || std::string(dbID).empty())
+    if((dbID == nullptr) || std::string(dbID).empty())
     {
       dqm_error( "ERROR: <db> tag has no 'id' attribute or is empty, line {0}", db->Row() );
       return 1;
@@ -101,10 +101,10 @@ int main(int argc, char* argv[])
       return 1;
     }
     
-    std::string dbHost = db->Attribute("host") ? db->Attribute("host") : "localhost";
-    std::string dbUser = db->Attribute("user") ? db->Attribute("user") : "DQM4HEP";
-    std::string dbDb = db->Attribute("db") ? db->Attribute("db") : "DQM4HEP";    
-    std::string dbPassword = db->Attribute("password") ? db->Attribute("password") : "";
+    std::string dbHost = db->Attribute("host") != nullptr ? db->Attribute("host") : "localhost";
+    std::string dbUser = db->Attribute("user") != nullptr ? db->Attribute("user") : "DQM4HEP";
+    std::string dbDb = db->Attribute("db") != nullptr ? db->Attribute("db") : "DQM4HEP";    
+    std::string dbPassword = db->Attribute("password") != nullptr ? db->Attribute("password") : "";
 
     DBInterfaceMetadata metadata;
     metadata.m_dbInterface = std::make_shared<DBInterface>();
@@ -125,10 +125,10 @@ int main(int argc, char* argv[])
   int nParameters(0), nParametersTags(0);
   std::set<std::pair<std::string,std::string>> dbTables;
   
-  for(TiXmlElement *parameters = root->FirstChildElement("parameters") ; parameters ; parameters = parameters->NextSiblingElement("parameters"))
+  for(TiXmlElement *parameters = root->FirstChildElement("parameters") ; parameters != nullptr ; parameters = parameters->NextSiblingElement("parameters"))
   {
-    std::string dbID = parameters->Attribute("db") ? parameters->Attribute("db") : "";
-    std::string dbTable = parameters->Attribute("table") ? parameters->Attribute("table") : "";
+    std::string dbID = parameters->Attribute("db") != nullptr ? parameters->Attribute("db") : "";
+    std::string dbTable = parameters->Attribute("table") != nullptr ? parameters->Attribute("table") : "";
     
     auto findIter = dbInterfaceMap.find(dbID);
     
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
         passwordText << "Password [host=" << findIter->second.m_host << " db=" << findIter->second.m_db << " user=" << findIter->second.m_user << "] : ";
         char *password = getpass(passwordText.str().c_str());
         
-        if(!password)
+        if(password == nullptr)
         {
           dqm_error( "ERROR: Invalid password !" );
           return 1;
@@ -168,18 +168,18 @@ int main(int argc, char* argv[])
     StringMap parameterMap;
     int nParameterTags(0);
     
-    for(TiXmlElement *parameter = parameters->FirstChildElement("parameter") ; parameter ; parameter = parameter->NextSiblingElement("parameter"))
+    for(TiXmlElement *parameter = parameters->FirstChildElement("parameter") ; parameter != nullptr ; parameter = parameter->NextSiblingElement("parameter"))
     {
       const std::string name = parameter->Attribute("name");
       std::string value;
 
-      if( parameter->Attribute("value") ) 
+      if( parameter->Attribute("value") != nullptr ) 
       {
         value = parameter->Attribute("value");
       }
       else
       {
-        if( parameter->FirstChild() )
+        if( parameter->FirstChild() != nullptr )
           value = parameter->FirstChild()->Value();
       }
       

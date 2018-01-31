@@ -233,7 +233,7 @@ namespace dqm4hep {
 
       void init(size_type sz, size_type cap)
       {
-        if (cap)
+        if (cap != 0u)
         {
           // Lee: the original form:
           //	rep_ = static_cast<Rep*>(operator new(sizeof(Rep) + cap));

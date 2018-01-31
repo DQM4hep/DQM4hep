@@ -218,7 +218,7 @@ int main(int argc, char* argv[])
   TiXmlElement *rootElement = document.RootElement();
   TiXmlElement *qTestsElement = rootElement->FirstChildElement("qtests");
 
-  if(!qTestsElement)
+  if(qTestsElement == nullptr)
   {
     dqm_error( "No <qtests> element found in input qtest file '{0}' !", qtestFile );
     return STATUS_CODE_NOT_FOUND;
@@ -229,7 +229,7 @@ int main(int argc, char* argv[])
 
   try
   {
-    for(TiXmlElement *qtest = qTestsElement->FirstChildElement("qtest") ; qtest ; qtest = qtest->NextSiblingElement("qtest"))
+    for(TiXmlElement *qtest = qTestsElement->FirstChildElement("qtest") ; qtest != nullptr ; qtest = qtest->NextSiblingElement("qtest"))
     {
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTest(qtest));
     }
@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
 
   try
   {
-    for(TiXmlElement *meElt = rootElement->FirstChildElement("monitorElement") ; meElt ; meElt = meElt->NextSiblingElement("monitorElement"))
+    for(TiXmlElement *meElt = rootElement->FirstChildElement("monitorElement") ; meElt != nullptr ; meElt = meElt->NextSiblingElement("monitorElement"))
     {
       std::string path, name, reference;
       THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
       else
         pTObject = (TObject *) rootFile->Get(fullName.getPath().c_str());
 
-      if(!pTObject)
+      if(pTObject == nullptr)
       {
         dqm_error( "TObject '{0}' in file '{0}' no found !", fullName.getPath(), rootFileName );
         throw StatusCodeException(STATUS_CODE_NOT_FOUND);
@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->attachReference(monitorElement, reference));
       }
 
-      for(TiXmlElement *qtest = meElt->FirstChildElement("qtest") ; qtest ; qtest = qtest->NextSiblingElement("qtest"))
+      for(TiXmlElement *qtest = meElt->FirstChildElement("qtest") ; qtest != nullptr ; qtest = qtest->NextSiblingElement("qtest"))
       {
         std::string qTestName;
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));

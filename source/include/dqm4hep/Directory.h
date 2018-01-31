@@ -436,7 +436,7 @@ namespace dqm4hep {
       Path fullPath = this->name();
       DirectoryPtr dir = const_cast<Directory<T>*>(this)->shared_from_this();
 
-      while(1)
+      while(true)
       {
         DirectoryPtr parentDir = dir->parent();
 

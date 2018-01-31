@@ -388,7 +388,7 @@ namespace dqm4hep {
 
       Double_t xLimit = lastX - m_rangeLength;
 
-      while(1)
+      while(true)
       {
         Double_t x, y;
         res = this->GetPoint(0, x, y);

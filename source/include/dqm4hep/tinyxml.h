@@ -296,7 +296,7 @@ namespace dqm4hep {
 
       inline static bool IsWhiteSpace( char c )
       {
-        return ( isspace( (unsigned char) c ) || c == '\n' || c == '\r' );
+        return ( (isspace( (unsigned char) c ) != 0) || c == '\n' || c == '\r' );
       }
       inline static bool IsWhiteSpace( int c )
       {
@@ -351,11 +351,11 @@ namespace dqm4hep {
           *_value = *p;
           return p+1;
         }
-        if ( *length )
+        if ( *length != 0 )
         {
           //strncpy( _value, p, *length );	// lots of compilers don't like this function (unsafe),
           // and the null terminator isn't needed
-          for( int i=0; p[i] && i<*length; ++i ) {
+          for( int i=0; (p[i] != 0) && i<*length; ++i ) {
             _value[i] = p[i];
           }
           return p + (*length);
@@ -699,7 +699,7 @@ namespace dqm4hep {
       }
 
       /// Returns true if this node has no children.
-      bool NoChildren() const						{ return !firstChild; }
+      bool NoChildren() const						{ return firstChild == nullptr; }
 
       virtual const TiXmlDocument*    ToDocument()    const { return nullptr; } ///< Cast to a more defined type. Will return null if not of the requested type.
       virtual const TiXmlElement*     ToElement()     const { return nullptr; } ///< Cast to a more defined type. Will return null if not of the requested type.
@@ -1006,7 +1006,7 @@ namespace dqm4hep {
       /// QueryStringAttribute examines the attribute - see QueryIntAttribute().
       int QueryStringAttribute( const char* name, std::string* _value ) const {
         const char* cstr = Attribute( name );
-        if ( cstr ) {
+        if ( cstr != nullptr ) {
           *_value = std::string( cstr );
           return TIXML_SUCCESS;
         }
@@ -1037,7 +1037,7 @@ namespace dqm4hep {
       int QueryValueAttribute( const std::string& name, std::string* outValue ) const
       {
         const TiXmlAttribute* node = attributeSet.Find( name );
-        if ( !node )
+        if ( node == nullptr )
           return TIXML_NO_ATTRIBUTE;
         *outValue = node->ValueStr();
         return TIXML_SUCCESS;
@@ -1685,13 +1685,13 @@ namespace dqm4hep {
       TiXmlNode* ToNode() const			{ return node; }
       /** Return the handle as a TiXmlElement. This may return null.
        */
-      TiXmlElement* ToElement() const		{ return ( ( node && node->ToElement() ) ? node->ToElement() : nullptr ); }
+      TiXmlElement* ToElement() const		{ return ( ( (node != nullptr) && (node->ToElement() != nullptr) ) ? node->ToElement() : nullptr ); }
       /**	Return the handle as a TiXmlText. This may return null.
        */
-      TiXmlText* ToText() const			{ return ( ( node && node->ToText() ) ? node->ToText() : nullptr ); }
+      TiXmlText* ToText() const			{ return ( ( (node != nullptr) && (node->ToText() != nullptr) ) ? node->ToText() : nullptr ); }
       /** Return the handle as a TiXmlUnknown. This may return null.
        */
-      TiXmlUnknown* ToUnknown() const		{ return ( ( node && node->ToUnknown() ) ? node->ToUnknown() : nullptr ); }
+      TiXmlUnknown* ToUnknown() const		{ return ( ( (node != nullptr) && (node->ToUnknown() != nullptr) ) ? node->ToUnknown() : nullptr ); }
 
       /** @deprecated use ToNode.
 		Return the handle as a TiXmlNode. This may return null.
@@ -1754,14 +1754,14 @@ namespace dqm4hep {
       /** Set the indent characters for printing. By default 4 spaces
 		but tab (\t) is also useful, or null/empty string for no indentation.
        */
-      void SetIndent( const char* _indent )			{ indent = _indent ? _indent : "" ; }
+      void SetIndent( const char* _indent )			{ indent = _indent != nullptr ? _indent : "" ; }
       /// Query the indention string.
       const char* Indent()							{ return indent.c_str(); }
       /** Set the line breaking string. By default set to newline (\n).
 		Some operating systems prefer other characters, or can be
 		set to the null/empty string for no indenation.
        */
-      void SetLineBreak( const char* _lineBreak )		{ lineBreak = _lineBreak ? _lineBreak : ""; }
+      void SetLineBreak( const char* _lineBreak )		{ lineBreak = _lineBreak != nullptr ? _lineBreak : ""; }
       /// Query the current line breaking string.
       const char* LineBreak()							{ return lineBreak.c_str(); }
 

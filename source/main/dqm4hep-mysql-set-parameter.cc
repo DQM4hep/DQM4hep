@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   {
     char *promptPassword = getpass("Password : ");
     
-    if(!promptPassword)
+    if(promptPassword == nullptr)
     {
       dqm_error( "No password specified !" );
       return 1;

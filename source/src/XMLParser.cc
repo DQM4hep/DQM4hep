@@ -245,9 +245,9 @@ namespace dqm4hep {
     {
       TiXmlElement* child = node->FirstChildElement();
 
-      while( 1 )
+      while( true )
       {
-        if( ! child )
+        if( child == nullptr )
           break;
 
         if( child->Value() != std::string("include") ) 
@@ -272,7 +272,7 @@ namespace dqm4hep {
         // add them to the xml tree
         TiXmlNode *includeAfter(child);
 
-        for(TiXmlElement *includeElement = rootInclude->FirstChildElement() ; includeElement ; includeElement =  includeElement->NextSiblingElement())
+        for(TiXmlElement *includeElement = rootInclude->FirstChildElement() ; includeElement != nullptr ; includeElement =  includeElement->NextSiblingElement())
           includeAfter = node->InsertAfterChild( includeAfter, *includeElement );
 
         // tricky lines :
@@ -287,7 +287,7 @@ namespace dqm4hep {
     
     void XMLParser::resolveInclude(const std::string &referencePath, TiXmlElement* element, TiXmlDocument &document)
     {
-      if( ! element->Attribute("ref") ) {
+      if( element->Attribute("ref") == nullptr ) {
         dqm_error( "XMLParser::resolveInclude(): missing attribute \"ref\" in element <{0}/>", element->Value() );
         throw StatusCodeException(STATUS_CODE_FAILURE);
       }
@@ -343,7 +343,7 @@ namespace dqm4hep {
     
     void XMLParser::readConstants(TiXmlNode *node)
     {
-      for( TiXmlElement* element = node->FirstChildElement() ; element ; element = element->NextSiblingElement() )
+      for( TiXmlElement* element = node->FirstChildElement() ; element != nullptr ; element = element->NextSiblingElement() )
       {
         if ( element->Value() == std::string("constants") )
           this->readConstantsSection(element);
@@ -358,7 +358,7 @@ namespace dqm4hep {
     {
       TiXmlElement *root = m_document.RootElement();
       
-      for( TiXmlElement* element = root->FirstChildElement() ; element ; element = element->NextSiblingElement() )
+      for( TiXmlElement* element = root->FirstChildElement() ; element != nullptr ; element = element->NextSiblingElement() )
         this->resolveConstantsInElement(element);
     }
     
@@ -366,11 +366,11 @@ namespace dqm4hep {
     
     void XMLParser::readConstantsSection(TiXmlElement *constants)
     {
-      for( TiXmlElement* element = constants->FirstChildElement("constant") ; element ; element = element->NextSiblingElement("constant") )
+      for( TiXmlElement* element = constants->FirstChildElement("constant") ; element != nullptr ; element = element->NextSiblingElement("constant") )
       {
         this->resolveConstantsInElement(element);
         
-        if( ! element->Attribute("name") )
+        if( element->Attribute("name") == nullptr )
         {
           dqm_error( "XMLParser::readConstantsSection(): constant element without name !" );
           throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -392,13 +392,13 @@ namespace dqm4hep {
 
         std::string value;
 
-        if( element->Attribute("value") ) 
+        if( element->Attribute("value") != nullptr ) 
         {
           value = element->Attribute("value");
         }
         else
         {
-          if( element->FirstChild() )
+          if( element->FirstChild() != nullptr )
             value = element->FirstChild()->Value();
         }
 
@@ -465,7 +465,7 @@ namespace dqm4hep {
         const std::string key( value.substr( pos+5 , pos2-pos-5 ));
         char *env = getenv(key.c_str());
         
-        if(!env)
+        if(env == nullptr)
         {
           dqm_error( "XMLParser::performEnvVariableReplacement(): env variable \"{0}\" not found !", key );
           throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -484,7 +484,7 @@ namespace dqm4hep {
     void XMLParser::resolveConstantsInElement(TiXmlElement *element)
     {
       // replace constants in all attributes
-      for(TiXmlAttribute *attribute = element->FirstAttribute(); attribute ; attribute = attribute->Next())
+      for(TiXmlAttribute *attribute = element->FirstAttribute(); attribute != nullptr ; attribute = attribute->Next())
       {
         std::string value(attribute->ValueStr());
         
@@ -496,7 +496,7 @@ namespace dqm4hep {
         attribute->SetValue(value);
       }
 
-      for(TiXmlNode *node = element->FirstChild() ; node ; node = node->NextSibling())
+      for(TiXmlNode *node = element->FirstChild() ; node != nullptr ; node = node->NextSibling())
       {
         if(node->Type() == TiXmlNode::TINYXML_ELEMENT)
         {
@@ -526,14 +526,14 @@ namespace dqm4hep {
       
       TiXmlElement *databases = document.RootElement()->FirstChildElement("databases");
       
-      if(!databases)
+      if(databases == nullptr)
         return;
       
-      for(TiXmlElement *db = databases->FirstChildElement("db") ; db ; db = db->NextSiblingElement("db"))
+      for(TiXmlElement *db = databases->FirstChildElement("db") ; db != nullptr ; db = db->NextSiblingElement("db"))
       {
         const char *dbID = db->Attribute("id");
         
-        if(!dbID || std::string(dbID).empty())
+        if((dbID == nullptr) || std::string(dbID).empty())
         {
           dqm_error( "ERROR: <db> tag has no 'id' attribute or is empty, line {0}", db->Row() );
           throw StatusCodeException(STATUS_CODE_NOT_FOUND);
@@ -545,9 +545,9 @@ namespace dqm4hep {
           throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
         }
         
-        std::string dbHost = db->Attribute("host") ? db->Attribute("host") : "localhost";
+        std::string dbHost = db->Attribute("host") != nullptr ? db->Attribute("host") : "localhost";
         std::string dbUser = "DQM4HEP"; // always has read access
-        std::string dbDb = db->Attribute("db") ? db->Attribute("db") : "DQM4HEP";
+        std::string dbDb = db->Attribute("db") != nullptr ? db->Attribute("db") : "DQM4HEP";
         
         std::shared_ptr<DBInterface> dbInterface(std::make_shared<DBInterface>());
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, dbInterface->connect(dbHost, dbUser, "", dbDb));
@@ -563,12 +563,12 @@ namespace dqm4hep {
       if(m_databases.empty())
         return;
       
-      for( TiXmlElement* element = pXmlElement->FirstChildElement() ; element ; element = element->NextSiblingElement() )
+      for( TiXmlElement* element = pXmlElement->FirstChildElement() ; element != nullptr ; element = element->NextSiblingElement() )
       {
         if(std::string(element->Value()) == "select")
         {
-          std::string dbID = element->Attribute("db") ? element->Attribute("db") : "";
-          std::string dbTable = element->Attribute("table") ? element->Attribute("table") : "";
+          std::string dbID = element->Attribute("db") != nullptr ? element->Attribute("db") : "";
+          std::string dbTable = element->Attribute("table") != nullptr ? element->Attribute("table") : "";
           
           if(dbID.empty() || dbTable.empty())
           {

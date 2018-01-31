@@ -62,7 +62,7 @@ void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirec
   TIter iter(pDirectory->GetListOfKeys());
   TKey *pTKey(nullptr);
 
-  while( (pTKey = (TKey*) iter()) )
+  while( (pTKey = (TKey*) iter()) != nullptr )
   {
     pDirectory->cd();
 

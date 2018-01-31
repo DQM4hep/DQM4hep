@@ -73,7 +73,7 @@ namespace dqm4hep {
         // create mysql instance
         m_pMySQL = mysql_init(nullptr);
 
-        if(!m_pMySQL)
+        if(m_pMySQL == nullptr)
         {
           dqm_error( "Couldn't create mysql instance : {0}", mysql_error(m_pMySQL) );
           throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -100,7 +100,7 @@ namespace dqm4hep {
       }
       catch(const StatusCodeException &exception)
       {
-        if(m_pMySQL)
+        if(m_pMySQL != nullptr)
           mysql_close(m_pMySQL);
 
         m_isConnected = false;
@@ -118,7 +118,7 @@ namespace dqm4hep {
       if(this->isConnected())
         return STATUS_CODE_UNCHANGED;
 
-      if(m_pMySQL)
+      if(m_pMySQL != nullptr)
         mysql_close(m_pMySQL);
 
       m_isConnected = false;
@@ -188,7 +188,7 @@ namespace dqm4hep {
       if(!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if(mysql_query(m_pMySQL, query.c_str()))
+      if(mysql_query(m_pMySQL, query.c_str()) != 0)
       {
         dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
@@ -196,7 +196,7 @@ namespace dqm4hep {
 
       MYSQL_RES *pMySQLResult = mysql_store_result(m_pMySQL);
 
-      if(!pMySQLResult)
+      if(pMySQLResult == nullptr)
       {
         dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
@@ -221,7 +221,7 @@ namespace dqm4hep {
       if(!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if(mysql_query(m_pMySQL, query.c_str()))
+      if(mysql_query(m_pMySQL, query.c_str()) != 0)
       {
         dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
         return STATUS_CODE_FAILURE;
@@ -357,7 +357,7 @@ namespace dqm4hep {
         int num_fields = mysql_num_fields(result);      
         MYSQL_ROW row;
       
-        while ((row = mysql_fetch_row(result)))
+        while ((row = mysql_fetch_row(result)) != nullptr)
           std::cout << std::setw(50) << std::left << row[0] << std::setw(50) << std::left << row[1] << std::setw(20) << std::left << row[2] << std::endl;
       });
     }
@@ -380,7 +380,7 @@ namespace dqm4hep {
         int num_fields = mysql_num_fields(result);      
         MYSQL_ROW row;
       
-        while ((row = mysql_fetch_row(result)))
+        while ((row = mysql_fetch_row(result)) != nullptr)
           parameterValueMap[row[0]] = row[1];
       });
     }

@@ -155,7 +155,7 @@ namespace dqm4hep {
       {
         pDirectory = m_pArchiveFile->mkdir(dirName.c_str());
 
-        if(!pDirectory)
+        if(pDirectory == nullptr)
           return STATUS_CODE_FAILURE;
       }
       else

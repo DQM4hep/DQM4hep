@@ -153,7 +153,7 @@ namespace dqm4hep {
       TiXmlNode* node = firstChild;
       TiXmlNode* temp = nullptr;
 
-      while ( node )
+      while ( node != nullptr )
       {
         temp = node;
         node = node->next;
@@ -175,7 +175,7 @@ namespace dqm4hep {
       TiXmlNode* node = firstChild;
       TiXmlNode* temp = nullptr;
 
-      while ( node )
+      while ( node != nullptr )
       {
         temp = node;
         node = node->next;
@@ -195,7 +195,7 @@ namespace dqm4hep {
       if ( node->Type() == TiXmlNode::TINYXML_DOCUMENT )
       {
         delete node;
-        if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+        if ( GetDocument() != nullptr ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return nullptr;
       }
 
@@ -204,7 +204,7 @@ namespace dqm4hep {
       node->prev = lastChild;
       node->next = nullptr;
 
-      if ( lastChild )
+      if ( lastChild != nullptr )
         lastChild->next = node;
       else
         firstChild = node;			// it was an empty list.
@@ -218,11 +218,11 @@ namespace dqm4hep {
     {
       if ( addThis.Type() == TiXmlNode::TINYXML_DOCUMENT )
       {
-        if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+        if ( GetDocument() != nullptr ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return nullptr;
       }
       TiXmlNode* node = addThis.Clone();
-      if ( !node )
+      if ( node == nullptr )
         return nullptr;
 
       return LinkEndChild( node );
@@ -231,23 +231,23 @@ namespace dqm4hep {
 
     TiXmlNode* TiXmlNode::InsertBeforeChild( TiXmlNode* beforeThis, const TiXmlNode& addThis )
     {
-      if ( !beforeThis || beforeThis->parent != this ) {
+      if ( (beforeThis == nullptr) || beforeThis->parent != this ) {
         return nullptr;
       }
       if ( addThis.Type() == TiXmlNode::TINYXML_DOCUMENT )
       {
-        if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+        if ( GetDocument() != nullptr ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return nullptr;
       }
 
       TiXmlNode* node = addThis.Clone();
-      if ( !node )
+      if ( node == nullptr )
         return nullptr;
       node->parent = this;
 
       node->next = beforeThis;
       node->prev = beforeThis->prev;
-      if ( beforeThis->prev )
+      if ( beforeThis->prev != nullptr )
       {
         beforeThis->prev->next = node;
       }
@@ -263,23 +263,23 @@ namespace dqm4hep {
 
     TiXmlNode* TiXmlNode::InsertAfterChild( TiXmlNode* afterThis, const TiXmlNode& addThis )
     {
-      if ( !afterThis || afterThis->parent != this ) {
+      if ( (afterThis == nullptr) || afterThis->parent != this ) {
         return nullptr;
       }
       if ( addThis.Type() == TiXmlNode::TINYXML_DOCUMENT )
       {
-        if ( GetDocument() ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
+        if ( GetDocument() != nullptr ) GetDocument()->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return nullptr;
       }
 
       TiXmlNode* node = addThis.Clone();
-      if ( !node )
+      if ( node == nullptr )
         return nullptr;
       node->parent = this;
 
       node->prev = afterThis;
       node->next = afterThis->next;
-      if ( afterThis->next )
+      if ( afterThis->next != nullptr )
       {
         afterThis->next->prev = node;
       }
@@ -295,33 +295,33 @@ namespace dqm4hep {
 
     TiXmlNode* TiXmlNode::ReplaceChild( TiXmlNode* replaceThis, const TiXmlNode& withThis )
     {
-      if ( !replaceThis )
+      if ( replaceThis == nullptr )
         return nullptr;
 
       if ( replaceThis->parent != this )
         return nullptr;
 
-      if ( withThis.ToDocument() ) {
+      if ( withThis.ToDocument() != nullptr ) {
         // A document can never be a child.	Thanks to Noam.
         TiXmlDocument* document = GetDocument();
-        if ( document )
+        if ( document != nullptr )
           document->SetError( TIXML_ERROR_DOCUMENT_TOP_ONLY, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return nullptr;
       }
 
       TiXmlNode* node = withThis.Clone();
-      if ( !node )
+      if ( node == nullptr )
         return nullptr;
 
       node->next = replaceThis->next;
       node->prev = replaceThis->prev;
 
-      if ( replaceThis->next )
+      if ( replaceThis->next != nullptr )
         replaceThis->next->prev = node;
       else
         lastChild = node;
 
-      if ( replaceThis->prev )
+      if ( replaceThis->prev != nullptr )
         replaceThis->prev->next = node;
       else
         firstChild = node;
@@ -334,7 +334,7 @@ namespace dqm4hep {
 
     bool TiXmlNode::RemoveChild( TiXmlNode* removeThis )
     {
-      if ( !removeThis ) {
+      if ( removeThis == nullptr ) {
         return false;
       }
 
@@ -344,12 +344,12 @@ namespace dqm4hep {
         return false;
       }
 
-      if ( removeThis->next )
+      if ( removeThis->next != nullptr )
         removeThis->next->prev = removeThis->prev;
       else
         lastChild = removeThis->prev;
 
-      if ( removeThis->prev )
+      if ( removeThis->prev != nullptr )
         removeThis->prev->next = removeThis->next;
       else
         firstChild = removeThis->next;
@@ -361,7 +361,7 @@ namespace dqm4hep {
     const TiXmlNode* TiXmlNode::FirstChild( const char * _value ) const
     {
       const TiXmlNode* node;
-      for ( node = firstChild; node; node = node->next )
+      for ( node = firstChild; node != nullptr; node = node->next )
       {
         if ( strcmp( node->Value(), _value ) == 0 )
           return node;
@@ -373,7 +373,7 @@ namespace dqm4hep {
     const TiXmlNode* TiXmlNode::LastChild( const char * _value ) const
     {
       const TiXmlNode* node;
-      for ( node = lastChild; node; node = node->prev )
+      for ( node = lastChild; node != nullptr; node = node->prev )
       {
         if ( strcmp( node->Value(), _value ) == 0 )
           return node;
@@ -384,7 +384,7 @@ namespace dqm4hep {
 
     const TiXmlNode* TiXmlNode::IterateChildren( const TiXmlNode* previous ) const
     {
-      if ( !previous )
+      if ( previous == nullptr )
       {
         return FirstChild();
       }
@@ -398,7 +398,7 @@ namespace dqm4hep {
 
     const TiXmlNode* TiXmlNode::IterateChildren( const char * val, const TiXmlNode* previous ) const
     {
-      if ( !previous )
+      if ( previous == nullptr )
       {
         return FirstChild( val );
       }
@@ -413,7 +413,7 @@ namespace dqm4hep {
     const TiXmlNode* TiXmlNode::NextSibling( const char * _value ) const
     {
       const TiXmlNode* node;
-      for ( node = next; node; node = node->next )
+      for ( node = next; node != nullptr; node = node->next )
       {
         if ( strcmp( node->Value(), _value ) == 0 )
           return node;
@@ -425,7 +425,7 @@ namespace dqm4hep {
     const TiXmlNode* TiXmlNode::PreviousSibling( const char * _value ) const
     {
       const TiXmlNode* node;
-      for ( node = prev; node; node = node->prev )
+      for ( node = prev; node != nullptr; node = node->prev )
       {
         if ( strcmp( node->Value(), _value ) == 0 )
           return node;
@@ -442,7 +442,7 @@ namespace dqm4hep {
 #else
       TiXmlAttribute* node = attributeSet.Find( name );
 #endif
-      if ( node )
+      if ( node != nullptr )
       {
         attributeSet.Remove( node );
         delete node;
@@ -454,10 +454,10 @@ namespace dqm4hep {
       const TiXmlNode* node;
 
       for (	node = FirstChild();
-          node;
+          node != nullptr;
           node = node->NextSibling() )
       {
-        if ( node->ToElement() )
+        if ( node->ToElement() != nullptr )
           return node->ToElement();
       }
       return nullptr;
@@ -469,10 +469,10 @@ namespace dqm4hep {
       const TiXmlNode* node;
 
       for (	node = FirstChild( _value );
-          node;
+          node != nullptr;
           node = node->NextSibling( _value ) )
       {
-        if ( node->ToElement() )
+        if ( node->ToElement() != nullptr )
           return node->ToElement();
       }
       return nullptr;
@@ -484,10 +484,10 @@ namespace dqm4hep {
       const TiXmlNode* node;
 
       for (	node = NextSibling();
-          node;
+          node != nullptr;
           node = node->NextSibling() )
       {
-        if ( node->ToElement() )
+        if ( node->ToElement() != nullptr )
           return node->ToElement();
       }
       return nullptr;
@@ -499,10 +499,10 @@ namespace dqm4hep {
       const TiXmlNode* node;
 
       for (	node = NextSibling( _value );
-          node;
+          node != nullptr;
           node = node->NextSibling( _value ) )
       {
-        if ( node->ToElement() )
+        if ( node->ToElement() != nullptr )
           return node->ToElement();
       }
       return nullptr;
@@ -513,9 +513,9 @@ namespace dqm4hep {
     {
       const TiXmlNode* node;
 
-      for( node = this; node; node = node->parent )
+      for( node = this; node != nullptr; node = node->parent )
       {
-        if ( node->ToDocument() )
+        if ( node->ToDocument() != nullptr )
           return node->ToDocument();
       }
       return nullptr;
@@ -564,7 +564,7 @@ namespace dqm4hep {
     void TiXmlElement::ClearThis()
     {
       Clear();
-      while( attributeSet.First() )
+      while( attributeSet.First() != nullptr )
       {
         TiXmlAttribute* node = attributeSet.First();
         attributeSet.Remove( node );
@@ -576,7 +576,7 @@ namespace dqm4hep {
     const char* TiXmlElement::Attribute( const char* name ) const
     {
       const TiXmlAttribute* node = attributeSet.Find( name );
-      if ( node )
+      if ( node != nullptr )
         return node->Value();
       return nullptr;
     }
@@ -586,7 +586,7 @@ namespace dqm4hep {
     const std::string* TiXmlElement::Attribute( const std::string& name ) const
     {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
-      if ( attrib )
+      if ( attrib != nullptr )
         return &attrib->ValueStr();
       return nullptr;
     }
@@ -598,9 +598,9 @@ namespace dqm4hep {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
       const char* result = nullptr;
 
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         result = attrib->Value();
-        if ( i ) {
+        if ( i != nullptr ) {
           attrib->QueryIntValue( i );
         }
       }
@@ -614,9 +614,9 @@ namespace dqm4hep {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
       const std::string* result = nullptr;
 
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         result = &attrib->ValueStr();
-        if ( i ) {
+        if ( i != nullptr ) {
           attrib->QueryIntValue( i );
         }
       }
@@ -630,9 +630,9 @@ namespace dqm4hep {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
       const char* result = nullptr;
 
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         result = attrib->Value();
-        if ( d ) {
+        if ( d != nullptr ) {
           attrib->QueryDoubleValue( d );
         }
       }
@@ -646,9 +646,9 @@ namespace dqm4hep {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
       const std::string* result = nullptr;
 
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         result = &attrib->ValueStr();
-        if ( d ) {
+        if ( d != nullptr ) {
           attrib->QueryDoubleValue( d );
         }
       }
@@ -660,7 +660,7 @@ namespace dqm4hep {
     int TiXmlElement::QueryIntAttribute( const char* name, int* ival ) const
     {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
-      if ( !attrib )
+      if ( attrib == nullptr )
         return TIXML_NO_ATTRIBUTE;
       return attrib->QueryIntValue( ival );
     }
@@ -670,7 +670,7 @@ namespace dqm4hep {
     int TiXmlElement::QueryIntAttribute( const std::string& name, int* ival ) const
     {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
-      if ( !attrib )
+      if ( attrib == nullptr )
         return TIXML_NO_ATTRIBUTE;
       return attrib->QueryIntValue( ival );
     }
@@ -680,7 +680,7 @@ namespace dqm4hep {
     int TiXmlElement::QueryDoubleAttribute( const char* name, double* dval ) const
     {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
-      if ( !attrib )
+      if ( attrib == nullptr )
         return TIXML_NO_ATTRIBUTE;
       return attrib->QueryDoubleValue( dval );
     }
@@ -690,7 +690,7 @@ namespace dqm4hep {
     int TiXmlElement::QueryDoubleAttribute( const std::string& name, double* dval ) const
     {
       const TiXmlAttribute* attrib = attributeSet.Find( name );
-      if ( !attrib )
+      if ( attrib == nullptr )
         return TIXML_NO_ATTRIBUTE;
       return attrib->QueryDoubleValue( dval );
     }
@@ -700,7 +700,7 @@ namespace dqm4hep {
     void TiXmlElement::SetAttribute( const char * name, int val )
     {
       TiXmlAttribute* attrib = attributeSet.FindOrCreate( name );
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         attrib->SetIntValue( val );
       }
     }
@@ -710,7 +710,7 @@ namespace dqm4hep {
     void TiXmlElement::SetAttribute( const std::string& name, int val )
     {
       TiXmlAttribute* attrib = attributeSet.FindOrCreate( name );
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         attrib->SetIntValue( val );
       }
     }
@@ -720,7 +720,7 @@ namespace dqm4hep {
     void TiXmlElement::SetDoubleAttribute( const char * name, double val )
     {
       TiXmlAttribute* attrib = attributeSet.FindOrCreate( name );
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         attrib->SetDoubleValue( val );
       }
     }
@@ -730,7 +730,7 @@ namespace dqm4hep {
     void TiXmlElement::SetDoubleAttribute( const std::string& name, double val )
     {
       TiXmlAttribute* attrib = attributeSet.FindOrCreate( name );
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         attrib->SetDoubleValue( val );
       }
     }
@@ -740,7 +740,7 @@ namespace dqm4hep {
     void TiXmlElement::SetAttribute( const char * cname, const char * cvalue )
     {
       TiXmlAttribute* attrib = attributeSet.FindOrCreate( cname );
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         attrib->SetValue( cvalue );
       }
     }
@@ -750,7 +750,7 @@ namespace dqm4hep {
     void TiXmlElement::SetAttribute( const std::string& _name, const std::string& _value )
     {
       TiXmlAttribute* attrib = attributeSet.FindOrCreate( _name );
-      if ( attrib ) {
+      if ( attrib != nullptr ) {
         attrib->SetValue( _value );
       }
     }
@@ -768,7 +768,7 @@ namespace dqm4hep {
       fprintf( cfile, "<%s", value.c_str() );
 
       const TiXmlAttribute* attrib;
-      for ( attrib = attributeSet.First(); attrib; attrib = attrib->Next() )
+      for ( attrib = attributeSet.First(); attrib != nullptr; attrib = attrib->Next() )
       {
         fprintf( cfile, " " );
         attrib->Print( cfile, depth );
@@ -779,11 +779,11 @@ namespace dqm4hep {
       // 2) An element with only a text child is printed as <foo> text </foo>
       // 3) An element with children is printed on multiple lines.
       TiXmlNode* node;
-      if ( !firstChild )
+      if ( firstChild == nullptr )
       {
         fprintf( cfile, " />" );
       }
-      else if ( firstChild == lastChild && firstChild->ToText() )
+      else if ( firstChild == lastChild && (firstChild->ToText() != nullptr) )
       {
         fprintf( cfile, ">" );
         firstChild->Print( cfile, depth + 1 );
@@ -793,9 +793,9 @@ namespace dqm4hep {
       {
         fprintf( cfile, ">" );
 
-        for ( node = firstChild; node; node=node->NextSibling() )
+        for ( node = firstChild; node != nullptr; node=node->NextSibling() )
         {
-          if ( !node->ToText() )
+          if ( node->ToText() == nullptr )
           {
             fprintf( cfile, "\n" );
           }
@@ -819,14 +819,14 @@ namespace dqm4hep {
       // Clone the attributes, then clone the children.
       const TiXmlAttribute* attribute = nullptr;
       for(	attribute = attributeSet.First();
-          attribute;
+          attribute != nullptr;
           attribute = attribute->Next() )
       {
         target->SetAttribute( attribute->Name(), attribute->Value() );
       }
 
       TiXmlNode* node = nullptr;
-      for ( node = firstChild; node; node = node->NextSibling() )
+      for ( node = firstChild; node != nullptr; node = node->NextSibling() )
       {
         target->LinkEndChild( node->Clone() );
       }
@@ -836,7 +836,7 @@ namespace dqm4hep {
     {
       if ( visitor->VisitEnter( *this, attributeSet.First() ) )
       {
-        for ( const TiXmlNode* node=FirstChild(); node; node=node->NextSibling() )
+        for ( const TiXmlNode* node=FirstChild(); node != nullptr; node=node->NextSibling() )
         {
           if ( !node->Accept( visitor ) )
             break;
@@ -849,7 +849,7 @@ namespace dqm4hep {
     TiXmlNode* TiXmlElement::Clone() const
     {
       auto  clone = new TiXmlElement( Value() );
-      if ( !clone )
+      if ( clone == nullptr )
         return nullptr;
 
       CopyTo( clone );
@@ -860,9 +860,9 @@ namespace dqm4hep {
     const char* TiXmlElement::GetText() const
     {
       const TiXmlNode* child = this->FirstChild();
-      if ( child ) {
+      if ( child != nullptr ) {
         const TiXmlText* childText = child->ToText();
-        if ( childText ) {
+        if ( childText != nullptr ) {
           return childText->Value();
         }
       }
@@ -929,7 +929,7 @@ namespace dqm4hep {
       // reading in binary mode so that tinyxml can normalize the EOL
       FILE* file = TiXmlFOpen( value.c_str (), "rb" );
 
-      if ( file )
+      if ( file != nullptr )
       {
         bool result = LoadFile( file, encoding );
         fclose( file );
@@ -944,7 +944,7 @@ namespace dqm4hep {
 
     bool TiXmlDocument::LoadFile( FILE* file, TiXmlEncoding encoding )
     {
-      if ( !file )
+      if ( file == nullptr )
       {
         SetError( TIXML_ERROR_OPENING_FILE, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return false;
@@ -1014,7 +1014,7 @@ namespace dqm4hep {
       const char LF = 0x0a;
 
       buf[length] = 0;
-      while( *p ) {
+      while( *p != 0 ) {
         assert( p < (buf+length) );
         assert( q <= (buf+length) );
         assert( q <= p );
@@ -1044,7 +1044,7 @@ namespace dqm4hep {
     {
       // The old c stuff lives on...
       FILE* fp = TiXmlFOpen( filename, "w" );
-      if ( fp )
+      if ( fp != nullptr )
       {
         bool result = SaveFile( fp );
         fclose( fp );
@@ -1083,7 +1083,7 @@ namespace dqm4hep {
       target->useMicrosoftBOM = useMicrosoftBOM;
 
       TiXmlNode* node = nullptr;
-      for ( node = firstChild; node; node = node->NextSibling() )
+      for ( node = firstChild; node != nullptr; node = node->NextSibling() )
       {
         target->LinkEndChild( node->Clone() );
       }
@@ -1093,7 +1093,7 @@ namespace dqm4hep {
     TiXmlNode* TiXmlDocument::Clone() const
     {
       auto  clone = new TiXmlDocument();
-      if ( !clone )
+      if ( clone == nullptr )
         return nullptr;
 
       CopyTo( clone );
@@ -1104,7 +1104,7 @@ namespace dqm4hep {
     void TiXmlDocument::Print( FILE* cfile, int depth ) const
     {
       assert( cfile );
-      for ( const TiXmlNode* node=FirstChild(); node; node=node->NextSibling() )
+      for ( const TiXmlNode* node=FirstChild(); node != nullptr; node=node->NextSibling() )
       {
         node->Print( cfile, depth );
         fprintf( cfile, "\n" );
@@ -1116,7 +1116,7 @@ namespace dqm4hep {
     {
       if ( visitor->VisitEnter( *this ) )
       {
-        for ( const TiXmlNode* node=FirstChild(); node; node=node->NextSibling() )
+        for ( const TiXmlNode* node=FirstChild(); node != nullptr; node=node->NextSibling() )
         {
           if ( !node->Accept( visitor ) )
             break;
@@ -1174,18 +1174,18 @@ TiXmlAttribute* TiXmlAttribute::Previous()
       EncodeString( value, &v );
 
       if (value.find ('\"') == TIXML_STRING::npos) {
-        if ( cfile ) {
+        if ( cfile != nullptr ) {
           fprintf (cfile, "%s=\"%s\"", n.c_str(), v.c_str() );
         }
-        if ( str ) {
+        if ( str != nullptr ) {
           (*str) += n; (*str) += "=\""; (*str) += v; (*str) += "\"";
         }
       }
       else {
-        if ( cfile ) {
+        if ( cfile != nullptr ) {
           fprintf (cfile, "%s='%s'", n.c_str(), v.c_str() );
         }
-        if ( str ) {
+        if ( str != nullptr ) {
           (*str) += n; (*str) += "='"; (*str) += v; (*str) += "'";
         }
       }
@@ -1279,7 +1279,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     {
       auto  clone = new TiXmlComment();
 
-      if ( !clone )
+      if ( clone == nullptr )
         return nullptr;
 
       CopyTo( clone );
@@ -1326,7 +1326,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
       TiXmlText* clone = nullptr;
       clone = new TiXmlText( "" );
 
-      if ( !clone )
+      if ( clone == nullptr )
         return nullptr;
 
       CopyTo( clone );
@@ -1374,23 +1374,23 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     void TiXmlDeclaration::Print( FILE* cfile, int /*depth*/, TIXML_STRING* str ) const
     {
-      if ( cfile ) fprintf( cfile, "<?xml " );
-      if ( str )	 (*str) += "<?xml ";
+      if ( cfile != nullptr ) fprintf( cfile, "<?xml " );
+      if ( str != nullptr )	 (*str) += "<?xml ";
 
       if ( !version.empty() ) {
-        if ( cfile ) fprintf (cfile, "version=\"%s\" ", version.c_str ());
-        if ( str ) { (*str) += "version=\""; (*str) += version; (*str) += "\" "; }
+        if ( cfile != nullptr ) fprintf (cfile, "version=\"%s\" ", version.c_str ());
+        if ( str != nullptr ) { (*str) += "version=\""; (*str) += version; (*str) += "\" "; }
       }
       if ( !encoding.empty() ) {
-        if ( cfile ) fprintf (cfile, "encoding=\"%s\" ", encoding.c_str ());
-        if ( str ) { (*str) += "encoding=\""; (*str) += encoding; (*str) += "\" "; }
+        if ( cfile != nullptr ) fprintf (cfile, "encoding=\"%s\" ", encoding.c_str ());
+        if ( str != nullptr ) { (*str) += "encoding=\""; (*str) += encoding; (*str) += "\" "; }
       }
       if ( !standalone.empty() ) {
-        if ( cfile ) fprintf (cfile, "standalone=\"%s\" ", standalone.c_str ());
-        if ( str ) { (*str) += "standalone=\""; (*str) += standalone; (*str) += "\" "; }
+        if ( cfile != nullptr ) fprintf (cfile, "standalone=\"%s\" ", standalone.c_str ());
+        if ( str != nullptr ) { (*str) += "standalone=\""; (*str) += standalone; (*str) += "\" "; }
       }
-      if ( cfile ) fprintf( cfile, "?>" );
-      if ( str )	 (*str) += "?>";
+      if ( cfile != nullptr ) fprintf( cfile, "?>" );
+      if ( str != nullptr )	 (*str) += "?>";
     }
 
 
@@ -1414,7 +1414,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     {
       auto  clone = new TiXmlDeclaration();
 
-      if ( !clone )
+      if ( clone == nullptr )
         return nullptr;
 
       CopyTo( clone );
@@ -1446,7 +1446,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     {
       auto  clone = new TiXmlUnknown();
 
-      if ( !clone )
+      if ( clone == nullptr )
         return nullptr;
 
       CopyTo( clone );
@@ -1516,7 +1516,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     TiXmlAttribute* TiXmlAttributeSet::FindOrCreate( const std::string& _name )
     {
       TiXmlAttribute* attrib = Find( _name );
-      if ( !attrib ) {
+      if ( attrib == nullptr ) {
         attrib = new TiXmlAttribute();
         Add( attrib );
         attrib->SetName( _name );
@@ -1540,7 +1540,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     TiXmlAttribute* TiXmlAttributeSet::FindOrCreate( const char* _name )
     {
       TiXmlAttribute* attrib = Find( _name );
-      if ( !attrib ) {
+      if ( attrib == nullptr ) {
         attrib = new TiXmlAttribute();
         Add( attrib );
         attrib->SetName( _name );
@@ -1588,10 +1588,10 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::FirstChild() const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         TiXmlNode* child = node->FirstChild();
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1600,10 +1600,10 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::FirstChild( const char * value ) const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         TiXmlNode* child = node->FirstChild( value );
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1612,10 +1612,10 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::FirstChildElement() const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         TiXmlElement* child = node->FirstChildElement();
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1624,10 +1624,10 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::FirstChildElement( const char * value ) const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         TiXmlElement* child = node->FirstChildElement( value );
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1636,17 +1636,17 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::Child( int count ) const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         int i;
         TiXmlNode* child = node->FirstChild();
         for (	i=0;
-            child && i<count;
+            (child != nullptr) && i<count;
             child = child->NextSibling(), ++i )
         {
           // nothing
         }
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1655,17 +1655,17 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::Child( const char* value, int count ) const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         int i;
         TiXmlNode* child = node->FirstChild( value );
         for (	i=0;
-            child && i<count;
+            (child != nullptr) && i<count;
             child = child->NextSibling( value ), ++i )
         {
           // nothing
         }
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1674,17 +1674,17 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::ChildElement( int count ) const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         int i;
         TiXmlElement* child = node->FirstChildElement();
         for (	i=0;
-            child && i<count;
+            (child != nullptr) && i<count;
             child = child->NextSiblingElement(), ++i )
         {
           // nothing
         }
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1693,17 +1693,17 @@ TiXmlAttribute* TiXmlAttribute::Previous()
 
     TiXmlHandle TiXmlHandle::ChildElement( const char* value, int count ) const
     {
-      if ( node )
+      if ( node != nullptr )
       {
         int i;
         TiXmlElement* child = node->FirstChildElement( value );
         for (	i=0;
-            child && i<count;
+            (child != nullptr) && i<count;
             child = child->NextSiblingElement( value ), ++i )
         {
           // nothing
         }
-        if ( child )
+        if ( child != nullptr )
           return TiXmlHandle( child );
       }
       return TiXmlHandle( nullptr );
@@ -1726,13 +1726,13 @@ TiXmlAttribute* TiXmlAttribute::Previous()
       buffer += "<";
       buffer += element.Value();
 
-      for( const TiXmlAttribute* attrib = firstAttribute; attrib; attrib = attrib->Next() )
+      for( const TiXmlAttribute* attrib = firstAttribute; attrib != nullptr; attrib = attrib->Next() )
       {
         buffer += " ";
         attrib->Print( nullptr, 0, &buffer );
       }
 
-      if ( !element.FirstChild() )
+      if ( element.FirstChild() == nullptr )
       {
         buffer += " />";
         DoLineBreak();
@@ -1740,7 +1740,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
       else
       {
         buffer += ">";
-        if (    element.FirstChild()->ToText()
+        if (    (element.FirstChild()->ToText() != nullptr)
             && element.LastChild() == element.FirstChild()
             && element.FirstChild()->ToText()->CDATA() == false )
         {
@@ -1760,7 +1760,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     bool TiXmlPrinter::VisitExit( const TiXmlElement& element )
     {
       --depth;
-      if ( !element.FirstChild() )
+      if ( element.FirstChild() == nullptr )
       {
         // nothing.
       }
