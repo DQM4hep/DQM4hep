@@ -1742,7 +1742,7 @@ TiXmlAttribute* TiXmlAttribute::Previous()
         buffer += ">";
         if (    (element.FirstChild()->ToText() != nullptr)
             && element.LastChild() == element.FirstChild()
-            && element.FirstChild()->ToText()->CDATA() == false )
+            && !element.FirstChild()->ToText()->CDATA() )
         {
           simpleTextPrint = true;
           // no DoLineBreak()!
