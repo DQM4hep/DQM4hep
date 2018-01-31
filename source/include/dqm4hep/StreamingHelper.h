@@ -56,32 +56,32 @@ namespace dqm4hep {
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlMap );
+      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlContainer );
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlMap );
+      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlContainer );
 
       /**
        */
       template <typename KeyType, typename VectorType>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, std::vector<VectorType> > &stlMap );
+      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, std::vector<VectorType> > &stlContainer );
 
       /**
        */
       template <typename KeyType, typename VectorType>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, std::vector<VectorType> > &stlMap );
+      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, std::vector<VectorType> > &stlContainer );
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlMap );
+      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlContainer );
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlMap );
+      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlContainer );
 
       /**
        */
@@ -96,22 +96,22 @@ namespace dqm4hep {
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlMap );
+      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlContainer );
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlMap );
+      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlContainer );
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlMap );
+      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlContainer );
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlMap );
+      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlContainer );
     };
 
     //-------------------------------------------------------------------------------------------------

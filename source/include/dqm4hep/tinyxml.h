@@ -266,7 +266,7 @@ namespace dqm4hep {
       /** Expands entities in a string. Note this should not contian the tag's '<', '>', etc,
 		or they will be transformed into entities!
        */
-      static void EncodeString( const TIXML_STRING& str, TIXML_STRING* out );
+      static void EncodeString( const TIXML_STRING& str, TIXML_STRING* outString );
 
       enum
       {
@@ -319,15 +319,15 @@ namespace dqm4hep {
       /*	Reads text. Returns a pointer past the given end tag.
 		Wickedly complex options, but it keeps the (sensitive) code in one place.
        */
-      static const char* ReadText(	const char* in,				// where to start
+      static const char* ReadText(	const char* p,				// where to start
           TIXML_STRING* text,			// the string read
-          bool ignoreWhiteSpace,		// whether to keep the white space
+          bool trimWhiteSpace,		// whether to keep the white space
           const char* endTag,			// what ends this text
-          bool ignoreCase,			// whether to ignore case in the end tag
+          bool caseInsensitive,			// whether to ignore case in the end tag
           TiXmlEncoding encoding );	// the current encoding
 
       // If an entity has been found, transform it into a character.
-      static const char* GetEntity( const char* in, char* value, int* length, TiXmlEncoding encoding );
+      static const char* GetEntity( const char* p, char* value, int* length, TiXmlEncoding encoding );
 
       // Get a character, while interpreting entities.
       // The length can be from 0 to 4 bytes.
@@ -371,7 +371,7 @@ namespace dqm4hep {
       // Ignore case only works for english, and should only be relied on when comparing
       // to English words: StringEqual( p, "version", true ) is fine.
       static bool StringEqual(	const char* p,
-          const char* endTag,
+          const char* tag,
           bool ignoreCase,
           TiXmlEncoding encoding );
 
@@ -528,7 +528,7 @@ namespace dqm4hep {
 
       const TiXmlNode* FirstChild()	const		{ return firstChild; }	///< The first child of this node. Will be null if there are no children.
       TiXmlNode* FirstChild()						{ return firstChild; }
-      const TiXmlNode* FirstChild( const char * value ) const;			///< The first child of this node with the matching 'value'. Will be null if none found.
+      const TiXmlNode* FirstChild( const char * _value ) const;			///< The first child of this node with the matching 'value'. Will be null if none found.
       /// The first child of this node with the matching 'value'. Will be null if none found.
       TiXmlNode* FirstChild( const char * _value ) {
         // Call through to the const version - safe since nothing is changed. Exiting syntax: cast this to a const (always safe)
@@ -538,7 +538,7 @@ namespace dqm4hep {
       const TiXmlNode* LastChild() const	{ return lastChild; }		/// The last child of this node. Will be null if there are no children.
       TiXmlNode* LastChild()	{ return lastChild; }
 
-      const TiXmlNode* LastChild( const char * value ) const;			/// The last child of this node matching 'value'. Will be null if there are no children.
+      const TiXmlNode* LastChild( const char * _value ) const;			/// The last child of this node matching 'value'. Will be null if there are no children.
       TiXmlNode* LastChild( const char * _value ) {
         return const_cast< TiXmlNode* > ((const_cast< const TiXmlNode* >(this))->LastChild( _value ));
       }
@@ -572,7 +572,7 @@ namespace dqm4hep {
       }
 
       /// This flavor of IterateChildren searches for children with a particular 'value'
-      const TiXmlNode* IterateChildren( const char * value, const TiXmlNode* previous ) const;
+      const TiXmlNode* IterateChildren( const char * val, const TiXmlNode* previous ) const;
       TiXmlNode* IterateChildren( const char * _value, const TiXmlNode* previous ) {
         return const_cast< TiXmlNode* >( (const_cast< const TiXmlNode* >(this))->IterateChildren( _value, previous ) );
       }
@@ -597,7 +597,7 @@ namespace dqm4hep {
 
 		@sa InsertEndChild
        */
-      TiXmlNode* LinkEndChild( TiXmlNode* addThis );
+      TiXmlNode* LinkEndChild( TiXmlNode* node );
 
       /** Add a new node related to this. Adds a child before the specified child.
 		Returns a pointer to the new object or NULL if an error occured.
@@ -757,7 +757,7 @@ namespace dqm4hep {
 #endif
 
       // Figure out what is at *p, and parse it. Returns null if it is not an xml node.
-      TiXmlNode* Identify( const char* start, TiXmlEncoding encoding );
+      TiXmlNode* Identify( const char* p, TiXmlEncoding encoding );
 
       TiXmlNode*		parent;
       NodeType		type;
@@ -835,9 +835,9 @@ namespace dqm4hep {
 		A specialized but useful call. Note that for success it returns 0,
 		which is the opposite of almost all other TinyXml calls.
        */
-      int QueryIntValue( int* _value ) const;
+      int QueryIntValue( int* ival ) const;
       /// QueryDoubleValue examines the value string. See QueryIntValue().
-      int QueryDoubleValue( double* _value ) const;
+      int QueryDoubleValue( double* dval ) const;
 
       void SetName( const char* _name )	{ name = _name; }				///< Set the name of this attribute.
       void SetValue( const char* _value )	{ value = _value; }				///< Set the value.
@@ -913,19 +913,19 @@ namespace dqm4hep {
       TiXmlAttributeSet();
       ~TiXmlAttributeSet();
 
-      void Add( TiXmlAttribute* attribute );
-      void Remove( TiXmlAttribute* attribute );
+      void Add( TiXmlAttribute* addMe );
+      void Remove( TiXmlAttribute* removeMe );
 
       const TiXmlAttribute* First()	const	{ return ( sentinel.next == &sentinel ) ? nullptr : sentinel.next; }
       TiXmlAttribute* First()					{ return ( sentinel.next == &sentinel ) ? nullptr : sentinel.next; }
       const TiXmlAttribute* Last() const		{ return ( sentinel.prev == &sentinel ) ? nullptr : sentinel.prev; }
       TiXmlAttribute* Last()					{ return ( sentinel.prev == &sentinel ) ? nullptr : sentinel.prev; }
 
-      TiXmlAttribute*	Find( const char* _name ) const;
+      TiXmlAttribute*	Find( const char* name ) const;
       TiXmlAttribute* FindOrCreate( const char* _name );
 
 #	ifdef TIXML_USE_STL
-      TiXmlAttribute*	Find( const std::string& _name ) const;
+      TiXmlAttribute*	Find( const std::string& name ) const;
       TiXmlAttribute* FindOrCreate( const std::string& _name );
 #	endif
 
@@ -948,7 +948,7 @@ namespace dqm4hep {
     {
     public:
       /// Construct an element.
-      TiXmlElement (const char * in_value);
+      TiXmlElement (const char * _value);
 
 #ifdef TIXML_USE_STL
       /// std::string constructor.
@@ -989,9 +989,9 @@ namespace dqm4hep {
 		an integer, it returns TIXML_WRONG_TYPE. If the attribute
 		does not exist, then TIXML_NO_ATTRIBUTE is returned.
        */
-      int QueryIntAttribute( const char* name, int* _value ) const;
+      int QueryIntAttribute( const char* name, int* ival ) const;
       /// QueryDoubleAttribute examines the attribute - see QueryIntAttribute().
-      int QueryDoubleAttribute( const char* name, double* _value ) const;
+      int QueryDoubleAttribute( const char* name, double* dval ) const;
       /// QueryFloatAttribute examines the attribute - see QueryIntAttribute().
       int QueryFloatAttribute( const char* name, float* _value ) const {
         double d;
@@ -1047,32 +1047,32 @@ namespace dqm4hep {
       /** Sets an attribute of name to a given value. The attribute
 		will be created if it does not exist, or changed if it does.
        */
-      void SetAttribute( const char* name, const char * _value );
+      void SetAttribute( const char* cname, const char * cvalue );
 
 #ifdef TIXML_USE_STL
       const std::string* Attribute( const std::string& name ) const;
       const std::string* Attribute( const std::string& name, int* i ) const;
       const std::string* Attribute( const std::string& name, double* d ) const;
-      int QueryIntAttribute( const std::string& name, int* _value ) const;
-      int QueryDoubleAttribute( const std::string& name, double* _value ) const;
+      int QueryIntAttribute( const std::string& name, int* ival ) const;
+      int QueryDoubleAttribute( const std::string& name, double* dval ) const;
 
       /// STL std::string form.
-      void SetAttribute( const std::string& name, const std::string& _value );
+      void SetAttribute( const std::string& _name, const std::string& _value );
       ///< STL std::string form.
-      void SetAttribute( const std::string& name, int _value );
+      void SetAttribute( const std::string& name, int val );
       ///< STL std::string form.
-      void SetDoubleAttribute( const std::string& name, double value );
+      void SetDoubleAttribute( const std::string& name, double val );
 #endif
 
       /** Sets an attribute of name to a given value. The attribute
 		will be created if it does not exist, or changed if it does.
        */
-      void SetAttribute( const char * name, int value );
+      void SetAttribute( const char * name, int val );
 
       /** Sets an attribute of name to a given value. The attribute
 		will be created if it does not exist, or changed if it does.
        */
-      void SetDoubleAttribute( const char * name, double value );
+      void SetDoubleAttribute( const char * name, double val );
 
       /** Deletes an attribute with the given name.
        */
@@ -1150,7 +1150,7 @@ namespace dqm4hep {
 		Reads the "value" of the element -- another element, or text.
 		This should terminate with the current end tag.
        */
-      const char* ReadValue( const char* in, TiXmlParsingData* prevData, TiXmlEncoding encoding );
+      const char* ReadValue( const char* p, TiXmlParsingData* data, TiXmlEncoding encoding );
 
     private:
       TiXmlAttributeSet attributeSet;
@@ -1251,7 +1251,7 @@ namespace dqm4hep {
 
       /** Walk the XML tree visiting this node and all of its children.
        */
-      bool Accept( TiXmlVisitor* content ) const override;
+      bool Accept( TiXmlVisitor* visitor ) const override;
 
     protected :
       ///  [internal use] Creates a new Element and returns it.
@@ -1320,7 +1320,7 @@ namespace dqm4hep {
         Print( cfile, depth, nullptr );
       }
 
-      const char* Parse( const char* p, TiXmlParsingData* data, TiXmlEncoding encoding ) override;
+      const char* Parse( const char* p, TiXmlParsingData* data, TiXmlEncoding _encoding ) override;
 
       const TiXmlDeclaration* ToDeclaration() const override { return this; } ///< Cast to a more defined type. Will return null not of the requested type.
       TiXmlDeclaration*       ToDeclaration() override       { return this; } ///< Cast to a more defined type. Will return null not of the requested type.
@@ -1372,7 +1372,7 @@ namespace dqm4hep {
 
       /** Walk the XML tree visiting this node and all of its children.
        */
-      bool Accept( TiXmlVisitor* content ) const override;
+      bool Accept( TiXmlVisitor* visitor ) const override;
 
     protected:
       void CopyTo( TiXmlUnknown* target ) const;
@@ -1416,7 +1416,7 @@ namespace dqm4hep {
       /// Save a file using the current document value. Returns true if successful.
       bool SaveFile() const;
       /// Load a file using the given filename. Returns true if successful.
-      bool LoadFile( const char * filename, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
+      bool LoadFile( const char * _filename, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
       /// Save a file using the given filename. Returns true if successful.
       bool SaveFile( const char * filename ) const;
       /** Load a file using the given FILE*. Returns true if successful. Note that this method
@@ -1443,7 +1443,7 @@ namespace dqm4hep {
 		method (either TIXML_ENCODING_LEGACY or TIXML_ENCODING_UTF8 will force TinyXml
 		to use that encoding, regardless of what TinyXml might otherwise try to detect.
        */
-      const char* Parse( const char* p, TiXmlParsingData* data = nullptr, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING ) override;
+      const char* Parse( const char* p, TiXmlParsingData* prevData = nullptr, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING ) override;
 
       /** Get the root element -- the only top level element -- of the document.
 		In well formed XML, there should only be one. TinyXml is tolerant of
@@ -1527,14 +1527,14 @@ namespace dqm4hep {
       /// Print this Document to a FILE stream.
       void Print( FILE* cfile, int depth = 0 ) const override;
       // [internal use]
-      void SetError( int err, const char* errorLocation, TiXmlParsingData* prevData, TiXmlEncoding encoding );
+      void SetError( int err, const char* pError, TiXmlParsingData* data, TiXmlEncoding encoding );
 
       const TiXmlDocument*    ToDocument()    const override { return this; } ///< Cast to a more defined type. Will return null not of the requested type.
       TiXmlDocument*          ToDocument() override          { return this; } ///< Cast to a more defined type. Will return null not of the requested type.
 
       /** Walk the XML tree visiting this node and all of its children.
        */
-      bool Accept( TiXmlVisitor* content ) const override;
+      bool Accept( TiXmlVisitor* visitor ) const override;
 
     protected :
       // [internal use]
@@ -1656,21 +1656,21 @@ namespace dqm4hep {
       /** Return a handle to the "index" child with the given name.
 		The first child is 0, the second 1, etc.
        */
-      TiXmlHandle Child( const char* value, int index ) const;
+      TiXmlHandle Child( const char* value, int count ) const;
       /** Return a handle to the "index" child.
 		The first child is 0, the second 1, etc.
        */
-      TiXmlHandle Child( int index ) const;
+      TiXmlHandle Child( int count ) const;
       /** Return a handle to the "index" child element with the given name.
 		The first child element is 0, the second 1, etc. Note that only TiXmlElements
 		are indexed: other types are not counted.
        */
-      TiXmlHandle ChildElement( const char* value, int index ) const;
+      TiXmlHandle ChildElement( const char* value, int count ) const;
       /** Return a handle to the "index" child element.
 		The first child element is 0, the second 1, etc. Note that only TiXmlElements
 		are indexed: other types are not counted.
        */
-      TiXmlHandle ChildElement( int index ) const;
+      TiXmlHandle ChildElement( int count ) const;
 
 #ifdef TIXML_USE_STL
       TiXmlHandle FirstChild( const std::string& _value ) const				{ return FirstChild( _value.c_str() ); }

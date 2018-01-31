@@ -151,7 +151,7 @@ namespace dqm4hep {
 
       /** Constructor with name and parent dir
        */
-      Directory(const std::string &name, DirectoryPtr parentDir = nullptr);
+      Directory(const std::string &name, DirectoryPtr parent = nullptr);
       
     private:
       std::string                     m_name;

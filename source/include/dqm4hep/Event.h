@@ -85,7 +85,7 @@ namespace dqm4hep {
 
       /** Set the event time stamp
        */
-      void setTimeStamp(const TimePoint &timePoint);
+      void setTimeStamp(const TimePoint &timeStamp);
 
       /** Get the event time stamp
        */
