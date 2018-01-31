@@ -388,11 +388,11 @@ namespace dqm4hep {
       {
         return FirstChild();
       }
-      else
-      {
+      
+      
         assert( previous->parent == this );
         return previous->NextSibling();
-      }
+      
     }
 
 
@@ -402,11 +402,11 @@ namespace dqm4hep {
       {
         return FirstChild( val );
       }
-      else
-      {
+      
+      
         assert( previous->parent == this );
         return previous->NextSibling( val );
-      }
+      
     }
 
 
@@ -935,11 +935,11 @@ namespace dqm4hep {
         fclose( file );
         return result;
       }
-      else
-      {
+      
+      
         SetError( TIXML_ERROR_OPENING_FILE, nullptr, nullptr, TIXML_ENCODING_UNKNOWN );
         return false;
-      }
+      
     }
 
     bool TiXmlDocument::LoadFile( FILE* file, TiXmlEncoding encoding )

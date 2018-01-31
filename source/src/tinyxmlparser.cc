@@ -141,7 +141,7 @@ namespace dqm4hep {
       //	{
       if ( anyByte < 127 )
         return isalpha( anyByte );
-      else
+      
         return 1;	// What else to do? The unicode set is huge...get the english ones right.
       //	}
       //	else
@@ -162,7 +162,7 @@ namespace dqm4hep {
       //	{
       if ( anyByte < 127 )
         return isalnum( anyByte );
-      else
+      
         return 1;	// What else to do? The unicode set is huge...get the english ones right.
       //	}
       //	else
@@ -935,7 +935,7 @@ namespace dqm4hep {
         // All good!
         return;
       }
-      else if ( tag->at( tag->length() - 1 ) == '>' )
+      if ( tag->at( tag->length() - 1 ) == '>' )
       {
         // There is more. Could be:
         //		text
@@ -1026,8 +1026,8 @@ namespace dqm4hep {
             // We are done, once we've found our closing tag.
             return;
           }
-          else
-          {
+          
+          
             // If not a closing tag, id it, and stream.
             const char* tagloc = tag->c_str() + tagIndex;
             TiXmlNode* node = Identify( tagloc, TIXML_DEFAULT_ENCODING );
@@ -1038,7 +1038,7 @@ namespace dqm4hep {
             node = nullptr;
 
             // No return: go around from the beginning: text, closing tag, or node.
-          }
+          
         }
       }
     }
@@ -1104,7 +1104,7 @@ namespace dqm4hep {
           }
           return (p+1);
         }
-        else if ( *p == '>' )
+        if ( *p == '>' )
         {
           // Done with attributes (if there were any.)
           // Read the value -- which can include other
@@ -1134,11 +1134,11 @@ namespace dqm4hep {
             if ( document ) document->SetError( TIXML_ERROR_READING_END_TAG, p, data, encoding );
             return nullptr;
           }
-          else
-          {
+          
+          
             if ( document ) document->SetError( TIXML_ERROR_READING_END_TAG, p, data, encoding );
             return nullptr;
-          }
+          
         }
         else
         {
@@ -1225,8 +1225,8 @@ namespace dqm4hep {
           {
             return p;
           }
-          else
-          {
+          
+          
             TiXmlNode* node = Identify( p, encoding );
             if ( node )
             {
@@ -1237,7 +1237,7 @@ namespace dqm4hep {
             {
               return nullptr;
             }
-          }
+          
         }
         pWithWhiteSpace = p;
         p = SkipWhiteSpace( p, encoding );
@@ -1534,8 +1534,8 @@ namespace dqm4hep {
         p = ReadText( p, &dummy, false, endTag, false, encoding );
         return p;
       }
-      else
-      {
+      
+      
         bool ignoreWhite = true;
 
         const char* end = "<";
@@ -1543,7 +1543,7 @@ namespace dqm4hep {
         if ( p )
           return p-1;	// don't truncate the '<'
         return nullptr;
-      }
+      
     }
 
 #ifdef TIXML_USE_STL

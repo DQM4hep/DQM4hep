@@ -351,7 +351,7 @@ namespace dqm4hep {
           *_value = *p;
           return p+1;
         }
-        else if ( *length )
+        if ( *length )
         {
           //strncpy( _value, p, *length );	// lots of compilers don't like this function (unsafe),
           // and the null terminator isn't needed
@@ -393,10 +393,10 @@ namespace dqm4hep {
           if ( v < 128 ) return tolower( v );
           return v;
         }
-        else
-        {
+        
+        
           return tolower( v );
-        }
+        
       }
       static void ConvertUTF32ToUTF8( unsigned long input, char* output, int* length );
 

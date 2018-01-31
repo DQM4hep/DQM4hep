@@ -123,7 +123,7 @@ namespace dqm4hep {
         dqm_error( "<!-- ERROR loading shared library : {0}\n    ->    {1} -->", libraryName, dlerror() );
         return STATUS_CODE_FAILURE;
       }
-      else
+      
         return STATUS_CODE_SUCCESS;
     }
 
