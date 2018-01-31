@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
 
   ObjectList list;
   storage.getObjects(list);
-  assert_test(list.size() == 0);
+  assert_test(list.empty());
 
   std::shared_ptr<Object> object;
 
