@@ -1710,12 +1710,12 @@ TiXmlAttribute* TiXmlAttribute::Previous()
     }
 
 
-    bool TiXmlPrinter::VisitEnter( const TiXmlDocument& )
+    bool TiXmlPrinter::VisitEnter( const TiXmlDocument&  /*unused*/)
     {
       return true;
     }
 
-    bool TiXmlPrinter::VisitExit( const TiXmlDocument& )
+    bool TiXmlPrinter::VisitExit( const TiXmlDocument&  /*unused*/)
     {
       return true;
     }

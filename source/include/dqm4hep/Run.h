@@ -145,7 +145,7 @@ namespace dqm4hep {
       std::map<std::string, std::string>     m_parametersMap;
       
       template <typename T>
-      friend T &operator <<(T &, const Run &);
+      friend T &operator <<(T & /*out*/, const Run & /*run*/);
     };
 
     //-------------------------------------------------------------------------------------------------

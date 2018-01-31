@@ -292,7 +292,7 @@ namespace dqm4hep {
 
     protected:
 
-      static const char* SkipWhiteSpace( const char*, TiXmlEncoding encoding );
+      static const char* SkipWhiteSpace( const char* /*p*/, TiXmlEncoding encoding );
 
       inline static bool IsWhiteSpace( char c )
       {
@@ -622,7 +622,7 @@ namespace dqm4hep {
       TiXmlNode* PreviousSibling()						{ return prev; }
 
       /// Navigate to a sibling node.
-      const TiXmlNode* PreviousSibling( const char * ) const;
+      const TiXmlNode* PreviousSibling( const char *  /*_value*/) const;
       TiXmlNode* PreviousSibling( const char *_prev ) {
         return const_cast< TiXmlNode* >( (const_cast< const TiXmlNode* >(this))->PreviousSibling( _prev ) );
       }
@@ -639,7 +639,7 @@ namespace dqm4hep {
       TiXmlNode* NextSibling()							{ return next; }
 
       /// Navigate to a sibling node with the given 'value'.
-      const TiXmlNode* NextSibling( const char * ) const;
+      const TiXmlNode* NextSibling( const char *  /*_value*/) const;
       TiXmlNode* NextSibling( const char* _next ) {
         return const_cast< TiXmlNode* >( (const_cast< const TiXmlNode* >(this))->NextSibling( _next ) );
       }
@@ -657,7 +657,7 @@ namespace dqm4hep {
 		Calls NextSibling and ToElement. Will skip all non-Element
 		nodes. Returns 0 if there is not another element.
        */
-      const TiXmlElement* NextSiblingElement( const char * ) const;
+      const TiXmlElement* NextSiblingElement( const char *  /*_value*/) const;
       TiXmlElement* NextSiblingElement( const char *_next ) {
         return const_cast< TiXmlElement* >( (const_cast< const TiXmlNode* >(this))->NextSiblingElement( _next ) );
       }
@@ -955,7 +955,7 @@ namespace dqm4hep {
       TiXmlElement( const std::string& _value );
 #endif
 
-      TiXmlElement( const TiXmlElement& );
+      TiXmlElement( const TiXmlElement&  /*copy*/);
 
       void operator=( const TiXmlElement& base );
 
@@ -1168,7 +1168,7 @@ namespace dqm4hep {
       TiXmlComment( const char* _value ) : TiXmlNode( TiXmlNode::TINYXML_COMMENT ) {
         SetValue( _value );
       }
-      TiXmlComment( const TiXmlComment& );
+      TiXmlComment( const TiXmlComment&  /*copy*/);
       void operator=( const TiXmlComment& base );
 
       ~TiXmlComment()	override = default;
@@ -1424,9 +1424,9 @@ namespace dqm4hep {
 		will be interpreted as an XML file. TinyXML doesn't stream in XML from the current
 		file location. Streaming may be added in the future.
        */
-      bool LoadFile( FILE*, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
+      bool LoadFile( FILE* /*file*/, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING );
       /// Save a file using the given FILE*. Returns true if successful.
-      bool SaveFile( FILE* ) const;
+      bool SaveFile( FILE*  /*fp*/) const;
 
 #ifdef TIXML_USE_STL
       bool LoadFile( const std::string& filename, TiXmlEncoding encoding = TIXML_DEFAULT_ENCODING )			///< STL std::string version.
