@@ -1,137 +1,134 @@
 #################################################
 # cmake file for building DQMCore package
 # @author Eté Rémi
-CMAKE_MINIMUM_REQUIRED( VERSION 2.6 FATAL_ERROR )
+cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
 #################################################
 
 ###############################
 # project name
-PROJECT( DQMCore )
+project( DQMCore )
 
-SET( ${PROJECT_NAME}_VERSION_MAJOR 2 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 3 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
+set( ${PROJECT_NAME}_VERSION_MAJOR 2 )
+set( ${PROJECT_NAME}_VERSION_MINOR 3 )
+set( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 ###############################
 # Require C++11
-INCLUDE( CheckCXXCompilerFlag )
+include( CheckCXXCompilerFlag )
 
-CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
+check_cxx_compiler_flag( "-std=c++11" COMPILER_SUPPORTS_CXX11 )
 
-IF( COMPILER_SUPPORTS_CXX11 )
-  SET (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-ELSE()
-	MESSAGE( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
-ENDIF()
+if( COMPILER_SUPPORTS_CXX11 )
+  set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
+else()
+	message( SEND_ERROR "DQMCore requires C++11 support. Please upgrade your compiler !" )
+endif()
 
 ###############################
 # Dependencies
-LIST( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
-INCLUDE( dqm4hep_settings )
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
+include( dqm4hep_settings )
+set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
 ###############################
 # Define options
-
-OPTION( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
+option( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 
 # ----- Find ROOT package -----
-LIST( APPEND ROOT_COMPONENT_LIST Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree )
-FIND_PACKAGE( ROOT COMPONENTS ${ROOT_COMPONENT_LIST} REQUIRED )
+list( APPEND ROOT_COMPONENT_LIST Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree )
+find_package( ROOT COMPONENTS ${ROOT_COMPONENT_LIST} REQUIRED )
 
 # ----- Find Threads for multithreading -----
-FIND_PACKAGE( Threads REQUIRED )
+find_package( Threads REQUIRED )
 
 # ----- Find MySQL package -----
-FIND_PACKAGE( MySQL REQUIRED )
+find_package( MySQL REQUIRED )
 
 # ----- Find xdrstream package -----
-FIND_PACKAGE( xdrstream REQUIRED )
+find_package( xdrstream REQUIRED )
 
 # ----- Find JSONCPP package -----
-FIND_PACKAGE( JSONCPP REQUIRED )
-
-
+find_package( JSONCPP REQUIRED )
 
 # ----- Include package properties -----
-FOREACH( pkg
-  ROOT
-  MySQL
-  xdrstream
-  JSONCPP )
+foreach( pkg ROOT MySQL xdrstream JSONCPP )
+  include_directories( ${${pkg}_INCLUDE_DIRS} )
+  link_libraries( ${${pkg}_LIBRARIES} )
+  add_definitions ( ${${pkg}_DEFINITIONS} )
 
-  INCLUDE_DIRECTORIES( ${${pkg}_INCLUDE_DIRS} )
-  LINK_LIBRARIES( ${${pkg}_LIBRARIES} )
-  ADD_DEFINITIONS ( ${${pkg}_DEFINITIONS} )
-
-  LIST( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${${pkg}_INCLUDE_DIRS} )
-  LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${${pkg}_LIBRARY_DIRS} )
-  LIST( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${${pkg}_LIBRARIES} )
-
-ENDFOREACH()
+  list( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${${pkg}_INCLUDE_DIRS} )
+  list( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${${pkg}_LIBRARY_DIRS} )
+  list( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${${pkg}_LIBRARIES} )
+endforeach()
 
 # ----- Install doc -----
-IF( INSTALL_DOC )
-    FIND_PACKAGE( Doxygen )
+if( INSTALL_DOC )
+    find_package( Doxygen )
 
-    IF( DOXYGEN_FOUND )
-        ADD_SUBDIRECTORY( ./doc )
-    ELSE()
-        MESSAGE( SEND_ERROR "Could not find doxygen required to build documentation" )
-        MESSAGE( "Please install doxygen or set INSTALL_DOC to OFF" )
-        MESSAGE( "" )
-    ENDIF()
-ENDIF()
+    if( DOXYGEN_FOUND )
+        add_subdirectory( ./doc )
+    else()
+        message( SEND_ERROR "Could not find doxygen required to build documentation" )
+        message( "Please install doxygen or set INSTALL_DOC to OFF" )
+        message( "" )
+    endif()
+endif()
 
 ###############################
 # Generate DQMCoreConfig.h
-CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.h.cmake.in"
+configure_file( "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.h.cmake.in"
     "${PROJECT_SOURCE_DIR}/source/include/${PROJECT_NAME}Config.h" @ONLY )
 
 ###############################
 # Add source directory
-ADD_SUBDIRECTORY( ./source )
+add_subdirectory( ./source )
 
 ###############################
 # Install scripts files
-FILE ( GLOB SCRIPTS_FILES scripts/*
+file( 
+  GLOB SCRIPTS_FILES scripts/*
 	PATTERN "*~" EXCLUDE
-    PATTERN "*#*" EXCLUDE
-    PATTERN ".#*" EXCLUDE
-    PATTERN "*CVS" EXCLUDE
-    PATTERN "*.svn" EXCLUDE
+  PATTERN "*#*" EXCLUDE
+  PATTERN ".#*" EXCLUDE
+  PATTERN "*CVS" EXCLUDE
+  PATTERN "*.svn" EXCLUDE
 )
 
-INSTALL(
+install(
 	FILES ${SCRIPTS_FILES}
 	DESTINATION bin
-    PERMISSIONS
-    OWNER_READ OWNER_WRITE OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE
+  PERMISSIONS
+  OWNER_READ OWNER_WRITE OWNER_EXECUTE
+  GROUP_READ GROUP_EXECUTE
+  WORLD_READ WORLD_EXECUTE
 )
 
 ###############################
 # Install conf files
-FILE ( GLOB CONF_FILES conf/*
+file( 
+  GLOB CONF_FILES conf/*
 	PATTERN "*~" EXCLUDE
-    PATTERN "*#*" EXCLUDE
-    PATTERN ".#*" EXCLUDE
-    PATTERN "*CVS" EXCLUDE
-    PATTERN "*.svn" EXCLUDE
+  PATTERN "*#*" EXCLUDE
+  PATTERN ".#*" EXCLUDE
+  PATTERN "*CVS" EXCLUDE
+  PATTERN "*.svn" EXCLUDE
 )
 
-INSTALL(
+install(
 	FILES ${CONF_FILES}
 	DESTINATION conf
 )
 
-INSTALL ( DIRECTORY cmake DESTINATION . PATTERN "*.in" EXCLUDE )
+install( 
+  DIRECTORY cmake 
+  DESTINATION . 
+  PATTERN "*.in" EXCLUDE 
+)
 
 ###############################
 # display some variables and write them to cache
-DISPLAY_STD_VARIABLES()
+display_std_variables()
 
 ###############################
 # generate and install following configuration files
-GENERATE_PACKAGE_CONFIGURATION_FILES( ${PROJECT_NAME}Config.cmake ${PROJECT_NAME}ConfigVersion.cmake ${PROJECT_NAME}LibDeps.cmake )
+generate_package_configuration_files( ${PROJECT_NAME}Config.cmake ${PROJECT_NAME}ConfigVersion.cmake ${PROJECT_NAME}LibDeps.cmake )

@@ -5,121 +5,107 @@
 #######################################################
 
 # include directories
-INCLUDE_DIRECTORIES( BEFORE include )
+include_directories( BEFORE include )
 
 # require proper c++
-ADD_DEFINITIONS( "-pedantic -Wunused-value -O2" )
-ADD_DEFINITIONS("-Wno-long-long -Wreturn-type -Werror")
+add_definitions( "-pedantic -Wunused-value -O2" )
+add_definitions("-Wno-long-long -Wreturn-type -Werror")
 
 # -------------------------------------------------
 # build the global library
 
-SET (
+set(
   ${PROJECT_NAME}DictHeaders
   ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/MonitorElement.h
 )
 
-SET( DICT_INCLUDE_DIRS "" )
-GET_DIRECTORY_PROPERTY(IncludeDirs INCLUDE_DIRECTORIES)
+set( DICT_INCLUDE_DIRS "" )
 
-FOREACH( dir ${IncludeDirs} )
-   SET( DICT_INCLUDE_DIRS ${DICT_INCLUDE_DIRS}\t-I${dir} )
-ENDFOREACH(dir)
+get_directory_property( IncludeDirs INCLUDE_DIRECTORIES )
 
-SET( LIB_HEADERS_PKG ${${PROJECT_NAME}DictHeaders} )
-SET( LINK_DEF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/LinkDef.h )
-SET( ROOT_DICT_OUTPUT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/dict" )
-SET( ROOT_PCM_FILE_NAME "${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict_rdict.pcm" )
+foreach( dir ${IncludeDirs} )
+   set( DICT_INCLUDE_DIRS ${DICT_INCLUDE_DIRS}\t-I${dir} )
+endforeach(dir)
 
-ADD_CUSTOM_COMMAND( OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict_rdict.pcm
-                   COMMAND mkdir -p ${ROOT_DICT_OUTPUT_DIR}
-                   COMMAND ${ROOT_CINT_EXECUTABLE} -f ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc -c ${DICT_INCLUDE_DIRS} -p ${LIB_HEADERS_PKG} ${LINK_DEF_FILE}
-                   COMMENT "Generating ROOT dictionary for DQMCore library."
-                   DEPENDS ${LIB_HEADERS_PKG}
+set( LIB_HEADERS_PKG ${${PROJECT_NAME}DictHeaders} )
+set( LINK_DEF_FILE ${CMAKE_CURRENT_SOURCE_DIR}/include/dqm4hep/LinkDef.h )
+set( ROOT_DICT_OUTPUT_DIR "${PROJECT_BINARY_DIR}/dict" )
+set( ROOT_PCM_FILE_NAME "${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict_rdict.pcm" )
+
+add_custom_command( 
+  OUTPUT ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict_rdict.pcm
+  COMMAND mkdir -p ${ROOT_DICT_OUTPUT_DIR}
+  COMMAND ${ROOT_CINT_EXECUTABLE} -f ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc -c ${DICT_INCLUDE_DIRS} -p ${LIB_HEADERS_PKG} ${LINK_DEF_FILE}
+  COMMENT "Generating ROOT dictionary for DQMCore library ..."
+  DEPENDS ${LIB_HEADERS_PKG}
 )
 
-SET( SRC_FILES ${SRC_FILES} src/Archiver.cc )
-SET( SRC_FILES ${SRC_FILES} src/QualityTest.cc )
-SET( SRC_FILES ${SRC_FILES} src/Logger.cc )
-SET( SRC_FILES ${SRC_FILES} src/DBInterface.cc )
-SET( SRC_FILES ${SRC_FILES} src/tinystr.cc )
-SET( SRC_FILES ${SRC_FILES} src/tinyxml.cc )
-SET( SRC_FILES ${SRC_FILES} src/tinyxmlerror.cc )
-SET( SRC_FILES ${SRC_FILES} src/tinyxmlparser.cc )
-SET( SRC_FILES ${SRC_FILES} src/XmlHelper.cc )
-SET( SRC_FILES ${SRC_FILES} src/XMLParser.cc )
-SET( SRC_FILES ${SRC_FILES} src/Event.cc )
-SET( SRC_FILES ${SRC_FILES} src/Path.cc )
-SET( SRC_FILES ${SRC_FILES} src/PluginManager.cc )
-SET( SRC_FILES ${SRC_FILES} src/Plugin.cc )
-SET( SRC_FILES ${SRC_FILES} src/GenericEvent.cc )
-SET( SRC_FILES ${SRC_FILES} src/Run.cc )
-SET( SRC_FILES ${SRC_FILES} src/Version.cc )
-SET( SRC_FILES ${SRC_FILES} src/MonitorElement.cc )
-SET( SRC_FILES ${SRC_FILES} src/MonitorElementManager.cc )
-AUX_SOURCE_DIRECTORY( src/qtest SRC_FILES )
+aux_source_directory( src SRC_FILES )
+aux_source_directory( src/qtest SRC_FILES )
 
-ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
-TARGET_LINK_LIBRARIES( ${PROJECT_NAME} ${MySQL_LIBRARIES} ${JSONCPP_LIBRARIES} ${xdrstream_LIBRARIES} )
-INSTALL( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib )
-INSTALL( FILES ${ROOT_PCM_FILE_NAME} DESTINATION lib )
-
+add_shared_library( ${PROJECT_NAME} ${SRC_FILES} ${ROOT_DICT_OUTPUT_DIR}/${PROJECT_NAME}Dict.cc )
+target_link_libraries( ${PROJECT_NAME} ${MySQL_LIBRARIES} ${JSONCPP_LIBRARIES} ${xdrstream_LIBRARIES} )
+install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib )
+install( FILES ${ROOT_PCM_FILE_NAME} DESTINATION lib )
 
 # -------------------------------------------------
 # build all binaries in main directory
-FILE(GLOB MAIN_SRCS "main/*.cc")
+file( GLOB MAIN_SRCS "main/*.cc" )
 
-FOREACH( MAIN_SRC ${MAIN_SRCS} )
-  GET_FILENAME_COMPONENT( MAIN_SRC_WITHOUT_EXT ${MAIN_SRC} NAME_WE )
-  ADD_EXECUTABLE( ${MAIN_SRC_WITHOUT_EXT} main/${MAIN_SRC_WITHOUT_EXT}.cc )
-  TARGET_LINK_LIBRARIES( ${MAIN_SRC_WITHOUT_EXT} ${PROJECT_NAME} )
-  INSTALL (
+foreach( MAIN_SRC ${MAIN_SRCS} )
+  get_filename_component( MAIN_SRC_WITHOUT_EXT ${MAIN_SRC} NAME_WE )
+  add_executable( ${MAIN_SRC_WITHOUT_EXT} main/${MAIN_SRC_WITHOUT_EXT}.cc )
+  target_link_libraries( ${MAIN_SRC_WITHOUT_EXT} ${PROJECT_NAME} )
+  install (
       TARGETS ${MAIN_SRC_WITHOUT_EXT}
       RUNTIME DESTINATION bin
   )
-ENDFOREACH()
+endforeach()
 
 
 # -------------------------------------------------
-# build unit test binaries
-IF( BUILD_TESTS )
-  ENABLE_TESTING()
-  FILE(GLOB TEST_SRCS "tests/*.cc")
+# build unit tests
+if( BUILD_TESTS )
+  enable_testing()
+  
+  file( GLOB TEST_SRCS "tests/*.cc" )
 
-  FOREACH( TEST_SRC ${TEST_SRCS} )
-    GET_FILENAME_COMPONENT( TEST_SRC_WITHOUT_EXT ${TEST_SRC} NAME_WE )
-    ADD_EXECUTABLE( ${TEST_SRC_WITHOUT_EXT} tests/${TEST_SRC_WITHOUT_EXT}.cc )
-    TARGET_LINK_LIBRARIES( ${TEST_SRC_WITHOUT_EXT} ${PROJECT_NAME} )
-    INSTALL (
+  foreach( TEST_SRC ${TEST_SRCS} )
+    get_filename_component( TEST_SRC_WITHOUT_EXT ${TEST_SRC} NAME_WE )
+    add_executable( ${TEST_SRC_WITHOUT_EXT} tests/${TEST_SRC_WITHOUT_EXT}.cc )
+    target_link_libraries( ${TEST_SRC_WITHOUT_EXT} ${PROJECT_NAME} )
+    install (
         TARGETS ${TEST_SRC_WITHOUT_EXT}
         RUNTIME DESTINATION bin/tests
     )
     
-    SET( TEST_ARGS "" )
+    set( TEST_ARGS "" )
     
-    IF( ${TEST_SRC_WITHOUT_EXT} STREQUAL "test-xmlparser" )
-      SET( TEST_ARGS "${PROJECT_SOURCE_DIR}/tests/test_xmlparser.xml" )
-    ENDIF()
+    if( ${TEST_SRC_WITHOUT_EXT} STREQUAL "test-xmlparser" )
+      set( TEST_ARGS "${PROJECT_SOURCE_DIR}/tests/test_xmlparser.xml" )
+    endif()
     
-    ADD_TEST( ${TEST_SRC_WITHOUT_EXT}-test ${PROJECT_BINARY_DIR}/bin/${TEST_SRC_WITHOUT_EXT} ${TEST_ARGS} )
-  ENDFOREACH()
+    add_test( ${TEST_SRC_WITHOUT_EXT}-test ${PROJECT_BINARY_DIR}/bin/${TEST_SRC_WITHOUT_EXT} ${TEST_ARGS} )
+  endforeach()
 
-  CONFIGURE_FILE( "${PROJECT_SOURCE_DIR}/cmake/quality-test-test.in"
+  configure_file( "${PROJECT_SOURCE_DIR}/cmake/quality-test-test.in"
       "${PROJECT_BINARY_DIR}/bin/quality-test-test" @ONLY )
 
-  INSTALL(
+  install(
   	FILES ${PROJECT_BINARY_DIR}/bin/quality-test-test
   	DESTINATION bin/tests
-      PERMISSIONS
-      OWNER_READ OWNER_WRITE OWNER_EXECUTE
-      GROUP_READ GROUP_EXECUTE
-      WORLD_READ WORLD_EXECUTE
+    PERMISSIONS
+    OWNER_READ OWNER_WRITE OWNER_EXECUTE
+    GROUP_READ GROUP_EXECUTE
+    WORLD_READ WORLD_EXECUTE
   )
 
-  ADD_TEST( quality-test-test ${CMAKE_INSTALL_PREFIX}/bin/tests/quality-test-test )
+  add_test( quality-test-test ${CMAKE_INSTALL_PREFIX}/bin/tests/quality-test-test )
+endif()
 
-ENDIF()
+dqm4hep_run_clang_tidy()
+dqm4hep_run_clang_format()
 
 # -------------------------------------------------
 # install headers
-INSTALL_DIRECTORY( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
+install_directory( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
