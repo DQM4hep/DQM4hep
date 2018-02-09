@@ -188,6 +188,25 @@ namespace dqm4hep {
        */
       virtual StatusCode init();
 
+      /**
+       *  @brief  Set the warning and error limits on quality test result.
+       *          The limits must be ordered as 0 < error < warning < 1, else throws an exception
+       *
+       *  @param  warning the warning limit
+       *  @param  error the error limit
+       */
+      void setLimits(float warning, float error);
+
+      /**
+       *  @brief  Get the warning limit
+       */
+      float warningLimit() const;
+
+      /**
+       *  @brief  Get the error limit
+       */
+      float errorLimit() const;
+
     protected:
       /** Runs a quality test on the given monitor element
        */
@@ -199,11 +218,17 @@ namespace dqm4hep {
       void fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const;
 
     private:
-      std::string m_type; ///< Quality test type (usually class name)
-      std::string m_name; ///< Quality test name
+      std::string m_type = {""};  ///< Quality test type (usually class name)
+      std::string m_name = {""};  ///< Quality test name
+      float m_warningLimit = {0}; ///< The quality test warning threshold
+      float m_errorLimit = {0};   ///< The quality test error threshold
 
     protected:
       std::string m_description; ///< Quality test description
+
+    public:
+      static constexpr float defaultWarningLimit = {0.8};
+      static constexpr float defaultErrorLimit = {0.5};
     };
 
     //-------------------------------------------------------------------------------------------------

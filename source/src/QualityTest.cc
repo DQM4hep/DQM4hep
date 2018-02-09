@@ -284,7 +284,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     QualityTest::QualityTest(const std::string &type, const std::string &name)
-        : m_type(type), m_name(name), m_description("") {
+        : m_type(type),
+          m_name(name),
+          m_description(""),
+          m_warningLimit(defaultWarningLimit),
+          m_errorLimit(defaultErrorLimit) {
       /* nop */
     }
 
@@ -355,6 +359,30 @@ namespace dqm4hep {
         report.m_quality = 0.f;
         report.m_executed = false;
       }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void QualityTest::setLimits(float warning, float error) {
+      if (warning < 0.f || error > 1.f || warning < error) {
+        dqm_error("QualityTest::setLimits: Wrong limits provided (warning = {0}, error = {1})!", warning, error);
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+      }
+
+      m_warningLimit = warning;
+      m_errorLimit = error;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float QualityTest::warningLimit() const {
+      return m_warningLimit;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    float QualityTest::errorLimit() const {
+      return m_errorLimit;
     }
 
     //-------------------------------------------------------------------------------------------------
