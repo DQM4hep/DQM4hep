@@ -5,7 +5,7 @@ ls -la
 mkdir -p build
 cd build
 
-cmake -DINSTALL_DOC=OFF -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake ..
+cmake -DINSTALL_DOC=OFF -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake -Dxdrstream_DIR=$PWD/../dependencies/xdrstream -DDQMCore_DIR=$PWD/../dependencies/dqm4hep-core ..
 
 if [ $? -ne 0 ]; then
     echo "Failed to run cmake"
