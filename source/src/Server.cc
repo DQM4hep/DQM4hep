@@ -27,6 +27,7 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/Server.h>
+#include <dqm4hep/Internal.h>
 
 // -- std headers
 #include <sys/utsname.h>
@@ -301,7 +302,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    Signal<int> &Server::onClientExit()
+    core::Signal<int> &Server::onClientExit()
     {
       return m_clientExitSignal;
     }
@@ -375,70 +376,39 @@ namespace dqm4hep {
 
     void Server::handleServerInfoRequest(const Buffer &/*request*/, Buffer &response)
     {
-      Json::Value responseValue, serverInfo;
-      serverInfo["name"] = m_name;
-      responseValue["server"] = serverInfo;
+      // get the list of services, request handlers and command handlers 
+      core::StringVector serviceList, requestHandlerList, commandHandlerList;
 
-      // uname
-      struct utsname unameStruct;
-      uname(&unameStruct);
-
-      // host name
-      char host[256];
-      gethostname(host, 256);
-
-      Json::Value hostInfo;
-      hostInfo["name"] = host;
-      hostInfo["system"] = unameStruct.sysname;
-      hostInfo["node"] = unameStruct.nodename;
-      hostInfo["release"] = unameStruct.release;
-      hostInfo["version"] = unameStruct.version;
-      hostInfo["machine"] = unameStruct.machine;
-      responseValue["host"] = hostInfo;
-
-      Json::Value serviceList(Json::arrayValue);
-      unsigned int index(0);
-
-      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
-      {
-        const std::string &name(iter->second->name());
-        serviceList[index] = name;
-        ++index;
+      for(auto service : m_serviceMap) {
+        serviceList.push_back(service.second->name());
+      }
+      
+      for(auto request : m_requestHandlerMap) {
+        requestHandlerList.push_back(request.second->name());
       }
 
-      responseValue["services"] = serviceList;
-
-      Json::Value requestHandlerList;
-      index = 0;
-
-      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        const std::string &name(iter->second->name());
-        requestHandlerList[index] = name;
-        ++index;
+      for(auto command : m_commandHandlerMap) {
+        commandHandlerList.push_back(command.second->name());
       }
+      
+      // get host info
+      core::StringMap hostInfo;
+      core::fillHostInfo(hostInfo);
 
-      responseValue["requestHandlers"] = requestHandlerList;
-
-      Json::Value commandHandlerList;
-      index = 0;
-
-      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        const std::string &name(iter->second->name());
-        commandHandlerList[index] = name;
-
-        ++index;
-      }
-
-      responseValue["commandHandlers"] = commandHandlerList;
-
-      Json::StreamWriterBuilder builder;
-      std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-      std::ostringstream jsonResponse;
-      writer->write(responseValue, &jsonResponse);
-
-      response.adopt(jsonResponse.str().c_str(), jsonResponse.str().size());
+      core::json jsonResponse = {
+        {"server", {
+          {"name", m_name}
+        }},
+        {"host", hostInfo},
+        {"services", serviceList},
+        {"requestHandlers", requestHandlerList},
+        {"commandHandlers", commandHandlerList}
+      };
+      
+      std::string serializedJson = jsonResponse.dump();
+      auto model = response.createModel<std::string>();
+      response.setModel(model);
+      model->move(std::move(serializedJson));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -595,7 +565,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    Signal<void> &Server::Timer::onTimeout()
+    core::Signal<void> &Server::Timer::onTimeout()
     {
       return m_timeoutSignal;
     }

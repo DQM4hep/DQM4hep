@@ -32,6 +32,8 @@
 // -- dqm4hep headers
 #include <dqm4hep/Service.h>
 #include <dqm4hep/RequestHandler.h>
+#include <dqm4hep/NetBuffer.h>
+#include <dqm4hep/Signal.h>
 
 // -- dim headers
 #include <dis.hxx>
@@ -214,7 +216,7 @@ namespace dqm4hep {
       /**
        *  @brief  Get the signal processed on client exit 
        */
-      Signal<int> &onClientExit();
+      core::Signal<int> &onClientExit();
       
       /**
        *  @brief  Get the client id. To be used inside callbacks
@@ -298,12 +300,12 @@ namespace dqm4hep {
         void stopTimer();
         void setSingleShot(bool single);
         bool singleShot() const;
-        Signal<void> &onTimeout();
+        core::Signal<void> &onTimeout();
       
       private:
         void timerHandler();
       private:
-        Signal<void>        m_timeoutSignal;
+        core::Signal<void>  m_timeoutSignal;
         bool                m_singleShot = true;
         Server             *m_pServer = nullptr;
         int                 m_period = 10;
@@ -324,7 +326,7 @@ namespace dqm4hep {
       RequestHandlerMap                              m_requestHandlerMap;    ///< The map of registered request handlers
       CommandHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
       RequestHandler                                 m_serverInfoHandler;    ///< The built-in request handler for server info
-      Signal<int>                                    m_clientExitSignal;     ///< The signal emitted whenever a client exits
+      core::Signal<int>                              m_clientExitSignal;     ///< The signal emitted whenever a client exits
       TimerPtrVector                                 m_timers;               ///< The list of timers
     };
 
