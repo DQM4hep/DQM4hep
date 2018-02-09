@@ -26,8 +26,8 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/Server.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/Server.h>
 
 // -- std headers
 #include <sys/utsname.h>
@@ -40,96 +40,85 @@ namespace dqm4hep {
 
   namespace net {
 
-    Server::Server(const std::string &name) :
-        m_name(name),
-        m_started(false),
-        m_serverInfoHandler(this, "/" + m_name + "/info", this, &Server::handleServerInfoRequest)
-    {
+    Server::Server(const std::string &name)
+        : m_name(name),
+          m_started(false),
+          m_serverInfoHandler(this, "/" + m_name + "/info", this, &Server::handleServerInfoRequest) {
       DimServer::addClientExitHandler(this);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Server::~Server()
-    {
+    Server::~Server() {
       this->stop();
       this->clear();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Server::name() const
-    {
+    const std::string &Server::name() const {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::start()
-    {
-      if(m_started)
+    void Server::start() {
+      if (m_started)
         return;
 
-      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
-      {
-        if(!iter->second->isServiceConnected())
+      for (auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end(); endIter != iter; ++iter) {
+        if (!iter->second->isServiceConnected())
           iter->second->connectService();
       }
 
-      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        if(!iter->second->isHandlingRequest())
+      for (auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end(); endIter != iter; ++iter) {
+        if (!iter->second->isHandlingRequest())
           iter->second->startHandlingRequest();
       }
 
-      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        if(!iter->second->isHandlingCommands())
+      for (auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end(); endIter != iter; ++iter) {
+        if (!iter->second->isHandlingCommands())
           iter->second->startHandlingCommands();
       }
 
-      if(!m_serverInfoHandler.isHandlingRequest())
+      if (!m_serverInfoHandler.isHandlingRequest())
         m_serverInfoHandler.startHandlingRequest();
 
-      DimServer::start(const_cast<char*>(m_name.c_str()));
-      
-      for(auto timer : m_timers)
+      DimServer::start(const_cast<char *>(m_name.c_str()));
+
+      for (auto timer : m_timers)
         timer->startTimer();
-      
+
       m_started = true;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stop()
-    {
-      if(!m_started)
+    void Server::stop() {
+      if (!m_started)
         return;
 
-      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
-      {
-        if(iter->second->isServiceConnected())
+      for (auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end(); endIter != iter; ++iter) {
+        if (iter->second->isServiceConnected())
           iter->second->disconnectService();
       }
 
-      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        if(iter->second->isHandlingRequest())
+      for (auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end(); endIter != iter; ++iter) {
+        if (iter->second->isHandlingRequest())
           iter->second->stopHandlingRequest();
       }
 
-      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
-      {
-        if(iter->second->isHandlingCommands())
+      for (auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end(); endIter != iter; ++iter) {
+        if (iter->second->isHandlingCommands())
           iter->second->stopHandlingCommands();
       }
 
-      if(m_serverInfoHandler.isHandlingRequest())
+      if (m_serverInfoHandler.isHandlingRequest())
         m_serverInfoHandler.stopHandlingRequest();
-        
-      for(auto timer : m_timers)
+
+      for (auto timer : m_timers)
         timer->stopTimer();
-      
+
       m_timers.clear();
 
       DimServer::stop();
@@ -138,22 +127,20 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isRunning() const
-    {
+    bool Server::isRunning() const {
       return m_started;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::clear()
-    {
-      for(auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end() ; endIter != iter ; ++iter)
+    void Server::clear() {
+      for (auto iter = m_serviceMap.begin(), endIter = m_serviceMap.end(); endIter != iter; ++iter)
         delete iter->second;
 
-      for(auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end() ; endIter != iter ; ++iter)
+      for (auto iter = m_requestHandlerMap.begin(), endIter = m_requestHandlerMap.end(); endIter != iter; ++iter)
         delete iter->second;
 
-      for(auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end() ; endIter != iter ; ++iter)
+      for (auto iter = m_commandHandlerMap.begin(), endIter = m_commandHandlerMap.end(); endIter != iter; ++iter)
         delete iter->second;
 
       m_serviceMap.clear();
@@ -165,162 +152,144 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    Service *Server::createService(const std::string &name)
-    {
-      if(name.empty())
+    Service *Server::createService(const std::string &name) {
+      if (name.empty())
         throw std::runtime_error("Server::createService(): service name is invalid");
 
       auto findIter = m_serviceMap.find(name);
 
-      if(findIter != m_serviceMap.end())
+      if (findIter != m_serviceMap.end())
         return findIter->second;
 
-      if(Server::serviceAlreadyRunning(name))
+      if (Server::serviceAlreadyRunning(name))
         throw std::runtime_error("Server::createService(): service '" + name + "' already running on network");
 
       // first insert nullptr, then create the service
       std::pair<ServiceMap::iterator, bool> inserted = m_serviceMap.insert(ServiceMap::value_type(name, nullptr));
 
-      if(inserted.second)
-      {
+      if (inserted.second) {
         Service *pService = new Service(this, name);
         inserted.first->second = pService;
 
-        if(this->isRunning())
+        if (this->isRunning())
           pService->connectService();
 
         return pService;
-      }
-      else
+      } else
         throw;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isServiceRegistered(const std::string &name) const
-    {
+    bool Server::isServiceRegistered(const std::string &name) const {
       return (m_serviceMap.find(name) != m_serviceMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isRequestHandlerRegistered(const std::string &name) const
-    {
+    bool Server::isRequestHandlerRegistered(const std::string &name) const {
       return (m_requestHandlerMap.find(name) != m_requestHandlerMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isCommandHandlerRegistered(const std::string &name) const
-    {
+    bool Server::isCommandHandlerRegistered(const std::string &name) const {
       return (m_commandHandlerMap.find(name) != m_commandHandlerMap.end());
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::startService(const std::string &name)
-    {
+    void Server::startService(const std::string &name) {
       Service *pService = this->service(name);
 
-      if(nullptr != pService && !pService->isServiceConnected())
+      if (nullptr != pService && !pService->isServiceConnected())
         pService->connectService();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stopService(const std::string &name)
-    {
+    void Server::stopService(const std::string &name) {
       Service *pService = this->service(name);
 
-      if(nullptr != pService && pService->isServiceConnected())
+      if (nullptr != pService && pService->isServiceConnected())
         pService->disconnectService();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::startRequestHandler(const std::string &name)
-    {
+    void Server::startRequestHandler(const std::string &name) {
       RequestHandler *pRequestHandler = this->requestHandler(name);
 
-      if(nullptr != pRequestHandler && !pRequestHandler->isHandlingRequest())
+      if (nullptr != pRequestHandler && !pRequestHandler->isHandlingRequest())
         pRequestHandler->startHandlingRequest();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stopRequestHandler(const std::string &name)
-    {
+    void Server::stopRequestHandler(const std::string &name) {
       RequestHandler *pRequestHandler = this->requestHandler(name);
 
-      if(nullptr != pRequestHandler && pRequestHandler->isHandlingRequest())
+      if (nullptr != pRequestHandler && pRequestHandler->isHandlingRequest())
         pRequestHandler->stopHandlingRequest();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::startCommandHandler(const std::string &name)
-    {
+    void Server::startCommandHandler(const std::string &name) {
       CommandHandler *pCommandHandler = this->commandHandler(name);
 
-      if(nullptr != pCommandHandler && !pCommandHandler->isHandlingCommands())
+      if (nullptr != pCommandHandler && !pCommandHandler->isHandlingCommands())
         pCommandHandler->startHandlingCommands();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::stopCommandHandler( const std::string &name)
-    {
+    void Server::stopCommandHandler(const std::string &name) {
       CommandHandler *pCommandHandler = this->commandHandler(name);
 
-      if(nullptr != pCommandHandler && pCommandHandler->isHandlingCommands())
+      if (nullptr != pCommandHandler && pCommandHandler->isHandlingCommands())
         pCommandHandler->stopHandlingCommands();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Service *Server::service(const std::string &name) const
-    {
+    Service *Server::service(const std::string &name) const {
       auto findIter = m_serviceMap.find(name);
       return (findIter == m_serviceMap.end() ? nullptr : findIter->second);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    RequestHandler *Server::requestHandler(const std::string &name) const
-    {
+    RequestHandler *Server::requestHandler(const std::string &name) const {
       auto findIter = m_requestHandlerMap.find(name);
       return (findIter == m_requestHandlerMap.end() ? nullptr : findIter->second);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    CommandHandler *Server::commandHandler(const std::string &name) const
-    {
+    CommandHandler *Server::commandHandler(const std::string &name) const {
       auto findIter = m_commandHandlerMap.find(name);
       return (findIter == m_commandHandlerMap.end() ? nullptr : findIter->second);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    core::Signal<int> &Server::onClientExit()
-    {
+
+    core::Signal<int> &Server::onClientExit() {
       return m_clientExitSignal;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    int Server::clientId() const
-    {
+
+    int Server::clientId() const {
       return DimServer::getClientId();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    std::string Server::dnsNode()
-    {
+    std::string Server::dnsNode() {
       char *pDnsNode = DimServer::getDnsNode();
 
-      if(pDnsNode)
+      if (pDnsNode)
         return pDnsNode;
 
       pDnsNode = getenv("DIM_DNS_NODE");
@@ -329,23 +298,20 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    int Server::dnsPort()
-    {
+    int Server::dnsPort() {
       return DimServer::getDnsPort();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    std::vector<std::string> Server::runningServers()
-    {
+    std::vector<std::string> Server::runningServers() {
       std::vector<std::string> runningServers;
 
       DimBrowser browser;
       browser.getServers();
       char *pServer, *pNode;
 
-      while(browser.getNextServer(pServer, pNode))
-      {
+      while (browser.getNextServer(pServer, pNode)) {
         std::string server(pServer);
         runningServers.push_back(server);
       }
@@ -355,17 +321,15 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::isServerRunning(const std::string &serverName)
-    {
+    bool Server::isServerRunning(const std::string &serverName) {
       DimBrowser browser;
       browser.getServers();
       char *pServer, *pNode;
 
-      while(browser.getNextServer(pServer, pNode))
-      {
+      while (browser.getNextServer(pServer, pNode)) {
         std::string server(pServer);
 
-        if(server == serverName)
+        if (server == serverName)
           return true;
       }
 
@@ -374,37 +338,32 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Server::handleServerInfoRequest(const Buffer &/*request*/, Buffer &response)
-    {
-      // get the list of services, request handlers and command handlers 
+    void Server::handleServerInfoRequest(const Buffer & /*request*/, Buffer &response) {
+      // get the list of services, request handlers and command handlers
       core::StringVector serviceList, requestHandlerList, commandHandlerList;
 
-      for(auto service : m_serviceMap) {
+      for (auto service : m_serviceMap) {
         serviceList.push_back(service.second->name());
       }
-      
-      for(auto request : m_requestHandlerMap) {
+
+      for (auto request : m_requestHandlerMap) {
         requestHandlerList.push_back(request.second->name());
       }
 
-      for(auto command : m_commandHandlerMap) {
+      for (auto command : m_commandHandlerMap) {
         commandHandlerList.push_back(command.second->name());
       }
-      
+
       // get host info
       core::StringMap hostInfo;
       core::fillHostInfo(hostInfo);
 
-      core::json jsonResponse = {
-        {"server", {
-          {"name", m_name}
-        }},
-        {"host", hostInfo},
-        {"services", serviceList},
-        {"requestHandlers", requestHandlerList},
-        {"commandHandlers", commandHandlerList}
-      };
-      
+      core::json jsonResponse = {{"server", {{"name", m_name}}},
+                                 {"host", hostInfo},
+                                 {"services", serviceList},
+                                 {"requestHandlers", requestHandlerList},
+                                 {"commandHandlers", commandHandlerList}};
+
       std::string serializedJson = jsonResponse.dump();
       auto model = response.createModel<std::string>();
       response.setModel(model);
@@ -413,25 +372,23 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::serviceAlreadyRunning(const std::string &name)
-    {
+    bool Server::serviceAlreadyRunning(const std::string &name) {
       DimBrowser browser;
       int nServices = browser.getServices(name.c_str());
 
-      if(nServices == 0)
+      if (nServices == 0)
         return false;
 
       int serviceType;
       char *serviceName, *format;
 
-      while(1)
-      {
+      while (1) {
         serviceType = browser.getNextService(serviceName, format);
 
-        if(serviceType == 0)
+        if (serviceType == 0)
           break;
 
-        if(serviceType == DimSERVICE)
+        if (serviceType == DimSERVICE)
           return true;
       }
 
@@ -440,25 +397,23 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::requestHandlerAlreadyRunning(const std::string &name)
-    {
+    bool Server::requestHandlerAlreadyRunning(const std::string &name) {
       DimBrowser browser;
       int nServices = browser.getServices(name.c_str());
 
-      if(nServices == 0)
+      if (nServices == 0)
         return false;
 
       int serviceType;
       char *serviceName, *format;
 
-      while(1)
-      {
+      while (1) {
         serviceType = browser.getNextService(serviceName, format);
 
-        if(serviceType == 0)
+        if (serviceType == 0)
           break;
 
-        if(serviceType == DimRPC)
+        if (serviceType == DimRPC)
           return true;
       }
 
@@ -467,125 +422,105 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Server::commandHandlerAlreadyRunning(const std::string &name)
-    {
+    bool Server::commandHandlerAlreadyRunning(const std::string &name) {
       DimBrowser browser;
       int nServices = browser.getServices(name.c_str());
 
-      if(nServices == 0)
+      if (nServices == 0)
         return false;
 
       int serviceType;
       char *serviceName, *format;
 
-      while(1)
-      {
+      while (1) {
         serviceType = browser.getNextService(serviceName, format);
 
-        if(serviceType == 0)
+        if (serviceType == 0)
           break;
 
-        if(serviceType == DimCOMMAND)
+        if (serviceType == DimCOMMAND)
           return true;
       }
 
       return false;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::clientExitHandler()
-    {
+
+    void Server::clientExitHandler() {
       int clientID(DimServer::getClientId());
       std::cout << "Client " << clientID << " exits" << std::endl;
       m_clientExitSignal.process(clientID);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::removeTimer(std::shared_ptr<Timer> timer)
-    {
+
+    void Server::removeTimer(std::shared_ptr<Timer> timer) {
       auto findIter = std::find(m_timers.begin(), m_timers.end(), timer);
-      
-      if(m_timers.end() != findIter)
+
+      if (m_timers.end() != findIter)
         m_timers.erase(findIter);
     }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    
-    Server::Timer::Timer(Server *server) :
-      DimTimer(),
-      m_pServer(server)
-    {
+
+    Server::Timer::Timer(Server *server) : DimTimer(), m_pServer(server) {
       /* nop */
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::Timer::setPeriod(int nSeconds)
-    {
+
+    void Server::Timer::setPeriod(int nSeconds) {
       m_period = nSeconds;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    int Server::Timer::period() const
-    {
+
+    int Server::Timer::period() const {
       return m_period;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::Timer::startTimer()
-    {
+
+    void Server::Timer::startTimer() {
       DimTimer::start(m_period);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::Timer::stopTimer()
-    {
+
+    void Server::Timer::stopTimer() {
       DimTimer::stop();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::Timer::setSingleShot(bool single)
-    {
+
+    void Server::Timer::setSingleShot(bool single) {
       m_singleShot = single;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    bool Server::Timer::singleShot() const
-    {
+
+    bool Server::Timer::singleShot() const {
       return m_singleShot;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    core::Signal<void> &Server::Timer::onTimeout()
-    {
+
+    core::Signal<void> &Server::Timer::onTimeout() {
       return m_timeoutSignal;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Server::Timer::timerHandler()
-    {
+
+    void Server::Timer::timerHandler() {
       m_timeoutSignal.process();
-      
-      if(!this->singleShot())
-      {
+
+      if (!this->singleShot()) {
         this->startTimer();
-      }  
-      else
-      {
+      } else {
         m_pServer->removeTimer(this->shared_from_this());
       }
     }
-    
   }
-
 }

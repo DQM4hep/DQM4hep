@@ -28,104 +28,103 @@
 // -- dqm4hep headers
 #include "dqm4hep/DQMNet.h"
 
-
 namespace dqm4hep {
 
   namespace net {
-    
+
     const char NullBuffer::buffer[] = "\0";
     const size_t NullBuffer::size = 1;
-    
+
     //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    
-    RawBuffer::RawBuffer() { 
-      this->adopt(NullBuffer::buffer, NullBuffer::size); 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    const char *RawBuffer::begin() const { 
-      return m_pBuffer; 
-    }
-    
     //-------------------------------------------------------------------------------------------------
 
-    const char *RawBuffer::end() const { 
-      return m_pBuffer+m_size; 
+    RawBuffer::RawBuffer() {
+      this->adopt(NullBuffer::buffer, NullBuffer::size);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
+    const char *RawBuffer::begin() const {
+      return m_pBuffer;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    const char *RawBuffer::end() const {
+      return m_pBuffer + m_size;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
     size_t RawBuffer::size() const {
-      return m_size; 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    void RawBuffer::adopt(const char *buffer, size_t size) { 
-      m_pBuffer = buffer; 
-      m_size = size; 
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    
-    const RawBuffer &BufferModel::raw() const { 
-      return m_rawBuffer; 
+      return m_size;
     }
 
     //-------------------------------------------------------------------------------------------------
-    
-    void BufferModel::handle(const char *buffer, size_t size) {
-      m_rawBuffer.adopt(buffer, size); 
+
+    void RawBuffer::adopt(const char *buffer, size_t size) {
+      m_pBuffer = buffer;
+      m_size = size;
     }
-    
+
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    const RawBuffer &BufferModel::raw() const {
+      return m_rawBuffer;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void BufferModel::handle(const char *buffer, size_t size) {
+      m_rawBuffer.adopt(buffer, size);
+    }
+
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     Buffer::Buffer() {
       this->adopt(NullBuffer::buffer, NullBuffer::size);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    Buffer::Buffer(Buffer&& buffer) {
+
+    Buffer::Buffer(Buffer &&buffer) {
       m_model = std::move(buffer.m_model);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     std::shared_ptr<BufferModel> Buffer::createModel() const {
       return std::make_shared<BufferModel>();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     void Buffer::setModel(std::shared_ptr<BufferModel> model) {
-      if( ! model )
+      if (!model)
         return;
       m_model = model;
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     const char *Buffer::begin() const {
       return m_model->raw().begin();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     const char *Buffer::end() const {
       return m_model->raw().end();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     size_t Buffer::size() const {
       return m_model->raw().size();
     }
-    
+
     //-------------------------------------------------------------------------------------------------
 
     void Buffer::adopt(const char *buffer, size_t size) {
@@ -133,13 +132,11 @@ namespace dqm4hep {
       model->handle(buffer, size);
       this->setModel(model);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     BufferModelPtr Buffer::model() const {
       return m_model;
     }
-
   }
-
 }

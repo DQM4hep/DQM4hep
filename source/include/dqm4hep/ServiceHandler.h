@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef SERVICEHANDLER_H
 #define SERVICEHANDLER_H
 
@@ -46,9 +45,9 @@ namespace dqm4hep {
     /**
      *
      */
-    class ServiceHandler
-    {
+    class ServiceHandler {
       friend class Client;
+
     public:
       typedef core::Signal<const Buffer &> UpdateSignal;
 
@@ -76,7 +75,8 @@ namespace dqm4hep {
        * @param name the service name
        */
       template <typename Controller>
-      ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &));
+      ServiceHandler(Client *pClient, const std::string &name, Controller *pController,
+                     void (Controller::*function)(const Buffer &));
 
       /**
        * Destructor
@@ -88,8 +88,7 @@ namespace dqm4hep {
        *
        *  The concrete dim updated info implementation
        */
-      class ServiceInfo : public DimUpdatedInfo
-      {
+      class ServiceInfo : public DimUpdatedInfo {
       public:
         /** Contructor
          */
@@ -100,7 +99,7 @@ namespace dqm4hep {
         void infoHandler();
 
       private:
-        ServiceHandler        *m_pHandler;
+        ServiceHandler *m_pHandler;
       };
 
       /**
@@ -110,26 +109,22 @@ namespace dqm4hep {
       void receiveServiceUpdated(const Buffer &);
 
     private:
-      std::string                    m_name;             ///< The request handler name
-      Client                        *m_pClient;          ///< The client manager
-      ServiceInfo                    m_serviceInfo;
-      UpdateSignal                   m_updateSignal;
+      std::string m_name; ///< The request handler name
+      Client *m_pClient;  ///< The client manager
+      ServiceInfo m_serviceInfo;
+      UpdateSignal m_updateSignal;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &)) :
-      m_name(name),
-      m_pClient(pClient),
-      m_serviceInfo(this)
-    {
+    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &name, Controller *pController,
+                                          void (Controller::*function)(const Buffer &))
+        : m_name(name), m_pClient(pClient), m_serviceInfo(this) {
       m_updateSignal.connect(pController, function);
     }
-
   }
-
 }
 
-#endif  //  SERVICEHANDLER_H
+#endif //  SERVICEHANDLER_H

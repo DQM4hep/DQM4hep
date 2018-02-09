@@ -33,16 +33,14 @@ namespace dqm4hep {
 
   namespace net {
 
-    Client::Client()
-    {
+    Client::Client() {
       DimClient::setNoDataCopy();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Client::~Client()
-    {
-      for(auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end() ; endIter != iter ; ++iter)
+    Client::~Client() {
+      for (auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end(); endIter != iter; ++iter)
         delete iter->second;
 
       m_serviceHandlerMap.clear();
@@ -50,35 +48,28 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Client::queryServerInfo(const std::string &serverName, core::json &serverInfo) const
-    {
+    void Client::queryServerInfo(const std::string &serverName, core::json &serverInfo) const {
       Buffer request;
-      this->sendRequest("/" + serverName + "/info", request, [&serverInfo](const Buffer &buffer){
-        serverInfo = core::json::parse(buffer.begin());
-      });
+      this->sendRequest("/" + serverName + "/info", request,
+                        [&serverInfo](const Buffer &buffer) { serverInfo = core::json::parse(buffer.begin()); });
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Client::hasSubscribed(const std::string &name) const
-    {
+    bool Client::hasSubscribed(const std::string &name) const {
       return (m_serviceHandlerMap.end() != m_serviceHandlerMap.find(name));
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    unsigned int Client::numberOfSubscriptions(const std::string &serviceName) const
-    {
+    unsigned int Client::numberOfSubscriptions(const std::string &serviceName) const {
       return m_serviceHandlerMap.count(serviceName);
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
-    void Client::notifyServerOnExit(const std::string &serverName)
-    {
+
+    void Client::notifyServerOnExit(const std::string &serverName) {
       DimClient::setExitHandler(serverName.c_str());
     }
-
   }
-
 }

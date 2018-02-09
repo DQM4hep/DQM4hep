@@ -25,14 +25,13 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQMNET_H
 #define DQMNET_H
 
 // interface headers
-#include <dqm4hep/NetBuffer.h>
 #include <dqm4hep/Client.h>
+#include <dqm4hep/NetBuffer.h>
 #include <dqm4hep/Server.h>
 #include <dqm4hep/Service.h>
 
-#endif  //  DQMNET_H
+#endif //  DQMNET_H

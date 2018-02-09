@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef SERVICE_H
 #define SERVICE_H
 
@@ -45,9 +44,9 @@ namespace dqm4hep {
 
     class Server;
 
-    class Service
-    {
+    class Service {
       friend class Server;
+
     public:
       /**
        * Get the service name
@@ -145,17 +144,16 @@ namespace dqm4hep {
       void sendData(const Buffer &buffer, const std::vector<int> &clientIds);
 
     private:
-      DimService           *m_pService;         ///< The service implementation
-      std::string           m_name;             ///< The service name
-      Server               *m_pServer;          ///< The server in which the service is declared
+      DimService *m_pService; ///< The service implementation
+      std::string m_name;     ///< The service name
+      Server *m_pServer;      ///< The server in which the service is declared
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::send(const T &value)
-    {
+    inline void Service::send(const T &value) {
       Buffer buffer;
       auto model = buffer.createModel<T>();
       model->copy(value);
@@ -166,8 +164,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::sendArray(const T *value, size_t nElements)
-    {
+    inline void Service::sendArray(const T *value, size_t nElements) {
       Buffer buffer(value, nElements);
       this->sendData(buffer, std::vector<int>());
     }
@@ -175,8 +172,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::send(const T &value, int clientId)
-    {
+    inline void Service::send(const T &value, int clientId) {
       Buffer buffer(value);
       this->sendData(buffer, std::vector<int>(1, clientId));
     }
@@ -184,8 +180,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::sendArray(const T *value, size_t nElements, int clientId)
-    {
+    inline void Service::sendArray(const T *value, size_t nElements, int clientId) {
       Buffer buffer(value, nElements);
       this->sendData(buffer, std::vector<int>(1, clientId));
     }
@@ -193,8 +188,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::send(const T &value, const std::vector<int> &clientIds)
-    {
+    inline void Service::send(const T &value, const std::vector<int> &clientIds) {
       Buffer buffer(value);
       this->sendData(buffer, clientIds);
     }
@@ -202,14 +196,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Service::sendArray(const T *value, size_t nElements, const std::vector<int> &clientIds)
-    {
+    inline void Service::sendArray(const T *value, size_t nElements, const std::vector<int> &clientIds) {
       Buffer buffer(value, nElements);
       this->sendData(buffer, clientIds);
     }
-
   }
-
 }
 
-#endif  //  SERVICE_H
+#endif //  SERVICE_H

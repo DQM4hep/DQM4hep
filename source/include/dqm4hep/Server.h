@@ -25,14 +25,13 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef SERVER_H
 #define SERVER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/Service.h>
-#include <dqm4hep/RequestHandler.h>
 #include <dqm4hep/NetBuffer.h>
+#include <dqm4hep/RequestHandler.h>
+#include <dqm4hep/Service.h>
 #include <dqm4hep/Signal.h>
 
 // -- dim headers
@@ -54,8 +53,7 @@ namespace dqm4hep {
      * All created services and request handlers are started after
      * server startup.
      */
-    class Server : public DimServer
-    {
+    class Server : public DimServer {
     public:
       /**
        *  @brief  Constructor
@@ -97,7 +95,7 @@ namespace dqm4hep {
 
       /**
        *  @brief  Create a new service.
-       *  
+       *
        *  @param  name the service name
        */
       Service *createService(const std::string &name);
@@ -109,9 +107,9 @@ namespace dqm4hep {
        *  @param  pController the class instance that will handle the request
        *  @param  function the class method that will treat the request and provide a response
        */
-      template <typename Controller >
-      void createRequestHandler(const std::string &name,
-          Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response));
+      template <typename Controller>
+      void createRequestHandler(const std::string &name, Controller *pController,
+                                void (Controller::*function)(const Buffer &request, Buffer &response));
 
       /**
        *  @brief  Create a new command handler
@@ -121,8 +119,8 @@ namespace dqm4hep {
        *  @param  function the class method that will treat the command
        */
       template <typename Controller>
-      void createCommandHandler(const std::string &name,
-          Controller *pController, void (Controller::*function)(const Buffer &command));
+      void createCommandHandler(const std::string &name, Controller *pController,
+                                void (Controller::*function)(const Buffer &command));
 
       /**
        *  @brief  Whether the target service is registered in this server
@@ -204,7 +202,8 @@ namespace dqm4hep {
        *  @param  function the command handler function
        */
       template <typename Controller>
-      void stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command));
+      void stopCommandHandler(const std::string &name, Controller *pController,
+                              void (Controller::*function)(const Buffer &command));
 
       /**
        *  @brief  Get a created service in this server
@@ -212,17 +211,17 @@ namespace dqm4hep {
        *  @param  name the service name
        */
       Service *service(const std::string &name) const;
-      
+
       /**
-       *  @brief  Get the signal processed on client exit 
+       *  @brief  Get the signal processed on client exit
        */
       core::Signal<int> &onClientExit();
-      
+
       /**
        *  @brief  Get the client id. To be used inside callbacks
        */
       int clientId() const;
-      
+
       /**
        *  @brief  Create a new timer
        *
@@ -280,20 +279,19 @@ namespace dqm4hep {
       static bool commandHandlerAlreadyRunning(const std::string &name);
 
     private:
-
       void handleServerInfoRequest(const Buffer &, Buffer &response);
       RequestHandler *requestHandler(const std::string &name) const;
       CommandHandler *commandHandler(const std::string &name) const;
       void clientExitHandler();
-        
+
       /**
        *  @brief  Timer class
        */
-      class Timer : private DimTimer, public std::enable_shared_from_this<Timer>
-      {
+      class Timer : private DimTimer, public std::enable_shared_from_this<Timer> {
       public:
         Timer(Server *server);
-        ~Timer() {}
+        ~Timer() {
+        }
         void setPeriod(int nSeconds);
         int period() const;
         void startTimer();
@@ -301,33 +299,34 @@ namespace dqm4hep {
         void setSingleShot(bool single);
         bool singleShot() const;
         core::Signal<void> &onTimeout();
-      
+
       private:
         void timerHandler();
+
       private:
-        core::Signal<void>  m_timeoutSignal;
-        bool                m_singleShot = true;
-        Server             *m_pServer = nullptr;
-        int                 m_period = 10;
+        core::Signal<void> m_timeoutSignal;
+        bool m_singleShot = true;
+        Server *m_pServer = nullptr;
+        int m_period = 10;
       };
-      
+
       void removeTimer(std::shared_ptr<Timer> timer);
 
     private:
       friend class Timer;
-      typedef std::map<std::string, Service *>         ServiceMap;
-      typedef std::map<std::string, RequestHandler *>  RequestHandlerMap;
-      typedef std::map<std::string, CommandHandler *>  CommandHandlerMap;
-      typedef std::vector<std::shared_ptr<Timer>>      TimerPtrVector;
+      typedef std::map<std::string, Service *> ServiceMap;
+      typedef std::map<std::string, RequestHandler *> RequestHandlerMap;
+      typedef std::map<std::string, CommandHandler *> CommandHandlerMap;
+      typedef std::vector<std::shared_ptr<Timer>> TimerPtrVector;
 
-      std::string                                    m_name;                 ///< The short server name
-      bool                                           m_started;              ///< Whether the server has been started
-      ServiceMap                                     m_serviceMap;           ///< The map of registered services
-      RequestHandlerMap                              m_requestHandlerMap;    ///< The map of registered request handlers
-      CommandHandlerMap                              m_commandHandlerMap;    ///< The map of registered command handlers
-      RequestHandler                                 m_serverInfoHandler;    ///< The built-in request handler for server info
-      core::Signal<int>                              m_clientExitSignal;     ///< The signal emitted whenever a client exits
-      TimerPtrVector                                 m_timers;               ///< The list of timers
+      std::string m_name;                    ///< The short server name
+      bool m_started;                        ///< Whether the server has been started
+      ServiceMap m_serviceMap;               ///< The map of registered services
+      RequestHandlerMap m_requestHandlerMap; ///< The map of registered request handlers
+      CommandHandlerMap m_commandHandlerMap; ///< The map of registered command handlers
+      RequestHandler m_serverInfoHandler;    ///< The built-in request handler for server info
+      core::Signal<int> m_clientExitSignal;  ///< The signal emitted whenever a client exits
+      TimerPtrVector m_timers;               ///< The list of timers
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -335,80 +334,76 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::createRequestHandler(const std::string &name,
-        Controller *pController, void (Controller::*function)(const Buffer &request, Buffer &response))
-    {
+    inline void Server::createRequestHandler(const std::string &name, Controller *pController,
+                                             void (Controller::*function)(const Buffer &request, Buffer &response)) {
       auto findIter = m_requestHandlerMap.find(name);
 
-      if(findIter != m_requestHandlerMap.end())
-        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name + "' already exists in this client");
+      if (findIter != m_requestHandlerMap.end())
+        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name +
+                                 "' already exists in this client");
 
-      if(Server::requestHandlerAlreadyRunning(name))
-        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name + "' already running on network");
+      if (Server::requestHandlerAlreadyRunning(name))
+        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name +
+                                 "' already running on network");
 
       // first insert nullptr, then create request handler
-      std::pair<RequestHandlerMap::iterator, bool> inserted = m_requestHandlerMap.insert(RequestHandlerMap::value_type(name, nullptr));
+      std::pair<RequestHandlerMap::iterator, bool> inserted =
+          m_requestHandlerMap.insert(RequestHandlerMap::value_type(name, nullptr));
 
-      if(inserted.second)
-      {
+      if (inserted.second) {
         RequestHandler *pRequestHandler = new RequestHandler(this, name, pController, function);
         inserted.first->second = pRequestHandler;
 
-        if(this->isRunning())
+        if (this->isRunning())
           pRequestHandler->startHandlingRequest();
-      }
-      else
+      } else
         throw;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::createCommandHandler(const std::string &name,
-        Controller *pController, void (Controller::*function)(const Buffer &command))
-    {
+    inline void Server::createCommandHandler(const std::string &name, Controller *pController,
+                                             void (Controller::*function)(const Buffer &command)) {
       auto findIter = m_commandHandlerMap.find(name);
 
-      if(findIter != m_commandHandlerMap.end())
-      {
+      if (findIter != m_commandHandlerMap.end()) {
         findIter->second->onCommand().connect(pController, function);
 
-        if(this->isRunning())
+        if (this->isRunning())
           findIter->second->startHandlingCommands();
 
         return;
       }
 
-      if(Server::commandHandlerAlreadyRunning(name))
-        throw std::runtime_error("Server::createCommandHandler(): command handler '" + name + "' already running on network");
+      if (Server::commandHandlerAlreadyRunning(name))
+        throw std::runtime_error("Server::createCommandHandler(): command handler '" + name +
+                                 "' already running on network");
 
       // first insert nullptr, then create command handler
-      std::pair<CommandHandlerMap::iterator, bool> inserted = m_commandHandlerMap.insert(CommandHandlerMap::value_type(name, nullptr));
+      std::pair<CommandHandlerMap::iterator, bool> inserted =
+          m_commandHandlerMap.insert(CommandHandlerMap::value_type(name, nullptr));
 
-      if(inserted.second)
-      {
+      if (inserted.second) {
         CommandHandler *pCommandHandler = new CommandHandler(this, name, pController, function);
         inserted.first->second = pCommandHandler;
 
-        if(this->isRunning())
+        if (this->isRunning())
           pCommandHandler->startHandlingCommands();
-      }
-      else
+      } else
         throw;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::stopCommandHandler(const std::string &name, Controller *pController)
-    {
+    inline void Server::stopCommandHandler(const std::string &name, Controller *pController) {
       auto findIter = m_commandHandlerMap.find(name);
 
-      if(findIter != m_commandHandlerMap.end())
-      {
+      if (findIter != m_commandHandlerMap.end()) {
         findIter->second->onCommand().disconnect(pController);
 
-        if(!findIter->second->onCommand().hasConnection())
+        if (!findIter->second->onCommand().hasConnection())
           m_commandHandlerMap.erase(findIter);
       }
     }
@@ -416,36 +411,33 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::stopCommandHandler(const std::string &name, Controller *pController, void (Controller::*function)(const Buffer &command))
-    {
+    inline void Server::stopCommandHandler(const std::string &name, Controller *pController,
+                                           void (Controller::*function)(const Buffer &command)) {
       auto findIter = m_commandHandlerMap.find(name);
 
-      if(findIter != m_commandHandlerMap.end())
-      {
+      if (findIter != m_commandHandlerMap.end()) {
         findIter->second->onCommand().disconnect(pController, function);
 
-        if(!findIter->second->onCommand().hasConnection())
+        if (!findIter->second->onCommand().hasConnection())
           m_commandHandlerMap.erase(findIter);
       }
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename Controller>
-    inline void Server::createTimer(Controller *controller, void (Controller::*function)(), int nSeconds, bool singleShot)
-    {
+    inline void Server::createTimer(Controller *controller, void (Controller::*function)(), int nSeconds,
+                                    bool singleShot) {
       auto timer = std::make_shared<Timer>(this);
       timer->onTimeout().connect(controller, function);
       timer->setSingleShot(singleShot);
       timer->setPeriod(nSeconds);
       m_timers.push_back(timer);
-      
-      if(this->isRunning())
+
+      if (this->isRunning())
         timer->startTimer();
     }
-
   }
-
 }
 
-#endif  //  SERVER_H
+#endif //  SERVER_H

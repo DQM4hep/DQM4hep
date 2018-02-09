@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #include "dqm4hep/ServiceHandler.h"
 #include "dqm4hep/Service.h"
 
@@ -33,57 +32,49 @@ namespace dqm4hep {
 
   namespace net {
 
-    ServiceHandler::~ServiceHandler()
-    {
+    ServiceHandler::~ServiceHandler() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &ServiceHandler::name() const
-    {
+    const std::string &ServiceHandler::name() const {
       return m_name;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Client *ServiceHandler::client() const
-    {
+    Client *ServiceHandler::client() const {
       return m_pClient;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    ServiceHandler::UpdateSignal &ServiceHandler::onServiceUpdate()
-    {
+    ServiceHandler::UpdateSignal &ServiceHandler::onServiceUpdate() {
       return m_updateSignal;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void ServiceHandler::receiveServiceUpdated(const Buffer &data)
-    {
+    void ServiceHandler::receiveServiceUpdated(const Buffer &data) {
       m_updateSignal.process(data);
     }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    ServiceHandler::ServiceInfo::ServiceInfo(ServiceHandler *pHandler) :
-      DimUpdatedInfo((char*)pHandler->name().c_str(), (void*)nullptr, 0),
-      m_pHandler(pHandler)
-    {
+    ServiceHandler::ServiceInfo::ServiceInfo(ServiceHandler *pHandler)
+        : DimUpdatedInfo((char *)pHandler->name().c_str(), (void *)nullptr, 0), m_pHandler(pHandler) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void ServiceHandler::ServiceInfo::infoHandler()
-    {
-      char *data = (char*)this->getData();
+    void ServiceHandler::ServiceInfo::infoHandler() {
+      char *data = (char *)this->getData();
       int size = this->getSize();
 
-      if(nullptr == data || size == 0)
+      if (nullptr == data || size == 0)
         return;
 
       // std::string contents(data, size);
@@ -91,7 +82,5 @@ namespace dqm4hep {
       buffer.adopt(data, size);
       m_pHandler->receiveServiceUpdated(buffer);
     }
-
   }
-
 }
