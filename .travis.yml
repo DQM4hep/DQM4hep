@@ -4,15 +4,24 @@ sudo: required
 os:
   - linux
 
+env:
+  global:
+    - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
+    
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
+      - libmysqlclient-dev
       - doxygen
+      - g++-4.9
 
 script:
   - ./.travis-ci.d/compile_and_test.sh
 
 before_install:
+  - eval "${MATRIX_EVAL}"
   - ./.travis-ci.d/install_dependencies.sh
 
 after_success:
