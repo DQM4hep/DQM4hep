@@ -35,6 +35,7 @@
 #include <dqm4hep/PluginManager.h>
 #include <dqm4hep/XMLParser.h>
 #include <dqm4hep/MonitorElementManager.h>
+#include <dqm4hep/json.h>
 
 // -- tclap headers
 #include <tclap/CmdLine.h>
@@ -303,13 +304,11 @@ int main(int argc, char* argv[])
 
   const QReportContainer &reports(reportStorage.reports());
 
-  Json::Value jsonRoot;
-  Json::Value jsonMetadata; Json::Value jsonHostInfo; Json::Value jsonQReports(Json::arrayValue);
+  json jsonRoot, jsonMetadata, jsonQReports;
   std::string date; timeToHMS(time(nullptr), date);
   StringMap hostInfos; fillHostInfo(hostInfos);
-  for(auto iter : hostInfos) jsonHostInfo[iter.first] = iter.second;
 
-  jsonMetadata["host"] = jsonHostInfo;
+  jsonMetadata["host"] = hostInfos;
   jsonMetadata["date"] = date;
   jsonRoot["meta"] = jsonMetadata;
 
@@ -322,7 +321,7 @@ int main(int argc, char* argv[])
   {
     for(const auto &iter2 : iter.second)
     {
-      Json::Value jsonQReport;
+      json jsonQReport;
       iter2.second.toJson(jsonQReport);
       jsonQReports[jsonIndex] = jsonQReport;
       jsonIndex++;
@@ -367,17 +366,9 @@ int main(int argc, char* argv[])
 
   if(outputJsonFileArg.isSet())
   {
-    const std::string jsonFileName(outputJsonFileArg.getValue());
-
-    Json::StreamWriterBuilder builder;
-    builder["indentation"] = "  ";
-    std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-    std::ostringstream jsonResponse;
-    writer->write(jsonRoot, &jsonResponse);
-
     std::ofstream jsonFile;
-    jsonFile.open(jsonFileName.c_str());
-    jsonFile << jsonResponse.str();
+    jsonFile.open(outputJsonFileArg.getValue().c_str());
+    jsonFile << jsonRoot.dump(2);
     jsonFile.close();
   }
 
