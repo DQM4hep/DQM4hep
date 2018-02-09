@@ -48,6 +48,9 @@ build_executable( main dqm4hep-send-command bin )
 build_executable( main dqm4hep-send-request-response bin )
 build_executable( main dqm4hep-subscribe-service bin )
 
+dqm4hep_run_clang_tidy()
+dqm4hep_run_clang_format()
+
 if( DQMNET_WEBSOCKETS )
   build_executable( main dqm4hep-ws-server bin )
   target_link_libraries( dqm4hep-ws-server ${Boost_LIBRARIES} ${OPENSSL_CRYPTO_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} )
