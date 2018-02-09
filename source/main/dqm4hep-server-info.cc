@@ -28,9 +28,8 @@
 
 #include "dqm4hep/Client.h"
 
-#include "json/json.h"
-
 using namespace dqm4hep::net;
+using namespace dqm4hep::core;
 
 int main(int argc, char **argv)
 {
@@ -43,16 +42,9 @@ int main(int argc, char **argv)
   std::string serverName(argv[1]);
 
   Client client;
-  Json::Value serverInfo;
+  json serverInfo;
   client.queryServerInfo(serverName, serverInfo);
-
-  Json::StreamWriterBuilder builder;
-  builder["indentation"] = "  ";
-  std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-  std::ostringstream jsonResponse;
-  writer->write(serverInfo, &jsonResponse);
-
-  std::cout << jsonResponse.str() << std::endl;
+  std::cout << serverInfo.dump(2) << std::endl;
 
   return 0;
 }

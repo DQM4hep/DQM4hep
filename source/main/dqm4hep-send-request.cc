@@ -28,8 +28,6 @@
 
 #include "dqm4hep/Client.h"
 
-#include "json/json.h"
-
 using namespace dqm4hep::net;
 
 int main(int argc, char **argv)

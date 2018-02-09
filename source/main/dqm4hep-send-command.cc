@@ -28,18 +28,10 @@
 
 #include "dqm4hep/Client.h"
 
-#include "json/json.h"
-
 using namespace dqm4hep::net;
 
 template <typename T>
 void sendCommand(const Client &client, const std::string &name, const std::string &value);
-
-// template <>
-// inline void sendCommand<std::string>(const Client &client, const std::string &name, const std::string &value)
-// {
-//   client.sendCommand(name, Buffer(value.c_str(), value.size()), true);
-// }
 
 template <typename T>
 inline void sendCommand(const Client &client, const std::string &name, const std::string &value)
