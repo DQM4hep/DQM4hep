@@ -84,18 +84,6 @@ namespace dqm4hep {
         {"description", m_description},
         {"parameters", m_parametersMap}
       };
-      // value["runNumber"] = m_runNumber;
-      // value["startTime"] = startTime;
-      // value["endTime"] = endTime;
-      // value["detector"] = m_detectorName;
-      // value["description"] = m_description;
-      // 
-      // Json::Value parametersValue;
-      // 
-      // for(const auto &parameter : m_parametersMap)
-      //   parametersValue[parameter.first] = parameter.second;
-      // 
-      // value["parameters"] = parametersValue;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -110,13 +98,6 @@ namespace dqm4hep {
       m_detectorName = value.value<std::string>("detector", "");
       m_description = value.value<std::string>("description", "");
       m_parametersMap = value.value<StringMap>("parameters", StringMap());
-
-      // m_parametersMap.clear();
-      // Json::Value parametersValue(value.get("parameters", Json::Value(Json::objectValue)));
-      // auto members = parametersValue.getMemberNames();
-      // 
-      // for( const auto &parameter : members )
-      //   m_parametersMap[parameter] = parametersValue[parameter].asString();
     }
 
   }
