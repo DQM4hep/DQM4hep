@@ -29,6 +29,7 @@
 #include "dqm4hep/Client.h"
 
 using namespace dqm4hep::net;
+using namespace dqm4hep::core;
 
 class ServicePrinter
 {
@@ -51,20 +52,10 @@ inline void ServicePrinter::printT(const Buffer &buffer)
 }
 
 template <>
-inline void ServicePrinter::printT<Json::Value>(const Buffer &buffer)
+inline void ServicePrinter::printT<json>(const Buffer &buffer)
 {
-  Json::Value value;
-  Json::CharReaderBuilder readerBuilder;
-  std::unique_ptr<Json::CharReader> reader(readerBuilder.newCharReader());
-  reader->parse(buffer.begin(), buffer.end(), &value, nullptr);
-
-  Json::StreamWriterBuilder builder;
-  builder["indentation"] = "  "; // Styled writer !
-  std::unique_ptr<Json::StreamWriter> writer(builder.newStreamWriter());
-  std::ostringstream jsonResponse;
-  writer->write(value, &jsonResponse);
-
-  std::cout << "=== " << m_serviceName << " ===" << std::endl << jsonResponse.str() << std::endl;
+  json value = json::parse(buffer.begin());
+  std::cout << "=== " << m_serviceName << " ===" << std::endl << value.dump(2) << std::endl;
 }
 
 inline void ServicePrinter::print(const Buffer &buffer)
@@ -93,7 +84,7 @@ inline void ServicePrinter::print(const Buffer &buffer)
   else if(m_printMethod == "long") this->printT<long>(buffer);
   else if(m_printMethod == "ulong") this->printT<unsigned long>(buffer);
   else if(m_printMethod == "ullong") this->printT<unsigned long long>(buffer);
-  else if(m_printMethod == "json") this->printT<Json::Value>(buffer);
+  else if(m_printMethod == "json") this->printT<json>(buffer);
 }
 
 int main(int argc, char **argv)
