@@ -30,13 +30,11 @@
 #define CLIENT_H
 
 // -- dqm4hep headers
-#include "dqm4hep/DQMNet.h"
+#include "dqm4hep/NetBuffer.h"
 #include "dqm4hep/RequestHandler.h"
 #include "dqm4hep/ServiceHandler.h"
 #include "dqm4hep/Service.h"
-
-// -- json headers
-#include "json/json.h"
+#include "dqm4hep/json.h"
 
 // -- dim headers
 #include "dic.hxx"
@@ -49,98 +47,102 @@ namespace dqm4hep {
   namespace net {
 
     /**
-     * Client class
-     *
-     * Main interface to server. User can send request to
-     * a server with or without expecting a response using
-     * the sendRequest() function. User can also subscribe to
-     * a particular service run on a server by using the
-     * subscribe() method and by providing a callback function.
+     *  @brief  Client class.
+     *          Main interface to server. User can send request to
+     *          a server with or without expecting a response using
+     *          the sendRequest() function. User can also subscribe to
+     *          a particular service run on a server by using the
+     *          subscribe() method and by providing a callback function.
      */
     class Client
     {
     public:
       /**
-       * Constructor
+       *  @brief  Constructor
        */
       Client();
 
       /**
-       * Destructor
+       *  @brief  Destructor
        */
       ~Client();
 
       /**
-       * Query server information
+       *  @brief  Query server information
        *
-       * @param serverName the 'short' server name
-       * @param serverInfo the json value describing the server information
+       *  @param  serverName the server name
+       *  @param  serverInfo the json value describing the server information
        */
-      void queryServerInfo(const std::string &serverName, Json::Value &serverInfo) const;
+      void queryServerInfo(const std::string &serverName, core::json &serverInfo) const;
 
       /**
-       * Send a command. Do not wait for any acknowledgment
+       *  @brief  Send a command. Do not wait for any response
        *
-       * @param name the request name
-       * @param command the request content
+       *  @param  name the request name
+       *  @param  command the request content
        */
       template <typename Request>
       void sendRequest(const std::string &name, const Request &request) const;
 
       /**
-       * Send a request. Wait for the server response (blocking)
-
-       * @param name the request name
-       * @param request the request to send
-       * @param operation the callback operation to perform on data reception
+       *  @brief  Send a request. Wait for the server response (blocking)
+       *
+       *  @param  name the request name
+       *  @param  request the request to send
+       *  @param  operation the callback operation to perform on data reception
        */
       template <typename Operation>
       void sendRequest(const std::string &name, const Buffer &request, Operation operation) const;
 
       /**
-       * Send a command.
+       *  @brief  Send a command.
        *
-       * @param name the command name
-       * @param command the command to send
-       * @param blocking whether to wait for command reception on server side
+       *  @param  name the command name
+       *  @param  command the command to send
+       *  @param  blocking whether to wait for command reception on server side
        */
       template <typename Command>
       void sendCommand(const std::string &name, const Command &command, bool blocking = false) const;
 
       /**
-       * Subscribe to target service
+       *  @brief  Subscribe to service
        *
-       * @param serviceName the service name
-       * @param pController the class instance that will receive the service updates
-       * @param function the class method that will receive the service update
+       *  @param  serviceName the service name
+       *  @param  pController the class instance that will receive the service updates
+       *  @param  function the class method that will receive the service update
        *
-       * @code{.cpp}
-       * // the class callback method
-       * void MyClass::myfunction(const int &integer) { ... }
-       * Client *pClient = new Client();
-       * pClient->subscribe(service-name", pMyClassInstance, &MyClass::myfunction)
-       * @endcode
+       *  @code{.cpp}
+       *  // the class callback method
+       *  void MyClass::myfunction(const int &integer) { ... }
+       *  Client client;
+       *  MyClass c;
+       *  client.subscribe("service-name", &c, &MyClass::myfunction);
+       *  @endcode
        */
       template <typename Controller>
       void subscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const Buffer &));
 
       /**
+       *  @brief  Unsubscribe from a particular service
        *
+       *  @param  serviceName the service name
+       *  @param  pController the controller class handling the service update
+       *  @param  function the controller method hadling the service update 
        */
       template <typename Controller>
       void unsubscribe(const std::string &serviceName, Controller *pController, void (Controller::*function)(const Buffer &));
 
       /**
-       * Whether this client already registered a service subscription
+       *  @brief  Whether this client already registered a service subscription
        *
-       * @param serviceName the service name
+       *  @param  serviceName the service name
        */
       bool hasSubscribed(const std::string &serviceName) const;
 
       /**
-       * [numberOfSubscriptions description]
-       * @param  serviceName [description]
-       * @return             [description]
+       *  @brief  Get the number of subscriptions for a specific service
+       *  
+       *  @param  serviceName the service name
        */
       unsigned int numberOfSubscriptions(const std::string &serviceName) const;
       
@@ -152,7 +154,7 @@ namespace dqm4hep {
       void notifyServerOnExit(const std::string &serverName);
 
     private:
-      typedef std::map<std::string, ServiceHandler *>      ServiceHandlerMap;
+      typedef std::map<std::string, ServiceHandler *>           ServiceHandlerMap;
       typedef std::vector<ServiceHandler *>                     ServiceHandlerList;
       ServiceHandlerMap            m_serviceHandlerMap;        ///< The service map
     };
@@ -182,33 +184,6 @@ namespace dqm4hep {
       contents.adopt(request.begin(), request.size());
       rpcInfo.setData((void*)contents.begin(), contents.size());
     }
-
-    //-------------------------------------------------------------------------------------------------
-
-    // template <typename Request, typename Operation>
-    // inline void Client::sendRequest(const std::string &name, const Request &request, Operation operation) const
-    // {
-    //   DimRpcInfo rpcInfo(const_cast<char*>(name.c_str()), (void*)nullptr, 0);
-    //
-    //   Buffer contents;
-    //   auto model = contents.createModel<Request>();
-    //   model->copy(request);
-    //   contents.setModel(model);
-    //
-    //   // send request
-    //   rpcInfo.setData((void*)contents.begin(), contents.size());
-    //
-    //   // wait for answer from server
-    //   char *data = (char*)rpcInfo.getData();
-    //   int size = rpcInfo.getSize();
-    //
-    //   Buffer response;
-    //
-    //   if(nullptr != data && 0 != size)
-    //     response.adopt(data, size);
-    //
-    //   operation(response);
-    // }
 
     //-------------------------------------------------------------------------------------------------
 
