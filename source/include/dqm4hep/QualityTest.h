@@ -24,13 +24,12 @@
  * @author Remi Ete, DESY
  */
 
-
 #ifndef DQM4HEP_QUALITYTEST_H
 #define DQM4HEP_QUALITYTEST_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/json.h>
 
 // -- root headers
@@ -45,8 +44,7 @@ namespace dqm4hep {
     /** QualityTestReport class
      *  Hanlde the result of a quality test
      */
-    class QualityTestReport
-    {
+    class QualityTestReport {
     public:
       /** Constructor
        */
@@ -73,16 +71,16 @@ namespace dqm4hep {
       void fromJson(const json &value);
 
     public:
-      std::string           m_qualityTestName;
-      std::string           m_qualityTestType;
-      std::string           m_qualityTestDescription;
-      std::string           m_monitorElementName;
-      std::string           m_monitorElementType;
-      std::string           m_monitorElementPath;
-      std::string           m_message;
-      float                 m_quality;
-      bool                  m_executed;
-      json                  m_extraInfos;
+      std::string m_qualityTestName;
+      std::string m_qualityTestType;
+      std::string m_qualityTestDescription;
+      std::string m_monitorElementName;
+      std::string m_monitorElementType;
+      std::string m_monitorElementPath;
+      std::string m_message;
+      float m_quality;
+      bool m_executed;
+      json m_extraInfos;
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -90,8 +88,7 @@ namespace dqm4hep {
 
     /** QReportStorage class
      */
-    class QReportStorage
-    {
+    class QReportStorage {
     public:
       /** Constructor
        */
@@ -115,7 +112,8 @@ namespace dqm4hep {
 
       /** Get a specific report
        */
-      StatusCode report(const std::string &path, const std::string &name, const std::string &qualityTestName, QReport &report);
+      StatusCode report(const std::string &path, const std::string &name, const std::string &qualityTestName,
+                        QReport &report);
 
       /** Get all reports of the monitor element
        */
@@ -123,11 +121,13 @@ namespace dqm4hep {
 
       /** Get all reports of the monitor element with quality higher than a limit (range [0,1])
        */
-      StatusCode reportsQualityHigher(const std::string &path, const std::string &name, float qlimit, QReportMap &reports);
+      StatusCode reportsQualityHigher(const std::string &path, const std::string &name, float qlimit,
+                                      QReportMap &reports);
 
       /** Get all reports of the monitor element with quality lower than a limit (range [0,1])
        */
-      StatusCode reportsQualityLower(const std::string &path, const std::string &name, float qlimit, QReportMap &reports);
+      StatusCode reportsQualityLower(const std::string &path, const std::string &name, float qlimit,
+                                     QReportMap &reports);
 
       /** Get all reports
        */
@@ -146,7 +146,7 @@ namespace dqm4hep {
       void clear();
 
     private:
-      QReportContainer         m_reports;
+      QReportContainer m_reports;
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -154,8 +154,7 @@ namespace dqm4hep {
 
     /** QualityTest class
      */
-    class QualityTest
-    {
+    class QualityTest {
     public:
       /** Constructor
        */
@@ -200,11 +199,11 @@ namespace dqm4hep {
       void fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const;
 
     private:
-      std::string           m_type;           ///< Quality test type (usually class name)
-      std::string           m_name;           ///< Quality test name
+      std::string m_type; ///< Quality test type (usually class name)
+      std::string m_name; ///< Quality test name
 
     protected:
-      std::string           m_description;    ///< Quality test description
+      std::string m_description; ///< Quality test description
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -212,8 +211,7 @@ namespace dqm4hep {
 
     /** QualityTestFactory class
      */
-    class QualityTestFactory
-    {
+    class QualityTestFactory {
     public:
       /** Destructor
        */
@@ -227,20 +225,16 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline StatusCode QualityTest::init()
-    {
+    inline StatusCode QualityTest::init() {
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline QualityTestFactory::~QualityTestFactory()
-    {
+    inline QualityTestFactory::~QualityTestFactory() {
       /* nop */
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_QUALITYTEST_H
+#endif //  DQM4HEP_QUALITYTEST_H

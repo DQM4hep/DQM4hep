@@ -26,9 +26,9 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
+#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Storage.h>
 
 // -- std headers
@@ -38,30 +38,29 @@
 using namespace std;
 using namespace dqm4hep::core;
 
-#define assert_test(Command) \
-  if( ! (Command) )\
-  {\
-    dqm_error( "Assertion failed : {0}, line {1}", #Command, __LINE__ );\
-    exit(1);\
+#define assert_test(Command)                                                                                           \
+  if (!(Command)) {                                                                                                    \
+    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
+    exit(1);                                                                                                           \
   }
 
-class Object
-{
+class Object {
 public:
-  Object(const std::string &name) :
-    m_name(name)
-    {}
-  const std::string &name() {return m_name;}
+  Object(const std::string &name) : m_name(name) {
+  }
+  const std::string &name() {
+    return m_name;
+  }
+
 private:
-  std::string    m_name;
+  std::string m_name;
 };
 
 typedef Directory<Object> Directory_t;
 typedef Storage<Object> Storage_t;
 typedef Storage_t::ObjectList ObjectList;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   Logger::createLogger("test-storage", {Logger::coloredConsole()});
   Logger::setMainLogger("test-storage");
   Logger::setLogLevel(spdlog::level::debug);

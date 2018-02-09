@@ -30,23 +30,23 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
-#include <dqm4hep/PluginManager.h>
-#include <dqm4hep/XMLParser.h>
 #include <dqm4hep/MonitorElementManager.h>
+#include <dqm4hep/PluginManager.h>
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/XMLParser.h>
 #include <dqm4hep/json.h>
 
 // -- tclap headers
-#include <tclap/CmdLine.h>
 #include <tclap/Arg.h>
+#include <tclap/CmdLine.h>
 #include <tclap/ValuesConstraint.h>
 
 // -- root headers
-#include <TFile.h>
 #include <TDirectory.h>
-#include <TSystem.h>
+#include <TFile.h>
 #include <TKey.h>
+#include <TSystem.h>
 
 using namespace std;
 using namespace dqm4hep::core;
@@ -63,250 +63,185 @@ const std::string blue("\033[34m");
 const std::string bold("\033[1m");
 const std::string reset("\033[0m");
 
-
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
   TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
 
-  TCLAP::ValueArg<std::string> qtestFileArg(
-      "i"
-      , "input-qtest-file"
-      , "The qtest input file"
-      , true
-      , ""
-      , "string");
+  TCLAP::ValueArg<std::string> qtestFileArg("i", "input-qtest-file", "The qtest input file", true, "", "string");
   pCommandLine->add(qtestFileArg);
 
-  TCLAP::ValueArg<std::string> rootFileArg(
-      "r"
-      , "input-root-file"
-      , "The root input file"
-      , true
-      , ""
-      , "string");
+  TCLAP::ValueArg<std::string> rootFileArg("r", "input-root-file", "The root input file", true, "", "string");
   pCommandLine->add(rootFileArg);
 
-  TCLAP::ValueArg<float> lowerQualityLimitArg(
-      "l"
-      , "lower-qlimit"
-      , "Filter qtest output with quality > limit"
-      , false
-      , 0.f
-      , "float");
+  TCLAP::ValueArg<float> lowerQualityLimitArg("l", "lower-qlimit", "Filter qtest output with quality > limit", false,
+                                              0.f, "float");
   pCommandLine->add(lowerQualityLimitArg);
 
-  TCLAP::ValueArg<float> upperQualityLimitArg(
-      "u"
-      , "upper-qlimit"
-      , "Filter qtest output with quality < limit"
-      , false
-      , 1.f
-      , "float");
+  TCLAP::ValueArg<float> upperQualityLimitArg("u", "upper-qlimit", "Filter qtest output with quality < limit", false,
+                                              1.f, "float");
   pCommandLine->add(upperQualityLimitArg);
 
   TCLAP::ValueArg<std::string> qualityThresholdsArg(
-      "t"
-      , "quality-thresolds"
-      , "The quality thresholds to apply to get 'good' / 'moderate' / 'bad' qualities (default 0.5:0.8)."
-      , false
-      , "0.5:0.8"
-      , "string");
+      "t", "quality-thresolds",
+      "The quality thresholds to apply to get 'good' / 'moderate' / 'bad' qualities (default 0.5:0.8).", false,
+      "0.5:0.8", "string");
   pCommandLine->add(qualityThresholdsArg);
 
   TCLAP::ValueArg<std::string> outputJsonFileArg(
-      "o"
-      , "output-json"
-      , "The json output file to store the quality test reports"
-      , false
-      , ""
-      , "string");
+      "o", "output-json", "The json output file to store the quality test reports", false, "", "string");
   pCommandLine->add(outputJsonFileArg);
 
   StringVector verbosities(Logger::logLevels());
   TCLAP::ValuesConstraint<std::string> verbosityConstraint(verbosities);
-  TCLAP::ValueArg<std::string> verbosityArg(
-      "v"
-      , "verbosity"
-      , "The logging verbosity"
-      , false
-      , "info"
-      , &verbosityConstraint);
+  TCLAP::ValueArg<std::string> verbosityArg("v", "verbosity", "The logging verbosity", false, "info",
+                                            &verbosityConstraint);
   pCommandLine->add(verbosityArg);
 
-  StringVector qualityExits( {"ignore", "failure", "warning", "error"} );
-  std::map<std::string, unsigned int> qualityExitMap({
-    {"ignore",  0},
-    {"failure", 1},
-    {"warning", 2},
-    {"error",   3}
-  });
+  StringVector qualityExits({"ignore", "failure", "warning", "error"});
+  std::map<std::string, unsigned int> qualityExitMap({{"ignore", 0}, {"failure", 1}, {"warning", 2}, {"error", 3}});
   TCLAP::ValuesConstraint<std::string> qualityExitsConstraint(qualityExits);
   TCLAP::ValueArg<std::string> qualityExitArg(
-      "e"
-      , "exit-on"
-      , "Returns 1 at end qtest if at least on of the qtest has a quality lower than the 'warning' or 'error' thresholds"
-      , false
-      , "ignore"
-      , &qualityExitsConstraint);
+      "e", "exit-on",
+      "Returns 1 at end qtest if at least on of the qtest has a quality lower than the 'warning' or 'error' thresholds",
+      false, "ignore", &qualityExitsConstraint);
   pCommandLine->add(qualityExitArg);
 
   // parse command line
   pCommandLine->parse(argc, argv);
 
-  Logger::setLogLevel( Logger::logLevelFromString( verbosityArg.getValue() ) );
+  Logger::setLogLevel(Logger::logLevelFromString(verbosityArg.getValue()));
 
-  const unsigned int qualityExit( qualityExitMap.find(qualityExitArg.getValue())->second );
+  const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
 
   StringVector qthresholds;
   tokenize(qualityThresholdsArg.getValue(), qthresholds, ":");
 
-  if(qthresholds.size() != 2)
-  {
-    dqm_error( "Wrong quality thresholds syntax. Excepted 'number:number' !" );
+  if (qthresholds.size() != 2) {
+    dqm_error("Wrong quality thresholds syntax. Excepted 'number:number' !");
     return STATUS_CODE_FAILURE;
   }
 
   float qLimit1(0.), qLimit2(0.);
 
-  if(!stringToType(qthresholds.at(0), qLimit1) || !stringToType(qthresholds.at(1), qLimit2))
-  {
-    dqm_error( "Wrong quality thresholds syntax. Excepted 'number:number' !" );
+  if (!stringToType(qthresholds.at(0), qLimit1) || !stringToType(qthresholds.at(1), qLimit2)) {
+    dqm_error("Wrong quality thresholds syntax. Excepted 'number:number' !");
     return STATUS_CODE_FAILURE;
   }
 
-  if(qLimit1 < 0 || qLimit2 < 0 || qLimit1 > 1.f || qLimit1 > 1.f)
-  {
-    dqm_error( "Wrong quality thresholds. Excepted numbers between 0 and 1 !" );
+  if (qLimit1 < 0 || qLimit2 < 0 || qLimit1 > 1.f || qLimit1 > 1.f) {
+    dqm_error("Wrong quality thresholds. Excepted numbers between 0 and 1 !");
     return STATUS_CODE_FAILURE;
   }
 
-  if(qLimit1 > qLimit2)
+  if (qLimit1 > qLimit2)
     std::swap(qLimit1, qLimit2);
 
-  try
-  {
+  try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
-  }
-  catch(StatusCodeException &e)
-  {
-    dqm_error( "While loading libraries : Caught {0}", e.toString() );
+  } catch (StatusCodeException &e) {
+    dqm_error("While loading libraries : Caught {0}", e.toString());
     return e.getStatusCode();
-  }
-  catch(...)
-  {
-    dqm_error( "While loading libraries : Caught unknown error" );
+  } catch (...) {
+    dqm_error("While loading libraries : Caught unknown error");
     return 1;
   }
 
   const std::string qtestFile(qtestFileArg.getValue());
   const std::string rootFileName(rootFileArg.getValue());
-  
+
   XMLParser parser;
-  
-  try
-  {
+
+  try {
     parser.parse(qtestFile);
-  }
-  catch(StatusCodeException &e)
-  {
-    dqm_error( "While reading qtest file : Caught {0}", e.toString() );
+  } catch (StatusCodeException &e) {
+    dqm_error("While reading qtest file : Caught {0}", e.toString());
     return e.getStatusCode();
   }
-  
-  TiXmlDocument &document(parser.document()); 
+
+  TiXmlDocument &document(parser.document());
   StringMap constants;
   TiXmlElement *rootElement = document.RootElement();
   TiXmlElement *qTestsElement = rootElement->FirstChildElement("qtests");
 
-  if(qTestsElement == nullptr)
-  {
-    dqm_error( "No <qtests> element found in input qtest file '{0}' !", qtestFile );
+  if (qTestsElement == nullptr) {
+    dqm_error("No <qtests> element found in input qtest file '{0}' !", qtestFile);
     return STATUS_CODE_NOT_FOUND;
   }
 
   std::unique_ptr<MonitorElementManager> monitorElementMgr(new MonitorElementManager());
   std::unique_ptr<TFile> rootFile(new TFile(rootFileName.c_str(), "READ"));
 
-  try
-  {
-    for(TiXmlElement *qtest = qTestsElement->FirstChildElement("qtest") ; qtest != nullptr ; qtest = qtest->NextSiblingElement("qtest"))
-    {
+  try {
+    for (TiXmlElement *qtest = qTestsElement->FirstChildElement("qtest"); qtest != nullptr;
+         qtest = qtest->NextSiblingElement("qtest")) {
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTest(qtest));
     }
-  }
-  catch(StatusCodeException &e)
-  {
-    dqm_error( "While creating qtest : Caught {0}", e.toString() );
+  } catch (StatusCodeException &e) {
+    dqm_error("While creating qtest : Caught {0}", e.toString());
     return e.getStatusCode();
   }
 
-  try
-  {
-    for(TiXmlElement *meElt = rootElement->FirstChildElement("monitorElement") ; meElt != nullptr ; meElt = meElt->NextSiblingElement("monitorElement"))
-    {
+  try {
+    for (TiXmlElement *meElt = rootElement->FirstChildElement("monitorElement"); meElt != nullptr;
+         meElt = meElt->NextSiblingElement("monitorElement")) {
       std::string path, name, reference;
       THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
-        XmlHelper::getAttribute(meElt, "path", path));
+                             XmlHelper::getAttribute(meElt, "path", path));
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
       THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
-        XmlHelper::getAttribute(meElt, "reference", reference));
+                             XmlHelper::getAttribute(meElt, "reference", reference));
 
       TObject *pTObject(nullptr);
-      Path fullName(path); fullName += name;
+      Path fullName(path);
+      fullName += name;
 
       // FIXME : bad handling of path in root path
-      if(path == "/")
-        pTObject = (TObject *) rootFile->Get(name.c_str());
+      if (path == "/")
+        pTObject = (TObject *)rootFile->Get(name.c_str());
       else
-        pTObject = (TObject *) rootFile->Get(fullName.getPath().c_str());
+        pTObject = (TObject *)rootFile->Get(fullName.getPath().c_str());
 
-      if(pTObject == nullptr)
-      {
-        dqm_error( "TObject '{0}' in file '{0}' no found !", fullName.getPath(), rootFileName );
+      if (pTObject == nullptr) {
+        dqm_error("TObject '{0}' in file '{0}' no found !", fullName.getPath(), rootFileName);
         throw StatusCodeException(STATUS_CODE_NOT_FOUND);
       }
 
       MonitorElementPtr monitorElement;
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->handleMonitorElement(path, pTObject, monitorElement));
 
-      if(!reference.empty())
-      {
-        dqm_debug( "Monitor element '{0}' read, reference file '{1}'", name, reference );
+      if (!reference.empty()) {
+        dqm_debug("Monitor element '{0}' read, reference file '{1}'", name, reference);
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->attachReference(monitorElement, reference));
       }
 
-      for(TiXmlElement *qtest = meElt->FirstChildElement("qtest") ; qtest != nullptr ; qtest = qtest->NextSiblingElement("qtest"))
-      {
+      for (TiXmlElement *qtest = meElt->FirstChildElement("qtest"); qtest != nullptr;
+           qtest = qtest->NextSiblingElement("qtest")) {
         std::string qTestName;
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));
         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->addQualityTest(path, name, qTestName));
       }
     }
-  }
-  catch(StatusCodeException &e)
-  {
-    dqm_error( "While creating monitor elements : Caught {0}", e.toString() );
+  } catch (StatusCodeException &e) {
+    dqm_error("While creating monitor elements : Caught {0}", e.toString());
     return e.getStatusCode();
   }
 
   QReportStorage reportStorage;
 
-  try
-  {
+  try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->runQualityTests(reportStorage));
-  }
-  catch(StatusCodeException &e)
-  {
-    dqm_error( "While processing quality tests : Caught {0}", e.toString() );
+  } catch (StatusCodeException &e) {
+    dqm_error("While processing quality tests : Caught {0}", e.toString());
     return e.getStatusCode();
   }
 
   const QReportContainer &reports(reportStorage.reports());
 
   json jsonRoot, jsonMetadata, jsonQReports;
-  std::string date; timeToHMS(time(nullptr), date);
-  StringMap hostInfos; fillHostInfo(hostInfos);
+  std::string date;
+  timeToHMS(time(nullptr), date);
+  StringMap hostInfos;
+  fillHostInfo(hostInfos);
 
   jsonMetadata["host"] = hostInfos;
   jsonMetadata["date"] = date;
@@ -315,48 +250,48 @@ int main(int argc, char* argv[])
   unsigned int jsonIndex(0);
   bool returnFailure(false);
 
-  std::cout << bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left << "STATUS" << setw(10) << std::left << "QUALITY" << "MESSAGE" << reset << std::endl;
+  std::cout << bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left
+            << "STATUS" << setw(10) << std::left << "QUALITY"
+            << "MESSAGE" << reset << std::endl;
 
-  for(const auto &iter : reports)
-  {
-    for(const auto &iter2 : iter.second)
-    {
+  for (const auto &iter : reports) {
+    for (const auto &iter2 : iter.second) {
       json jsonQReport;
       iter2.second.toJson(jsonQReport);
       jsonQReports[jsonIndex] = jsonQReport;
       jsonIndex++;
 
-      if(!iter2.second.m_executed)
-      {
-        std::cout << redBck << white << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << setw(10) << std::left << "FAIL" << setw(10) << std::left << "none" << iter2.second.m_message << reset << std::endl;
+      if (!iter2.second.m_executed) {
+        std::cout << redBck << white << setw(40) << std::left << iter.first.second << setw(30) << std::left
+                  << iter2.second.m_qualityTestName << setw(10) << std::left << "FAIL" << setw(10) << std::left
+                  << "none" << iter2.second.m_message << reset << std::endl;
 
-        if(qualityExit >= 1)
+        if (qualityExit >= 1)
           returnFailure = true;
-      }
-      else
-      {
+      } else {
         const float quality(iter2.second.m_quality);
 
-        if(quality < lowerQualityLimitArg.getValue() || quality > upperQualityLimitArg.getValue())
+        if (quality < lowerQualityLimitArg.getValue() || quality > upperQualityLimitArg.getValue())
           continue;
 
-        if(quality < qLimit1)
-        {
-          if(qualityExit >= 3)
+        if (quality < qLimit1) {
+          if (qualityExit >= 3)
             returnFailure = true;
 
-          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << red << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
-        }
-        else if(qLimit1 <= quality && quality < qLimit2)
-        {
-          if(qualityExit >= 2)
+          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left
+                    << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << red << setw(10)
+                    << std::left << quality << reset << iter2.second.m_message << std::endl;
+        } else if (qLimit1 <= quality && quality < qLimit2) {
+          if (qualityExit >= 2)
             returnFailure = true;
 
-          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << yellow << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
-        }
-        else
-        {
-          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << blue << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
+          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left
+                    << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << yellow
+                    << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
+        } else {
+          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left
+                    << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << blue << setw(10)
+                    << std::left << quality << reset << iter2.second.m_message << std::endl;
         }
       }
     }
@@ -364,16 +299,14 @@ int main(int argc, char* argv[])
 
   jsonRoot["qreports"] = jsonQReports;
 
-  if(outputJsonFileArg.isSet())
-  {
+  if (outputJsonFileArg.isSet()) {
     std::ofstream jsonFile;
     jsonFile.open(outputJsonFileArg.getValue().c_str());
     jsonFile << jsonRoot.dump(2);
     jsonFile.close();
   }
 
-  if(returnFailure)
-  {
+  if (returnFailure) {
     dqm_warning("Option --return-on {0} was given => return 1 !", qualityExitArg.getValue());
     return 1;
   }

@@ -27,189 +27,169 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/GenericEvent.h"
-#include "dqm4hep/StreamingHelper.h"
 #include "dqm4hep/PluginManager.h"
+#include "dqm4hep/StreamingHelper.h"
 
 namespace dqm4hep {
 
   namespace core {
 
-    DQM_PLUGIN_DECL( GenericEventStreamer , "GenericEventStreamer" );
+    DQM_PLUGIN_DECL(GenericEventStreamer, "GenericEventStreamer");
 
-    GenericEvent::GenericEvent()
-    {
+    GenericEvent::GenericEvent() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    GenericEvent::~GenericEvent()
-    {
+    GenericEvent::~GenericEvent() {
       /* nop */
     }
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     template <typename T>
-    StatusCode GenericEvent::setValues(const std::string &key, const T &vals)
-    {
+    StatusCode GenericEvent::setValues(const std::string &key, const T &vals) {
       return STATUS_CODE_FAILURE;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    StatusCode GenericEvent::getValues(const std::string &key, T &vals) const
-    {
+    StatusCode GenericEvent::getValues(const std::string &key, T &vals) const {
       return STATUS_CODE_FAILURE;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::setValues(const std::string &key, const IntVector &vals)
-    {
-      m_intValues[ key ] = vals;
+    StatusCode GenericEvent::setValues(const std::string &key, const IntVector &vals) {
+      m_intValues[key] = vals;
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::setValues(const std::string &key, const FloatVector &vals)
-    {
-      m_floatValues[ key ] = vals;
+    StatusCode GenericEvent::setValues(const std::string &key, const FloatVector &vals) {
+      m_floatValues[key] = vals;
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::setValues(const std::string &key, const DoubleVector &vals)
-    {
-      m_doubleValues[ key ] = vals;
+    StatusCode GenericEvent::setValues(const std::string &key, const DoubleVector &vals) {
+      m_doubleValues[key] = vals;
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::setValues(const std::string &key, const StringVector &vals)
-    {
-      m_stringValues[ key ] = vals;
+    StatusCode GenericEvent::setValues(const std::string &key, const StringVector &vals) {
+      m_stringValues[key] = vals;
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::getValues(const std::string &key, IntVector &vals) const
-    {
+    StatusCode GenericEvent::getValues(const std::string &key, IntVector &vals) const {
       auto findIter = m_intValues.find(key);
-      
-      if(m_intValues.cend() != findIter)
-      {
+
+      if (m_intValues.cend() != findIter) {
         vals.insert(vals.begin(), findIter->second.cbegin(), findIter->second.cend());
         return STATUS_CODE_SUCCESS;
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::getValues(const std::string &key, FloatVector &vals) const
-    {
+    StatusCode GenericEvent::getValues(const std::string &key, FloatVector &vals) const {
       auto findIter = m_floatValues.find(key);
-      
-      if(m_floatValues.cend() != findIter)
-      {
+
+      if (m_floatValues.cend() != findIter) {
         vals.insert(vals.begin(), findIter->second.cbegin(), findIter->second.cend());
         return STATUS_CODE_SUCCESS;
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::getValues(const std::string &key, DoubleVector &vals) const
-    {
+    StatusCode GenericEvent::getValues(const std::string &key, DoubleVector &vals) const {
       auto findIter = m_doubleValues.find(key);
-      
-      if(m_doubleValues.cend() != findIter)
-      {
+
+      if (m_doubleValues.cend() != findIter) {
         vals.insert(vals.begin(), findIter->second.cbegin(), findIter->second.cend());
         return STATUS_CODE_SUCCESS;
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    StatusCode GenericEvent::getValues(const std::string &key, StringVector &vals) const
-    {
+    StatusCode GenericEvent::getValues(const std::string &key, StringVector &vals) const {
       auto findIter = m_stringValues.find(key);
-      
-      if(m_stringValues.cend() != findIter)
-      {
+
+      if (m_stringValues.cend() != findIter) {
         vals.insert(vals.begin(), findIter->second.cbegin(), findIter->second.cend());
         return STATUS_CODE_SUCCESS;
       }
-      
+
       return STATUS_CODE_NOT_FOUND;
     }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    GenericEventStreamer::GenericEventStreamer()
-    {
+    GenericEventStreamer::GenericEventStreamer() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    GenericEventStreamer::~GenericEventStreamer()
-    {
+    GenericEventStreamer::~GenericEventStreamer() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    EventPtr GenericEventStreamer::createEvent() const
-    {
+    EventPtr GenericEventStreamer::createEvent() const {
       return std::shared_ptr<Event>(new EventBase<GenericEvent>(new GenericEvent()));
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::write(const EventPtr &event, xdrstream::IODevice *pDevice)
-    {
+    StatusCode GenericEventStreamer::write(const EventPtr &event, xdrstream::IODevice *pDevice) {
       const GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
 
-      if(nullptr == pGenericEvent)
+      if (nullptr == pGenericEvent)
         return STATUS_CODE_INVALID_PARAMETER;
 
-      if( ! XDR_TESTBIT( event->writeBase(pDevice) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(event->writeBase(pDevice), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
       // write event contents
       const GenericEvent::IntVectorMap &intVals(pGenericEvent->m_intValues);
-      if( ! XDR_TESTBIT( StreamingHelper::write( pDevice , intVals ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, intVals), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
-      if( ! XDR_TESTBIT( StreamingHelper::write( pDevice , pGenericEvent->m_floatValues ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_floatValues), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
-      if( ! XDR_TESTBIT( StreamingHelper::write( pDevice , pGenericEvent->m_doubleValues ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_doubleValues), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
-      if( ! XDR_TESTBIT( StreamingHelper::write( pDevice , pGenericEvent->m_stringValues ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_stringValues), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;
@@ -217,28 +197,25 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::read(EventPtr &event, xdrstream::IODevice *pDevice)
-    {
+    StatusCode GenericEventStreamer::read(EventPtr &event, xdrstream::IODevice *pDevice) {
       event = this->createEvent();
       GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
 
       // read event info
-      if( ! XDR_TESTBIT( event->readBase(pDevice) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(event->readBase(pDevice), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
       // write event contents
-      if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_intValues ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_intValues), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
-      if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_floatValues ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_floatValues), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
-      if( ! XDR_TESTBIT( StreamingHelper::read( pDevice , pGenericEvent->m_doubleValues ) , xdrstream::XDR_SUCCESS ) )
+      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_doubleValues), xdrstream::XDR_SUCCESS))
         return STATUS_CODE_FAILURE;
 
       return STATUS_CODE_SUCCESS;
     }
-
   }
-
 }

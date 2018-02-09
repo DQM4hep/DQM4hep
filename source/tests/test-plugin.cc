@@ -26,10 +26,10 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/PluginManager.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- std headers
 #include <iostream>
@@ -38,24 +38,23 @@
 using namespace std;
 using namespace dqm4hep::core;
 
-#define assert_test(Command) \
-  if( ! (Command) )\
-  {\
-    dqm_error( "Assertion failed : {0}, line {1}", #Command, __LINE__ );\
-    exit(1);\
+#define assert_test(Command)                                                                                           \
+  if (!(Command)) {                                                                                                    \
+    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
+    exit(1);                                                                                                           \
   }
 
-class TestPlugin
-{
+class TestPlugin {
 public:
   TestPlugin() = default;
-  void print() { dqm_info( "Hello world plugin !" ); }
+  void print() {
+    dqm_info("Hello world plugin !");
+  }
 };
 
-DQM_PLUGIN_DECL( TestPlugin, "TestPlugin" );
+DQM_PLUGIN_DECL(TestPlugin, "TestPlugin");
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   Logger::createLogger("test-plugin", {Logger::coloredConsole()});
   Logger::setMainLogger("test-plugin");
   Logger::setLogLevel(spdlog::level::debug);

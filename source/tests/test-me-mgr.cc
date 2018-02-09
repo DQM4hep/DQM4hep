@@ -26,10 +26,10 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/MonitorElementManager.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- std headers
 #include <iostream>
@@ -38,15 +38,13 @@
 using namespace std;
 using namespace dqm4hep::core;
 
-#define assert_test(Command) \
-  if( ! (Command) )\
-  {\
-    dqm_error( "Assertion failed : {0}, line {1}", #Command, __LINE__ );\
-    exit(1);\
+#define assert_test(Command)                                                                                           \
+  if (!(Command)) {                                                                                                    \
+    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
+    exit(1);                                                                                                           \
   }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   Logger::createLogger("test-me-mgr", {Logger::coloredConsole()});
   Logger::setMainLogger("test-me-mgr");
   Logger::setLogLevel(spdlog::level::debug);
@@ -67,8 +65,6 @@ int main(int argc, char* argv[])
 
   assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement("/", "TestGraph"));
   assert_test(STATUS_CODE_NOT_FOUND == meMgr->getMonitorElement("/", "TestGraph", monitorElement));
-
-
 
   return 0;
 }

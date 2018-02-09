@@ -24,30 +24,33 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_PLUGINMANAGER_H
 #define DQM4HEP_PLUGINMANAGER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
-#include <dqm4hep/Singleton.h>
-#include <dqm4hep/Plugin.h>
 #include <dqm4hep/Logging.h>
+#include <dqm4hep/Plugin.h>
+#include <dqm4hep/Singleton.h>
+#include <dqm4hep/StatusCodes.h>
 
 //-------------------------------------------------------------------------------------------------
 
-#define DQM_PLUGIN_DECL( ClassName , ClassStr ) \
-    class DQMPlugin_##ClassName : public dqm4hep::core::Plugin, public ClassName \
-    { \
-    public: \
-    DQMPlugin_##ClassName (bool reg) : dqm4hep::core::Plugin(ClassStr), ClassName() { \
-      if(reg) THROW_RESULT_IF(dqm4hep::core::STATUS_CODE_SUCCESS, !=, this->registerMe()); \
-    } \
-    dqm4hep::core::Plugin *create() const { return new DQMPlugin_##ClassName (false); } \
-    std::string className() const { return std::string(#ClassName); } \
-    }; \
-    static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName(true)
+#define DQM_PLUGIN_DECL(ClassName, ClassStr)                                                                           \
+  class DQMPlugin_##ClassName : public dqm4hep::core::Plugin, public ClassName {                                       \
+  public:                                                                                                              \
+    DQMPlugin_##ClassName(bool reg) : dqm4hep::core::Plugin(ClassStr), ClassName() {                                   \
+      if (reg)                                                                                                         \
+        THROW_RESULT_IF(dqm4hep::core::STATUS_CODE_SUCCESS, !=, this->registerMe());                                   \
+    }                                                                                                                  \
+    dqm4hep::core::Plugin *create() const {                                                                            \
+      return new DQMPlugin_##ClassName(false);                                                                         \
+    }                                                                                                                  \
+    std::string className() const {                                                                                    \
+      return std::string(#ClassName);                                                                                  \
+    }                                                                                                                  \
+  };                                                                                                                   \
+  static DQMPlugin_##ClassName instance_DQMPlugin_##ClassName(true)
 
 //-------------------------------------------------------------------------------------------------
 
@@ -61,12 +64,11 @@ namespace dqm4hep {
      *  Responsible for loading shared libraries
      *  that contains Plugin instances
      */
-    class PluginManager : public Singleton<PluginManager>
-    {
+    class PluginManager : public Singleton<PluginManager> {
       friend class Singleton<PluginManager>;
       friend class Plugin;
 
-      typedef std::map<const std::string, Plugin*> PluginMap;
+      typedef std::map<const std::string, Plugin *> PluginMap;
 
     public:
       /** Load shared libraries from the environment variable 4HEP_PLUGIN_DLL
@@ -75,25 +77,25 @@ namespace dqm4hep {
 
       /** Load the shared libraries
        */
-      StatusCode loadLibraries( const StringVector &libraryNameList );
+      StatusCode loadLibraries(const StringVector &libraryNameList);
 
       /** Load the shared library
        */
-      StatusCode loadLibrary( const std::string &libraryName );
+      StatusCode loadLibrary(const std::string &libraryName);
 
       /** Get the plug-in by name
        */
-      const Plugin *getPlugin( const std::string &pluginName ) const;
+      const Plugin *getPlugin(const std::string &pluginName) const;
 
       /** Get the plug-in clone. A new plug-in instance is allocated and returned
        *  to the user. Ownership of the plug-in transfered to the caller.
        */
       template <typename T>
-      std::shared_ptr<T> create( const std::string &pluginName ) const;
+      std::shared_ptr<T> create(const std::string &pluginName) const;
 
       /** Whether the plug-in is registered within the plug-in manager
        */
-      bool isPluginRegistered( const std::string &pluginName ) const;
+      bool isPluginRegistered(const std::string &pluginName) const;
 
       /** Get the plug-in name list
        */
@@ -119,26 +121,25 @@ namespace dqm4hep {
 
       /** Register the plug-in. Only available by plug-ins themselves
        */
-      StatusCode registerPlugin( Plugin *pPlugin );
+      StatusCode registerPlugin(Plugin *pPlugin);
 
     private:
-      PluginMap              m_pluginMap;
+      PluginMap m_pluginMap;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline std::shared_ptr<T> PluginManager::create( const std::string &pluginName ) const
-    {
-      const Plugin *pPlugin = this->getPlugin( pluginName );
+    inline std::shared_ptr<T> PluginManager::create(const std::string &pluginName) const {
+      const Plugin *pPlugin = this->getPlugin(pluginName);
 
-      if(!pPlugin)
+      if (!pPlugin)
         return std::shared_ptr<T>();
 
       Plugin *pClass = pPlugin->create();
 
-      if(nullptr == pClass)
+      if (nullptr == pClass)
         return std::shared_ptr<T>();
 
       return std::shared_ptr<T>(dynamic_cast<T *>(pClass));
@@ -147,23 +148,19 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StringVector PluginManager::pluginNamesMatchingType() const
-    {
+    inline StringVector PluginManager::pluginNamesMatchingType() const {
       StringVector pluginNames;
 
-      for (auto plugin : m_pluginMap)
-      {
+      for (auto plugin : m_pluginMap) {
         const Plugin *pPlugin(plugin.second);
 
-        if(nullptr != dynamic_cast<const T *>(pPlugin))
+        if (nullptr != dynamic_cast<const T *>(pPlugin))
           pluginNames.push_back(plugin.first);
       }
 
       return pluginNames;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_PLUGINMANAGER_H
+#endif //  DQM4HEP_PLUGINMANAGER_H

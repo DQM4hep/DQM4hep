@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_ARCHIVER_H
 #define DQM4HEP_ARCHIVER_H
 
@@ -47,9 +46,9 @@ namespace dqm4hep {
 
     /** Archiver class
      */
-    class Archiver
-    {
+    class Archiver {
       friend class MonitorElementManager;
+
     public:
       /** Constructor
        */
@@ -57,7 +56,8 @@ namespace dqm4hep {
 
       /** Constructor with file name and opening mode
        */
-      Archiver(const std::string &archiveFileName, const std::string &openingMode = "RECREATE", bool allowSuffix = true);
+      Archiver(const std::string &archiveFileName, const std::string &openingMode = "RECREATE",
+               bool allowSuffix = true);
 
       /** Destructor
        */
@@ -66,7 +66,8 @@ namespace dqm4hep {
       /** Open a new archive.
        *  Close the current file if opened. Supported opening mode are the TFile opening mode option (see TFile)
        */
-      StatusCode open(const std::string &archiveFileName, const std::string &openingMode = "RECREATE", bool allowSuffix = true);
+      StatusCode open(const std::string &archiveFileName, const std::string &openingMode = "RECREATE",
+                      bool allowSuffix = true);
 
       /** Close the current archive
        */
@@ -103,14 +104,12 @@ namespace dqm4hep {
 
     private:
       // members
-      std::string           m_fileName;        ///< The root file name
-      std::string           m_openingMode;     ///< The root file opening mode
-      bool                  m_isOpened;        ///< Whether the archive is opened
-      TFile                *m_pArchiveFile;    ///< The actual archive implementation (root file)
+      std::string m_fileName;    ///< The root file name
+      std::string m_openingMode; ///< The root file opening mode
+      bool m_isOpened;           ///< Whether the archive is opened
+      TFile *m_pArchiveFile;     ///< The actual archive implementation (root file)
     };
-
   }
-
 }
 
-#endif  //  DQM4HEP_ARCHIVER_H
+#endif //  DQM4HEP_ARCHIVER_H

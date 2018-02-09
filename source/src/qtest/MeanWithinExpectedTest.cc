@@ -26,13 +26,13 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
-#include <dqm4hep/QualityTest.h>
-#include <dqm4hep/PluginManager.h>
 #include <dqm4hep/Logging.h>
-#include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/MonitorElement.h>
+#include <dqm4hep/PluginManager.h>
+#include <dqm4hep/QualityTest.h>
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/XmlHelper.h>
 
 // -- root headers
 #include <TH1.h>
@@ -44,11 +44,9 @@ namespace dqm4hep {
 
     /** MeanWithinExpectedTest class
      */
-    class MeanWithinExpectedTest : public QualityTest
-    {
+    class MeanWithinExpectedTest : public QualityTest {
     public:
-      class Factory : public QualityTestFactory
-      {
+      class Factory : public QualityTestFactory {
       public:
         QTestPtr createQualityTest(const std::string &name) const override;
       };
@@ -59,9 +57,9 @@ namespace dqm4hep {
       StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
 
     protected:
-      float               m_expectedMean;
-      float               m_meanDeviationLower;
-      float               m_meanDeviationUpper;
+      float m_expectedMean;
+      float m_meanDeviationLower;
+      float m_meanDeviationUpper;
     };
 
     typedef MeanWithinExpectedTest::Factory MeanWithinExpectedTestFactory;
@@ -69,75 +67,67 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline QTestPtr MeanWithinExpectedTest::Factory::createQualityTest(const std::string &name) const
-    {
+    inline QTestPtr MeanWithinExpectedTest::Factory::createQualityTest(const std::string &name) const {
       return std::shared_ptr<QTest>(new MeanWithinExpectedTest(name));
     }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    MeanWithinExpectedTest::MeanWithinExpectedTest(const std::string &name) :
-	    QualityTest("MeanWithinExpected", name),
-      m_expectedMean(0.f),
-      m_meanDeviationLower(0.f),
-      m_meanDeviationUpper(0.f)
-    {
-      m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean (using TMath::Prob(chi2,1))";
+    MeanWithinExpectedTest::MeanWithinExpectedTest(const std::string &name)
+        : QualityTest("MeanWithinExpected", name),
+          m_expectedMean(0.f),
+          m_meanDeviationLower(0.f),
+          m_meanDeviationUpper(0.f) {
+      m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is "
+                      "defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean "
+                      "(using TMath::Prob(chi2,1))";
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle)
-    {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle,
-          "ExpectedMean", m_expectedMean));
+    StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle) {
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle,
-          "MeanDeviationLower", m_meanDeviationLower, [this](const float &value){
-            return value < this->m_expectedMean;
-          }));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
+                       XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower,
+                                                [this](const float &value) { return value < this->m_expectedMean; }));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle,
-          "MeanDeviationUpper", m_meanDeviationUpper, [this](const float &value){
-            return value > this->m_expectedMean;
-          }));
-          
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
+                       XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper,
+                                                [this](const float &value) { return value > this->m_expectedMean; }));
+
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report)
-    {
+    StatusCode MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
       TH1 *pHistogram = monitorElement->objectTo<TH1>();
-      
-      if(nullptr == pHistogram)
-      {
+
+      if (nullptr == pHistogram) {
         report.m_message = "ROOT monitor object is not a TH1 object !";
         return STATUS_CODE_INVALID_PTR;
       }
-      
+
       const float mean(pHistogram->GetMean());
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
-      if(m_meanDeviationLower < mean && mean < m_meanDeviationUpper)
-      {
-        report.m_message = "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
-      }
-      else
-      {
-        report.m_message = "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
+      if (m_meanDeviationLower < mean && mean < m_meanDeviationUpper) {
+        report.m_message =
+            "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
+      } else {
+        report.m_message =
+            "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
       }
 
-      const float chi = (mean - m_expectedMean)/range;
-      const float probability = TMath::Prob(chi*chi, 1);
+      const float chi = (mean - m_expectedMean) / range;
+      const float probability = TMath::Prob(chi * chi, 1);
       report.m_quality = probability;
 
       return STATUS_CODE_SUCCESS;
     }
 
-    DQM_PLUGIN_DECL( MeanWithinExpectedTestFactory, "MeanWithinExpectedTest" );
+    DQM_PLUGIN_DECL(MeanWithinExpectedTestFactory, "MeanWithinExpectedTest");
   }
-
 }

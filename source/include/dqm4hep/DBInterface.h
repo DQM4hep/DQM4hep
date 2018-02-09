@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_DBINTERFACE_H
 #define DQM4HEP_DBINTERFACE_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Logging.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- mysql headers
 #include <mysql.h>
@@ -42,15 +41,14 @@ namespace dqm4hep {
 
     /** DBInterface class
      */
-    class DBInterface
-    {
+    class DBInterface {
     public:
-      /** 
+      /**
        *  @brief  Constructor
        */
       DBInterface();
 
-      /** 
+      /**
        *  @brief  Constructor. Connect to database
        *
        *  @param  host the host name
@@ -58,24 +56,25 @@ namespace dqm4hep {
        *  @param  password the user password (if any)
        *  @param  database the database name to use
        */
-      DBInterface(const std::string &host, const std::string &user, const std::string &password, const std::string &database);
+      DBInterface(const std::string &host, const std::string &user, const std::string &password,
+                  const std::string &database);
 
-      /** 
+      /**
        *  @brief  Destructor
        */
       virtual ~DBInterface();
 
-      /** 
+      /**
        *  @brief  Connect to the mysql server
        */
       StatusCode connect();
 
-      /** 
+      /**
        *  @brief  Disconnect from the database
        */
       StatusCode disconnect();
 
-      /** 
+      /**
        *  @brief  Connect to the database.
        *          Not possible if a connection is being handled.
        *          Use disconnect() first and then connect()
@@ -85,9 +84,10 @@ namespace dqm4hep {
        *  @param  password the user password (if any)
        *  @param  database the database name to use
        */
-      StatusCode connect(const std::string &host, const std::string &user, const std::string &password, const std::string &database);
+      StatusCode connect(const std::string &host, const std::string &user, const std::string &password,
+                         const std::string &database);
 
-      /** 
+      /**
        *  @brief  Set host, user, password and database.
        *          Not possible if a connection is being handled.
        *          Use disconnect() first and then connect()
@@ -97,29 +97,30 @@ namespace dqm4hep {
        *  @param  password the user password (if any)
        *  @param  database the database name to use
        */
-      StatusCode set(const std::string &host, const std::string &user, const std::string &password, const std::string &database);
+      StatusCode set(const std::string &host, const std::string &user, const std::string &password,
+                     const std::string &database);
 
-      /** 
+      /**
        *  @brief  Get the host name
        */
       const std::string &getHost() const;
 
-      /** 
+      /**
        *  @brief  Get the user name
        */
       const std::string &getUser() const;
 
-      /** 
+      /**
        *  @brief  Get the password
        */
       const std::string &getPassword() const;
 
-      /** 
+      /**
        *  @brief  Get the data base name
        */
       const std::string &getDataBase() const;
 
-      /** 
+      /**
        *  @brief  Send query to database
        *          The result is not converted.
        *
@@ -128,7 +129,7 @@ namespace dqm4hep {
        */
       StatusCode queryRaw(const std::string &query, void *&pResult);
 
-      /** 
+      /**
        *  @brief  The result is streamed in type T using DQM4HEP::stringToType()
        *
        *  @param  query the mysql query
@@ -137,7 +138,7 @@ namespace dqm4hep {
       template <typename T>
       StatusCode query(const std::string &query, T &result);
 
-      /** 
+      /**
        *  @brief  Send query to database.
        *          The result is streamed in a vector.
        *          Each value of the vector is streamed using DQM4HEP::stringToType()
@@ -148,7 +149,7 @@ namespace dqm4hep {
       template <typename T>
       StatusCode queryVector(const std::string &query, std::vector<T> &result);
 
-      /** 
+      /**
        *  @brief  Send query to database
        *          The result is passed in the handler function for user parsing
        *
@@ -158,49 +159,50 @@ namespace dqm4hep {
       template <typename Handler>
       StatusCode queryAndHandle(const std::string &query, Handler handler);
 
-      /** 
+      /**
        *  @brief  Execute the query (no result expected)
        *
        *  @param  query the mysql query
        */
       StatusCode execute(const std::string &query);
 
-      /** 
+      /**
        *  @brief  Whether a connection is being handled
        */
       bool isConnected();
 
       /**
        *  @brief  Create a new parameter table
-       *  
+       *
        *  @param  table the table name
        *  @param  ifNotExists whether to check for table existence on creation
        *  @param  dropExistingTable whether to drop the existing table before creating
        */
-      StatusCode createParameterTable(const std::string &table, bool ifNotExists = true, bool dropExistingTable = false);
+      StatusCode createParameterTable(const std::string &table, bool ifNotExists = true,
+                                      bool dropExistingTable = false);
 
       /**
        *  @brief  Empty a parameter table (uses the TRUNCATE statement)
-       *  
+       *
        *  @param  table the table name
        */
       StatusCode emptyParameterTable(const std::string &table);
-      
+
       /**
        *  @brief  Set the parameters in the table.
        *          The parameter table must exist.
-       *          
-       *  @param  table the parameter table name 
+       *
+       *  @param  table the parameter table name
        *  @param  parameterValueMap a map of parameter name -> value to upload
        */
       StatusCode setParameters(const std::string &table, const StringMap &parameterValueMap);
-      
+
       /**
        *  @brief  Backup a parameter table under the specified name.
        *          A copy of the existing table is done.
        *          The parameter table must exist !
        *          The original table is left unchanged
-       *          
+       *
        * @param  table the parameter table name to backup
        * @param  backupTable the new parameter table name
        */
@@ -208,57 +210,53 @@ namespace dqm4hep {
 
       /**
        *  @brief  Dump the parameter table in standard output
-       *  
+       *
        *  @param  table the parameter table name
        */
       StatusCode dumpParameterTable(const std::string &table);
-      
+
       /**
        *  @brief  Extract all parameters from the specified table
-       *   
+       *
        *  @param  table the parameter table name
        *  @param  parameterValueMap the map of parameter name -> value to receive
        */
       StatusCode getTableParameters(const std::string &table, StringMap &parameterValueMap);
 
     private:
-      MYSQL                       *m_pMySQL;
+      MYSQL *m_pMySQL;
 
-      std::string                  m_host;
-      std::string                  m_user;
-      std::string                  m_password;
-      std::string                  m_database;
+      std::string m_host;
+      std::string m_user;
+      std::string m_password;
+      std::string m_database;
 
-      bool                         m_isConnected;
+      bool m_isConnected;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode DBInterface::query(const std::string &query, T &result)
-    {
-      if(!this->isConnected())
+    inline StatusCode DBInterface::query(const std::string &query, T &result) {
+      if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if(mysql_query(m_pMySQL, query.c_str()))
-      {
-        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
+      if (mysql_query(m_pMySQL, query.c_str())) {
+        dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
 
       MYSQL_RES *pMySQLResult = mysql_store_result(m_pMySQL);
 
-      if(!pMySQLResult)
-      {
-        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
+      if (!pMySQLResult) {
+        dqm_error("MySQL store result failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
 
       MYSQL_ROW row = mysql_fetch_row(pMySQLResult);
 
-      if(!dqm4hep::core::stringToType(row[0], result))
-      {
+      if (!dqm4hep::core::stringToType(row[0], result)) {
         mysql_free_result(pMySQLResult);
         return STATUS_CODE_FAILURE;
       }
@@ -271,32 +269,28 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode DBInterface::queryVector(const std::string &query, std::vector<T> &result)
-    {
-      if(!this->isConnected())
+    inline StatusCode DBInterface::queryVector(const std::string &query, std::vector<T> &result) {
+      if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if(mysql_query(m_pMySQL, query.c_str()))
-      {
-        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
+      if (mysql_query(m_pMySQL, query.c_str())) {
+        dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
 
       MYSQL_RES *pMySQLResult = mysql_store_result(m_pMySQL);
 
-      if(!pMySQLResult)
-      {
-        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
+      if (!pMySQLResult) {
+        dqm_error("MySQL store result failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
 
       MYSQL_ROW row;
 
-      while( (row = mysql_fetch_row(pMySQLResult)) )
-      {
+      while ((row = mysql_fetch_row(pMySQLResult))) {
         T value = T();
 
-        if(!dqm4hep::core::stringToType(row[0], value))
+        if (!dqm4hep::core::stringToType(row[0], value))
           continue;
 
         result.push_back(value);
@@ -310,34 +304,29 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Handler>
-    inline StatusCode DBInterface::queryAndHandle(const std::string &query, Handler handler)
-    {
-      if( ! this->isConnected() )
+    inline StatusCode DBInterface::queryAndHandle(const std::string &query, Handler handler) {
+      if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if(mysql_query(m_pMySQL, query.c_str()))
-      {
-        dqm_error( "MySQL query failed : {0}", mysql_error(m_pMySQL) );
+      if (mysql_query(m_pMySQL, query.c_str())) {
+        dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
 
       MYSQL_RES *pMySQLResult = mysql_store_result(m_pMySQL);
 
-      if(!pMySQLResult)
-      {
-        dqm_error( "MySQL store result failed : {0}", mysql_error(m_pMySQL) );
+      if (!pMySQLResult) {
+        dqm_error("MySQL store result failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
 
-      handler( pMySQLResult );
+      handler(pMySQLResult);
 
       mysql_free_result(pMySQLResult);
 
       return STATUS_CODE_SUCCESS;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_DBINTERFACE_H
+#endif //  DQM4HEP_DBINTERFACE_H

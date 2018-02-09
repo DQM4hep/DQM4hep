@@ -25,20 +25,19 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_MONITORELEMENT_H
 #define DQM4HEP_MONITORELEMENT_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/PtrHandler.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- root headers
-#include <TObject.h>
-#include <TGraph.h>
-#include <TPaveText.h>
 #include <Rtypes.h>
+#include <TGraph.h>
+#include <TObject.h>
+#include <TPaveText.h>
 
 namespace dqm4hep {
 
@@ -51,9 +50,9 @@ namespace dqm4hep {
      *
      *  @author Remi Ete, DESY
      */
-    class MonitorElement : public std::enable_shared_from_this<MonitorElement>
-    {
+    class MonitorElement : public std::enable_shared_from_this<MonitorElement> {
       friend class MonitorElementManager;
+
     public:
       /** Constructor
        */
@@ -73,7 +72,8 @@ namespace dqm4hep {
 
       /** Constructor with ROOT object and reference ptr
        */
-      static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);      
+      static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject,
+                                           const PtrHandler<TObject> &referenceObject);
 
       /** Get the monitor element type (class name)
        */
@@ -169,7 +169,7 @@ namespace dqm4hep {
       /** Constructor with ROOT object and reference ptr
        */
       MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
-      
+
       /** Set the monitor element object path
        */
       void setPath(const std::string &path);
@@ -191,28 +191,26 @@ namespace dqm4hep {
       StatusCode runQualityTest(const std::string &name, QReport &report);
 
     private:
-      std::string             m_path;               ///< The monitor element path
-      PtrHandler<TObject>     m_monitorObject;      ///< The monitored object
-      PtrHandler<TObject>     m_referenceObject;    ///< The reference object
-      QTestMap                m_qualityTests;       ///< The list of assigned quality tests
+      std::string m_path;                    ///< The monitor element path
+      PtrHandler<TObject> m_monitorObject;   ///< The monitored object
+      PtrHandler<TObject> m_referenceObject; ///< The reference object
+      QTestMap m_qualityTests;               ///< The list of assigned quality tests
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *MonitorElement::objectTo()
-    {
-      T *objCast = (T *) this->object(); // use old C cast for ROOT objects ...
+    inline T *MonitorElement::objectTo() {
+      T *objCast = (T *)this->object(); // use old C cast for ROOT objects ...
       return objCast ? objCast : nullptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *MonitorElement::referenceTo()
-    {
-      T *objCast = (T *) this->reference(); // use old C cast for ROOT objects ...
+    inline T *MonitorElement::referenceTo() {
+      T *objCast = (T *)this->reference(); // use old C cast for ROOT objects ...
       return objCast ? objCast : nullptr;
     }
 
@@ -223,11 +221,9 @@ namespace dqm4hep {
      *  Extension of a TObject for scalar values like int,
      *  float, double or string.
      */
-    template<typename T>
-    class TScalarObject : public TObject
-    {
+    template <typename T>
+    class TScalarObject : public TObject {
     public:
-
       /** Default constructor
        */
       TScalarObject();
@@ -265,19 +261,19 @@ namespace dqm4hep {
        */
       void Init();
 
-      T            m_scalar;       ///< The scalar value
-      TPaveText   *m_pPaveText;    ///< The pave text on which to draw the scalar value
+      T m_scalar;             ///< The scalar value
+      TPaveText *m_pPaveText; ///< The pave text on which to draw the scalar value
 
       ClassDefOverride(TScalarObject, 1);
     };
 
-    typedef TScalarObject<dqm_int>     TScalarInt;
-    typedef TScalarObject<dqm_float>   TScalarReal;
-    typedef TScalarObject<dqm_float>   TScalarFloat;
-    typedef TScalarObject<dqm_double>  TScalarDouble;
-    typedef TScalarObject<dqm_short>   TScalarShort;
-    typedef TScalarObject<long>       TScalarLong;
-    typedef TScalarObject<Long64_t>    TScalarLong64_t;
+    typedef TScalarObject<dqm_int> TScalarInt;
+    typedef TScalarObject<dqm_float> TScalarReal;
+    typedef TScalarObject<dqm_float> TScalarFloat;
+    typedef TScalarObject<dqm_double> TScalarDouble;
+    typedef TScalarObject<dqm_short> TScalarShort;
+    typedef TScalarObject<long> TScalarLong;
+    typedef TScalarObject<Long64_t> TScalarLong64_t;
     typedef TScalarObject<std::string> TScalarString;
 
     //-------------------------------------------------------------------------------------------------
@@ -287,14 +283,9 @@ namespace dqm4hep {
      *
      *  A TGraph with a dynamic x range axis
      */
-    class TDynamicGraph : public TGraph
-    {
+    class TDynamicGraph : public TGraph {
     public:
-      enum
-      {
-        kDynamicRange  = BIT(14),
-        kShrinkToRange = BIT(15)
-      };
+      enum { kDynamicRange = BIT(14), kShrinkToRange = BIT(15) };
 
       /** Constructor
        */
@@ -326,7 +317,7 @@ namespace dqm4hep {
       void ShrinkToRange();
 
     private:
-      Double_t       m_rangeLength;
+      Double_t m_rangeLength;
 
       ClassDefOverride(TDynamicGraph, 1);
     };
@@ -335,28 +326,21 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    TScalarObject<T>::TScalarObject()
-    {
+    TScalarObject<T>::TScalarObject() {
       Init();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    TScalarObject<T>::TScalarObject(const T &scalar) :
-    m_scalar(scalar),
-    m_pPaveText(nullptr)
-    {
-
+    TScalarObject<T>::TScalarObject(const T &scalar) : m_scalar(scalar), m_pPaveText(nullptr) {
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    TScalarObject<T>::~TScalarObject()
-    {
-      if(nullptr != m_pPaveText)
-      {
+    TScalarObject<T>::~TScalarObject() {
+      if (nullptr != m_pPaveText) {
         delete m_pPaveText;
         m_pPaveText = nullptr;
       }
@@ -365,9 +349,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Clear(Option_t *option)
-    {
-      if(nullptr != m_pPaveText)
+    void TScalarObject<T>::Clear(Option_t *option) {
+      if (nullptr != m_pPaveText)
         m_pPaveText->Clear(option);
 
       m_scalar = 0;
@@ -376,12 +359,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Draw(Option_t *option)
-    {
+    void TScalarObject<T>::Draw(Option_t *option) {
       std::string scalarStr = ToString();
 
-      if(nullptr == m_pPaveText)
-      {
+      if (nullptr == m_pPaveText) {
         m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
         m_pPaveText->SetFillColor(0);
         m_pPaveText->SetBorderSize(0);
@@ -397,24 +378,21 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Set(const T &value)
-    {
+    void TScalarObject<T>::Set(const T &value) {
       m_scalar = value;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    const T &TScalarObject<T>::Get() const
-    {
+    const T &TScalarObject<T>::Get() const {
       return m_scalar;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    std::string TScalarObject<T>::ToString() const
-    {
+    std::string TScalarObject<T>::ToString() const {
       std::stringstream ss;
       ss << m_scalar;
       return ss.str();
@@ -423,8 +401,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Init()
-    {
+    void TScalarObject<T>::Init() {
       m_scalar = 0;
       m_pPaveText = nullptr;
     }
@@ -434,9 +411,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline void TScalarObject<std::string>::Clear(Option_t *option)
-    {
-      if(nullptr != m_pPaveText)
+    inline void TScalarObject<std::string>::Clear(Option_t *option) {
+      if (nullptr != m_pPaveText)
         m_pPaveText->Clear(option);
 
       m_scalar.clear();
@@ -445,16 +421,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline std::string TScalarObject<std::string>::ToString() const
-    {
+    inline std::string TScalarObject<std::string>::ToString() const {
       return m_scalar;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline void TScalarObject<std::string>::Init()
-    {
+    inline void TScalarObject<std::string>::Init() {
       m_scalar = "";
       m_pPaveText = nullptr;
     }
@@ -462,13 +436,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline void TScalarObject<std::string>::Draw(Option_t *option)
-    {
+    inline void TScalarObject<std::string>::Draw(Option_t *option) {
       StringVector lines;
-      dqm4hep::core::tokenize( m_scalar , lines , "\n" );
+      dqm4hep::core::tokenize(m_scalar, lines, "\n");
 
-      if(nullptr == m_pPaveText)
-      {
+      if (nullptr == m_pPaveText) {
         m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
         m_pPaveText->SetFillColor(0);
         m_pPaveText->SetBorderSize(0);
@@ -477,14 +449,12 @@ namespace dqm4hep {
 
       m_pPaveText->Clear();
 
-      for(auto iter = lines.begin(), endIter = lines.end() ; endIter != iter ; ++iter)
-        m_pPaveText->AddText( (*iter).c_str() );
+      for (auto iter = lines.begin(), endIter = lines.end(); endIter != iter; ++iter)
+        m_pPaveText->AddText((*iter).c_str());
 
       m_pPaveText->Draw(option);
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_MONITORELEMENT_H
+#endif //  DQM4HEP_MONITORELEMENT_H

@@ -32,53 +32,43 @@ namespace dqm4hep {
 
   namespace core {
 
-    Version::Version() :
-        m_major( 0 ),
-        m_minor( 0 ),
-        m_patch( 0 )
-    {
+    Version::Version() : m_major(0), m_minor(0), m_patch(0) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Version::Version( unsigned int major, unsigned int minor, unsigned int patch )
-    {
-      set( m_major, m_minor, m_patch );
+    Version::Version(unsigned int major, unsigned int minor, unsigned int patch) {
+      set(m_major, m_minor, m_patch);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Version::~Version()
-    {
+    Version::~Version() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    unsigned int Version::getMajor() const
-    {
+    unsigned int Version::getMajor() const {
       return m_major;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    unsigned int Version::getMinor() const
-    {
+    unsigned int Version::getMinor() const {
       return m_minor;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    unsigned int Version::getPatch() const
-    {
+    unsigned int Version::getPatch() const {
       return m_patch;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Version::set( unsigned int major, unsigned int minor, unsigned int patch )
-    {
+    void Version::set(unsigned int major, unsigned int minor, unsigned int patch) {
       m_major = major;
       m_minor = minor;
       m_patch = patch;
@@ -89,15 +79,13 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Version::toString() const
-    {
+    const std::string &Version::toString() const {
       return m_versionString;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Version &Version::operator = ( const Version &version )
-    {
+    Version &Version::operator=(const Version &version) {
       m_major = version.m_major;
       m_minor = version.m_minor;
       m_patch = version.m_patch;
@@ -108,30 +96,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool operator <( const Version &lhs, const Version &rhs )
-    {
-      if(lhs.getMajor() < rhs.getMajor())
+    bool operator<(const Version &lhs, const Version &rhs) {
+      if (lhs.getMajor() < rhs.getMajor())
         return true;
 
-      if(lhs.getMinor() < rhs.getMinor())
+      if (lhs.getMinor() < rhs.getMinor())
         return true;
 
-      if(lhs.getPatch() < rhs.getPatch())
-        return true;
-
-      return false;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    bool operator <= ( const Version &lhs, const Version &rhs )
-    {
-      if(lhs < rhs)
-        return true;
-
-      if( lhs.getMajor() == rhs.getMajor()
-          && lhs.getMinor() == rhs.getMinor()
-          && lhs.getPatch() == rhs.getPatch() )
+      if (lhs.getPatch() < rhs.getPatch())
         return true;
 
       return false;
@@ -139,58 +111,58 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    bool operator > ( const Version &lhs, const Version &rhs )
-    {
-      return ! ( lhs <= rhs );
+    bool operator<=(const Version &lhs, const Version &rhs) {
+      if (lhs < rhs)
+        return true;
+
+      if (lhs.getMajor() == rhs.getMajor() && lhs.getMinor() == rhs.getMinor() && lhs.getPatch() == rhs.getPatch())
+        return true;
+
+      return false;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool operator >= ( const Version &lhs, const Version &rhs )
-    {
-      return ! ( lhs < rhs );
+    bool operator>(const Version &lhs, const Version &rhs) {
+      return !(lhs <= rhs);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool operator == ( const Version &lhs, const Version &rhs )
-    {
-      return ( lhs.getMajor() == rhs.getMajor()
-          && lhs.getMinor() == rhs.getMinor()
-          && lhs.getPatch() == rhs.getPatch() );
+    bool operator>=(const Version &lhs, const Version &rhs) {
+      return !(lhs < rhs);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool operator != ( const Version &lhs, const Version &rhs )
-    {
-      return ! ( lhs == rhs );
+    bool operator==(const Version &lhs, const Version &rhs) {
+      return (lhs.getMajor() == rhs.getMajor() && lhs.getMinor() == rhs.getMinor() && lhs.getPatch() == rhs.getPatch());
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    bool operator!=(const Version &lhs, const Version &rhs) {
+      return !(lhs == rhs);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     xdrstream::Status Version::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-        xdrstream::xdr_version_t version)
-    {
-      if( xdrstream::XDR_READ_STREAM == mode )
-      {
+                                      xdrstream::xdr_version_t version) {
+      if (xdrstream::XDR_READ_STREAM == mode) {
         uint32_t major, minor, patch;
-        XDR_STREAM( pDevice->read( & major ) );
-        XDR_STREAM( pDevice->read( & minor ) );
-        XDR_STREAM( pDevice->read( & patch ) );
+        XDR_STREAM(pDevice->read(&major));
+        XDR_STREAM(pDevice->read(&minor));
+        XDR_STREAM(pDevice->read(&patch));
 
-        this->set( major, minor, patch );
-      }
-      else
-      {
-        XDR_STREAM( pDevice->write<uint32_t>( & m_major ) );
-        XDR_STREAM( pDevice->write<uint32_t>( & m_minor ) );
-        XDR_STREAM( pDevice->write<uint32_t>( & m_patch ) );
+        this->set(major, minor, patch);
+      } else {
+        XDR_STREAM(pDevice->write<uint32_t>(&m_major));
+        XDR_STREAM(pDevice->write<uint32_t>(&m_minor));
+        XDR_STREAM(pDevice->write<uint32_t>(&m_patch));
       }
 
       return xdrstream::XDR_SUCCESS;
     }
-
   }
-
 }

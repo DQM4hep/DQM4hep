@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_EVENTSTREAMER_H
 #define DQM4HEP_EVENTSTREAMER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Event.h>
+#include <dqm4hep/StatusCodes.h>
 
 namespace xdrstream {
   class IODevice;
@@ -45,8 +44,7 @@ namespace dqm4hep {
 
     /** EventStreamer class
      */
-    class EventStreamer
-    {
+    class EventStreamer {
     public:
       /** Destructor
        */
@@ -65,26 +63,26 @@ namespace dqm4hep {
        */
       virtual StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice) = 0;
 
-      /** Serialize a part of a Event object identified by the reg exp 'subEventIdentifier' and store it in the data stream
+      /** Serialize a part of a Event object identified by the reg exp 'subEventIdentifier' and store it in the data
+       * stream
        *
        *  Example : subEventIdentifier = "MyCollection1:MyCollection2"
        *            subEventIdentifier = "*TpcCollection"
        *
        *  The identifier decoding has to be performed by the user, based on the event contents itself
        */
-      virtual StatusCode write(const EventPtr &event, const std::string &subEventIdentifier, xdrstream::IODevice *pDevice);
+      virtual StatusCode write(const EventPtr &event, const std::string &subEventIdentifier,
+                               xdrstream::IODevice *pDevice);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode EventStreamer::write(const EventPtr &event, const std::string &/*subEventIdentifier*/, xdrstream::IODevice *pDevice)
-    {
+    StatusCode EventStreamer::write(const EventPtr &event, const std::string & /*subEventIdentifier*/,
+                                    xdrstream::IODevice *pDevice) {
       return this->write(event, pDevice);
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_EVENTSTREAMER_H
+#endif //  DQM4HEP_EVENTSTREAMER_H

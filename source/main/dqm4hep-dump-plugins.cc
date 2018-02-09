@@ -30,29 +30,22 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/PluginManager.h>
+#include <dqm4hep/StatusCodes.h>
 
 using namespace std;
 using namespace dqm4hep::core;
 
-
-int main(int argc, char* argv[])
-{
-  try
-  {
+int main(int argc, char *argv[]) {
+  try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
     PluginManager::instance()->dump();
-  }
-  catch(StatusCodeException &e)
-  {
-    dqm_error( "While loading libraries : Caught {0}", e.toString() );
+  } catch (StatusCodeException &e) {
+    dqm_error("While loading libraries : Caught {0}", e.toString());
     return e.getStatusCode();
-  }
-  catch(...)
-  {
-    dqm_error( "While loading libraries : Caught unknown error" );
+  } catch (...) {
+    dqm_error("While loading libraries : Caught unknown error");
     return 1;
   }
 

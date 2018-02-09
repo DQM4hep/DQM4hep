@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_STREAMINGHELPER_H
 #define DQM4HEP_STREAMINGHELPER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- xdrstream headers
 #include <xdrstream/xdrstream.h>
@@ -40,94 +39,98 @@ namespace dqm4hep {
 
   namespace core {
 
-    class StreamingHelper
-    {
+    class StreamingHelper {
     public:
       /**
        */
       template <typename T>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, T &stlContainer );
+      static xdrstream::Status read(xdrstream::IODevice *pDevice, T &stlContainer);
 
       /**
        */
       template <typename T>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const T &stlContainer );
+      static xdrstream::Status write(xdrstream::IODevice *pDevice, const T &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status read(xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status write(xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename VectorType>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::map<KeyType, std::vector<VectorType> > &stlContainer );
+      static xdrstream::Status read(xdrstream::IODevice *pDevice,
+                                    std::map<KeyType, std::vector<VectorType>> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename VectorType>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::map<KeyType, std::vector<VectorType> > &stlContainer );
+      static xdrstream::Status write(xdrstream::IODevice *pDevice,
+                                     const std::map<KeyType, std::vector<VectorType>> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status read( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status read(xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status write( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status write(xdrstream::IODevice *pDevice,
+                                     const std::multimap<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename T>
-      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, T &stlContainer );
+      static xdrstream::Status readStreamables(xdrstream::IODevice *pDevice, T &stlContainer);
 
       /**
        */
       template <typename T>
-      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const T &stlContainer );
+      static xdrstream::Status writeStreamables(xdrstream::IODevice *pDevice, const T &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status readStreamables(xdrstream::IODevice *pDevice,
+                                               std::map<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status writeStreamables(xdrstream::IODevice *pDevice,
+                                                const std::map<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status readStreamables( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status readStreamables(xdrstream::IODevice *pDevice,
+                                               std::multimap<KeyType, ValueType> &stlContainer);
 
       /**
        */
       template <typename KeyType, typename ValueType>
-      static xdrstream::Status writeStreamables( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlContainer );
+      static xdrstream::Status writeStreamables(xdrstream::IODevice *pDevice,
+                                                const std::multimap<KeyType, ValueType> &stlContainer);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline xdrstream::Status StreamingHelper::read( xdrstream::IODevice *pDevice , T &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::read(xdrstream::IODevice *pDevice, T &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i= 0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         typename T::value_type value;
-        XDR_STREAM( pDevice->read( & value ) )
-        stlContainer.insert( stlContainer.end() , value );
+        XDR_STREAM(pDevice->read(&value))
+        stlContainer.insert(stlContainer.end(), value);
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -136,35 +139,32 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline xdrstream::Status StreamingHelper::write( xdrstream::IODevice *pDevice , const T &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::write(xdrstream::IODevice *pDevice, const T &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( auto iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-        XDR_STREAM( pDevice->write( & ( *iter ) ) )
+      for (auto iter = stlContainer.begin(), endIter = stlContainer.end(); endIter != iter; ++iter)
+        XDR_STREAM(pDevice->write(&(*iter)))
 
-        return xdrstream::XDR_SUCCESS;
+      return xdrstream::XDR_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::read( xdrstream::IODevice *pDevice , std::map<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::read(xdrstream::IODevice *pDevice,
+                                                   std::map<KeyType, ValueType> &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i=0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         KeyType key;
         ValueType value;
 
-        XDR_STREAM( pDevice->read( & key ) )
-        XDR_STREAM( pDevice->read( & value ) )
+        XDR_STREAM(pDevice->read(&key))
+        XDR_STREAM(pDevice->read(&value))
 
-        stlContainer.insert( stlContainer.end() , typename std::map<KeyType, ValueType>::value_type(key, value) );
+        stlContainer.insert(stlContainer.end(), typename std::map<KeyType, ValueType>::value_type(key, value));
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -173,16 +173,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::write( xdrstream::IODevice *pDevice , const std::map<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::write(xdrstream::IODevice *pDevice,
+                                                    const std::map<KeyType, ValueType> &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( auto iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-      {
-        XDR_STREAM( pDevice->write( & ( iter->first ) ) )
-		    XDR_STREAM( pDevice->write( & ( iter->second ) ) )
+      for (auto iter = stlContainer.begin(), endIter = stlContainer.end(); endIter != iter; ++iter) {
+        XDR_STREAM(pDevice->write(&(iter->first)))
+        XDR_STREAM(pDevice->write(&(iter->second)))
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -191,20 +189,20 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename VectorType>
-    inline xdrstream::Status StreamingHelper::read( xdrstream::IODevice *pDevice, std::map<KeyType, std::vector<VectorType> > &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::read(xdrstream::IODevice *pDevice,
+                                                   std::map<KeyType, std::vector<VectorType>> &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i=0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         KeyType key;
         std::vector<VectorType> value;
 
-        XDR_STREAM( pDevice->read( & key ) )
-        XDR_STREAM( StreamingHelper::read( pDevice , value ) )
+        XDR_STREAM(pDevice->read(&key))
+        XDR_STREAM(StreamingHelper::read(pDevice, value))
 
-        stlContainer.insert( stlContainer.end() , typename std::map<KeyType, std::vector<VectorType> >::value_type(key, value) );
+        stlContainer.insert(stlContainer.end(),
+                            typename std::map<KeyType, std::vector<VectorType>>::value_type(key, value));
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -213,16 +211,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename VectorType>
-    inline xdrstream::Status StreamingHelper::write( xdrstream::IODevice *pDevice, const std::map<KeyType, std::vector<VectorType> > &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::write(xdrstream::IODevice *pDevice,
+                                                    const std::map<KeyType, std::vector<VectorType>> &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( auto iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-      {
-        XDR_STREAM( pDevice->write( & ( iter->first ) ) )
-		    XDR_STREAM( StreamingHelper::write( pDevice , iter->second ) )
+      for (auto iter = stlContainer.begin(), endIter = stlContainer.end(); endIter != iter; ++iter) {
+        XDR_STREAM(pDevice->write(&(iter->first)))
+        XDR_STREAM(StreamingHelper::write(pDevice, iter->second))
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -231,20 +227,19 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::read( xdrstream::IODevice *pDevice , std::multimap<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::read(xdrstream::IODevice *pDevice,
+                                                   std::multimap<KeyType, ValueType> &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i= 0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         KeyType key;
         ValueType value;
 
-        XDR_STREAM( pDevice->read( & key ) )
-        XDR_STREAM( pDevice->read( & value ) )
+        XDR_STREAM(pDevice->read(&key))
+        XDR_STREAM(pDevice->read(&value))
 
-        stlContainer.insert( stlContainer.end() , typename std::multimap<KeyType, ValueType>::value_type(key, value) );
+        stlContainer.insert(stlContainer.end(), typename std::multimap<KeyType, ValueType>::value_type(key, value));
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -253,16 +248,16 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::write( xdrstream::IODevice *pDevice , const std::multimap<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::write(xdrstream::IODevice *pDevice,
+                                                    const std::multimap<KeyType, ValueType> &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( typename std::multimap<KeyType, ValueType>::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-      {
-        XDR_STREAM( pDevice->write( & ( iter->first ) ) )
-		    XDR_STREAM( pDevice->write( & ( iter->second ) ) )
+      for (typename std::multimap<KeyType, ValueType>::const_iterator iter = stlContainer.begin(),
+                                                                      endIter = stlContainer.end();
+           endIter != iter; ++iter) {
+        XDR_STREAM(pDevice->write(&(iter->first)))
+        XDR_STREAM(pDevice->write(&(iter->second)))
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -271,16 +266,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline xdrstream::Status StreamingHelper::readStreamables( xdrstream::IODevice *pDevice, T &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::readStreamables(xdrstream::IODevice *pDevice, T &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i= 0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         auto pObject = new T();
-        XDR_STREAM( pObject->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
-        stlContainer.insert( stlContainer.end() , pObject );
+        XDR_STREAM(pObject->stream(xdrstream::XDR_READ_STREAM, pDevice))
+        stlContainer.insert(stlContainer.end(), pObject);
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -289,36 +282,34 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline xdrstream::Status StreamingHelper::writeStreamables( xdrstream::IODevice *pDevice, const T &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::writeStreamables(xdrstream::IODevice *pDevice, const T &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( typename T::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-        XDR_STREAM( (*iter)->stream( xdrstream::XDR_WRITE_STREAM , pDevice ) )
+      for (typename T::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end(); endIter != iter;
+           ++iter)
+        XDR_STREAM((*iter)->stream(xdrstream::XDR_WRITE_STREAM, pDevice))
 
-        return xdrstream::XDR_SUCCESS;
+      return xdrstream::XDR_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::readStreamables( xdrstream::IODevice *pDevice, std::map<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::readStreamables(xdrstream::IODevice *pDevice,
+                                                              std::map<KeyType, ValueType> &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i= 0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         KeyType key;
-        XDR_STREAM( pDevice->read( & key ) )
+        XDR_STREAM(pDevice->read(&key))
 
         auto pObject = new ValueType();
-        XDR_STREAM( pObject->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
+        XDR_STREAM(pObject->stream(xdrstream::XDR_READ_STREAM, pDevice))
 
-        typename std::map<KeyType, ValueType>::value_type value( key , pObject );
-        stlContainer.insert( stlContainer.end() , value );
+        typename std::map<KeyType, ValueType>::value_type value(key, pObject);
+        stlContainer.insert(stlContainer.end(), value);
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -327,16 +318,16 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::writeStreamables( xdrstream::IODevice *pDevice, const std::map<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::writeStreamables(xdrstream::IODevice *pDevice,
+                                                               const std::map<KeyType, ValueType> &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( typename std::map<KeyType, ValueType>::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-      {
-        XDR_STREAM( pDevice->write( & ( iter->first ) ) )
-		    XDR_STREAM( (iter->second)->stream( xdrstream::XDR_WRITE_STREAM , pDevice ) )
+      for (typename std::map<KeyType, ValueType>::const_iterator iter = stlContainer.begin(),
+                                                                 endIter = stlContainer.end();
+           endIter != iter; ++iter) {
+        XDR_STREAM(pDevice->write(&(iter->first)))
+        XDR_STREAM((iter->second)->stream(xdrstream::XDR_WRITE_STREAM, pDevice))
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -345,21 +336,20 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::readStreamables( xdrstream::IODevice *pDevice, std::multimap<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::readStreamables(xdrstream::IODevice *pDevice,
+                                                              std::multimap<KeyType, ValueType> &stlContainer) {
       uint32_t nRead = 0;
-      XDR_STREAM( pDevice->read( & nRead ) )
+      XDR_STREAM(pDevice->read(&nRead))
 
-      for( uint32_t i= 0 ; i<nRead ; i++ )
-      {
+      for (uint32_t i = 0; i < nRead; i++) {
         KeyType key;
-        XDR_STREAM( pDevice->read( & key ) )
+        XDR_STREAM(pDevice->read(&key))
 
         auto pObject = new ValueType();
-        XDR_STREAM( pObject->stream( xdrstream::XDR_READ_STREAM , pDevice ) )
+        XDR_STREAM(pObject->stream(xdrstream::XDR_READ_STREAM, pDevice))
 
-        typename std::multimap<KeyType, ValueType>::value_type value( key , pObject );
-        stlContainer.insert( stlContainer.end() , value );
+        typename std::multimap<KeyType, ValueType>::value_type value(key, pObject);
+        stlContainer.insert(stlContainer.end(), value);
       }
 
       return xdrstream::XDR_SUCCESS;
@@ -368,23 +358,21 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename KeyType, typename ValueType>
-    inline xdrstream::Status StreamingHelper::writeStreamables( xdrstream::IODevice *pDevice, const std::multimap<KeyType, ValueType> &stlContainer )
-    {
+    inline xdrstream::Status StreamingHelper::writeStreamables(xdrstream::IODevice *pDevice,
+                                                               const std::multimap<KeyType, ValueType> &stlContainer) {
       uint32_t nWrite = stlContainer.size();
-      XDR_STREAM( pDevice->write( & nWrite ) )
+      XDR_STREAM(pDevice->write(&nWrite))
 
-      for( typename std::multimap<KeyType, ValueType>::const_iterator iter = stlContainer.begin(), endIter = stlContainer.end() ;
-          endIter != iter ; ++iter)
-      {
-        XDR_STREAM( pDevice->write( & ( iter->first ) ) )
-		    XDR_STREAM( (iter->second)->stream( xdrstream::XDR_WRITE_STREAM , pDevice ) )
+      for (typename std::multimap<KeyType, ValueType>::const_iterator iter = stlContainer.begin(),
+                                                                      endIter = stlContainer.end();
+           endIter != iter; ++iter) {
+        XDR_STREAM(pDevice->write(&(iter->first)))
+        XDR_STREAM((iter->second)->stream(xdrstream::XDR_WRITE_STREAM, pDevice))
       }
 
       return xdrstream::XDR_SUCCESS;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_STREAMINGHELPER_H
+#endif //  DQM4HEP_STREAMINGHELPER_H

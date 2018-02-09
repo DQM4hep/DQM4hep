@@ -26,10 +26,10 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Directory.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
-#include <dqm4hep/Directory.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- std headers
 #include <iostream>
@@ -38,28 +38,27 @@
 using namespace std;
 using namespace dqm4hep::core;
 
-#define assert_test(Command) \
-  if( ! (Command) )\
-  {\
-    dqm_error( "Assertion failed : {0}", #Command );\
-    exit(1);\
+#define assert_test(Command)                                                                                           \
+  if (!(Command)) {                                                                                                    \
+    dqm_error("Assertion failed : {0}", #Command);                                                                     \
+    exit(1);                                                                                                           \
   }
 
-class Object
-{
+class Object {
 public:
-  Object(const std::string &name) :
-    m_name(name)
-    {}
-  const std::string &name() {return m_name;}
+  Object(const std::string &name) : m_name(name) {
+  }
+  const std::string &name() {
+    return m_name;
+  }
+
 private:
-  std::string    m_name;
+  std::string m_name;
 };
 
 typedef Directory<Object> Directory_t;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   Logger::createLogger("test-directory", {Logger::coloredConsole()});
   Logger::setMainLogger("test-directory");
   Logger::setLogLevel(spdlog::level::debug);
@@ -68,9 +67,12 @@ int main(int argc, char* argv[])
   auto heroes = root->mkdir("heroes");
 
   std::shared_ptr<Object> object;
-  object = std::make_shared<Object>("superman"); heroes->add(object);
-  object = std::make_shared<Object>("spiderman"); heroes->add(object);
-  object = std::make_shared<Object>("batman"); heroes->add(object);
+  object = std::make_shared<Object>("superman");
+  heroes->add(object);
+  object = std::make_shared<Object>("spiderman");
+  heroes->add(object);
+  object = std::make_shared<Object>("batman");
+  heroes->add(object);
   assert_test(heroes->contents().size() == 3);
 
   heroes->remove(object);
@@ -85,7 +87,7 @@ int main(int argc, char* argv[])
   pBibouDir->add(std::make_shared<Object>("tutu"));
   assert_test(pBibouDir->contents().size() == 3);
 
-  pBibouDir->remove( [](std::shared_ptr<Object> object){ return object->name() == "toto"; } );
+  pBibouDir->remove([](std::shared_ptr<Object> object) { return object->name() == "toto"; });
   assert_test(pBibouDir->contents().size() == 2);
   Path bibouPath = pBibouDir->fullPath();
   assert_test(bibouPath.getPath() == "/root/bibou");
@@ -93,10 +95,10 @@ int main(int argc, char* argv[])
   assert_test(root->isRoot());
   assert_test(!root->isEmpty());
   assert_test(!pBibouDir->isEmpty());
-  assert_test(pBibouDir->contains( [](std::shared_ptr<Object> object){ return object->name() == "tata"; } ));
-  assert_test(!pBibouDir->contains( [](std::shared_ptr<Object> object){ return object->name() == "teufteuf"; } ));
-  assert_test(pBibouDir->find( [](std::shared_ptr<Object> object){ return object->name() == "tata"; } ) != nullptr);
-  assert_test(pBibouDir->find( [](std::shared_ptr<Object> object){ return object->name() == "teufteuf"; } ) == nullptr);
+  assert_test(pBibouDir->contains([](std::shared_ptr<Object> object) { return object->name() == "tata"; }));
+  assert_test(!pBibouDir->contains([](std::shared_ptr<Object> object) { return object->name() == "teufteuf"; }));
+  assert_test(pBibouDir->find([](std::shared_ptr<Object> object) { return object->name() == "tata"; }) != nullptr);
+  assert_test(pBibouDir->find([](std::shared_ptr<Object> object) { return object->name() == "teufteuf"; }) == nullptr);
   assert_test(root->hasChild("bibou"));
   assert_test(root->mkdir("bibou") == pBibouDir);
   assert_test(pBibouDir->parent() == root);

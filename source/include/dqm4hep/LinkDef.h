@@ -10,14 +10,14 @@
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 
-#pragma link C++ class dqm4hep::core::TScalarInt+;
-#pragma link C++ class dqm4hep::core::TScalarReal+;
-#pragma link C++ class dqm4hep::core::TScalarFloat+;
-#pragma link C++ class dqm4hep::core::TScalarDouble+;
-#pragma link C++ class dqm4hep::core::TScalarString+;
-#pragma link C++ class dqm4hep::core::TScalarShort+;
-#pragma link C++ class dqm4hep::core::TScalarLong+;
+#pragma link C++ class dqm4hep::core::TScalarInt + ;
+#pragma link C++ class dqm4hep::core::TScalarReal + ;
+#pragma link C++ class dqm4hep::core::TScalarFloat + ;
+#pragma link C++ class dqm4hep::core::TScalarDouble + ;
+#pragma link C++ class dqm4hep::core::TScalarString + ;
+#pragma link C++ class dqm4hep::core::TScalarShort + ;
+#pragma link C++ class dqm4hep::core::TScalarLong + ;
 
-#pragma link C++ class dqm4hep::core::TDynamicGraph+;
+#pragma link C++ class dqm4hep::core::TDynamicGraph + ;
 
 #endif

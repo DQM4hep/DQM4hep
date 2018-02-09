@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #include <dqm4hep/Run.h>
 #include <dqm4hep/StreamingHelper.h>
 
@@ -33,34 +32,30 @@ namespace dqm4hep {
 
   namespace core {
 
-    Run::Run(int runNumber, const std::string &description, const std::string &detectorName) :
-        m_runNumber(runNumber),
-        m_startTime(dqm4hep::core::now()),
-        m_endTime(),
-        m_detectorName(detectorName),
-        m_description(description),
-        m_parametersMap()
-    {
+    Run::Run(int runNumber, const std::string &description, const std::string &detectorName)
+        : m_runNumber(runNumber),
+          m_startTime(dqm4hep::core::now()),
+          m_endTime(),
+          m_detectorName(detectorName),
+          m_description(description),
+          m_parametersMap() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StringVector Run::getParameterKeys() const
-    {
+    StringVector Run::getParameterKeys() const {
       StringVector keys;
 
-      for(auto iter = m_parametersMap.begin(), endIter = m_parametersMap.end() ;
-          endIter != iter ; ++iter)
-        keys.push_back( iter->first );
+      for (auto iter = m_parametersMap.begin(), endIter = m_parametersMap.end(); endIter != iter; ++iter)
+        keys.push_back(iter->first);
 
       return keys;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Run::reset()
-    {
+    void Run::reset() {
       m_runNumber = 0;
       m_startTime = TimePoint();
       m_endTime = TimePoint();
@@ -71,25 +66,17 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Run::toJson(json &value) const
-    {
+    void Run::toJson(json &value) const {
       auto startTime = std::chrono::system_clock::to_time_t(m_startTime);
       auto endTime = std::chrono::system_clock::to_time_t(m_endTime);
 
-      value = {
-        {"runNumber", m_runNumber},
-        {"startTime", startTime},
-        {"endTime", endTime},
-        {"detector", m_detectorName},
-        {"description", m_description},
-        {"parameters", m_parametersMap}
-      };
+      value = {{"runNumber", m_runNumber},   {"startTime", startTime},       {"endTime", endTime},
+               {"detector", m_detectorName}, {"description", m_description}, {"parameters", m_parametersMap}};
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Run::fromJson(const json &value)
-    {
+    void Run::fromJson(const json &value) {
       m_runNumber = value.value<int>("runNumber", 0);
       auto startTime = value.value<int64_t>("startTime", 0);
       auto endTime = value.value<int64_t>("endTime", 0);
@@ -99,7 +86,5 @@ namespace dqm4hep {
       m_description = value.value<std::string>("description", "");
       m_parametersMap = value.value<StringMap>("parameters", StringMap());
     }
-
   }
-
 }

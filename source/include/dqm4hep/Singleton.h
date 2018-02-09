@@ -5,26 +5,25 @@
  * Creation date : ven. juil. 25 2014
  *
  * This file is part of Arbor libraries.
- * 
+ *
  * Arbor is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  * based upon these libraries are permitted. Any copy of these libraries
  * must include this copyright notice.
- * 
+ *
  * Arbor is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with Arbor.  If not, see <http://www.gnu.org/licenses/>.
- * 
+ *
  * @author Remi Ete
  * @copyright CNRS , IPNL
  */
-
 
 #ifndef DQM4HEP_SINGLETON_H
 #define DQM4HEP_SINGLETON_H
@@ -36,8 +35,7 @@ namespace dqm4hep {
     /** Singleton class
      */
     template <typename T>
-    class Singleton
-    {
+    class Singleton {
     public:
       /** Constructor
        */
@@ -56,7 +54,7 @@ namespace dqm4hep {
       static void kill();
 
     protected:
-      static T        *m_pInstance;     ///< The unique instance of the class
+      static T *m_pInstance; ///< The unique instance of the class
     };
 
     //--------------------------------------------------------------------------------------------
@@ -68,25 +66,22 @@ namespace dqm4hep {
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    Singleton<T>::Singleton()
-    {
+    Singleton<T>::Singleton() {
       /* nop */
     }
 
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    Singleton<T>::~Singleton()
-    {
+    Singleton<T>::~Singleton() {
       /* nop */
     }
 
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    T *Singleton<T>::instance()
-    {
-      if(nullptr == m_pInstance)
+    T *Singleton<T>::instance() {
+      if (nullptr == m_pInstance)
         m_pInstance = new T();
 
       return m_pInstance;
@@ -95,17 +90,14 @@ namespace dqm4hep {
     //--------------------------------------------------------------------------------------------
 
     template <typename T>
-    void Singleton<T>::kill()
-    {
-      if(nullptr == m_pInstance)
+    void Singleton<T>::kill() {
+      if (nullptr == m_pInstance)
         return;
 
       delete m_pInstance;
       m_pInstance = nullptr;
     }
-
   }
+}
 
-} 
-
-#endif  //  DQM4HEP_SINGLETON_H
+#endif //  DQM4HEP_SINGLETON_H

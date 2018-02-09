@@ -25,14 +25,13 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_GENERICEVENT_H
 #define DQM4HEP_GENERICEVENT_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
-#include <dqm4hep/EventStreamer.h>
 #include <dqm4hep/Event.h>
+#include <dqm4hep/EventStreamer.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- xdrstream headers
 #include <xdrstream/xdrstream.h>
@@ -65,8 +64,7 @@ namespace dqm4hep {
      *
      *  \endcode
      */
-    class GenericEvent
-    {
+    class GenericEvent {
     public:
       /** Constructor
        */
@@ -103,15 +101,15 @@ namespace dqm4hep {
       StatusCode getValues(const std::string &key, T &vals) const;
 
     private:
-      typedef  std::map<std::string, IntVector> IntVectorMap;
-      typedef  std::map<std::string, FloatVector> FloatVectorMap;
-      typedef  std::map<std::string, DoubleVector> DoubleVectorMap;
-      typedef  std::map<std::string, StringVector> StringVectorMap;
+      typedef std::map<std::string, IntVector> IntVectorMap;
+      typedef std::map<std::string, FloatVector> FloatVectorMap;
+      typedef std::map<std::string, DoubleVector> DoubleVectorMap;
+      typedef std::map<std::string, StringVector> StringVectorMap;
 
-      IntVectorMap                    m_intValues = {};
-      FloatVectorMap                  m_floatValues = {};
-      DoubleVectorMap                 m_doubleValues = {};
-      StringVectorMap                 m_stringValues = {};
+      IntVectorMap m_intValues = {};
+      FloatVectorMap m_floatValues = {};
+      DoubleVectorMap m_doubleValues = {};
+      StringVectorMap m_stringValues = {};
 
       friend class GenericEventStreamer;
     };
@@ -122,8 +120,7 @@ namespace dqm4hep {
     /**
      * @brief GenericEventStreamer class
      */
-    class GenericEventStreamer : public EventStreamer
-    {
+    class GenericEventStreamer : public EventStreamer {
     public:
       /** Constructor
        */
@@ -146,9 +143,7 @@ namespace dqm4hep {
        */
       StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice) override;
     };
-
   }
-
 }
 
-#endif  //  DQM4HEP_GENERICEVENT_H
+#endif //  DQM4HEP_GENERICEVENT_H

@@ -25,42 +25,35 @@
  */
 
 // -- dqm4hep headers
+#include <dqm4hep/Logging.h>
 #include <dqm4hep/Plugin.h>
 #include <dqm4hep/PluginManager.h>
 #include <dqm4hep/Version.h>
-#include <dqm4hep/Logging.h>
 
 namespace dqm4hep {
 
   namespace core {
 
-    Plugin::Plugin(const std::string &pluginName) :
-		    m_pluginName( pluginName )
-    {
+    Plugin::Plugin(const std::string &pluginName) : m_pluginName(pluginName) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Plugin::~Plugin()
-    {
+    Plugin::~Plugin() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Plugin::pluginName() const
-    {
+    const std::string &Plugin::pluginName() const {
       return m_pluginName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Plugin::registerMe()
-    {
-      return PluginManager::instance()->registerPlugin( this );
+    StatusCode Plugin::registerMe() {
+      return PluginManager::instance()->registerPlugin(this);
     }
-
   }
-
 }

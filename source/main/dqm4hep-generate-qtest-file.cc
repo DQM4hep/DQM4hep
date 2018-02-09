@@ -30,52 +30,48 @@
  */
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
-#include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/Path.h>
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/XmlHelper.h>
 
 // -- tclap headers
-#include <tclap/CmdLine.h>
 #include <tclap/Arg.h>
+#include <tclap/CmdLine.h>
 
 // -- std headers
-#include <iostream>
 #include <fstream>
-#include <sstream>
+#include <iostream>
 #include <signal.h>
+#include <sstream>
 
 // -- root headers
-#include <TFile.h>
 #include <TDirectory.h>
-#include <TSystem.h>
+#include <TFile.h>
 #include <TKey.h>
+#include <TSystem.h>
 
 using namespace std;
 using namespace dqm4hep::core;
 
 //-------------------------------------------------------------------------------------------------
 
-void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirectory, const Path &currentPath, TiXmlElement *pParentElement)
-{
+void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirectory, const Path &currentPath,
+                                 TiXmlElement *pParentElement) {
   TIter iter(pDirectory->GetListOfKeys());
   TKey *pTKey(nullptr);
 
-  while( (pTKey = (TKey*) iter()) != nullptr )
-  {
+  while ((pTKey = (TKey *)iter()) != nullptr) {
     pDirectory->cd();
 
-    if(pTKey->IsFolder())
-    {
+    if (pTKey->IsFolder()) {
       pDirectory->cd(pTKey->GetName());
       TDirectory *pSubDir = gDirectory;
       Path localPath = currentPath + std::string(pTKey->GetName());
       CreateElementsFromDirectory(fileName, pSubDir, localPath, pParentElement);
       pDirectory->cd();
-    }
-    else
-    {
+    } else {
       auto pXmlElement = new TiXmlElement("monitorElement");
       pXmlElement->SetAttribute("path", currentPath.getPath());
       pXmlElement->SetAttribute("name", pTKey->GetName());
@@ -89,27 +85,14 @@ void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirec
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
   TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
 
-  TCLAP::ValueArg<std::string> rootFileArg(
-      "i"
-      , "input-root-file"
-      , "The root input file"
-      , true
-      , ""
-      , "string");
+  TCLAP::ValueArg<std::string> rootFileArg("i", "input-root-file", "The root input file", true, "", "string");
   pCommandLine->add(rootFileArg);
 
-  TCLAP::ValueArg<std::string> qtestFileArg(
-      "o"
-      , "output-qtest-file"
-      , "The qtest output file"
-      , true
-      , ""
-      , "string");
+  TCLAP::ValueArg<std::string> qtestFileArg("o", "output-qtest-file", "The qtest output file", true, "", "string");
   pCommandLine->add(qtestFileArg);
 
   // parse command line
@@ -122,7 +105,7 @@ int main(int argc, char* argv[])
   TiXmlDocument document;
 
   auto pRootElement = new TiXmlElement("dqm4hep");
-  auto pDeclaration = new TiXmlDeclaration( "1.0", "", "" );
+  auto pDeclaration = new TiXmlDeclaration("1.0", "", "");
   auto pQTestsXmlElement = new TiXmlElement("qtests");
   auto pQTestsXmlComment = new TiXmlComment("Create your quality tests here");
 

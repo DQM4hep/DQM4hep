@@ -25,19 +25,18 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_LOGGER_H
 #define DQM4HEP_LOGGER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- std headers
-#include <string>
-#include <mutex>
 #include <fstream>
 #include <memory>
+#include <mutex>
+#include <string>
 
 // -- spdlog headers
 #include <spdlog/logger.h>
@@ -47,8 +46,7 @@ namespace dqm4hep {
 
   namespace core {
 
-    class Logger
-    {
+    class Logger {
     public:
       typedef std::shared_ptr<spdlog::logger> LoggerPtr;
       typedef std::shared_ptr<spdlog::sinks::sink> AppenderPtr;
@@ -202,11 +200,9 @@ namespace dqm4hep {
       static void setLoggerPattern(const std::string &logger, const std::string &pattern);
 
     private:
-      static LoggerPtr      m_mainLogger;   ///< The main logger instance
+      static LoggerPtr m_mainLogger; ///< The main logger instance
     };
-
   }
-
 }
 
-#endif  //  DQM4HEP_LOGGER_H
+#endif //  DQM4HEP_LOGGER_H

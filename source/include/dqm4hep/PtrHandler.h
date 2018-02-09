@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_PTRHANDLER_H
 #define DQM4HEP_PTRHANDLER_H
 
@@ -39,8 +38,7 @@ namespace dqm4hep {
     /** PtrHandler template class
      */
     template <typename T>
-    class PtrHandler
-    {
+    class PtrHandler {
     public:
       /** Constructor
        */
@@ -89,37 +87,43 @@ namespace dqm4hep {
       operator bool() const;
 
     private:
-      T        *m_ptr;           ///< The handled pointer
-      bool      m_owner;         ///< Whether the pointer is owned by the handler
+      T *m_ptr;     ///< The handled pointer
+      bool m_owner; ///< Whether the pointer is owned by the handler
 
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const S *lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, const S *rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const S *lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, const S *rhs);
-      template <typename S> friend bool operator ==(std::nullptr_t lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator ==(const PtrHandler<S> &lhs, std::nullptr_t rhs);
-      template <typename S> friend bool operator !=(std::nullptr_t lhs, const PtrHandler<S> &rhs);
-      template <typename S> friend bool operator !=(const PtrHandler<S> &lhs, std::nullptr_t rhs);
+      template <typename S>
+      friend bool operator==(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
+      template <typename S>
+      friend bool operator==(const S *lhs, const PtrHandler<S> &rhs);
+      template <typename S>
+      friend bool operator==(const PtrHandler<S> &lhs, const S *rhs);
+      template <typename S>
+      friend bool operator!=(const PtrHandler<S> &lhs, const PtrHandler<S> &rhs);
+      template <typename S>
+      friend bool operator!=(const S *lhs, const PtrHandler<S> &rhs);
+      template <typename S>
+      friend bool operator!=(const PtrHandler<S> &lhs, const S *rhs);
+      template <typename S>
+      friend bool operator==(std::nullptr_t lhs, const PtrHandler<S> &rhs);
+      template <typename S>
+      friend bool operator==(const PtrHandler<S> &lhs, std::nullptr_t rhs);
+      template <typename S>
+      friend bool operator!=(std::nullptr_t lhs, const PtrHandler<S> &rhs);
+      template <typename S>
+      friend bool operator!=(const PtrHandler<S> &lhs, std::nullptr_t rhs);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline PtrHandler<T>::PtrHandler(T *ptr, bool owner) :
-      m_ptr(ptr),
-      m_owner(owner)
-    {
+    inline PtrHandler<T>::PtrHandler(T *ptr, bool owner) : m_ptr(ptr), m_owner(owner) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *PtrHandler<T>::take()
-    {
+    inline T *PtrHandler<T>::take() {
       T *ptr = m_ptr;
       m_ptr = nullptr;
       return ptr;
@@ -128,8 +132,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void PtrHandler<T>::set(T *ptr, bool owner)
-    {
+    inline void PtrHandler<T>::set(T *ptr, bool owner) {
       this->clear();
       m_ptr = ptr;
       m_owner = owner;
@@ -138,9 +141,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void PtrHandler<T>::clear()
-    {
-      if(m_owner && nullptr != m_ptr)
+    inline void PtrHandler<T>::clear() {
+      if (m_owner && nullptr != m_ptr)
         delete m_ptr;
       m_ptr = nullptr;
     }
@@ -148,140 +150,122 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *PtrHandler<T>::ptr() const
-    {
+    inline T *PtrHandler<T>::ptr() const {
       return m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool PtrHandler<T>::owner() const
-    {
+    inline bool PtrHandler<T>::owner() const {
       return m_owner;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline const T *PtrHandler<T>::operator->() const
-    {
+    inline const T *PtrHandler<T>::operator->() const {
       return m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *PtrHandler<T>::operator->()
-    {
+    inline T *PtrHandler<T>::operator->() {
       return m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline const T &PtrHandler<T>::operator*() const
-    {
+    inline const T &PtrHandler<T>::operator*() const {
       return *m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T &PtrHandler<T>::operator*()
-    {
+    inline T &PtrHandler<T>::operator*() {
       return *m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline PtrHandler<T>::operator bool() const
-    {
+    inline PtrHandler<T>::operator bool() const {
       return m_ptr != nullptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool operator ==(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs)
-    {
+    inline bool operator==(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) {
       return lhs.m_ptr == rhs.m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool operator ==(const T *lhs, const PtrHandler<T> &rhs)
-    {
+    inline bool operator==(const T *lhs, const PtrHandler<T> &rhs) {
       return lhs == rhs.m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T> inline bool operator ==(const PtrHandler<T> &lhs, const T *rhs)
-    {
+    template <typename T>
+    inline bool operator==(const PtrHandler<T> &lhs, const T *rhs) {
       return lhs.m_ptr == rhs;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool operator !=(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs)
-    {
+    inline bool operator!=(const PtrHandler<T> &lhs, const PtrHandler<T> &rhs) {
       return lhs.m_ptr != rhs.m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool operator !=(const T *lhs, const PtrHandler<T> &rhs)
-    {
+    inline bool operator!=(const T *lhs, const PtrHandler<T> &rhs) {
       return lhs != rhs.m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool operator !=(const PtrHandler<T> &lhs, const T *rhs)
-    {
+    inline bool operator!=(const PtrHandler<T> &lhs, const T *rhs) {
       return lhs.m_ptr != rhs;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator ==(std::nullptr_t lhs, const PtrHandler<S> &rhs)
-    {
+    inline bool operator==(std::nullptr_t lhs, const PtrHandler<S> &rhs) {
       return lhs == rhs.m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator ==(const PtrHandler<S> &lhs, std::nullptr_t rhs)
-    {
+    inline bool operator==(const PtrHandler<S> &lhs, std::nullptr_t rhs) {
       return lhs.m_ptr == rhs;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator !=(std::nullptr_t lhs, const PtrHandler<S> &rhs)
-    {
+    inline bool operator!=(std::nullptr_t lhs, const PtrHandler<S> &rhs) {
       return lhs != rhs.m_ptr;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename S>
-    inline bool operator !=(const PtrHandler<S> &lhs, std::nullptr_t rhs)
-    {
+    inline bool operator!=(const PtrHandler<S> &lhs, std::nullptr_t rhs) {
       return lhs.m_ptr != rhs;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_LOGGING_H
+#endif //  DQM4HEP_LOGGING_H

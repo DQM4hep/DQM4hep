@@ -28,7 +28,6 @@
 // -- dqm4hep headers
 #include <dqm4hep/DQMCore.h>
 
-int main(int argc, char* argv[]) 
-{
+int main(int argc, char *argv[]) {
   return 0;
 }

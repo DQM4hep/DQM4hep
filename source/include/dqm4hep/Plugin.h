@@ -24,13 +24,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_PLUGIN_H
 #define DQM4HEP_PLUGIN_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 namespace dqm4hep {
 
@@ -40,9 +39,9 @@ namespace dqm4hep {
 
     /** Plugin class
      */
-    class Plugin
-    {
+    class Plugin {
       friend class PluginManager;
+
     public:
       /** Constructor
        */
@@ -68,11 +67,9 @@ namespace dqm4hep {
       StatusCode registerMe();
 
     private:
-      const std::string              m_pluginName;
+      const std::string m_pluginName;
     };
-
   }
-
 }
 
-#endif  //  DQM4HEP_PLUGIN_H
+#endif //  DQM4HEP_PLUGIN_H

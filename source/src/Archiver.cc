@@ -29,93 +29,79 @@
 #include "dqm4hep/Archiver.h"
 #include "dqm4hep/Directory.h"
 #include "dqm4hep/Logging.h"
-#include "dqm4hep/Storage.h"
 #include "dqm4hep/MonitorElement.h"
+#include "dqm4hep/Storage.h"
 
 // -- root headers
-#include "TFile.h"
 #include "TDirectory.h"
+#include "TFile.h"
 #include "TSystem.h"
 
 namespace dqm4hep {
 
   namespace core {
 
-    Archiver::Archiver() :
-        m_fileName(""),
-        m_openingMode(""),
-        m_pArchiveFile(nullptr),
-        m_isOpened(false)
-    {
+    Archiver::Archiver() : m_fileName(""), m_openingMode(""), m_pArchiveFile(nullptr), m_isOpened(false) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Archiver::Archiver(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix)
-    {
+    Archiver::Archiver(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix) {
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, openingMode, allowSuffix));
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    Archiver::~Archiver()
-    {
-      if(m_isOpened)
+    Archiver::~Archiver() {
+      if (m_isOpened)
         close();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::open(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix)
-    {
+    StatusCode Archiver::open(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix) {
       // if already open write the archive if not done
       // and close it before to re-open
-      if(m_isOpened)
+      if (m_isOpened)
         RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, close());
 
-      if(archiveFileName.empty())
+      if (archiveFileName.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
-      if(allowSuffix)
-      {
+      if (allowSuffix) {
         int fileId(0);
 
         size_t pos = archiveFileName.rfind(".root");
 
-        if(std::string::npos == pos)
-        {
-          dqm_error( "Couldn't open archive '{0}' ! Must be a root file !", archiveFileName );
+        if (std::string::npos == pos) {
+          dqm_error("Couldn't open archive '{0}' ! Must be a root file !", archiveFileName);
           return STATUS_CODE_INVALID_PARAMETER;
         }
 
         std::string baseArchiveName = archiveFileName.substr(0, pos);
         std::string fullArchiveName = archiveFileName;
 
-        while(!gSystem->AccessPathName(fullArchiveName.c_str()))
-        {
+        while (!gSystem->AccessPathName(fullArchiveName.c_str())) {
           std::stringstream ss;
           ss << baseArchiveName << "_" << fileId << ".root";
           fullArchiveName = ss.str();
-          fileId ++;
+          fileId++;
         }
 
         m_fileName = fullArchiveName;
-      }
-      else
-      {
+      } else {
         m_fileName = archiveFileName;
       }
 
       m_openingMode = openingMode;
 
-      dqm_info( "Archiver::open: Opening archive {0}", m_fileName );
+      dqm_info("Archiver::open: Opening archive {0}", m_fileName);
 
       m_pArchiveFile = new TFile(m_fileName.c_str(), openingMode.c_str());
 
-      if(nullptr == m_pArchiveFile)
-      {
-        dqm_error( "Couldn't open archive '{0}' !", m_fileName );
+      if (nullptr == m_pArchiveFile) {
+        dqm_error("Couldn't open archive '{0}' !", m_fileName);
         return STATUS_CODE_FAILURE;
       }
 
@@ -126,9 +112,8 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::close()
-    {
-      if(!m_isOpened)
+    StatusCode Archiver::close() {
+      if (!m_isOpened)
         return STATUS_CODE_FAILURE;
 
       m_pArchiveFile->Close();
@@ -144,22 +129,18 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::archive(MeStoragePtr storage, const std::string &dirName)
-    {
-      if(!this->isOpened())
+    StatusCode Archiver::archive(MeStoragePtr storage, const std::string &dirName) {
+      if (!this->isOpened())
         return STATUS_CODE_NOT_ALLOWED;
 
       TDirectory *pDirectory(nullptr);
 
-      if(!dirName.empty())
-      {
+      if (!dirName.empty()) {
         pDirectory = m_pArchiveFile->mkdir(dirName.c_str());
 
-        if(pDirectory == nullptr)
+        if (pDirectory == nullptr)
           return STATUS_CODE_FAILURE;
-      }
-      else
-      {
+      } else {
         // TFile inherits from TDirectory ...
         pDirectory = m_pArchiveFile;
       }
@@ -174,53 +155,45 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Archiver::getFileName() const
-    {
+    const std::string &Archiver::getFileName() const {
       return m_fileName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    bool Archiver::isOpened() const
-    {
+    bool Archiver::isOpened() const {
       return m_isOpened;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Archiver::getOpeningMode() const
-    {
+    const std::string &Archiver::getOpeningMode() const {
       return m_openingMode;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::recursiveFill(MonitorElementDir directory, TDirectory *pROOTDir)
-    {
-      if(nullptr == directory || nullptr == pROOTDir)
+    StatusCode Archiver::recursiveFill(MonitorElementDir directory, TDirectory *pROOTDir) {
+      if (nullptr == directory || nullptr == pROOTDir)
         return STATUS_CODE_INVALID_PTR;
 
       pROOTDir->cd();
 
       const auto &subDirList(directory->subdirs());
 
-      if(!subDirList.empty())
-      {
-        for(auto iter = subDirList.begin(), endIter = subDirList.end() ; endIter != iter ; ++iter)
-        {
+      if (!subDirList.empty()) {
+        for (auto iter = subDirList.begin(), endIter = subDirList.end(); endIter != iter; ++iter) {
           auto subDir = *iter;
           TDirectory *pROOTSubDir = pROOTDir->mkdir(subDir->name().c_str());
 
-          if(nullptr != pROOTSubDir)
-          {
+          if (nullptr != pROOTSubDir) {
             RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::recursiveFill(subDir, pROOTSubDir));
           }
         }
       }
 
       // write the monitor elements
-      if( ! directory->isEmpty() )
-      {
+      if (!directory->isEmpty()) {
         RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::writeMonitorElements(directory, pROOTDir));
       }
 
@@ -229,24 +202,20 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::writeMonitorElements(MonitorElementDir directory, TDirectory *pROOTDir)
-    {
-      if(nullptr == directory || nullptr == pROOTDir)
+    StatusCode Archiver::writeMonitorElements(MonitorElementDir directory, TDirectory *pROOTDir) {
+      if (nullptr == directory || nullptr == pROOTDir)
         return STATUS_CODE_INVALID_PTR;
 
       pROOTDir->cd();
 
       const auto &monitorElementList(directory->contents());
 
-      for(auto iter = monitorElementList.begin(), endIter = monitorElementList.end() ; endIter != iter ; ++iter)
-      {
+      for (auto iter = monitorElementList.begin(), endIter = monitorElementList.end(); endIter != iter; ++iter) {
         TObject *pObject = (*iter)->object();
         pROOTDir->WriteObjectAny(pObject, pObject->IsA(), (*iter)->name().c_str());
       }
 
       return STATUS_CODE_SUCCESS;
     }
-    
   }
-
 }

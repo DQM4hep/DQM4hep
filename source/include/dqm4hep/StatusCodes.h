@@ -36,103 +36,95 @@
 #include <execinfo.h>
 #endif
 
-#define RETURN_RESULT_IF(StatusCode1, Operator, Command)		\
-    {									\
-  const dqm4hep::core::StatusCode statusCode(Command);			\
-  if (statusCode Operator StatusCode1)				\
-  {									\
-    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
-    dqm_error( "    in function: {0}", __FUNCTION__ ); \
-    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
-    return statusCode;						\
-  }									\
-    }
+#define RETURN_RESULT_IF(StatusCode1, Operator, Command)                                                               \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if (statusCode Operator StatusCode1) {                                                                             \
+      dqm_error("{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode));                          \
+      dqm_error("    in function: {0}", __FUNCTION__);                                                                 \
+      dqm_error("    in file:     {0} line#: {1}", __FILE__, __LINE__);                                                \
+      return statusCode;                                                                                               \
+    }                                                                                                                  \
+  }
 
 //-------------------------------------------------------------------------------------------------
 
-#define RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command) \
-    {									\
-  const dqm4hep::core::StatusCode statusCode(Command);			\
-  if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
-  {									\
-    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
-    dqm_error( "    in function: {0}", __FUNCTION__ ); \
-    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
-    return statusCode;						\
-  }									\
-    }
+#define RETURN_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                                           \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2)) {                                      \
+      dqm_error("{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode));                          \
+      dqm_error("    in function: {0}", __FUNCTION__);                                                                 \
+      dqm_error("    in file:     {0} line#: {1}", __FILE__, __LINE__);                                                \
+      return statusCode;                                                                                               \
+    }                                                                                                                  \
+  }
 
 //-------------------------------------------------------------------------------------------------
 
-#define THROW_RESULT_IF(StatusCode1, Operator, Command)			\
-    {									\
-  const dqm4hep::core::StatusCode statusCode(Command);			\
-  if (statusCode Operator StatusCode1)				\
-  {									\
-    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
-    dqm_error( "    in function: {0}", __FUNCTION__ ); \
-    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
-    throw dqm4hep::core::StatusCodeException(statusCode);			\
-  }									\
-    }
+#define THROW_RESULT_IF(StatusCode1, Operator, Command)                                                                \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if (statusCode Operator StatusCode1) {                                                                             \
+      dqm_error("{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode));                          \
+      dqm_error("    in function: {0}", __FUNCTION__);                                                                 \
+      dqm_error("    in file:     {0} line#: {1}", __FILE__, __LINE__);                                                \
+      throw dqm4hep::core::StatusCodeException(statusCode);                                                            \
+    }                                                                                                                  \
+  }
 
 //-------------------------------------------------------------------------------------------------
 
-#define THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                     \
-    {									\
-  const dqm4hep::core::StatusCode statusCode(Command);			\
-  if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
-  {									\
-    dqm_error( "{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode) ); \
-    dqm_error( "    in function: {0}", __FUNCTION__ ); \
-    dqm_error( "    in file:     {0} line#: {1}", __FILE__, __LINE__ ); \
-    throw dqm4hep::core::StatusCodeException(statusCode);			\
-  }									\
-    }
+#define THROW_RESULT_IF_AND_IF(StatusCode1, StatusCode2, Operator, Command)                                            \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2)) {                                      \
+      dqm_error("{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode));                          \
+      dqm_error("    in function: {0}", __FUNCTION__);                                                                 \
+      dqm_error("    in file:     {0} line#: {1}", __FILE__, __LINE__);                                                \
+      throw dqm4hep::core::StatusCodeException(statusCode);                                                            \
+    }                                                                                                                  \
+  }
 
 //-------------------------------------------------------------------------------------------------
 
-#define PROCESS_CODE_IF_AND_RETURN(StatusCode1, Operator, Command, Code) \
-    {									\
-  const dqm4hep::core::StatusCode statusCode(Command);			\
-  if (statusCode Operator StatusCode1)				\
-  {									\
-    Code								\
-    return statusCode;						\
-  }									\
-    }
+#define PROCESS_CODE_IF_AND_RETURN(StatusCode1, Operator, Command, Code)                                               \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if (statusCode Operator StatusCode1) {                                                                             \
+      Code return statusCode;                                                                                          \
+    }                                                                                                                  \
+  }
 
 //-------------------------------------------------------------------------------------------------
 
-#define PROCESS_CODE_IF_AND_IF_AND_RETURN(StatusCode1, StatusCode2, Operator, Command, Code) \
-    {									\
-  const dqm4hep::core::StatusCode statusCode(Command);			\
-  if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2))	\
-  {									\
-    Code								\
-    return statusCode;						\
-  }									\
-    }
+#define PROCESS_CODE_IF_AND_IF_AND_RETURN(StatusCode1, StatusCode2, Operator, Command, Code)                           \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if ((statusCode Operator StatusCode1) && (statusCode Operator StatusCode2)) {                                      \
+      Code return statusCode;                                                                                          \
+    }                                                                                                                  \
+  }
 
 //-------------------------------------------------------------------------------------------------
 
 // definitions of the status code table
-#define STATUS_CODE_TABLE(d)                                                                            \
-    d(STATUS_CODE_SUCCESS,                  "STATUS_CODE_SUCCESS"                   )                   \
-    d(STATUS_CODE_FAILURE,                  "STATUS_CODE_FAILURE"                   )                   \
-    d(STATUS_CODE_NOT_FOUND,                "STATUS_CODE_NOT_FOUND"                 )                   \
-    d(STATUS_CODE_NOT_INITIALIZED,          "STATUS_CODE_NOT_INITIALIZED"           )                   \
-    d(STATUS_CODE_ALREADY_INITIALIZED,      "STATUS_CODE_ALREADY_INITIALIZED"       )                   \
-    d(STATUS_CODE_ALREADY_PRESENT,          "STATUS_CODE_ALREADY_PRESENT"           )                   \
-    d(STATUS_CODE_OUT_OF_RANGE,             "STATUS_CODE_OUT_OF_RANGE"              )                   \
-    d(STATUS_CODE_NOT_ALLOWED,              "STATUS_CODE_NOT_ALLOWED"               )                   \
-    d(STATUS_CODE_INVALID_PARAMETER,        "STATUS_CODE_INVALID_PARAMETER"         )                   \
-    d(STATUS_CODE_UNCHANGED,                "STATUS_CODE_UNCHANGED"                 )                   \
-    d(STATUS_CODE_INVALID_PTR,              "STATUS_CODE_INVALID_PTR"               )
+#define STATUS_CODE_TABLE(d)                                                                                           \
+  d(STATUS_CODE_SUCCESS, "STATUS_CODE_SUCCESS") d(STATUS_CODE_FAILURE, "STATUS_CODE_FAILURE")                          \
+      d(STATUS_CODE_NOT_FOUND, "STATUS_CODE_NOT_FOUND") d(STATUS_CODE_NOT_INITIALIZED, "STATUS_CODE_NOT_INITIALIZED")  \
+          d(STATUS_CODE_ALREADY_INITIALIZED, "STATUS_CODE_ALREADY_INITIALIZED")                                        \
+              d(STATUS_CODE_ALREADY_PRESENT, "STATUS_CODE_ALREADY_PRESENT")                                            \
+                  d(STATUS_CODE_OUT_OF_RANGE, "STATUS_CODE_OUT_OF_RANGE")                                              \
+                      d(STATUS_CODE_NOT_ALLOWED, "STATUS_CODE_NOT_ALLOWED")                                            \
+                          d(STATUS_CODE_INVALID_PARAMETER, "STATUS_CODE_INVALID_PARAMETER")                            \
+                              d(STATUS_CODE_UNCHANGED, "STATUS_CODE_UNCHANGED")                                        \
+                                  d(STATUS_CODE_INVALID_PTR, "STATUS_CODE_INVALID_PTR")
 
 // macros for enumerators
-#define GET_ENUM_ENTRY(a, b)  a,
-#define GET_NAME_SWITCH(a, b) case a : return b;
+#define GET_ENUM_ENTRY(a, b) a,
+#define GET_NAME_SWITCH(a, b)                                                                                          \
+  case a:                                                                                                              \
+    return b;
 
 //-------------------------------------------------------------------------------------------------
 
@@ -142,11 +134,7 @@ namespace dqm4hep {
 
     /** StatusCode enumerator
      */
-    enum StatusCode
-    {
-      STATUS_CODE_TABLE(GET_ENUM_ENTRY)
-      NUMBER_OF_STATUS_CODES
-    };
+    enum StatusCode { STATUS_CODE_TABLE(GET_ENUM_ENTRY) NUMBER_OF_STATUS_CODES };
 
     std::string statusCodeToString(const StatusCode statusCode);
 
@@ -154,10 +142,8 @@ namespace dqm4hep {
 
     /** StatusCodeException class
      */
-    class StatusCodeException : public std::exception
-    {
+    class StatusCodeException : public std::exception {
     public:
-
       /** Constructor
        */
       StatusCodeException(const StatusCode statusCode);
@@ -179,17 +165,14 @@ namespace dqm4hep {
       const std::string &getBackTrace() const;
 
     private:
-
-      const StatusCode    m_statusCode;   ///< The status code
-      std::string          m_backTrace;    ///< The back trace
+      const StatusCode m_statusCode; ///< The status code
+      std::string m_backTrace;       ///< The back trace
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline StatusCodeException::StatusCodeException(const StatusCode statusCode) :
-        m_statusCode(statusCode)
-    {
+    inline StatusCodeException::StatusCodeException(const StatusCode statusCode) : m_statusCode(statusCode) {
 #if defined(__GNUC__) && defined(BACKTRACE)
       const size_t maxDepth = 100;
       void *stackAddresses[maxDepth];
@@ -199,8 +182,7 @@ namespace dqm4hep {
 
       m_backTrace = "\nBackTrace\n    ";
 
-      for (size_t i = 1; i < stackDepth; ++i)
-      {
+      for (size_t i = 1; i < stackDepth; ++i) {
         m_backTrace += stackStrings[i];
         m_backTrace += "\n    ";
       }
@@ -211,45 +193,38 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline StatusCodeException::~StatusCodeException() throw()
-    {
+    inline StatusCodeException::~StatusCodeException() throw() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline StatusCode StatusCodeException::getStatusCode() const
-    {
+    inline StatusCode StatusCodeException::getStatusCode() const {
       return m_statusCode;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline std::string StatusCodeException::toString() const
-    {
+    inline std::string StatusCodeException::toString() const {
       return statusCodeToString(m_statusCode);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const std::string &StatusCodeException::getBackTrace() const
-    {
+    inline const std::string &StatusCodeException::getBackTrace() const {
       return m_backTrace;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline std::string statusCodeToString(const StatusCode statusCode)
-    {
-      switch (statusCode)
-      {
-      STATUS_CODE_TABLE(GET_NAME_SWITCH)
-      default : throw dqm4hep::core::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+    inline std::string statusCodeToString(const StatusCode statusCode) {
+      switch (statusCode) {
+        STATUS_CODE_TABLE(GET_NAME_SWITCH)
+      default:
+        throw dqm4hep::core::StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
       }
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_STATUS_CODES_H
+#endif //  DQM4HEP_STATUS_CODES_H

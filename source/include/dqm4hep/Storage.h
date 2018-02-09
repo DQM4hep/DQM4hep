@@ -25,28 +25,26 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_STORAGE_H
 #define DQM4HEP_STORAGE_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
-#include <dqm4hep/Internal.h>
 #include <dqm4hep/Directory.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 namespace dqm4hep {
 
   namespace core {
 
     template <typename T>
-    class Storage
-    {
+    class Storage {
     public:
       typedef typename Directory<T>::DirectoryPtr DirectoryPtr;
       typedef typename Directory<T>::ObjectPtr ObjectPtr;
       typedef typename Directory<T>::ObjectList ObjectList;
       typedef typename Directory<T>::DirectoryList DirectoryList;
-      
+
       Storage();
       ~Storage();
       StatusCode mkdir(const std::string &dirName);
@@ -81,53 +79,45 @@ namespace dqm4hep {
       bool iterate(const DirectoryPtr &directory, F function) const;
 
     private:
-      DirectoryPtr           m_rootDirectory;
-      DirectoryPtr           m_currentDirectory;
+      DirectoryPtr m_rootDirectory;
+      DirectoryPtr m_currentDirectory;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Storage<T>::Storage() :
-      m_rootDirectory(Directory<T>::make_shared("")),
-      m_currentDirectory(m_rootDirectory)
-    {
+    inline Storage<T>::Storage() : m_rootDirectory(Directory<T>::make_shared("")), m_currentDirectory(m_rootDirectory) {
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Storage<T>::~Storage()
-    = default;
+    inline Storage<T>::~Storage() = default;
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::mkdir(const std::string &dirName)
-    {
-      if(dirName.empty())
+    inline StatusCode Storage<T>::mkdir(const std::string &dirName) {
+      if (dirName.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
       Path path(dirName);
 
-      if(!path.isValid())
+      if (!path.isValid())
         return STATUS_CODE_INVALID_PARAMETER;
 
       DirectoryPtr directory = !path.isRelative() ? m_rootDirectory : m_currentDirectory;
       StringVector directoryList = path.getSplitPath();
 
-      for(auto iter = directoryList.begin(), endIter = directoryList.end() ;
-          endIter != iter ; ++iter)
-      {
+      for (auto iter = directoryList.begin(), endIter = directoryList.end(); endIter != iter; ++iter) {
         std::string dirName = *iter;
 
-        if(dirName == ".")
+        if (dirName == ".")
           continue;
 
-        if(dirName == "..")
-        {
-          if(directory == m_rootDirectory)
+        if (dirName == "..") {
+          if (directory == m_rootDirectory)
             return STATUS_CODE_FAILURE;
 
           directory = directory->parent();
@@ -135,7 +125,7 @@ namespace dqm4hep {
         }
 
         // if sub dir doesn't exists, create it
-        if(!directory->hasChild(dirName))
+        if (!directory->hasChild(dirName))
           directory->mkdir(dirName);
 
         // navigate forward
@@ -148,42 +138,36 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Storage<T>::cd()
-    {
+    inline void Storage<T>::cd() {
       m_currentDirectory = m_rootDirectory;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::cd(const std::string &dirName)
-    {
+    inline StatusCode Storage<T>::cd(const std::string &dirName) {
       // go back to sub dir
-      if(dirName.empty())
-      {
+      if (dirName.empty()) {
         this->cd();
         return STATUS_CODE_SUCCESS;
       }
 
       Path path(dirName);
 
-      if(!path.isValid())
+      if (!path.isValid())
         return STATUS_CODE_INVALID_PARAMETER;
 
       DirectoryPtr directory = !path.isRelative() ? m_rootDirectory : m_currentDirectory;
       StringVector directoryList = path.getSplitPath();
 
-      for(auto iter = directoryList.begin(), endIter = directoryList.end() ;
-          endIter != iter ; ++iter)
-      {
+      for (auto iter = directoryList.begin(), endIter = directoryList.end(); endIter != iter; ++iter) {
         std::string dirName = *iter;
 
-        if(dirName == ".")
+        if (dirName == ".")
           continue;
 
-        if(dirName == "..")
-        {
-          if(directory == m_rootDirectory)
+        if (dirName == "..") {
+          if (directory == m_rootDirectory)
             return STATUS_CODE_FAILURE;
 
           directory = directory->parent();
@@ -194,7 +178,7 @@ namespace dqm4hep {
         RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->find(dirName, directory));
       }
 
-      if(nullptr == directory)
+      if (nullptr == directory)
         return STATUS_CODE_FAILURE;
 
       m_currentDirectory = directory;
@@ -205,8 +189,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool Storage<T>::dirExists(const std::string &dirName) const
-    {
+    inline bool Storage<T>::dirExists(const std::string &dirName) const {
       DirectoryPtr directory = nullptr;
       return (this->find(dirName, directory) == STATUS_CODE_SUCCESS);
     }
@@ -214,17 +197,15 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline const std::string &Storage<T>::pwd() const
-    {
+    inline const std::string &Storage<T>::pwd() const {
       return m_currentDirectory->name();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::goUp()
-    {
-      if(m_currentDirectory->isRoot())
+    inline StatusCode Storage<T>::goUp() {
+      if (m_currentDirectory->isRoot())
         return STATUS_CODE_UNCHANGED;
 
       m_currentDirectory = m_currentDirectory->parent();
@@ -235,17 +216,15 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::rmdir(const std::string &dirName)
-    {
-      if(dirName.empty())
+    inline StatusCode Storage<T>::rmdir(const std::string &dirName) {
+      if (dirName.empty())
         return STATUS_CODE_NOT_ALLOWED;
 
       DirectoryPtr directory = nullptr;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
 
-      if(directory == m_rootDirectory)
+      if (directory == m_rootDirectory)
         return STATUS_CODE_NOT_ALLOWED;
-
 
       std::string fullPathDirName = directory->fullPath().getPath();
       std::string currentFullPathDirName = m_currentDirectory->fullPath().getPath();
@@ -253,7 +232,7 @@ namespace dqm4hep {
 
       // this mean that the directory that we try
       // to remove is a parent of the current one.
-      if(pos == 0 || pos != std::string::npos)
+      if (pos == 0 || pos != std::string::npos)
         return STATUS_CODE_FAILURE;
 
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->parent()->rmdir(directory->name()));
@@ -264,36 +243,31 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::find(const std::string &dirName, DirectoryPtr &directory) const
-    {
+    inline StatusCode Storage<T>::find(const std::string &dirName, DirectoryPtr &directory) const {
       directory = nullptr;
 
       // go back to sub dir
-      if(dirName.empty() || dirName == "." || dirName == "./")
-      {
+      if (dirName.empty() || dirName == "." || dirName == "./") {
         directory = m_currentDirectory;
         return STATUS_CODE_SUCCESS;
       }
 
       Path path(dirName);
 
-      if(!path.isValid())
+      if (!path.isValid())
         return STATUS_CODE_INVALID_PARAMETER;
 
       directory = !path.isRelative() ? m_rootDirectory : m_currentDirectory;
       StringVector directoryList = path.getSplitPath();
 
-      for(auto iter = directoryList.begin(), endIter = directoryList.end() ;
-          endIter != iter ; ++iter)
-      {
+      for (auto iter = directoryList.begin(), endIter = directoryList.end(); endIter != iter; ++iter) {
         std::string dirName = *iter;
 
-        if(dirName == ".")
+        if (dirName == ".")
           continue;
 
-        if(dirName == "..")
-        {
-          if(directory == m_rootDirectory)
+        if (dirName == "..") {
+          if (directory == m_rootDirectory)
             return STATUS_CODE_FAILURE;
 
           directory = directory->parent();
@@ -303,7 +277,7 @@ namespace dqm4hep {
         // navigate forward
         StatusCode statusCode = directory->find(dirName, directory);
 
-        if(statusCode != STATUS_CODE_SUCCESS)
+        if (statusCode != STATUS_CODE_SUCCESS)
           return statusCode;
       }
 
@@ -313,32 +287,28 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline typename Storage<T>::DirectoryPtr Storage<T>::root() const
-    {
+    inline typename Storage<T>::DirectoryPtr Storage<T>::root() const {
       return m_rootDirectory;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline typename Storage<T>::DirectoryPtr Storage<T>::current() const
-    {
+    inline typename Storage<T>::DirectoryPtr Storage<T>::current() const {
       return m_currentDirectory;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::add(ObjectPtr object)
-    {
+    inline StatusCode Storage<T>::add(ObjectPtr object) {
       return m_currentDirectory->add(object);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode Storage<T>::add(const std::string &dirName, ObjectPtr object)
-    {
+    inline StatusCode Storage<T>::add(const std::string &dirName, ObjectPtr object) {
       DirectoryPtr directory = nullptr;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->mkdir(dirName));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
@@ -349,8 +319,7 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline StatusCode Storage<T>::remove(F function)
-    {
+    inline StatusCode Storage<T>::remove(F function) {
       return m_currentDirectory->remove(function);
     }
 
@@ -358,8 +327,7 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline StatusCode Storage<T>::remove(const std::string &dirName, F function)
-    {
+    inline StatusCode Storage<T>::remove(const std::string &dirName, F function) {
       DirectoryPtr directory = nullptr;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
       return directory->remove(function);
@@ -369,8 +337,7 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline typename Storage<T>::ObjectPtr Storage<T>::findObject(F function) const
-    {
+    inline typename Storage<T>::ObjectPtr Storage<T>::findObject(F function) const {
       return m_currentDirectory->find(function);
     }
 
@@ -378,11 +345,10 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline typename Storage<T>::ObjectPtr Storage<T>::findObject(const std::string &dirName, F function) const
-    {
+    inline typename Storage<T>::ObjectPtr Storage<T>::findObject(const std::string &dirName, F function) const {
       DirectoryPtr directory;
 
-      if(this->find(dirName, directory))
+      if (this->find(dirName, directory))
         return nullptr;
 
       return directory->find(function);
@@ -391,19 +357,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool Storage<T>::containsObject(const ObjectPtr &object) const
-    {
+    inline bool Storage<T>::containsObject(const ObjectPtr &object) const {
       return m_currentDirectory->containsObject(object);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool Storage<T>::containsObject(const std::string &dirName, const ObjectPtr &object) const
-    {
+    inline bool Storage<T>::containsObject(const std::string &dirName, const ObjectPtr &object) const {
       DirectoryPtr directory = NULL;
 
-      if(this->find(dirName, directory))
+      if (this->find(dirName, directory))
         return false;
 
       return directory->containsObject(object);
@@ -413,18 +377,17 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline bool Storage<T>::iterate(const DirectoryPtr &directory, F function) const
-    {
+    inline bool Storage<T>::iterate(const DirectoryPtr &directory, F function) const {
       auto contents(directory->contents());
 
       for (auto &obj : contents)
-        if(!function(directory, obj))
+        if (!function(directory, obj))
           return false;
 
       auto subdirs(directory->subdirs());
 
-      for(const auto &dir : subdirs)
-        if(!this->iterate(dir, function))
+      for (const auto &dir : subdirs)
+        if (!this->iterate(dir, function))
           return false;
 
       return true;
@@ -434,17 +397,15 @@ namespace dqm4hep {
 
     template <typename T>
     template <typename F>
-    inline void Storage<T>::iterate(F function) const
-    {
+    inline void Storage<T>::iterate(F function) const {
       this->iterate(m_rootDirectory, function);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Storage<T>::getObjects(ObjectList &objectList) const
-    {
-      this->iterate([&](const DirectoryPtr &directory, ObjectPtr object){
+    inline void Storage<T>::getObjects(ObjectList &objectList) const {
+      this->iterate([&](const DirectoryPtr &directory, ObjectPtr object) {
         objectList.push_back(object);
         return true;
       });
@@ -453,14 +414,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Storage<T>::clear()
-    {
+    inline void Storage<T>::clear() {
       m_rootDirectory->clear();
       m_currentDirectory = m_rootDirectory;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_STORAGE_H
+#endif //  DQM4HEP_STORAGE_H

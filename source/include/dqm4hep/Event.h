@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_EVENT_H
 #define DQM4HEP_EVENT_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- xdrstream headers
 #include <xdrstream/xdrstream.h>
@@ -42,8 +41,7 @@ namespace dqm4hep {
 
     /** EventType enumerator
      */
-    enum EventType
-    {
+    enum EventType {
       UNKNOWN_EVENT = 0,
       RAW_DATA_EVENT = 1,
       RECONSTRUCTED_EVENT = 2,
@@ -60,8 +58,7 @@ namespace dqm4hep {
      *  Template methods of this class (i.e getEvent<T>()) refers to a
      *  BaseEvent<T> implementation.
      */
-    class Event
-    {
+    class Event {
     public:
       /** Destructor
        */
@@ -148,12 +145,12 @@ namespace dqm4hep {
       Event();
 
     protected:
-      EventType                          m_type;          ///< The event type
-      std::string                        m_source;        ///< The event source
-      TimePoint                          m_timeStamp;     ///< The event time stamp
-      uint64_t                           m_eventSize;     ///< The serialized event size (unit bytes)
-      uint32_t                           m_eventNumber;   ///< The event number
-      uint32_t                           m_runNumber;     ///< The run number
+      EventType m_type;       ///< The event type
+      std::string m_source;   ///< The event source
+      TimePoint m_timeStamp;  ///< The event time stamp
+      uint64_t m_eventSize;   ///< The serialized event size (unit bytes)
+      uint32_t m_eventNumber; ///< The event number
+      uint32_t m_runNumber;   ///< The run number
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -162,8 +159,7 @@ namespace dqm4hep {
     /** EventBase interface
      */
     template <typename T>
-    class EventBase : public Event
-    {
+    class EventBase : public Event {
     public:
       /** Constructor
        */
@@ -195,19 +191,18 @@ namespace dqm4hep {
       void clear() override;
 
     protected:
-      T                    *m_pEvent;        ///< The real event implementation
-      bool                  m_isOwner;       ///< Whether the event wrapper owns the real event implementation
+      T *m_pEvent;    ///< The real event implementation
+      bool m_isOwner; ///< Whether the event wrapper owns the real event implementation
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *Event::getEvent() const
-    {
+    inline T *Event::getEvent() const {
       const EventBase<T> *const pEventBase(dynamic_cast<const EventBase<T> *const>(this));
 
-      if(nullptr == pEventBase)
+      if (nullptr == pEventBase)
         return nullptr;
 
       return pEventBase->getEvent();
@@ -216,13 +211,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Event::setEvent(T *pEvent, bool isOwner)
-    {
+    inline void Event::setEvent(T *pEvent, bool isOwner) {
       EventBase<T> *const pEventBase(dynamic_cast<EventBase<T> *const>(this));
 
-      if(NULL == pEventBase)
-      {
-        if(isOwner)
+      if (NULL == pEventBase) {
+        if (isOwner)
           delete pEvent;
 
         return;
@@ -234,85 +227,73 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setType(EventType type)
-    {
+    inline void Event::setType(EventType type) {
       m_type = type;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline EventType Event::getType() const
-    {
+    inline EventType Event::getType() const {
       return m_type;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setSource(const std::string &sourceName)
-    {
+    inline void Event::setSource(const std::string &sourceName) {
       m_source = sourceName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const std::string &Event::getSource() const
-    {
+    inline const std::string &Event::getSource() const {
       return m_source;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setTimeStamp(const TimePoint &timeStamp)
-    {
+    inline void Event::setTimeStamp(const TimePoint &timeStamp) {
       m_timeStamp = timeStamp;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const TimePoint &Event::getTimeStamp() const
-    {
+    inline const TimePoint &Event::getTimeStamp() const {
       return m_timeStamp;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setEventSize(uint64_t eventSize)
-    {
+    inline void Event::setEventSize(uint64_t eventSize) {
       m_eventSize = eventSize;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline uint64_t Event::getEventSize() const
-    {
+    inline uint64_t Event::getEventSize() const {
       return m_eventSize;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setEventNumber(uint32_t eventNumber)
-    {
+    inline void Event::setEventNumber(uint32_t eventNumber) {
       m_eventNumber = eventNumber;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline uint32_t Event::getEventNumber() const
-    {
+    inline uint32_t Event::getEventNumber() const {
       return m_eventNumber;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setRunNumber(uint32_t runNumber)
-    {
+    inline void Event::setRunNumber(uint32_t runNumber) {
       m_runNumber = runNumber;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline uint32_t Event::getRunNumber() const
-    {
+    inline uint32_t Event::getRunNumber() const {
       return m_runNumber;
     }
 
@@ -320,46 +301,35 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline EventBase<T>::EventBase() :
-      Event(),
-      m_isOwner(true),
-      m_pEvent(nullptr)
-    {
+    inline EventBase<T>::EventBase() : Event(), m_isOwner(true), m_pEvent(nullptr) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline EventBase<T>::EventBase(T *pEvent) :
-      Event(),
-      m_isOwner(true),
-      m_pEvent(pEvent)
-    {
+    inline EventBase<T>::EventBase(T *pEvent) : Event(), m_isOwner(true), m_pEvent(pEvent) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline EventBase<T>::~EventBase()
-    {
+    inline EventBase<T>::~EventBase() {
       this->clear();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T *EventBase<T>::getEvent() const
-    {
+    inline T *EventBase<T>::getEvent() const {
       return m_pEvent;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void EventBase<T>::setEvent(T *pEvent, bool isOwner)
-    {
+    inline void EventBase<T>::setEvent(T *pEvent, bool isOwner) {
       this->clear();
       m_pEvent = pEvent;
       m_isOwner = isOwner;
@@ -368,11 +338,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void EventBase<T>::clear()
-    {
+    inline void EventBase<T>::clear() {
       Event::clear();
-      
-      if(nullptr != m_pEvent && this->isOwner())
+
+      if (nullptr != m_pEvent && this->isOwner())
         delete m_pEvent;
 
       m_pEvent = nullptr;
@@ -381,13 +350,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool EventBase<T>::isOwner() const
-    {
+    inline bool EventBase<T>::isOwner() const {
       return m_isOwner;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_EVENT_H
+#endif //  DQM4HEP_EVENT_H

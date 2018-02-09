@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_PATH_H
 #define DQM4HEP_PATH_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 namespace dqm4hep {
 
@@ -39,8 +38,7 @@ namespace dqm4hep {
 
     /** Path class
      */
-    class Path
-    {
+    class Path {
     public:
       /** Constructor
        */
@@ -68,19 +66,19 @@ namespace dqm4hep {
 
       /** Normalize the path. Replace all "//" and "/./" by "/" only characters
        */
-      static std::string& normalize(std::string &path);
+      static std::string &normalize(std::string &path);
 
       /** += operator
        */
-      Path &operator +=(const Path &path);
+      Path &operator+=(const Path &path);
 
       /** Assignment operator with path
        */
-      Path &operator =(const Path &path);
+      Path &operator=(const Path &path);
 
       /** Assignment operator with string
        */
-      Path &operator =(const std::string &path);
+      Path &operator=(const std::string &path);
 
       /** + operator
        */
@@ -88,21 +86,20 @@ namespace dqm4hep {
 
       /** << operator
        */
-      friend std::ostream &operator <<(std::ostream &out, const Path &path);
+      friend std::ostream &operator<<(std::ostream &out, const Path &path);
 
       /** == operator
        */
-      friend bool operator ==(const Path &lhs, const Path &rhs);
+      friend bool operator==(const Path &lhs, const Path &rhs);
 
     private:
-      std::string                       m_path;
+      std::string m_path;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline Path operator+(const Path &lhs, const Path &rhs)
-    {
+    inline Path operator+(const Path &lhs, const Path &rhs) {
       Path path(lhs.m_path);
       path += rhs;
 
@@ -111,8 +108,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline std::ostream &operator <<(std::ostream &out, const Path &path)
-    {
+    inline std::ostream &operator<<(std::ostream &out, const Path &path) {
       out << path.m_path;
 
       return out;
@@ -120,13 +116,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline bool operator ==(const Path &lhs, const Path &rhs)
-    {
+    inline bool operator==(const Path &lhs, const Path &rhs) {
       return (lhs.getSplitPath() == rhs.getSplitPath());
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_PATH_H
+#endif //  DQM4HEP_PATH_H

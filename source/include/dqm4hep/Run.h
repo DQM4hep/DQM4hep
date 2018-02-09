@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_RUN_H
 #define DQM4HEP_RUN_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/json.h>
 
 // -- std headers
@@ -44,8 +43,7 @@ namespace dqm4hep {
 
     /** Run class
      */
-    class Run
-    {
+    class Run {
     public:
       /** Constructor with run number (optional)
        */
@@ -118,7 +116,7 @@ namespace dqm4hep {
 
       /** Reset the run
        */
-       void reset();
+      void reset();
 
       /** Convert run to json
        */
@@ -129,31 +127,32 @@ namespace dqm4hep {
       void fromJson(const json &value);
 
     protected:
-      int                                    m_runNumber;
-      TimePoint                              m_startTime;
-      TimePoint                              m_endTime;
-      std::string                            m_detectorName;
-      std::string                            m_description;
-      std::map<std::string, std::string>     m_parametersMap;
-      
+      int m_runNumber;
+      TimePoint m_startTime;
+      TimePoint m_endTime;
+      std::string m_detectorName;
+      std::string m_description;
+      std::map<std::string, std::string> m_parametersMap;
+
       template <typename T>
-      friend T &operator <<(T & /*out*/, const Run & /*run*/);
+      friend T &operator<<(T & /*out*/, const Run & /*run*/);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline T &operator <<(T &out, const Run &run)
-    {
+    inline T &operator<<(T &out, const Run &run) {
       out << "Run :\n"
-          "  -> run number : " << run.getRunNumber() << "\n"
-          "  -> detector : " << run.getDetectorName() << "\n"
-          "  -> description : " << run.getDescription() << "\n"
-          "  -> parameters : \n";
+             "  -> run number : "
+          << run.getRunNumber() << "\n"
+                                   "  -> detector : "
+          << run.getDetectorName() << "\n"
+                                      "  -> description : "
+          << run.getDescription() << "\n"
+                                     "  -> parameters : \n";
 
-      for(auto iter = run.m_parametersMap.begin(), endIter = run.m_parametersMap.end() ;
-          endIter != iter ; ++iter)
+      for (auto iter = run.m_parametersMap.begin(), endIter = run.m_parametersMap.end(); endIter != iter; ++iter)
         out << "   * " << iter->first << " = " << iter->second << "\n";
 
       return out;
@@ -161,90 +160,78 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline int Run::getRunNumber() const
-    {
+    inline int Run::getRunNumber() const {
       return m_runNumber;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline TimePoint Run::getStartTime() const
-    {
+    inline TimePoint Run::getStartTime() const {
       return m_startTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline TimePoint Run::getEndTime() const
-    {
+    inline TimePoint Run::getEndTime() const {
       return m_endTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const std::string &Run::getDescription() const
-    {
+    inline const std::string &Run::getDescription() const {
       return m_description;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const std::string &Run::getDetectorName() const
-    {
+    inline const std::string &Run::getDetectorName() const {
       return m_detectorName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setRunNumber(int runNumber)
-    {
+    inline void Run::setRunNumber(int runNumber) {
       m_runNumber = runNumber;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setStartTime(const TimePoint &startTime)
-    {
+    inline void Run::setStartTime(const TimePoint &startTime) {
       m_startTime = startTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setEndTime(const TimePoint &endTime)
-    {
+    inline void Run::setEndTime(const TimePoint &endTime) {
       m_endTime = endTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setDescription(const std::string &description)
-    {
+    inline void Run::setDescription(const std::string &description) {
       m_description = description;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setDetectorName(const std::string &detectorName)
-    {
+    inline void Run::setDetectorName(const std::string &detectorName) {
       m_detectorName = detectorName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Run::setParameter(const std::string &key, const T &value)
-    {
+    inline void Run::setParameter(const std::string &key, const T &value) {
       m_parametersMap[key] = dqm4hep::core::typeToString<T>(value);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Run::getParameter(const std::string &key, T &value) const
-    {
+    inline void Run::getParameter(const std::string &key, T &value) const {
       auto findIter = m_parametersMap.find(key);
 
-      if(m_parametersMap.end() == findIter)
+      if (m_parametersMap.end() == findIter)
         return;
 
       dqm4hep::core::stringToType(findIter->second, value);
@@ -253,19 +240,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline void Run::setParameter(const std::string &key, const std::string &value)
-    {
+    inline void Run::setParameter(const std::string &key, const std::string &value) {
       m_parametersMap[key] = value;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline void Run::getParameter(const std::string &key, std::string &value) const
-    {
+    inline void Run::getParameter(const std::string &key, std::string &value) const {
       auto findIter = m_parametersMap.find(key);
 
-      if(m_parametersMap.end() == findIter)
+      if (m_parametersMap.end() == findIter)
         return;
 
       value = findIter->second;
@@ -273,13 +258,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline unsigned int Run::getNParameters() const
-    {
+    inline unsigned int Run::getNParameters() const {
       return m_parametersMap.size();
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_RUN_H
+#endif //  DQM4HEP_RUN_H

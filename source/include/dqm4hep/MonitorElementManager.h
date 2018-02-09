@@ -25,31 +25,45 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_MONITORELEMENTMANAGER_H
 #define DQM4HEP_MONITORELEMENTMANAGER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
-#include <dqm4hep/Internal.h>
-#include <dqm4hep/XmlHelper.h>
-#include <dqm4hep/Storage.h>
 #include <dqm4hep/Directory.h>
+#include <dqm4hep/Internal.h>
+#include <dqm4hep/Logging.h>
 #include <dqm4hep/MonitorElement.h>
 #include <dqm4hep/QualityTest.h>
-#include <dqm4hep/Logging.h>
+#include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/Storage.h>
+#include <dqm4hep/XmlHelper.h>
 
 // -- root headers
-#include <TObject.h>
 #include <TFile.h>
+#include <TObject.h>
 
-class TH1F; class TH1I; class TH1C; class TH1S;
-class TH2F; class TH2I; class TH2C; class TH2S;
-class TH3F; class TH3I;
-class THStack; class TMultiGraph; class TH2Poly;
-class TProfile; class TProfile2D;
-class TScalarInt; class TScalarFloat; class TScalarShort; class TScalarString;
-class TGraph; class TGraphErrors;  class TGraph2D;
+class TH1F;
+class TH1I;
+class TH1C;
+class TH1S;
+class TH2F;
+class TH2I;
+class TH2C;
+class TH2S;
+class TH3F;
+class TH3I;
+class THStack;
+class TMultiGraph;
+class TH2Poly;
+class TProfile;
+class TProfile2D;
+class TScalarInt;
+class TScalarFloat;
+class TScalarShort;
+class TScalarString;
+class TGraph;
+class TGraphErrors;
+class TGraph2D;
 
 namespace dqm4hep {
 
@@ -57,24 +71,36 @@ namespace dqm4hep {
 
     class TDynamicGraph; // this one comes from DQM4HEP, not ROOT
 
-    typedef allocator_helper<TObject, TH1F, const char*, const char *, int, float, float> TH1FAllocator;
-    typedef allocator_helper<TObject, TH1I, const char*, const char *, int, float, float> TH1IAllocator;
-    typedef allocator_helper<TObject, TH1C, const char*, const char *, int, float, float> TH1CAllocator;
-    typedef allocator_helper<TObject, TH1S, const char*, const char *, int, float, float> TH1SAllocator;
+    typedef allocator_helper<TObject, TH1F, const char *, const char *, int, float, float> TH1FAllocator;
+    typedef allocator_helper<TObject, TH1I, const char *, const char *, int, float, float> TH1IAllocator;
+    typedef allocator_helper<TObject, TH1C, const char *, const char *, int, float, float> TH1CAllocator;
+    typedef allocator_helper<TObject, TH1S, const char *, const char *, int, float, float> TH1SAllocator;
 
-    typedef allocator_helper<TObject, TH2F, const char*, const char *, int, float, float, int, float, float> TH2FAllocator;
-    typedef allocator_helper<TObject, TH2I, const char*, const char *, int, float, float, int, float, float> TH2IAllocator;
-    typedef allocator_helper<TObject, TH2C, const char*, const char *, int, float, float, int, float, float> TH2CAllocator;
-    typedef allocator_helper<TObject, TH2S, const char*, const char *, int, float, float, int, float, float> TH2SAllocator;
+    typedef allocator_helper<TObject, TH2F, const char *, const char *, int, float, float, int, float, float>
+        TH2FAllocator;
+    typedef allocator_helper<TObject, TH2I, const char *, const char *, int, float, float, int, float, float>
+        TH2IAllocator;
+    typedef allocator_helper<TObject, TH2C, const char *, const char *, int, float, float, int, float, float>
+        TH2CAllocator;
+    typedef allocator_helper<TObject, TH2S, const char *, const char *, int, float, float, int, float, float>
+        TH2SAllocator;
 
-    typedef allocator_helper<TObject, TH3F, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3FAllocator;
-    typedef allocator_helper<TObject, TH3I, const char*, const char *, int, float, float, int, float, float, int, float, float> TH3IAllocator;
+    typedef allocator_helper<TObject, TH3F, const char *, const char *, int, float, float, int, float, float, int,
+                             float, float>
+        TH3FAllocator;
+    typedef allocator_helper<TObject, TH3I, const char *, const char *, int, float, float, int, float, float, int,
+                             float, float>
+        TH3IAllocator;
 
-    typedef allocator_helper<TObject, THStack, const char*, const char *> THStackAllocator;
-    typedef allocator_helper<TObject, TH2Poly, const char*, const char *, double, double, double, double> TH2PolyAllocator;
+    typedef allocator_helper<TObject, THStack, const char *, const char *> THStackAllocator;
+    typedef allocator_helper<TObject, TH2Poly, const char *, const char *, double, double, double, double>
+        TH2PolyAllocator;
 
-    typedef allocator_helper<TObject, TProfile, const char*, const char *, int, float, float, float, float> TProfileAllocator;
-    typedef allocator_helper<TObject, TProfile2D, const char*, const char *, int, float, float, int, float, float, float, float> TProfile2DAllocator;
+    typedef allocator_helper<TObject, TProfile, const char *, const char *, int, float, float, float, float>
+        TProfileAllocator;
+    typedef allocator_helper<TObject, TProfile2D, const char *, const char *, int, float, float, int, float, float,
+                             float, float>
+        TProfile2DAllocator;
 
     typedef allocator_helper<TObject, TScalarInt, int> TScalarIntAllocator;
     typedef allocator_helper<TObject, TScalarFloat, float> TScalarFloatAllocator;
@@ -90,12 +116,12 @@ namespace dqm4hep {
 
     /** MonitorElementManager class
      */
-    class MonitorElementManager
-    {
+    class MonitorElementManager {
       typedef std::shared_ptr<QualityTest> QualityTestPtr;
       typedef std::shared_ptr<QualityTestFactory> QualityTestFactoryPtr;
       typedef std::map<const std::string, QualityTestPtr> QualityTestMap;
       typedef std::map<const std::string, const QualityTestFactoryPtr> QualityTestFactoryMap;
+
     public:
       /** Constructor
        */
@@ -146,7 +172,6 @@ namespace dqm4hep {
       bool dirExists(const std::string &dirName) const;
 
     public:
-
       ///////////////////////////////
       // MONITOR ELEMENT INTERFACE //
       ///////////////////////////////
@@ -160,12 +185,14 @@ namespace dqm4hep {
       /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
-      StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement);
+      StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name,
+                                    MonitorElementPtr &monitorElement);
 
       /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
-      StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement);
+      StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name,
+                                    MonitorElementPtr &monitorElement);
 
       /** Book a monitor element using the ROOT TClass facility.
        *  The className is passed to TClass::GetClass() to get the corresponding
@@ -174,7 +201,8 @@ namespace dqm4hep {
        *    - ROOT object is disabled so that object with same can be allocated safely memory leak
        *  The resulting monitored TObject is owned by the manager
        */
-      StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name, MonitorElementPtr &monitorElement);
+      StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name,
+                                    MonitorElementPtr &monitorElement);
 
       /** Add a monitor element from an external source.
       *  WARNING : The ROOT object is NOT owned by the framework.
@@ -185,9 +213,9 @@ namespace dqm4hep {
       /** Book a monitor element. The objectType must inherit TObject and have a ROOT dictionnary.
        *
        */
-      template <typename ObjectType, typename ...Args>
+      template <typename ObjectType, typename... Args>
       StatusCode bookObject(const std::string &path, const std::string &name, MonitorElementPtr &monitorElement,
-          allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args);
+                            allocator_helper<TObject, ObjectType, Args...> allocator, Args... args);
 
       /**
        * @brief  Open root file, find reference object and attach it to the monitor element
@@ -198,7 +226,6 @@ namespace dqm4hep {
       StatusCode attachReference(MonitorElementPtr monitorElement, const std::string &fileName);
 
     public:
-
       ///////////////////////
       // GETTERS INTERFACE //
       ///////////////////////
@@ -213,7 +240,8 @@ namespace dqm4hep {
 
       /** Get the monitor element in the given directory (result by ptr reference)
        */
-      StatusCode getMonitorElement(const std::string &dirName, const std::string &name, MonitorElementPtr &monitorElement) const;
+      StatusCode getMonitorElement(const std::string &dirName, const std::string &name,
+                                   MonitorElementPtr &monitorElement) const;
 
       ////////////////////////
       // DELETION INTERFACE //
@@ -224,7 +252,6 @@ namespace dqm4hep {
       StatusCode removeMonitorElement(const std::string &path, const std::string &name);
 
     public:
-
       ////////////////////////////
       // QUALITY TEST INTERFACE //
       ////////////////////////////
@@ -240,7 +267,8 @@ namespace dqm4hep {
 
       /** Remove a quality test from the monitor element
        */
-      StatusCode removeQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName);
+      StatusCode removeQualityTest(const std::string &path, const std::string &name,
+                                   const std::string &qualityTestName);
 
       /**
        */
@@ -252,47 +280,49 @@ namespace dqm4hep {
 
       /**
        */
-      StatusCode runQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName, QReportStorage &reports);
+      StatusCode runQualityTest(const std::string &path, const std::string &name, const std::string &qualityTestName,
+                                QReportStorage &reports);
 
     private:
-
       /** Get the monitor element storage
        */
       const Storage<MonitorElement> &getStorage() const;
 
-      typedef std::map<MonitorElementPtr, QualityTestMap>    MonitorElementToQTestMap;
+      typedef std::map<MonitorElementPtr, QualityTestMap> MonitorElementToQTestMap;
 
-      Storage<MonitorElement>        m_storage;
-      QualityTestFactoryMap          m_qualityTestFactoryMap;
-      QualityTestMap                 m_qualityTestMap;
-      MonitorElementToQTestMap       m_monitorElementToQTestMap;
-
+      Storage<MonitorElement> m_storage;
+      QualityTestFactoryMap m_qualityTestFactoryMap;
+      QualityTestMap m_qualityTestMap;
+      MonitorElementToQTestMap m_monitorElementToQTestMap;
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename ObjectType, typename ...Args>
-    StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name, MonitorElementPtr &monitorElement,
-        allocator_helper<TObject, ObjectType, Args...> allocator, Args ...args)
-    {
+    template <typename ObjectType, typename... Args>
+    StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name,
+                                                 MonitorElementPtr &monitorElement,
+                                                 allocator_helper<TObject, ObjectType, Args...> allocator,
+                                                 Args... args) {
       monitorElement = nullptr;
 
-      if(!ObjectType::Class()->HasDictionary())
-      {
-        dqm_error( "Couldn't book object of type '{0}', because this class has no dictionnary!", ObjectType::Class_name() );
+      if (!ObjectType::Class()->HasDictionary()) {
+        dqm_error("Couldn't book object of type '{0}', because this class has no dictionnary!",
+                  ObjectType::Class_name());
         return STATUS_CODE_NOT_ALLOWED;
       }
 
-      if(ObjectType::Class()->IsForeign())
-      {
-        dqm_error( "Couldn't book object of type '{0}', because this class is foreign (does not have a Streamer method))!", ObjectType::Class_name() );
+      if (ObjectType::Class()->IsForeign()) {
+        dqm_error(
+            "Couldn't book object of type '{0}', because this class is foreign (does not have a Streamer method))!",
+            ObjectType::Class_name());
         return STATUS_CODE_NOT_ALLOWED;
       }
 
-      if(!ObjectType::Class()->InheritsFrom("TNamed"))
-      {
-        dqm_error( "Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call SetName())!", ObjectType::Class_name() );
+      if (!ObjectType::Class()->InheritsFrom("TNamed")) {
+        dqm_error("Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call "
+                  "SetName())!",
+                  ObjectType::Class_name());
         return STATUS_CODE_NOT_ALLOWED;
       }
 
@@ -301,19 +331,17 @@ namespace dqm4hep {
       TObject *pTObject = allocator.create(args...);
       TObject::SetObjectStat(objectStat);
 
-      if(!pTObject)
-      {
-        dqm_warning( "Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_name(), path, name );
+      if (!pTObject) {
+        dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_name(),
+                    path, name);
         return STATUS_CODE_FAILURE;
       }
 
-      ((TNamed*)pTObject)->SetName(name.c_str());
+      ((TNamed *)pTObject)->SetName(name.c_str());
 
       return this->addMonitorElement(path, pTObject, monitorElement);
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_MONITORELEMENTMANAGER_H
+#endif //  DQM4HEP_MONITORELEMENTMANAGER_H

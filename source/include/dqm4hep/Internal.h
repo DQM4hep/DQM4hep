@@ -25,47 +25,46 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_INTERNAL_H
 #define DQM4HEP_INTERNAL_H
 
 // -- std headers
-#include <set>
-#include <iostream>
-#include <sstream>
-#include <utility>
-#include <map>
-#include <vector>
-#include <list>
-#include <queue>
-#include <string>
-#include <ctime>
 #include <assert.h>
-#include <stdio.h>
-#include <math.h>
-#include <unistd.h>
-#include <exception>
-#include <limits>
-#include <memory>
 #include <chrono>
+#include <ctime>
+#include <exception>
+#include <iostream>
+#include <limits>
+#include <list>
+#include <map>
+#include <math.h>
+#include <memory>
+#include <queue>
 #include <ratio>
+#include <set>
+#include <sstream>
+#include <stdio.h>
+#include <string>
+#include <unistd.h>
+#include <utility>
+#include <vector>
 
-#include <thread>
-#include <sys/utsname.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
+#include <thread>
 #include <unistd.h>
 
 // apple stuff for stdint.h
 #ifdef __APPLE__
 #include <_types.h>
-#include <_types/_uint8_t.h>
 #include <_types/_uint16_t.h>
 #include <_types/_uint32_t.h>
 #include <_types/_uint64_t.h>
+#include <_types/_uint8_t.h>
+#include <sys/_pthread/_pthread_mutex_t.h>
+#include <sys/_pthread/_pthread_types.h>
 #include <sys/_types/_int16_t.h>
 #include <sys/_types/_int64_t.h>
-#include <sys/_pthread/_pthread_types.h>
-#include <sys/_pthread/_pthread_mutex_t.h>
 #else
 #include <bits/pthreadtypes.h>
 #include <stdint.h>
@@ -109,73 +108,73 @@ namespace dqm4hep {
     /** allocator_helper class
      */
     template <typename BaseType, typename RealType, typename... Args>
-    class allocator_helper
-    {
+    class allocator_helper {
     public:
       /** Create a new instance of RealType, inheriting
        *  from BaseType using Args type as constructor parameters
        */
-      BaseType *create(Args ... args) const { return new RealType(args...); }
+      BaseType *create(Args... args) const {
+        return new RealType(args...);
+      }
     };
 
     // time
-    typedef std::chrono::system_clock::time_point  TimePoint;
-    typedef std::chrono::duration<double>          TimeDuration;
+    typedef std::chrono::system_clock::time_point TimePoint;
+    typedef std::chrono::duration<double> TimeDuration;
 
     // event
-    typedef std::shared_ptr<Event>  EventPtr;
-    typedef std::queue<EventPtr>    EventQueue;
-    
+    typedef std::shared_ptr<Event> EventPtr;
+    typedef std::queue<EventPtr> EventQueue;
+
     // plugin
     typedef std::shared_ptr<Plugin> PluginPtr;
 
     // typedefs for streaming
-    typedef char                  dqm_char;
-    typedef uint8_t               dqm_uchar;
-    typedef int16_t               dqm_short;
-    typedef uint16_t              dqm_ushort;
-    typedef int16_t               dqm_short_int;
-    typedef uint16_t              dqm_ushort_int;
-    typedef int64_t               dqm_lint;
-    typedef uint64_t              dqm_ulint;
-    typedef float                 dqm_real;
-    typedef float                 dqm_float;
-    typedef double                dqm_double;
-    typedef bool                  dqm_bool;
-    typedef int64_t               dqm_int;
-    typedef uint64_t              dqm_uint;
+    typedef char dqm_char;
+    typedef uint8_t dqm_uchar;
+    typedef int16_t dqm_short;
+    typedef uint16_t dqm_ushort;
+    typedef int16_t dqm_short_int;
+    typedef uint16_t dqm_ushort_int;
+    typedef int64_t dqm_lint;
+    typedef uint64_t dqm_ulint;
+    typedef float dqm_real;
+    typedef float dqm_float;
+    typedef double dqm_double;
+    typedef bool dqm_bool;
+    typedef int64_t dqm_int;
+    typedef uint64_t dqm_uint;
 
     // basic typedefs
-    typedef std::vector<int>                                    IntVector;
-    typedef std::vector<unsigned int>                           UIntVector;
-    typedef std::vector<float>                                  FloatVector;
-    typedef std::vector<double>                                 DoubleVector;
-    typedef std::vector<std::string>                            StringVector;
-    typedef std::set<std::string>                               StringSet;
-    typedef std::map<std::string, std::string>                  ParameterMap;
-    typedef std::pair<std::string, std::string>                 StringPair;
-    typedef std::map<std::string, std::string>                  StringMap;
+    typedef std::vector<int> IntVector;
+    typedef std::vector<unsigned int> UIntVector;
+    typedef std::vector<float> FloatVector;
+    typedef std::vector<double> DoubleVector;
+    typedef std::vector<std::string> StringVector;
+    typedef std::set<std::string> StringSet;
+    typedef std::map<std::string, std::string> ParameterMap;
+    typedef std::pair<std::string, std::string> StringPair;
+    typedef std::map<std::string, std::string> StringMap;
 
     // dqm4hep typedefs
-    typedef std::shared_ptr<MonitorElement>                     MonitorElementPtr;
-    typedef std::vector<MonitorElementPtr>                      MonitorElementList;
-    typedef std::map<const std::string, MonitorElementPtr>      MonitorElementMap;
-    typedef std::shared_ptr<Directory<MonitorElement>>          MonitorElementDir;
-    typedef QualityTest                                         QTest;
-    typedef std::shared_ptr<QualityTest>                        QTestPtr;
-    typedef QualityTestReport                                   QReport;
-    typedef std::map<std::string, QReport>                      QReportMap;
-    typedef std::map<StringPair, QReportMap>                    QReportContainer;
-    typedef std::map<std::string, QTestPtr>                     QTestMap;
-    typedef std::shared_ptr<Storage<MonitorElement>>            MeStoragePtr;
+    typedef std::shared_ptr<MonitorElement> MonitorElementPtr;
+    typedef std::vector<MonitorElementPtr> MonitorElementList;
+    typedef std::map<const std::string, MonitorElementPtr> MonitorElementMap;
+    typedef std::shared_ptr<Directory<MonitorElement>> MonitorElementDir;
+    typedef QualityTest QTest;
+    typedef std::shared_ptr<QualityTest> QTestPtr;
+    typedef QualityTestReport QReport;
+    typedef std::map<std::string, QReport> QReportMap;
+    typedef std::map<StringPair, QReportMap> QReportContainer;
+    typedef std::map<std::string, QTestPtr> QTestMap;
+    typedef std::shared_ptr<Storage<MonitorElement>> MeStoragePtr;
 
     //-------------------------------------------------------------------------------------------------
 
     /** Convert std::string to a type
      */
     template <class T>
-    inline bool stringToType(const std::string &s, T &t)
-    {
+    inline bool stringToType(const std::string &s, T &t) {
       std::istringstream iss(s);
       return !(iss >> t).fail();
     }
@@ -185,8 +184,7 @@ namespace dqm4hep {
     /** Convert type to std::string
     */
     template <class T>
-    inline std::string typeToString(const T &t)
-    {
+    inline std::string typeToString(const T &t) {
       std::ostringstream oss;
 
       if ((oss << t).fail())
@@ -199,8 +197,7 @@ namespace dqm4hep {
 
     /** Screen splash of DQM4HEP
      */
-    inline void screenSplash()
-    {
+    inline void screenSplash() {
       time_t t;
       time(&t);
       char timeStr[256];
@@ -212,7 +209,7 @@ namespace dqm4hep {
       std::cout << "#   (Data Quality Monitoring For High Energy Physics)" << std::endl;
       std::cout << "#" << std::endl;
       std::cout << "#      Version    : " << DQMCore_VERSION_STR << std::endl;
-      std::cout << "#      Started at : " << timeStr ;
+      std::cout << "#      Started at : " << timeStr;
       std::cout << "#      Author     : R. Ete, A. Pingault" << std::endl;
       std::cout << "#      Mail       : <dqm4hep@gmail.com> " << std::endl;
       std::cout << "#" << std::endl;
@@ -223,13 +220,11 @@ namespace dqm4hep {
 
     /** Tokenize string with delimiter.
      */
-    inline void tokenize(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ")
-    {
+    inline void tokenize(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ") {
       std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
-      std::string::size_type pos     = inputString.find_first_of(delimiter, lastPos);
+      std::string::size_type pos = inputString.find_first_of(delimiter, lastPos);
 
-      while ((std::string::npos != pos) || (std::string::npos != lastPos))
-      {
+      while ((std::string::npos != pos) || (std::string::npos != lastPos)) {
         tokens.push_back(inputString.substr(lastPos, pos - lastPos));
         lastPos = inputString.find_first_not_of(delimiter, pos);
         pos = inputString.find_first_of(delimiter, lastPos);
@@ -240,8 +235,7 @@ namespace dqm4hep {
 
     /** Convert time_t to hour, minutes and seconds
      */
-    inline void timeToHMS(time_t t, int &hours, int &minutes, int &seconds)
-    {
+    inline void timeToHMS(time_t t, int &hours, int &minutes, int &seconds) {
       auto pTmTime = new tm();
       localtime_r(&t, pTmTime);
       hours = pTmTime->tm_hour;
@@ -254,8 +248,7 @@ namespace dqm4hep {
 
     /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
      */
-    inline void timeToHMS(time_t t, std::string &timeStr)
-    {
+    inline void timeToHMS(time_t t, std::string &timeStr) {
       // get h m and s
       int hours, minutes, seconds;
       dqm4hep::core::timeToHMS(t, hours, minutes, seconds);
@@ -270,8 +263,7 @@ namespace dqm4hep {
 
     /** Get the current time (unit seconds)
      */
-    inline TimePoint now()
-    {
+    inline TimePoint now() {
       return std::chrono::system_clock::now();
     }
 
@@ -279,8 +271,7 @@ namespace dqm4hep {
 
     /** Sleep for the specified time duration
      */
-    inline void sleep(const TimeDuration &duration)
-    {
+    inline void sleep(const TimeDuration &duration) {
       std::this_thread::sleep_for(duration);
     }
 
@@ -288,8 +279,7 @@ namespace dqm4hep {
 
     /** Get the special character list that are to be avoided in some strings
      */
-    inline StringVector getSpecialCharacterList()
-    {
+    inline StringVector getSpecialCharacterList() {
       StringVector specialCharacterList;
 
       specialCharacterList.push_back("|");
@@ -322,14 +312,11 @@ namespace dqm4hep {
 
     /** Whether the string contains a special character
      */
-    inline bool containsSpecialCharacters(const std::string &str)
-    {
+    inline bool containsSpecialCharacters(const std::string &str) {
       StringVector specialCharacterList = dqm4hep::core::getSpecialCharacterList();
 
-      for(auto iter = specialCharacterList.begin(), endIter = specialCharacterList.end() ;
-          endIter != iter ; ++iter)
-      {
-        if(str.find(*iter) != std::string::npos)
+      for (auto iter = specialCharacterList.begin(), endIter = specialCharacterList.end(); endIter != iter; ++iter) {
+        if (str.find(*iter) != std::string::npos)
           return true;
       }
 
@@ -340,8 +327,7 @@ namespace dqm4hep {
 
     /** Fill host info (uname result + host name). See Key for available keys
      */
-    inline void fillHostInfo( StringMap &info )
-    {
+    inline void fillHostInfo(StringMap &info) {
       // uname
       struct utsname unameStruct;
       uname(&unameStruct);
@@ -363,20 +349,17 @@ namespace dqm4hep {
     /** Specialization for booleans
      */
     template <>
-    inline bool stringToType(const std::string &s, bool &t)
-    {
-      if(s == "on" || s == "1" || s == "true")
+    inline bool stringToType(const std::string &s, bool &t) {
+      if (s == "on" || s == "1" || s == "true")
         t = true;
-      else if(s == "off" || s == "0" || s == "false")
+      else if (s == "off" || s == "0" || s == "false")
         t = false;
       else
         return false;
 
       return true;
     }
-
   }
-
 }
 
-#endif  //  DQM4HEP_ENUMERATORS_H
+#endif //  DQM4HEP_ENUMERATORS_H

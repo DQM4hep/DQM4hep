@@ -25,13 +25,12 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_VERSION_H
 #define DQM4HEP_VERSION_H
 
 // -- dqm4hep headers
-#include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/StatusCodes.h>
 
 // -- xdrstream headers
 #include <xdrstream/xdrstream.h>
@@ -42,8 +41,7 @@ namespace dqm4hep {
 
     /** Version class
      */
-    class Version : public xdrstream::Streamable
-    {
+    class Version : public xdrstream::Streamable {
     public:
       /** Constructor
        */
@@ -51,7 +49,7 @@ namespace dqm4hep {
 
       /** Constructor with version numbers
        */
-      Version( unsigned int major, unsigned int minor, unsigned int patch );
+      Version(unsigned int major, unsigned int minor, unsigned int patch);
 
       /** Destructor
        */
@@ -71,7 +69,7 @@ namespace dqm4hep {
 
       /** Set the complete version numbers
        */
-      void set( unsigned int major, unsigned int minor, unsigned int patch );
+      void set(unsigned int major, unsigned int minor, unsigned int patch);
 
       /** Get the version to string
        */
@@ -79,29 +77,27 @@ namespace dqm4hep {
 
       /** Assignment operator
        */
-      Version &operator =( const Version &version );
+      Version &operator=(const Version &version);
 
       // from xdrstreamm::Streamable
       xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-          xdrstream::xdr_version_t version = 0) override;
+                               xdrstream::xdr_version_t version = 0) override;
 
     private:
-      unsigned int    m_major;
-      unsigned int    m_minor;
-      unsigned int    m_patch;
-      std::string     m_versionString;
+      unsigned int m_major;
+      unsigned int m_minor;
+      unsigned int m_patch;
+      std::string m_versionString;
     };
 
     // compare operators
-    bool operator <  ( const Version &lhs, const Version &rhs );
-    bool operator <= ( const Version &lhs, const Version &rhs );
-    bool operator >  ( const Version &lhs, const Version &rhs );
-    bool operator >= ( const Version &lhs, const Version &rhs );
-    bool operator == ( const Version &lhs, const Version &rhs );
-    bool operator != ( const Version &lhs, const Version &rhs );
-
+    bool operator<(const Version &lhs, const Version &rhs);
+    bool operator<=(const Version &lhs, const Version &rhs);
+    bool operator>(const Version &lhs, const Version &rhs);
+    bool operator>=(const Version &lhs, const Version &rhs);
+    bool operator==(const Version &lhs, const Version &rhs);
+    bool operator!=(const Version &lhs, const Version &rhs);
   }
-
 }
 
-#endif  //  DQM4HEP_VERSION_H
+#endif //  DQM4HEP_VERSION_H

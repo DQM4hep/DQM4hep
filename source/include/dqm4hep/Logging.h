@@ -25,7 +25,6 @@
  * @copyright CNRS , IPNL
  */
 
-
 #ifndef DQM4HEP_LOGGING_H
 #define DQM4HEP_LOGGING_H
 
@@ -47,4 +46,4 @@
 #define dqm_critical(...) dqm4hep::core::Logger::mainLogger()->critical(__VA_ARGS__)
 #define dqm_info(...) dqm4hep::core::Logger::mainLogger()->info(__VA_ARGS__)
 
-#endif  //  DQM4HEP_LOGGING_H
+#endif //  DQM4HEP_LOGGING_H

@@ -30,9 +30,5 @@
 
 namespace dqm4hep {
 
-  namespace core {
-
-
-  }
-
+  namespace core {}
 }
