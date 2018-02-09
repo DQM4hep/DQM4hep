@@ -32,12 +32,7 @@
 // -- dqm4hep headers
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
-
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
-
-// -- json headers
-#include <json/json.h>
+#include <dqm4hep/json.h>
 
 // -- std headers
 #include <ctime>
@@ -49,7 +44,7 @@ namespace dqm4hep {
 
     /** Run class
      */
-    class Run : public xdrstream::Streamable
+    class Run
     {
     public:
       /** Constructor with run number (optional)
@@ -58,7 +53,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~Run() override;
+      ~Run() = default;
 
       /** Get the run number
        */
@@ -125,16 +120,13 @@ namespace dqm4hep {
        */
        void reset();
 
-      xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-          xdrstream::xdr_version_t version = 0) override;
-
       /** Convert run to json
        */
-      void toJson(Json::Value &value) const;
+      void toJson(json &value) const;
 
       /** Read run info from json
        */
-      void fromJson(const Json::Value &value);
+      void fromJson(const json &value);
 
     protected:
       int                                    m_runNumber;

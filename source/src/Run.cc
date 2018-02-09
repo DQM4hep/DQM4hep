@@ -46,13 +46,6 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    Run::~Run()
-    {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     StringVector Run::getParameterKeys() const
     {
       StringVector keys;
@@ -78,80 +71,52 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    xdrstream::Status Run::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-        xdrstream::xdr_version_t version)
+    void Run::toJson(json &value) const
     {
-      if( xdrstream::XDR_READ_STREAM == mode )
-      {
-        XDR_STREAM( pDevice->read<int32_t>( & m_runNumber ) )
+      auto startTime = std::chrono::system_clock::to_time_t(m_startTime);
+      auto endTime = std::chrono::system_clock::to_time_t(m_endTime);
 
-		    int64_t startTime;// = std::chrono::system_clock::to_time_t(m_startTime);
-        int64_t endTime; //= std::chrono::system_clock::to_time_t(m_endTime);
-        XDR_STREAM( pDevice->read<int64_t>( & startTime ) )
-        XDR_STREAM( pDevice->read<int64_t>( & endTime ) )
-        m_startTime = std::chrono::system_clock::from_time_t(startTime);
-        m_endTime = std::chrono::system_clock::from_time_t(endTime);
-
-        XDR_STREAM( pDevice->read( & m_detectorName ) )
-        XDR_STREAM( pDevice->read( & m_description ) )
-        XDR_STREAM( StreamingHelper::read( pDevice , m_parametersMap ))
-      }
-      else
-      {
-        XDR_STREAM( pDevice->write<int32_t>( & m_runNumber ) )
-
-		    int64_t startTime = std::chrono::system_clock::to_time_t(m_startTime);
-        int64_t endTime = std::chrono::system_clock::to_time_t(m_endTime);
-        XDR_STREAM( pDevice->write<int64_t>( & startTime ) )
-        XDR_STREAM( pDevice->write<int64_t>( & endTime ) )
-
-        XDR_STREAM( pDevice->write( & m_detectorName ) )
-        XDR_STREAM( pDevice->write( & m_description ) )
-        XDR_STREAM( StreamingHelper::write( pDevice , m_parametersMap ))
-      }
-
-      return xdrstream::XDR_SUCCESS;
+      value = {
+        {"runNumber", m_runNumber},
+        {"startTime", startTime},
+        {"endTime", endTime},
+        {"detector", m_detectorName},
+        {"description", m_description},
+        {"parameters", m_parametersMap}
+      };
+      // value["runNumber"] = m_runNumber;
+      // value["startTime"] = startTime;
+      // value["endTime"] = endTime;
+      // value["detector"] = m_detectorName;
+      // value["description"] = m_description;
+      // 
+      // Json::Value parametersValue;
+      // 
+      // for(const auto &parameter : m_parametersMap)
+      //   parametersValue[parameter.first] = parameter.second;
+      // 
+      // value["parameters"] = parametersValue;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void Run::toJson(Json::Value &value) const
+    void Run::fromJson(const json &value)
     {
-      Json::Value::Int64 startTime = std::chrono::system_clock::to_time_t(m_startTime);
-      Json::Value::Int64 endTime = std::chrono::system_clock::to_time_t(m_endTime);
-
-      value["runNumber"] = m_runNumber;
-      value["startTime"] = startTime;
-      value["endTime"] = endTime;
-      value["detector"] = m_detectorName;
-      value["description"] = m_description;
-
-      Json::Value parametersValue;
-
-      for(const auto &parameter : m_parametersMap)
-        parametersValue[parameter.first] = parameter.second;
-
-      value["parameters"] = parametersValue;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    void Run::fromJson(const Json::Value &value)
-    {
-      m_runNumber = value.get("runNumber", 0).asInt();
-      int64_t startTime = value.get("startTime", 0).asInt64();
-      int64_t endTime = value.get("endTime", 0).asInt64();
+      m_runNumber = value.value<int>("runNumber", 0);
+      auto startTime = value.value<int64_t>("startTime", 0);
+      auto endTime = value.value<int64_t>("endTime", 0);
       m_startTime = std::chrono::system_clock::from_time_t(startTime);
       m_endTime = std::chrono::system_clock::from_time_t(endTime);
-      m_detectorName = value.get("detector", "").asString();
-      m_description = value.get("description", "").asString();
+      m_detectorName = value.value<std::string>("detector", "");
+      m_description = value.value<std::string>("description", "");
+      m_parametersMap = value.value<StringMap>("parameters", StringMap());
 
-      m_parametersMap.clear();
-      Json::Value parametersValue(value.get("parameters", Json::Value(Json::objectValue)));
-      auto members = parametersValue.getMemberNames();
-
-      for( const auto &parameter : members )
-        m_parametersMap[parameter] = parametersValue[parameter].asString();
+      // m_parametersMap.clear();
+      // Json::Value parametersValue(value.get("parameters", Json::Value(Json::objectValue)));
+      // auto members = parametersValue.getMemberNames();
+      // 
+      // for( const auto &parameter : members )
+      //   m_parametersMap[parameter] = parametersValue[parameter].asString();
     }
 
   }
