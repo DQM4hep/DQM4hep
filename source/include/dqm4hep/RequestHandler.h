@@ -29,17 +29,16 @@
 #ifndef REQUESTHANDLER_H
 #define REQUESTHANDLER_H
 
+// -- dqm4hep headers
+#include "dqm4hep/NetBuffer.h"
+#include "dqm4hep/Signal.h"
+#include "dqm4hep/json.h"
+
 // -- std headers
 #include <string>
 
-// -- json headers
-#include "json/json.h"
-
 // -- dim headers
 #include "dis.hxx"
-
-// -- dqm4hep headers
-#include "dqm4hep/DQMNet.h"
 
 namespace dqm4hep {
 
@@ -51,7 +50,7 @@ namespace dqm4hep {
     {
       friend class Server;
     public:
-      typedef Signal<const Buffer &, Buffer &> RequestSignal;
+      typedef core::Signal<const Buffer &, Buffer &> RequestSignal;
 
       /**
        * Get the request name
@@ -159,7 +158,7 @@ namespace dqm4hep {
     {
       friend class Server;
     public:
-      typedef Signal<const Buffer &> CommandSignal;
+      typedef core::Signal<const Buffer &> CommandSignal;
 
       /**
        * Get the request name

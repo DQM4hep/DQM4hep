@@ -29,14 +29,13 @@
 #ifndef SERVICEHANDLER_H
 #define SERVICEHANDLER_H
 
-// -- json headers
-#include "json/json.h"
-
 // -- dim headers
 #include "dic.hxx"
 
 // -- dqm4hep headers
-#include "dqm4hep/DQMNet.h"
+#include "dqm4hep/NetBuffer.h"
+#include "dqm4hep/Signal.h"
+#include "dqm4hep/json.h"
 
 namespace dqm4hep {
 
@@ -51,7 +50,7 @@ namespace dqm4hep {
     {
       friend class Client;
     public:
-      typedef Signal<const Buffer &> UpdateSignal;
+      typedef core::Signal<const Buffer &> UpdateSignal;
 
       /**
        * Get the service name

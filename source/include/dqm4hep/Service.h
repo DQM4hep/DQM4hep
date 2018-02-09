@@ -37,7 +37,7 @@
 #include "dis.hxx"
 
 // -- dqm4hep headers
-#include "dqm4hep/DQMNet.h"
+#include "dqm4hep/NetBuffer.h"
 
 namespace dqm4hep {
 
