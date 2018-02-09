@@ -39,11 +39,11 @@ option( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" 
 # ----- Find Threads for multithreading -----
 find_package( Threads REQUIRED )
 
-# ----- Find json cpp package -----
-find_package( JSONCPP REQUIRED )
+# ----- Find DQMCore package -----
+find_package( DQMCore REQUIRED )
 
 # ----- Include package properties -----
-foreach( pkg JSONCPP )
+foreach( pkg DQMCore )
 
   include_directories( ${${pkg}_INCLUDE_DIRS} )
   link_libraries( ${${pkg}_LIBRARIES} )
