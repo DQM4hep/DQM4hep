@@ -5,7 +5,7 @@ ls -la
 mkdir -p build
 cd build
 
-cmake -DINSTALL_DOC=OFF -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake -DJSONCPP_DIR=$PWD/../dependencies/jsoncpp/install ..
+cmake -DINSTALL_DOC=OFF -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake ..
 
 if [ $? -ne 0 ]; then
     echo "Failed to run cmake"
