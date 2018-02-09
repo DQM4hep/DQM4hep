@@ -47,11 +47,8 @@ find_package( MySQL REQUIRED )
 # ----- Find xdrstream package -----
 find_package( xdrstream REQUIRED )
 
-# ----- Find JSONCPP package -----
-find_package( JSONCPP REQUIRED )
-
 # ----- Include package properties -----
-foreach( pkg ROOT MySQL xdrstream JSONCPP )
+foreach( pkg ROOT MySQL xdrstream )
   include_directories( ${${pkg}_INCLUDE_DIRS} )
   link_libraries( ${${pkg}_LIBRARIES} )
   add_definitions ( ${${pkg}_DEFINITIONS} )
