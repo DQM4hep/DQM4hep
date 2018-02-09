@@ -43,7 +43,7 @@ namespace dqm4hep {
       m_message(""),
       m_quality(0.f),
       m_executed(true),
-      m_extraInfos(Json::objectValue)
+      m_extraInfos()
     {
       /* nop */
     }
@@ -75,34 +75,37 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTestReport::toJson(Json::Value &value) const
+    void QualityTestReport::toJson(json &value) const
     {
-      value["qualityTestType"] = m_qualityTestType;
-      value["qualityTestName"] = m_qualityTestName;
-      value["qualityTestDescription"] = m_qualityTestDescription;
-      value["monitorElementName"] = m_monitorElementName;
-      value["monitorElementType"] = m_monitorElementType;
-      value["monitorElementPath"] = m_monitorElementPath;
-      value["message"] = m_message;
-      value["quality"] = m_quality;
-      value["executed"] = m_executed;
-      value["extra"] = m_extraInfos;
+      value = {
+        {"qualityTestType", m_qualityTestType},
+        {"qualityTestName", m_qualityTestName},
+        {"qualityTestDescription", m_qualityTestDescription},
+        {"monitorElementName", m_monitorElementName},
+        {"monitorElementType", m_monitorElementType},
+        {"monitorElementPath", m_monitorElementPath},
+        {"message", m_message},
+        {"quality", m_quality},
+        {"executed", m_executed},
+        {"extra", m_extraInfos}
+      };
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTestReport::fromJson(const Json::Value &value)
+    void QualityTestReport::fromJson(const json &value)
     {
-      m_qualityTestType = value.get("qualityTestType", m_qualityTestType).asString();
-      m_qualityTestName = value.get("qualityTestName", m_qualityTestName).asString();
-      m_qualityTestDescription = value.get("qualityTestDescription", m_qualityTestDescription).asString();
-      m_monitorElementType = value.get("monitorElementType", m_monitorElementType).asString();
-      m_monitorElementName = value.get("monitorElementName", m_monitorElementName).asString();
-      m_monitorElementPath = value.get("monitorElementPath", m_monitorElementPath).asString();
-      m_message = value.get("message", m_message).asString();
-      m_quality = value.get("quality", m_quality).asFloat();
-      m_executed = value.get("executed", m_executed).asBool();
-      m_extraInfos = value.get("extra", m_extraInfos);
+      
+      m_qualityTestType = value.value<std::string>("qualityTestType", m_qualityTestType);
+      m_qualityTestName = value.value<std::string>("qualityTestName", m_qualityTestName);
+      m_qualityTestDescription = value.value<std::string>("qualityTestDescription", m_qualityTestDescription);
+      m_monitorElementType = value.value<std::string>("monitorElementType", m_monitorElementType);
+      m_monitorElementName = value.value<std::string>("monitorElementName", m_monitorElementName);
+      m_monitorElementPath = value.value<std::string>("monitorElementPath", m_monitorElementPath);
+      m_message = value.value<std::string>("message", m_message);
+      m_quality = value.value<float>("quality", m_quality);
+      m_executed = value.value<bool>("executed", m_executed);
+      m_extraInfos = value.value<json>("extra", m_extraInfos);
     }
 
     //-------------------------------------------------------------------------------------------------

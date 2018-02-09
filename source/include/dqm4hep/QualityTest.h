@@ -31,9 +31,7 @@
 // -- dqm4hep headers
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Internal.h>
-
-// -- json headers
-#include <json/json.h>
+#include <dqm4hep/json.h>
 
 // -- root headers
 #include <TObject.h>
@@ -66,13 +64,13 @@ namespace dqm4hep {
        * [toJson description]
        * @param value [description]
        */
-      void toJson(Json::Value &value) const;
+      void toJson(json &value) const;
 
       /**
        * [fromJson description]
        * @param value [description]
        */
-      void fromJson(const Json::Value &value);
+      void fromJson(const json &value);
 
     public:
       std::string           m_qualityTestName;
@@ -84,7 +82,7 @@ namespace dqm4hep {
       std::string           m_message;
       float                 m_quality;
       bool                  m_executed;
-      Json::Value           m_extraInfos;
+      json                  m_extraInfos;
     };
 
     //-------------------------------------------------------------------------------------------------
