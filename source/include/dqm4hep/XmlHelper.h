@@ -280,7 +280,10 @@ namespace dqm4hep {
     template <typename T, typename Validator>
     inline StatusCode XmlHelper::getAttribute(const TiXmlElement *const pXmlElement, const std::string &attributeName,
                                               T &attributeValue, Validator validator) {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute<T>(pXmlElement, attributeName, attributeValue));
+      const StatusCode statusCode(XmlHelper::getAttribute<T>(pXmlElement, attributeName, attributeValue));
+      
+      if(STATUS_CODE_SUCCESS != statusCode)
+        return statusCode;
 
       if (!validator(attributeValue))
         return STATUS_CODE_INVALID_PARAMETER;
@@ -337,7 +340,10 @@ namespace dqm4hep {
     template <typename T, typename Validator>
     inline StatusCode XmlHelper::readParameter(const TiXmlHandle &xmlHandle, const std::string &parameterName, T &t,
                                                Validator validator) {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, parameterName, t));
+     const StatusCode statusCode(XmlHelper::readParameter(xmlHandle, parameterName, t));
+     
+     if(STATUS_CODE_SUCCESS != statusCode)
+       return statusCode;
 
       if (!validator(t))
         return STATUS_CODE_INVALID_PARAMETER;
@@ -386,7 +392,11 @@ namespace dqm4hep {
     template <typename T, typename Validator>
     inline StatusCode XmlHelper::readParameters(const TiXmlHandle &xmlHandle, const std::string &parameterName,
                                                 std::vector<T> &vector, Validator validator) {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, parameterName, vector));
+      
+      const StatusCode statusCode(XmlHelper::readParameter(xmlHandle, parameterName, vector));
+      
+      if(STATUS_CODE_SUCCESS != statusCode)
+        return statusCode;
 
       if (!validator(vector))
         return STATUS_CODE_INVALID_PARAMETER;
