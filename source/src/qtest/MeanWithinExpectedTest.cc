@@ -54,7 +54,7 @@ namespace dqm4hep {
       MeanWithinExpectedTest(const std::string &name);
       ~MeanWithinExpectedTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
+      void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
 
     protected:
       float m_expectedMean;
@@ -102,12 +102,12 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
       TH1 *pHistogram = monitorElement->objectTo<TH1>();
 
       if (nullptr == pHistogram) {
         report.m_message = "ROOT monitor object is not a TH1 object !";
-        return STATUS_CODE_INVALID_PTR;
+        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
 
       const float mean(pHistogram->GetMean());
@@ -116,16 +116,14 @@ namespace dqm4hep {
       if (m_meanDeviationLower < mean && mean < m_meanDeviationUpper) {
         report.m_message =
             "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
-      } else {
+      } 
+      else {
         report.m_message =
             "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
       }
 
       const float chi = (mean - m_expectedMean) / range;
-      const float probability = TMath::Prob(chi * chi, 1);
-      report.m_quality = probability;
-
-      return STATUS_CODE_SUCCESS;
+      report.m_quality = TMath::Prob(chi * chi, 1);
     }
 
     DQM_PLUGIN_DECL(MeanWithinExpectedTestFactory, "MeanWithinExpectedTest");
