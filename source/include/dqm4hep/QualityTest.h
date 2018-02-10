@@ -223,6 +223,24 @@ namespace dqm4hep {
        */
       float errorLimit() const;
 
+      /**
+       *  @brief  Set the default warning and error limits
+       *  
+       *  @param  warning the warning limit
+       *  @param  error the error limit
+       */
+      static void setDefaultLimits(float warning, float error);
+      
+      /**
+       *  @brief  Get the default warning limit  
+       */
+      static float defaultWarningLimit();
+      
+      /**
+       *  @brief  Get the default error limit  
+       */
+      static float defaultErrorLimit();
+
     protected:
       /** Runs a quality test on the given monitor element and return a quality estimate
        */
@@ -241,10 +259,8 @@ namespace dqm4hep {
 
     protected:
       std::string m_description; ///< Quality test description
-
-    public:
-      static constexpr float defaultWarningLimit = {0.8};
-      static constexpr float defaultErrorLimit = {0.5};
+      static float m_defaultWarningLimit;
+      static float m_defaultErrorLimit;
     };
 
     //-------------------------------------------------------------------------------------------------

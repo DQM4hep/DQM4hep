@@ -283,12 +283,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
+    float QualityTest::m_defaultWarningLimit = 0.8;
+    float QualityTest::m_defaultErrorLimit = 0.5;
+    
+    //-------------------------------------------------------------------------------------------------
+
     QualityTest::QualityTest(const std::string &type, const std::string &name)
         : m_type(type),
           m_name(name),
           m_description(""),
-          m_warningLimit(defaultWarningLimit),
-          m_errorLimit(defaultErrorLimit) {
+          m_warningLimit(m_defaultWarningLimit),
+          m_errorLimit(m_defaultErrorLimit) {
       /* nop */
     }
 
@@ -384,6 +389,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void QualityTest::setLimits(float warning, float error) {
+      
       if (warning < 0.f || error > 1.f || warning < error) {
         dqm_error("QualityTest::setLimits: Wrong limits provided (warning = {0}, error = {1})!", warning, error);
         throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
@@ -403,6 +409,31 @@ namespace dqm4hep {
 
     float QualityTest::errorLimit() const {
       return m_errorLimit;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void QualityTest::setDefaultLimits(float warning, float error) {
+      
+      if (warning < 0.f || error > 1.f || warning < error) {
+        dqm_error("QualityTest::setDefaultLimits: Wrong limits provided (warning = {0}, error = {1})!", warning, error);
+        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+      }
+
+      QualityTest::m_defaultWarningLimit = warning;
+      QualityTest::m_defaultErrorLimit = error;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    float QualityTest::defaultWarningLimit() {
+      return m_defaultWarningLimit;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    float QualityTest::defaultErrorLimit() {
+      return m_defaultErrorLimit;
     }
 
     //-------------------------------------------------------------------------------------------------
