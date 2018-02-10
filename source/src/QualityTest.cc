@@ -42,7 +42,7 @@ namespace dqm4hep {
           m_monitorElementPath(""),
           m_message(""),
           m_quality(0.f),
-          m_executed(true),
+          m_qualityFlag(UNDEFINED),
           m_extraInfos() {
       /* nop */
     }
@@ -64,7 +64,7 @@ namespace dqm4hep {
       m_monitorElementPath = qreport.m_monitorElementPath;
       m_message = qreport.m_message;
       m_quality = qreport.m_quality;
-      m_executed = qreport.m_executed;
+      m_qualityFlag = qreport.m_qualityFlag;
       m_extraInfos = qreport.m_extraInfos;
 
       return *this;
@@ -81,7 +81,7 @@ namespace dqm4hep {
                {"monitorElementPath", m_monitorElementPath},
                {"message", m_message},
                {"quality", m_quality},
-               {"executed", m_executed},
+               {"flag", m_qualityFlag},
                {"extra", m_extraInfos}};
     }
 
@@ -97,7 +97,7 @@ namespace dqm4hep {
       m_monitorElementPath = value.value<std::string>("monitorElementPath", m_monitorElementPath);
       m_message = value.value<std::string>("message", m_message);
       m_quality = value.value<float>("quality", m_quality);
-      m_executed = value.value<bool>("executed", m_executed);
+      m_qualityFlag = value.value<QualityFlag>("flag", m_qualityFlag);
       m_extraInfos = value.value<json>("extra", m_extraInfos);
     }
 
@@ -324,20 +324,40 @@ namespace dqm4hep {
       if (nullptr == monitorElement) {
         report.m_message = "Couldn't run quality test: monitor element pointer is nullptr";
         report.m_quality = 0.f;
-        report.m_executed = false;
+        report.m_qualityFlag = INVALID;
         return;
       }
 
       if (nullptr == monitorElement->object()) {
         report.m_message = "Couldn't run quality test: ROOT monitor object is nullptr";
         report.m_quality = 0.f;
-        report.m_executed = false;
+        report.m_qualityFlag = INVALID;
+        return;
+      }
+      
+      if(!this->enoughStatistics(monitorElement)) {
+        report.m_message = "Couldn't run quality test: Not enough statistics !";
+        report.m_quality = 0.f;
+        report.m_qualityFlag = INSUFFICENT_STAT;
         return;
       }
 
       try {
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->userRun(monitorElement, report));
-        report.m_executed = true;
+        this->userRun(monitorElement, report);
+        
+        if(report.m_quality >= 0.f && report.m_quality < this->errorLimit()) {
+          report.m_qualityFlag = ERROR;
+        }
+        else if(report.m_quality >= this->errorLimit() && report.m_quality < this->warningLimit()) {
+          report.m_qualityFlag = WARNING;
+        }
+        else if(report.m_quality >= this->warningLimit() && report.m_quality <= 1.f) {
+          report.m_qualityFlag = SUCCESS;
+        }
+        else {
+          report.m_message = "Quality value (" + typeToString(report.m_quality) + ") is out range !";
+          throw StatusCodeException(STATUS_CODE_OUT_OF_RANGE);
+        }
       } catch (StatusCodeException &exception) {
         const std::string message("Caught StatusCodeException while run QTest: " + exception.toString());
 
@@ -347,7 +367,7 @@ namespace dqm4hep {
           report.m_message = message;
 
         report.m_quality = 0.f;
-        report.m_executed = false;
+        report.m_qualityFlag = INVALID;
       } catch (...) {
         const std::string message("Caught unknown exception while run QTest");
 
@@ -357,7 +377,7 @@ namespace dqm4hep {
           report.m_message = message;
 
         report.m_quality = 0.f;
-        report.m_executed = false;
+        report.m_qualityFlag = INVALID;
       }
     }
 
@@ -396,7 +416,7 @@ namespace dqm4hep {
       report.m_monitorElementPath = monitorElement ? monitorElement->path() : "";
       report.m_quality = 0.f;
       report.m_message = "";
-      report.m_executed = false;
+      report.m_qualityFlag = UNDEFINED;
       report.m_extraInfos.clear();
     }
   }

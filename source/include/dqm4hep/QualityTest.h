@@ -40,6 +40,15 @@ namespace dqm4hep {
   namespace core {
 
     class TiXmlHandle;
+    
+    enum QualityFlag {
+      UNDEFINED,
+      INVALID,
+      INSUFFICENT_STAT,
+      SUCCESS,
+      WARNING,
+      ERROR
+    };
 
     /** QualityTestReport class
      *  Hanlde the result of a quality test
@@ -78,8 +87,8 @@ namespace dqm4hep {
       std::string m_monitorElementType;
       std::string m_monitorElementPath;
       std::string m_message;
+      QualityFlag m_qualityFlag;
       float m_quality;
-      bool m_executed;
       json m_extraInfos;
     };
 
@@ -187,6 +196,13 @@ namespace dqm4hep {
       /** Initialize the quality test.
        */
       virtual StatusCode init();
+      
+      /**
+       *  @brief  Whether the monitor element has enough statistics to perform the qtest
+       *
+       *  @param  monitorElement the monitor element to check
+       */
+      virtual bool enoughStatistics(MonitorElementPtr monitorElement) const;
 
       /**
        *  @brief  Set the warning and error limits on quality test result.
@@ -208,9 +224,9 @@ namespace dqm4hep {
       float errorLimit() const;
 
     protected:
-      /** Runs a quality test on the given monitor element
+      /** Runs a quality test on the given monitor element and return a quality estimate
        */
-      virtual StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) = 0;
+      virtual void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) = 0;
 
       /** Fill basic info in the qtest report.
        *  Must be called at start of qtest run
@@ -252,6 +268,12 @@ namespace dqm4hep {
 
     inline StatusCode QualityTest::init() {
       return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    inline bool QualityTest::enoughStatistics(MonitorElementPtr /*monitorElement*/) const {
+      return true;
     }
 
     //-------------------------------------------------------------------------------------------------
