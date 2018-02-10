@@ -51,59 +51,116 @@
 using namespace std;
 using namespace dqm4hep::core;
 
-const std::string underline("\033[4m");
-const std::string redBck("\033[41m");
-const std::string red("\033[31m");
-const std::string green("\033[32m");
-const std::string yellow("\033[33m");
-const std::string cyan("\033[36m");
-const std::string magenta("\033[35m");
-const std::string white("\033[37m");
-const std::string blue("\033[34m");
-const std::string bold("\033[1m");
-const std::string reset("\033[0m");
+namespace colors {
+  const std::string underline("\033[4m");
+  const std::string redBck("\033[41m");
+  const std::string red("\033[31m");
+  const std::string green("\033[32m");
+  const std::string yellow("\033[33m");
+  const std::string cyan("\033[36m");
+  const std::string magenta("\033[35m");
+  const std::string white("\033[37m");
+  const std::string blue("\033[34m");
+  const std::string bold("\033[1m");
+  const std::string reset("\033[0m");
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+void printQReport(const QReport &report) {
+  std::string status, headColor, color;
+  
+  switch(report.m_qualityFlag) {
+    case UNDEFINED: 
+      status = "UNDEFINED"; 
+      headColor = colors::redBck+colors::white; 
+      break;
+    case INVALID: 
+      status = "INVALID"; 
+      headColor = colors::redBck+colors::white; 
+      color = colors::red; 
+      break;
+    case INSUFFICENT_STAT: 
+      status = "INSUF_STAT"; 
+      color = colors::magenta; 
+      break;
+    case SUCCESS: 
+      status = "SUCCESS"; 
+      color = colors::blue; 
+      break;
+    case WARNING: 
+      status = "WARNING"; 
+      color = colors::yellow; 
+      break;
+    case ERROR: 
+      status = "ERROR"; 
+      color = colors::red; 
+      break;
+    default: 
+      throw StatusCodeException(STATUS_CODE_FAILURE);    
+  }
+  
+  std::cout << headColor << setw(40) << std::left << report.m_monitorElementName << setw(30) << std::left
+            << report.m_qualityTestName << color << setw(10) << std::left << status << color << setw(10)
+            << std::left << report.m_quality << colors::reset << report.m_message << std::endl;
+}
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
   TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
 
-  TCLAP::ValueArg<std::string> qtestFileArg("i", "input-qtest-file", "The qtest input file", true, "", "string");
+  TCLAP::ValueArg<std::string> qtestFileArg(
+    "i", 
+    "input-qtest-file", 
+    "The qtest input file", 
+    true, 
+    "", 
+    "string");
   pCommandLine->add(qtestFileArg);
 
-  TCLAP::ValueArg<std::string> rootFileArg("r", "input-root-file", "The root input file", true, "", "string");
+  TCLAP::ValueArg<std::string> rootFileArg(
+    "r", 
+    "input-root-file", 
+    "The root input file", 
+    true, 
+    "", 
+    "string");
   pCommandLine->add(rootFileArg);
 
-  TCLAP::ValueArg<float> lowerQualityLimitArg("l", "lower-qlimit", "Filter qtest output with quality > limit", false,
-                                              0.f, "float");
-  pCommandLine->add(lowerQualityLimitArg);
-
-  TCLAP::ValueArg<float> upperQualityLimitArg("u", "upper-qlimit", "Filter qtest output with quality < limit", false,
-                                              1.f, "float");
-  pCommandLine->add(upperQualityLimitArg);
-
-  TCLAP::ValueArg<std::string> qualityThresholdsArg(
-      "t", "quality-thresolds",
-      "The quality thresholds to apply to get 'good' / 'moderate' / 'bad' qualities (default 0.5:0.8).", false,
-      "0.5:0.8", "string");
-  pCommandLine->add(qualityThresholdsArg);
-
   TCLAP::ValueArg<std::string> outputJsonFileArg(
-      "o", "output-json", "The json output file to store the quality test reports", false, "", "string");
+    "o", 
+    "output-json", 
+    "The json output file to store the quality test reports", 
+    false, 
+    "", 
+    "string");
   pCommandLine->add(outputJsonFileArg);
 
   StringVector verbosities(Logger::logLevels());
   TCLAP::ValuesConstraint<std::string> verbosityConstraint(verbosities);
-  TCLAP::ValueArg<std::string> verbosityArg("v", "verbosity", "The logging verbosity", false, "info",
-                                            &verbosityConstraint);
+  TCLAP::ValueArg<std::string> verbosityArg(
+    "v", 
+    "verbosity", 
+    "The logging verbosity", 
+    false, 
+    "info",
+    &verbosityConstraint);
   pCommandLine->add(verbosityArg);
 
   StringVector qualityExits({"ignore", "failure", "warning", "error"});
   std::map<std::string, unsigned int> qualityExitMap({{"ignore", 0}, {"failure", 1}, {"warning", 2}, {"error", 3}});
   TCLAP::ValuesConstraint<std::string> qualityExitsConstraint(qualityExits);
   TCLAP::ValueArg<std::string> qualityExitArg(
-      "e", "exit-on",
-      "Returns 1 at end qtest if at least on of the qtest has a quality lower than the 'warning' or 'error' thresholds",
-      false, "ignore", &qualityExitsConstraint);
+    "e", 
+    "exit-on",
+    "Returns -1 at end qtest if at least on of the qtest shows errors, warnings or anything not successful",
+    false, 
+    "ignore", 
+    &qualityExitsConstraint);
   pCommandLine->add(qualityExitArg);
 
   // parse command line
@@ -112,29 +169,6 @@ int main(int argc, char *argv[]) {
   Logger::setLogLevel(Logger::logLevelFromString(verbosityArg.getValue()));
 
   const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
-
-  StringVector qthresholds;
-  tokenize(qualityThresholdsArg.getValue(), qthresholds, ":");
-
-  if (qthresholds.size() != 2) {
-    dqm_error("Wrong quality thresholds syntax. Excepted 'number:number' !");
-    return STATUS_CODE_FAILURE;
-  }
-
-  float qLimit1(0.), qLimit2(0.);
-
-  if (!stringToType(qthresholds.at(0), qLimit1) || !stringToType(qthresholds.at(1), qLimit2)) {
-    dqm_error("Wrong quality thresholds syntax. Excepted 'number:number' !");
-    return STATUS_CODE_FAILURE;
-  }
-
-  if (qLimit1 < 0 || qLimit2 < 0 || qLimit1 > 1.f || qLimit1 > 1.f) {
-    dqm_error("Wrong quality thresholds. Excepted numbers between 0 and 1 !");
-    return STATUS_CODE_FAILURE;
-  }
-
-  if (qLimit1 > qLimit2)
-    std::swap(qLimit1, qLimit2);
 
   try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
@@ -236,70 +270,54 @@ int main(int argc, char *argv[]) {
   }
 
   const QReportContainer &reports(reportStorage.reports());
-
-  json jsonRoot, jsonMetadata, jsonQReports;
-  std::string date;
-  timeToHMS(time(nullptr), date);
-  StringMap hostInfos;
-  fillHostInfo(hostInfos);
-
-  jsonMetadata["host"] = hostInfos;
-  jsonMetadata["date"] = date;
-  jsonRoot["meta"] = jsonMetadata;
-
-  unsigned int jsonIndex(0);
   bool returnFailure(false);
 
-  std::cout << bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left
+  // Print the quality reports in shell
+  std::cout << colors::bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left
             << "STATUS" << setw(10) << std::left << "QUALITY"
-            << "MESSAGE" << reset << std::endl;
+            << "MESSAGE" << colors::reset << std::endl;
 
   for (const auto &iter : reports) {
     for (const auto &iter2 : iter.second) {
-      json jsonQReport;
-      iter2.second.toJson(jsonQReport);
-      jsonQReports[jsonIndex] = jsonQReport;
-      jsonIndex++;
+      
+      printQReport(iter2.second);
+      auto flag = iter2.second.m_qualityFlag;
 
-      if (!iter2.second.m_executed) {
-        std::cout << redBck << white << setw(40) << std::left << iter.first.second << setw(30) << std::left
-                  << iter2.second.m_qualityTestName << setw(10) << std::left << "FAIL" << setw(10) << std::left
-                  << "none" << iter2.second.m_message << reset << std::endl;
-
-        if (qualityExit >= 1)
-          returnFailure = true;
-      } else {
-        const float quality(iter2.second.m_quality);
-
-        if (quality < lowerQualityLimitArg.getValue() || quality > upperQualityLimitArg.getValue())
-          continue;
-
-        if (quality < qLimit1) {
-          if (qualityExit >= 3)
-            returnFailure = true;
-
-          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left
-                    << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << red << setw(10)
-                    << std::left << quality << reset << iter2.second.m_message << std::endl;
-        } else if (qLimit1 <= quality && quality < qLimit2) {
-          if (qualityExit >= 2)
-            returnFailure = true;
-
-          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left
-                    << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << yellow
-                    << setw(10) << std::left << quality << reset << iter2.second.m_message << std::endl;
-        } else {
-          std::cout << setw(40) << std::left << iter.first.second << setw(30) << std::left
-                    << iter2.second.m_qualityTestName << blue << setw(10) << std::left << "SUCCESS" << blue << setw(10)
-                    << std::left << quality << reset << iter2.second.m_message << std::endl;
-        }
+      if ( (flag == INVALID || flag == UNDEFINED || flag == INSUFFICENT_STAT) && (qualityExit >= 1) ) {
+        returnFailure = true;
+      } 
+      else if(flag == ERROR && qualityExit >= 3) {
+        returnFailure = true;
+      } 
+      else if(flag == WARNING && qualityExit >= 2) {
+        returnFailure = true;
       }
     }
   }
 
-  jsonRoot["qreports"] = jsonQReports;
-
+  // Save quality reports in a json file
   if (outputJsonFileArg.isSet()) {
+    
+    json jsonRoot, jsonMetadata, jsonQReports;
+    std::string date;
+    timeToHMS(time(nullptr), date);
+    StringMap hostInfos;
+    fillHostInfo(hostInfos);
+
+    jsonMetadata["host"] = hostInfos;
+    jsonMetadata["date"] = date;
+    jsonRoot["meta"] = jsonMetadata;
+    
+    for (const auto &iter : reports) {
+      for (const auto &iter2 : iter.second) {
+        json jsonQReport;
+        iter2.second.toJson(jsonQReport);
+        jsonQReports.push_back(jsonQReport);
+      }
+    }
+    
+    jsonRoot["qreports"] = jsonQReports;
+      
     std::ofstream jsonFile;
     jsonFile.open(outputJsonFileArg.getValue().c_str());
     jsonFile << jsonRoot.dump(2);
@@ -307,8 +325,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (returnFailure) {
-    dqm_warning("Option --return-on {0} was given => return 1 !", qualityExitArg.getValue());
-    return 1;
+    dqm_warning("Option --return-on {0} was given => return -1 !", qualityExitArg.getValue());
+    return -1;
   }
 
   return 0;
