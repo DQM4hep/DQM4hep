@@ -364,6 +364,14 @@ namespace dqm4hep {
       std::string name, type;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
+      
+      float warningLimit(QualityTest::defaultWarningLimit), errorLimit(QualityTest::defaultWarningLimit);
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "error", errorLimit, [](const float &value){
+        return (value >= 0.f && value < 1.f);
+      }));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "warning", warningLimit, [&errorLimit](const float &value){
+        return (value >=0.f && value > errorLimit && value <= 1.f);
+      }));
 
       auto findIter = m_qualityTestMap.find(name);
 
@@ -377,6 +385,7 @@ namespace dqm4hep {
 
       QualityTestPtr qualityTest = findFactoryIter->second->createQualityTest(name);
 
+      qualityTest->setLimits(warningLimit, errorLimit);
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qualityTest->readSettings(TiXmlHandle(pXmlElement)));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qualityTest->init());
 
