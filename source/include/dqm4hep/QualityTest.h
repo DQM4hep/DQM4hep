@@ -153,6 +153,13 @@ namespace dqm4hep {
       /** Clear all contents
        */
       void clear();
+      
+      /**
+       *  @brief  Write contents to a json file
+       *  
+       *  @param  fname the file name
+       */
+      void write(const std::string &fname);
 
     private:
       QReportContainer m_reports;
@@ -222,14 +229,6 @@ namespace dqm4hep {
        *  @brief  Get the error limit
        */
       float errorLimit() const;
-
-      /**
-       *  @brief  Set the default warning and error limits
-       *  
-       *  @param  warning the warning limit
-       *  @param  error the error limit
-       */
-      static void setDefaultLimits(float warning, float error);
       
       /**
        *  @brief  Get the default warning limit  

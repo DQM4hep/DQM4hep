@@ -279,6 +279,36 @@ namespace dqm4hep {
     void QReportStorage::clear() {
       m_reports.clear();
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void QReportStorage::write(const std::string &fname) {
+      
+      json jsonRoot, jsonMetadata, jsonQReports;
+      std::string date;
+      timeToHMS(time(nullptr), date);
+      StringMap hostInfos;
+      fillHostInfo(hostInfos);
+
+      jsonMetadata["host"] = hostInfos;
+      jsonMetadata["date"] = date;
+      jsonRoot["meta"] = jsonMetadata;
+      
+      for (const auto &iter : m_reports) {
+        for (const auto &iter2 : iter.second) {
+          json jsonQReport;
+          iter2.second.toJson(jsonQReport);
+          jsonQReports.push_back(jsonQReport);
+        }
+      }
+      
+      jsonRoot["qreports"] = jsonQReports;
+        
+      std::ofstream jsonFile;
+      jsonFile.open(fname.c_str());
+      jsonFile << jsonRoot.dump(2);
+      jsonFile.close();
+    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
@@ -409,19 +439,6 @@ namespace dqm4hep {
 
     float QualityTest::errorLimit() const {
       return m_errorLimit;
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    void QualityTest::setDefaultLimits(float warning, float error) {
-      
-      if (warning < 0.f || error > 1.f || warning < error) {
-        dqm_error("QualityTest::setDefaultLimits: Wrong limits provided (warning = {0}, error = {1})!", warning, error);
-        throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
-      }
-
-      QualityTest::m_defaultWarningLimit = warning;
-      QualityTest::m_defaultErrorLimit = error;
     }
     
     //-------------------------------------------------------------------------------------------------
