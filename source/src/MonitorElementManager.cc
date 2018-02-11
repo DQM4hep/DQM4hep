@@ -230,7 +230,13 @@ namespace dqm4hep {
 
       const bool objectStat(TObject::GetObjectStat());
       TObject::SetObjectStat(false);
-      TObject *pTObject = pTFile->Get(fullName.getPath().c_str());
+      TObject *pTObject = nullptr;
+      // FIXME : bad handling of path in root path
+      if (path == "/")
+        pTObject = (TObject *)pTFile->Get(name.c_str());
+      else
+        pTObject = (TObject *)pTFile->Get(fullName.getPath().c_str());
+        
       TObject::SetObjectStat(objectStat);
 
       if (pTObject == nullptr)
@@ -302,6 +308,50 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests) {
+
+      if(nullptr == pTFile) {
+        dqm_error( "MonitorElementManager::readMonitorElements: Invalid TFile pointer !" );
+        return STATUS_CODE_INVALID_PARAMETER;
+      }
+      
+      if(nullptr == pXmlElement) {
+        dqm_error( "MonitorElementManager::readMonitorElements: Invalid xml element !" );
+        return STATUS_CODE_INVALID_PARAMETER;
+      }
+      
+      for (TiXmlElement *meElt = pXmlElement->FirstChildElement("monitorElement"); meElt != nullptr; meElt = meElt->NextSiblingElement("monitorElement")) {
+        
+        std::string path, name, reference;
+        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "path", path));
+        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "reference", reference));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
+
+        // read element from root file
+        MonitorElementPtr monitorElement;
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->readMonitorElement(pTFile, path, name, monitorElement));
+
+        // read reference element if any
+        if (!reference.empty()) {
+          dqm_debug("Monitor element '{0}' read, reference file '{1}'", name, reference);
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->attachReference(monitorElement, reference));
+        }
+        
+        // attach quality tests if option set
+        if(readQTests) {
+          for (TiXmlElement *qtest = meElt->FirstChildElement("qtest"); qtest != nullptr; qtest = qtest->NextSiblingElement("qtest")) {
+            std::string qTestName;
+            THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));
+            THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->addQualityTest(path, name, qTestName));
+          }          
+        }
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
@@ -360,15 +410,43 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::createQualityTest(TiXmlElement *const pXmlElement) {
+    StatusCode MonitorElementManager::createQualityTests(TiXmlElement *const pXmlElement) {
+      
+      if (nullptr == pXmlElement) {
+        dqm_error("MonitorElementManager::createQualityTests: invalid xml element!");
+        return STATUS_CODE_INVALID_PTR;
+      }
+      
+      float warningLimit(QualityTest::defaultWarningLimit()), errorLimit(QualityTest::defaultWarningLimit());
+      
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "error", errorLimit, [](const float &value){
+        return (value >= 0.f && value < 1.f);
+      }));
+      
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "warning", warningLimit, [&errorLimit](const float &value){
+        return (value >=0.f && value > errorLimit && value <= 1.f);
+      }));
+      
+      for (TiXmlElement *qtest = pXmlElement->FirstChildElement("qtest"); qtest != nullptr; qtest = qtest->NextSiblingElement("qtest")) {
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->createQualityTest(qtest, warningLimit, errorLimit));
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElementManager::createQualityTest(TiXmlElement *const pXmlElement, float warning, float error) {
       std::string name, type;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
       
-      float warningLimit(QualityTest::defaultWarningLimit), errorLimit(QualityTest::defaultWarningLimit);
+      float warningLimit(warning), errorLimit(error);
+      
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "error", errorLimit, [](const float &value){
         return (value >= 0.f && value < 1.f);
       }));
+      
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "warning", warningLimit, [&errorLimit](const float &value){
         return (value >=0.f && value > errorLimit && value <= 1.f);
       }));

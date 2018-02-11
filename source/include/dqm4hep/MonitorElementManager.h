@@ -224,6 +224,15 @@ namespace dqm4hep {
        * @param  fileName        the root file name contaning the reference
        */
       StatusCode attachReference(MonitorElementPtr monitorElement, const std::string &fileName);
+      
+      /**
+       *  @brief  Read monitor element described by the xml element from a root file
+       *
+       *  @param  pTFile the root file
+       *  @param  pXmlElement the xml element describing the objects to read
+       *  @param  readQTests whether to associate qtest to monitor elements
+       */
+      StatusCode readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests = true);
 
     public:
       ///////////////////////
@@ -256,10 +265,14 @@ namespace dqm4hep {
       // QUALITY TEST INTERFACE //
       ////////////////////////////
 
+      /** Create quality tests from the xml element.
+       */
+      StatusCode createQualityTests(TiXmlElement *const pXmlElement);      
+      
       /** Create a quality test from the xml element.
        *  The xml element must contain the attribute 'type' and 'name'
        */
-      StatusCode createQualityTest(TiXmlElement *const pXmlElement);
+      StatusCode createQualityTest(TiXmlElement *const pXmlElement, float warning = QualityTest::defaultWarningLimit(), float error = QualityTest::defaultErrorLimit());
 
       /** Add a (already created) quality test to the monitor element
        */
