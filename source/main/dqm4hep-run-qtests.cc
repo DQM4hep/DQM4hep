@@ -70,6 +70,7 @@ namespace colors {
 
 void printQReport(const QReport &report) {
   std::string status, headColor, color;
+  static bool firstPrint(true);
   
   switch(report.m_qualityFlag) {
     case UNDEFINED: 
@@ -100,6 +101,12 @@ void printQReport(const QReport &report) {
     default: 
       throw StatusCodeException(STATUS_CODE_FAILURE);    
   }
+  
+  if(firstPrint) {
+    std::cout << colors::bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left << "STATUS" << setw(10) << std::left << "QUALITY" << "MESSAGE" << colors::reset << std::endl;
+    firstPrint = false;
+  }
+
   
   std::cout << headColor << setw(40) << std::left << report.m_monitorElementName << setw(30) << std::left
             << report.m_qualityTestName << color << setw(10) << std::left << status << color << setw(10)
@@ -162,166 +169,84 @@ int main(int argc, char *argv[]) {
     "ignore", 
     &qualityExitsConstraint);
   pCommandLine->add(qualityExitArg);
+  
+  StringVector qualityFlags({"undefined", "invalid", "insuf_stat", "success", "warning", "error"});
+  std::map<std::string, unsigned int> qualityFlagMap({{"undefined", UNDEFINED}, {"invalid", INVALID}, {"insuf_stat", INSUFFICENT_STAT}, {"success", SUCCESS}, {"warning", WARNING}, {"error", ERROR}});
+  TCLAP::ValuesConstraint<std::string> qualityFlagsConstraint(qualityFlags);
+  TCLAP::ValueArg<std::string> qualityFlagArg(
+    "p", 
+    "print-only",
+    "Print only the quality reports of the given flag",
+    false, 
+    "", 
+    &qualityFlagsConstraint);
+  pCommandLine->add(qualityFlagArg);
 
   // parse command line
   pCommandLine->parse(argc, argv);
 
   Logger::setLogLevel(Logger::logLevelFromString(verbosityArg.getValue()));
-
-  const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
-
-  try {
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
-  } catch (StatusCodeException &e) {
-    dqm_error("While loading libraries : Caught {0}", e.toString());
-    return e.getStatusCode();
-  } catch (...) {
-    dqm_error("While loading libraries : Caught unknown error");
-    return 1;
-  }
-
-  const std::string qtestFile(qtestFileArg.getValue());
-  const std::string rootFileName(rootFileArg.getValue());
-
-  XMLParser parser;
-
-  try {
-    parser.parse(qtestFile);
-  } catch (StatusCodeException &e) {
-    dqm_error("While reading qtest file : Caught {0}", e.toString());
-    return e.getStatusCode();
-  }
-
-  TiXmlDocument &document(parser.document());
-  StringMap constants;
-  TiXmlElement *rootElement = document.RootElement();
-  TiXmlElement *qTestsElement = rootElement->FirstChildElement("qtests");
-
-  if (qTestsElement == nullptr) {
-    dqm_error("No <qtests> element found in input qtest file '{0}' !", qtestFile);
-    return STATUS_CODE_NOT_FOUND;
-  }
-
-  std::unique_ptr<MonitorElementManager> monitorElementMgr(new MonitorElementManager());
-  std::unique_ptr<TFile> rootFile(new TFile(rootFileName.c_str(), "READ"));
-
-  try {
-    for (TiXmlElement *qtest = qTestsElement->FirstChildElement("qtest"); qtest != nullptr;
-         qtest = qtest->NextSiblingElement("qtest")) {
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTest(qtest));
-    }
-  } catch (StatusCodeException &e) {
-    dqm_error("While creating qtest : Caught {0}", e.toString());
-    return e.getStatusCode();
-  }
-
-  try {
-    for (TiXmlElement *meElt = rootElement->FirstChildElement("monitorElement"); meElt != nullptr;
-         meElt = meElt->NextSiblingElement("monitorElement")) {
-      std::string path, name, reference;
-      THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
-                             XmlHelper::getAttribute(meElt, "path", path));
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
-      THROW_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=,
-                             XmlHelper::getAttribute(meElt, "reference", reference));
-
-      TObject *pTObject(nullptr);
-      Path fullName(path);
-      fullName += name;
-
-      // FIXME : bad handling of path in root path
-      if (path == "/")
-        pTObject = (TObject *)rootFile->Get(name.c_str());
-      else
-        pTObject = (TObject *)rootFile->Get(fullName.getPath().c_str());
-
-      if (pTObject == nullptr) {
-        dqm_error("TObject '{0}' in file '{0}' no found !", fullName.getPath(), rootFileName);
-        throw StatusCodeException(STATUS_CODE_NOT_FOUND);
-      }
-
-      MonitorElementPtr monitorElement;
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->handleMonitorElement(path, pTObject, monitorElement));
-
-      if (!reference.empty()) {
-        dqm_debug("Monitor element '{0}' read, reference file '{1}'", name, reference);
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->attachReference(monitorElement, reference));
-      }
-
-      for (TiXmlElement *qtest = meElt->FirstChildElement("qtest"); qtest != nullptr;
-           qtest = qtest->NextSiblingElement("qtest")) {
-        std::string qTestName;
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->addQualityTest(path, name, qTestName));
-      }
-    }
-  } catch (StatusCodeException &e) {
-    dqm_error("While creating monitor elements : Caught {0}", e.toString());
-    return e.getStatusCode();
-  }
-
-  QReportStorage reportStorage;
-
-  try {
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->runQualityTests(reportStorage));
-  } catch (StatusCodeException &e) {
-    dqm_error("While processing quality tests : Caught {0}", e.toString());
-    return e.getStatusCode();
-  }
-
-  const QReportContainer &reports(reportStorage.reports());
   bool returnFailure(false);
-
-  // Print the quality reports in shell
-  std::cout << colors::bold << setw(40) << std::left << "NAME" << setw(30) << std::left << "QTEST" << setw(10) << std::left
-            << "STATUS" << setw(10) << std::left << "QUALITY"
-            << "MESSAGE" << colors::reset << std::endl;
-
-  for (const auto &iter : reports) {
-    for (const auto &iter2 : iter.second) {
       
-      printQReport(iter2.second);
-      auto flag = iter2.second.m_qualityFlag;
+  try {
+    // load shared libraries, mainly to get custom quality tests
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
+    
+    // parse xml file
+    XMLParser parser;
+    parser.parse(qtestFileArg.getValue());
+    
+    TiXmlDocument &document(parser.document());
+    StringMap constants;
+    TiXmlElement *rootElement = document.RootElement();
+    TiXmlElement *qtestsElement = rootElement->FirstChildElement("qtests");
+    
+    std::unique_ptr<MonitorElementManager> monitorElementMgr(new MonitorElementManager());
+    std::unique_ptr<TFile> rootFile(new TFile(rootFileArg.getValue().c_str(), "READ"));
+    
+    // create, configure and run quality tests
+    QReportStorage reportStorage;
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTests(qtestsElement));
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->readMonitorElements(rootFile.get(), rootElement, true));
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->runQualityTests(reportStorage));
+    
+    const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
+    const int qualityFlag(qualityFlagArg.isSet() ? qualityFlagMap.find(qualityFlagArg.getValue())->second : -1);
+    
+    // Print the quality reports in shell        
+    for (const auto &iter : reportStorage.reports()) {
+      for (const auto &iter2 : iter.second) {
 
-      if ( (flag == INVALID || flag == UNDEFINED || flag == INSUFFICENT_STAT) && (qualityExit >= 1) ) {
-        returnFailure = true;
-      } 
-      else if(flag == ERROR && qualityExit >= 3) {
-        returnFailure = true;
-      } 
-      else if(flag == WARNING && qualityExit >= 2) {
-        returnFailure = true;
+        auto flag = iter2.second.m_qualityFlag;
+        
+        if(qualityFlag < 0 || qualityFlag == flag) {
+          printQReport(iter2.second);          
+        }
+
+        if ( (flag == INVALID || flag == UNDEFINED || flag == INSUFFICENT_STAT) && (qualityExit >= 1) ) {
+          returnFailure = true;
+        } 
+        else if(flag == ERROR && qualityExit >= 3) {
+          returnFailure = true;
+        } 
+        else if(flag == WARNING && qualityExit >= 2) {
+          returnFailure = true;
+        }
       }
+    }
+    
+    // Save quality reports in a json file
+    if (outputJsonFileArg.isSet()) {
+      reportStorage.write(outputJsonFileArg.getValue());
     }
   }
-
-  // Save quality reports in a json file
-  if (outputJsonFileArg.isSet()) {
-    
-    json jsonRoot, jsonMetadata, jsonQReports;
-    std::string date;
-    timeToHMS(time(nullptr), date);
-    StringMap hostInfos;
-    fillHostInfo(hostInfos);
-
-    jsonMetadata["host"] = hostInfos;
-    jsonMetadata["date"] = date;
-    jsonRoot["meta"] = jsonMetadata;
-    
-    for (const auto &iter : reports) {
-      for (const auto &iter2 : iter.second) {
-        json jsonQReport;
-        iter2.second.toJson(jsonQReport);
-        jsonQReports.push_back(jsonQReport);
-      }
-    }
-    
-    jsonRoot["qreports"] = jsonQReports;
-      
-    std::ofstream jsonFile;
-    jsonFile.open(outputJsonFileArg.getValue().c_str());
-    jsonFile << jsonRoot.dump(2);
-    jsonFile.close();
+  catch (StatusCodeException &e) {
+    dqm_error("Caught status code exception: {0}", e.toString());
+    return e.getStatusCode();
+  } 
+  catch (...) {
+    dqm_error("Caught unknown exception ...");
+    return 1;
   }
 
   if (returnFailure) {
