@@ -181,6 +181,20 @@ int main(int argc, char *argv[]) {
     "", 
     &qualityFlagsConstraint);
   pCommandLine->add(qualityFlagArg);
+  
+  TCLAP::SwitchArg writeMonitorElementArg(
+    "w", 
+    "write-monitor-elements",
+    "If set, the monitor elements will also be written in the qreport (if option set)",
+    false);
+  pCommandLine->add(writeMonitorElementArg);
+  
+  TCLAP::SwitchArg compressArg(
+    "c", 
+    "compress-json",
+    "If set, the json in the qreport output file will not beautified",
+    false);
+  pCommandLine->add(compressArg);
 
   // parse command line
   pCommandLine->parse(argc, argv);
@@ -237,7 +251,38 @@ int main(int argc, char *argv[]) {
     
     // Save quality reports in a json file
     if (outputJsonFileArg.isSet()) {
-      reportStorage.write(outputJsonFileArg.getValue());
+      json root(nullptr), qreport(nullptr), metadata(nullptr), elements(nullptr);
+      std::string date;
+      timeToHMS(time(nullptr), date);
+      StringMap hostInfos;
+      fillHostInfo(hostInfos);
+
+      // write metadata
+      metadata["host"] = hostInfos;
+      metadata["date"] = date;
+      root["meta"] = metadata;
+      
+      // write qreports
+      reportStorage.toJson(qreport);
+      root["qreports"] = qreport;
+      
+      // write monitor elements
+      if(writeMonitorElementArg.getValue()) {
+        monitorElementMgr->monitorElementsToJson(elements);
+      }
+      root["elements"] = elements;
+      
+      ofstream ofile;
+      ofile.open(outputJsonFileArg.getValue());
+      
+      if(compressArg.getValue()) {
+        ofile << root.dump();
+      }
+      else {
+        ofile << root.dump(2);
+      }
+
+      ofile.close();
     }
   }
   catch (StatusCodeException &e) {
