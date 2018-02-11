@@ -34,6 +34,7 @@
 #include <TAxis.h>
 #include <TH1.h>
 #include <TPad.h>
+#include <TBufferJSON.h>
 
 templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicGraph)
 
@@ -209,6 +210,60 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
       m_referenceObject.clear();
       m_referenceObject.set(referenceObject.ptr(), false);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void MonitorElement::toJson(json &object) const {
+      
+      json jsonObject = nullptr, jsonReference = nullptr;
+      
+      if(nullptr != m_monitorObject) {
+        jsonObject = json::parse(TBufferJSON::ConvertToJSON(m_monitorObject.ptr(), 23).Data());
+      }
+      
+      if(nullptr != m_referenceObject) {
+        jsonReference = json::parse(TBufferJSON::ConvertToJSON(m_referenceObject.ptr(), 23).Data());
+      }
+
+      object = {
+        {"object", jsonObject},
+        {"reference", jsonReference},
+        {"path", m_path}
+      };
+    }
+  
+    //-------------------------------------------------------------------------------------------------
+    
+    // FIXME : ConvertFromJSON not yet available (ROOT 6.14 only)
+    // void MonitorElement::fromJson(const json &object) {
+    //   
+    //   // read object
+    //   m_monitorObject.clear();
+    //   auto jsonObject = object.value("object", json(nullptr));
+    //   
+    //   if(nullptr != jsonObject) {
+    //     TObject *pTObject = TBufferJSON::ConvertFromJSON(jsonObject.dump().c_str());
+    //     
+    //     if(nullptr != pTObject) {
+    //       m_monitorObject.set(pTObject, true);
+    //     }
+    //   }
+    //   
+    //   // read reference
+    //   m_referenceObject.clear();
+    //   auto jsonReference = object.value("reference", json(nullptr));
+    //   
+    //   if(nullptr != jsonReference) {
+    //     TObject *pTObject = TBufferJSON::ConvertFromJSON(jsonReference.dump().c_str());
+    //     
+    //     if(nullptr != pTObject) {
+    //       m_referenceObject.set(pTObject, true);
+    //     }
+    //   }
+    //   
+    //   // read path
+    //   m_path = object.value<std::string>("path", "");
+    // }
 
     //-------------------------------------------------------------------------------------------------
 

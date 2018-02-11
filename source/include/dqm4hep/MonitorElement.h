@@ -32,6 +32,7 @@
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/PtrHandler.h>
 #include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/json.h>
 
 // -- root headers
 #include <Rtypes.h>
@@ -148,6 +149,16 @@ namespace dqm4hep {
       /** Set the wrapped object and reference object (ptr handle)
        */
       void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
+      
+      /**
+       *  @brief  Convert the monitor element to json
+       *  
+       *  @param  object the json object to receive
+       */
+      void toJson(json &object) const;
+      
+      // FIXME : ConvertFromJSON not yet available (ROOT 6.14 only)
+      // void fromJson(const json &value);
 
     private:
       /** Constructor
