@@ -282,32 +282,14 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    void QReportStorage::write(const std::string &fname) {
-      
-      json jsonRoot, jsonMetadata, jsonQReports;
-      std::string date;
-      timeToHMS(time(nullptr), date);
-      StringMap hostInfos;
-      fillHostInfo(hostInfos);
-
-      jsonMetadata["host"] = hostInfos;
-      jsonMetadata["date"] = date;
-      jsonRoot["meta"] = jsonMetadata;
-      
+    void QReportStorage::toJson(json &object) const {      
       for (const auto &iter : m_reports) {
         for (const auto &iter2 : iter.second) {
           json jsonQReport;
           iter2.second.toJson(jsonQReport);
-          jsonQReports.push_back(jsonQReport);
+          object.push_back(jsonQReport);
         }
       }
-      
-      jsonRoot["qreports"] = jsonQReports;
-        
-      std::ofstream jsonFile;
-      jsonFile.open(fname.c_str());
-      jsonFile << jsonRoot.dump(2);
-      jsonFile.close();
     }
 
     //-------------------------------------------------------------------------------------------------

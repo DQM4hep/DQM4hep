@@ -155,11 +155,11 @@ namespace dqm4hep {
       void clear();
       
       /**
-       *  @brief  Write contents to a json file
+       *  @brief  Convert all stored reports to json format
        *  
-       *  @param  fname the file name
+       *  @param  object the json object to receive
        */
-      void write(const std::string &fname);
+      void toJson(json &object) const;
 
     private:
       QReportContainer m_reports;
