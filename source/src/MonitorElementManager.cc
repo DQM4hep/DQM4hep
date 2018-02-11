@@ -352,6 +352,17 @@ namespace dqm4hep {
       
       return STATUS_CODE_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void MonitorElementManager::monitorElementsToJson(json &object) const {
+      m_storage.iterate([&object](const MonitorElementDir &, MonitorElementPtr monitorElement) {
+        json meObject;
+        monitorElement->toJson(meObject);
+        object.push_back(meObject);
+        return true;
+      });
+    }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------

@@ -233,6 +233,13 @@ namespace dqm4hep {
        *  @param  readQTests whether to associate qtest to monitor elements
        */
       StatusCode readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests = true);
+      
+      /**
+       *  @brief  Write all monitor elements in the storage to json
+       *  
+       *  @param  object the json object to receive
+       */
+      void monitorElementsToJson(json &object) const;
 
     public:
       ///////////////////////
