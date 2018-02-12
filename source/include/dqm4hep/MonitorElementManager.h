@@ -41,6 +41,7 @@
 // -- root headers
 #include <TFile.h>
 #include <TObject.h>
+#include <TClass.h>
 
 class TH1F;
 class TH1I;
@@ -328,21 +329,21 @@ namespace dqm4hep {
 
       if (!ObjectType::Class()->HasDictionary()) {
         dqm_error("Couldn't book object of type '{0}', because this class has no dictionnary!",
-                  ObjectType::Class_name());
+                  ObjectType::Class_Name());
         return STATUS_CODE_NOT_ALLOWED;
       }
 
       if (ObjectType::Class()->IsForeign()) {
         dqm_error(
             "Couldn't book object of type '{0}', because this class is foreign (does not have a Streamer method))!",
-            ObjectType::Class_name());
+            ObjectType::Class_Name());
         return STATUS_CODE_NOT_ALLOWED;
       }
 
       if (!ObjectType::Class()->InheritsFrom("TNamed")) {
         dqm_error("Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call "
                   "SetName())!",
-                  ObjectType::Class_name());
+                  ObjectType::Class_Name());
         return STATUS_CODE_NOT_ALLOWED;
       }
 
@@ -352,7 +353,7 @@ namespace dqm4hep {
       TObject::SetObjectStat(objectStat);
 
       if (!pTObject) {
-        dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_name(),
+        dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_Name(),
                     path, name);
         return STATUS_CODE_FAILURE;
       }
