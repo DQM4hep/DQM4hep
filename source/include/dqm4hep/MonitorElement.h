@@ -266,6 +266,14 @@ namespace dqm4hep {
       /** Convert the scalar value to std::string
        */
       std::string ToString() const;
+      
+      /**
+       *  @brief  Whether the scalar is equal to an other one.
+       *          Compare only the value itself
+       *          
+       *  @param  other the other scalar object
+       */
+      Bool_t IsEqual(const TObject *other) const override;
 
     private:
       /** Initialize the scalar object (called only in C'tor)
@@ -337,20 +345,20 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    TScalarObject<T>::TScalarObject() {
+    inline TScalarObject<T>::TScalarObject() {
       Init();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    TScalarObject<T>::TScalarObject(const T &scalar) : m_scalar(scalar), m_pPaveText(nullptr) {
+    inline TScalarObject<T>::TScalarObject(const T &scalar) : m_scalar(scalar), m_pPaveText(nullptr) {
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    TScalarObject<T>::~TScalarObject() {
+    inline TScalarObject<T>::~TScalarObject() {
       if (nullptr != m_pPaveText) {
         delete m_pPaveText;
         m_pPaveText = nullptr;
@@ -360,7 +368,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Clear(Option_t *option) {
+    inline void TScalarObject<T>::Clear(Option_t *option) {
       if (nullptr != m_pPaveText)
         m_pPaveText->Clear(option);
 
@@ -370,7 +378,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Draw(Option_t *option) {
+    inline void TScalarObject<T>::Draw(Option_t *option) {
       std::string scalarStr = ToString();
 
       if (nullptr == m_pPaveText) {
@@ -389,21 +397,21 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Set(const T &value) {
+    inline void TScalarObject<T>::Set(const T &value) {
       m_scalar = value;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    const T &TScalarObject<T>::Get() const {
+    inline const T &TScalarObject<T>::Get() const {
       return m_scalar;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    std::string TScalarObject<T>::ToString() const {
+    inline std::string TScalarObject<T>::ToString() const {
       std::stringstream ss;
       ss << m_scalar;
       return ss.str();
@@ -412,9 +420,20 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    void TScalarObject<T>::Init() {
+    inline void TScalarObject<T>::Init() {
       m_scalar = 0;
       m_pPaveText = nullptr;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline Bool_t TScalarObject<T>::IsEqual(const TObject *other) const {
+      const auto *otherScalar = (TScalarObject<T>*)other;
+      if(nullptr == otherScalar)
+        return false;
+      const T &value = otherScalar->Get();
+      return (value == m_scalar);
     }
 
     //-------------------------------------------------------------------------------------------------
