@@ -72,45 +72,83 @@ void fillNotExact(TH1 *histogram) {
 }
 
 int main(int argc, char *argv[]) {
+  
   Logger::createLogger("test-qtest-exact-ref-comp", {Logger::coloredConsole()});
   Logger::setMainLogger("test-qtest-exact-ref-comp");
   Logger::setLogLevel(spdlog::level::debug);
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
+  // create our test element
   MonitorElementPtr testElement;
   meMgr->bookObject("/", "TestHisto", testElement, TH1FAllocator(), "", "A test histogram", 100, 0.f, 99.f);
-  
   TH1F *histogram = testElement->objectTo<TH1F>();
   assert_test(nullptr != histogram);
-  
   fillExact(histogram);
-  
+
+  // create different references
   PtrHandler<TObject> reference(new TH1F("", "The good reference", 100, 0.f, 99.f), true);
-  PtrHandler<TObject> badReferenceBining(new TH1F("", "The bad reference - Wrong binning", 110, 0.f, 99.f), true);
-  PtrHandler<TObject> badReferenceContent(new TH1F("", "The bad reference - Wrong content", 100, 0.f, 99.f), true);
-  PtrHandler<TObject> badReferenceType(new TH1D("", "The bad reference - Wrong type", 100, 0.f, 99.f), true);
-  
   fillExact((TH1F*)reference.ptr());
+  PtrHandler<TObject> badReferenceBining(new TH1F("", "The bad reference - Wrong binning", 110, 0.f, 99.f), true);
   fillExact((TH1F*)badReferenceBining.ptr());
+  PtrHandler<TObject> badReferenceContent(new TH1F("", "The bad reference - Wrong content", 100, 0.f, 99.f), true);
+  fillNotExact((TH1F*)badReferenceContent.ptr());
+  PtrHandler<TObject> badReferenceType(new TH1D("", "The bad reference - Wrong type", 100, 0.f, 99.f), true);
   fillExact((TH1F*)badReferenceType.ptr());
-  fillNotExact((TH1F*)reference.ptr());
-  
+
+  // create the qtest XML config
   const std::string qtestType("ExactRefCompareTest");
   const std::string qtestName("UnitTestExactRefComp");
   TiXmlElement *qtestElement = new TiXmlElement("qtest");
+  std::shared_ptr<TiXmlElement> sharedQTest(qtestElement);
   qtestElement->SetAttribute("name", qtestName);
   qtestElement->SetAttribute("type", qtestType);
 
+  // configure the qtest
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(qtestElement));
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
   
-  QReportStorage storage;
-  QReport report;
+  // run it !
+  QReportStorage storage; QReport report; json jsonReport;
   assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
   assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
-  assert_test(report.m_qualityFlag == SUCCESS);
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == INVALID); // no reference assigned yet
   
+  storage.clear();
+  testElement->setReferenceObject(reference);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == SUCCESS); // same histograms
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceBining);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == INVALID); // reference has a different binning
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceType);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == INVALID); // wrong reference type
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceContent);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == ERROR); // valid test but reference is different
+  
+  assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
 
   return 0;
 }
