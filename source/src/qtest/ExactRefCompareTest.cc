@@ -68,7 +68,7 @@ namespace dqm4hep {
       ExactRefCompareTest(const std::string &name);
       ~ExactRefCompareTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      StatusCode userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
+      void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
       
     private:
       void doHistogramTest(MonitorElementPtr monitorElement, QualityTestReport &report);
@@ -122,7 +122,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode ExactRefCompareTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void ExactRefCompareTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
       
       const bool hasObject = (monitorElement->object() != nullptr);
       const bool hasReference = (monitorElement->reference() != nullptr);
@@ -164,8 +164,6 @@ namespace dqm4hep {
       else {
         this->doIsEqualTest(monitorElement, report);
       }
-
-      return STATUS_CODE_SUCCESS;
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -205,21 +203,24 @@ namespace dqm4hep {
       unsigned int nDifferentBins(0);
       
       for(auto bin = firstBin ; bin <= lastBin ; ++bin) {
-        if( ! (fabs(histogram->GetBinContent(bin) - reference->GetBinContent(bin)) < std::numeric_limits<Double_t>::epsilon() ) ) {
+        
+        const Double_t binContent(histogram->GetBinContent(bin));
+        const Double_t binContentRef(reference->GetBinContent(bin));
+        const bool binsAreDifferent(!(fabs(binContent-binContentRef) < std::numeric_limits<Double_t>::epsilon()));
+        
+        if(binsAreDifferent) {
           ++nDifferentBins;
         }
       }
       
       if(nDifferentBins != 0) {
         report.m_message = "Histogram and reference are different (difference = " + typeToString(nDifferentBins) + ")";
-        // TODO uncomment after PR #28 merged
         // Quality estimate as the percentage of different points. 
         // This factor is scaled to the error limit to make sure the quality flag is set to ERROR
-        report.m_quality = /*this->errorLimit() **/ (static_cast<float>(nBins) - static_cast<float>(nDifferentBins)) / static_cast<float>(nBins);
+        report.m_quality = this->errorLimit() * (static_cast<float>(nBins) - static_cast<float>(nDifferentBins)) / static_cast<float>(nBins);
       }
       else {
         report.m_message = "Histogram and reference are equal !";
-        // TODO uncomment after PR #28 merged
         report.m_quality = 1.f;
       }
       
@@ -258,12 +259,10 @@ namespace dqm4hep {
       
       if(nDifferentPoints != 0) {
         report.m_message = "Graph and reference are different (difference = " + typeToString(nDifferentPoints) + ")";
-        // TODO uncomment after PR #28 merged
-        report.m_quality = /*this->errorLimit() **/ (static_cast<float>(nPoints) - static_cast<float>(nDifferentPoints)) / static_cast<float>(nPoints);
+        report.m_quality = this->errorLimit() * (static_cast<float>(nPoints) - static_cast<float>(nDifferentPoints)) / static_cast<float>(nPoints);
       }
       else {
         report.m_message = "Graph and reference are equal !";
-        // TODO uncomment after PR #28 merged
         report.m_quality = 1.f;
       }
       
@@ -306,12 +305,10 @@ namespace dqm4hep {
       
       if(nDifferentPoints != 0) {
         report.m_message = "Graph and reference are different (difference = " + typeToString(nDifferentPoints) + ")";
-        // TODO uncomment after PR #28 merged
-        report.m_quality = /*this->errorLimit() **/ (static_cast<float>(nPoints) - static_cast<float>(nDifferentPoints)) / static_cast<float>(nPoints);
+        report.m_quality = this->errorLimit() * (static_cast<float>(nPoints) - static_cast<float>(nDifferentPoints)) / static_cast<float>(nPoints);
       }
       else {
         report.m_message = "Graph and reference are equal !";
-        // TODO uncomment after PR #28 merged
         report.m_quality = 1.f;
       }
       
