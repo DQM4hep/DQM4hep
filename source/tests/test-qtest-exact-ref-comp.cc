@@ -95,6 +95,22 @@ int main(int argc, char *argv[]) {
   fillExact((TH1F*)badReferenceBining.ptr());
   fillExact((TH1F*)badReferenceType.ptr());
   fillNotExact((TH1F*)reference.ptr());
+  
+  const std::string qtestType("ExactRefCompareTest");
+  const std::string qtestName("UnitTestExactRefComp");
+  TiXmlElement *qtestElement = new TiXmlElement("qtest");
+  qtestElement->SetAttribute("name", qtestName);
+  qtestElement->SetAttribute("type", qtestType);
+
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(qtestElement));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  
+  QReportStorage storage;
+  QReport report;
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  assert_test(report.m_qualityFlag == SUCCESS);
+  
 
   return 0;
 }
