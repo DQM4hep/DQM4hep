@@ -233,7 +233,7 @@ namespace dqm4hep {
      *  float, double or string.
      */
     template <typename T>
-    class TScalarObject : public TObject {
+    class TScalarObject : public TNamed {
     public:
       /** Default constructor
        */
@@ -286,11 +286,11 @@ namespace dqm4hep {
       ClassDefOverride(TScalarObject, 1);
     };
 
-    typedef TScalarObject<dqm_int> TScalarInt;
-    typedef TScalarObject<dqm_float> TScalarReal;
-    typedef TScalarObject<dqm_float> TScalarFloat;
-    typedef TScalarObject<dqm_double> TScalarDouble;
-    typedef TScalarObject<dqm_short> TScalarShort;
+    typedef TScalarObject<int> TScalarInt;
+    typedef TScalarObject<float> TScalarReal;
+    typedef TScalarObject<float> TScalarFloat;
+    typedef TScalarObject<double> TScalarDouble;
+    typedef TScalarObject<short> TScalarShort;
     typedef TScalarObject<long> TScalarLong;
     typedef TScalarObject<Long64_t> TScalarLong64_t;
     typedef TScalarObject<std::string> TScalarString;
