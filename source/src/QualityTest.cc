@@ -372,7 +372,13 @@ namespace dqm4hep {
           report.m_qualityFlag = SUCCESS;
         }
         else {
-          report.m_message = "Quality value (" + typeToString(report.m_quality) + ") is out range !";
+          const std::string message("Quality value (" + typeToString(report.m_quality) + ") is out range !");
+          
+          if (!report.m_message.empty())
+            report.m_message + " " + message;
+          else
+            report.m_message = message;
+            
           throw StatusCodeException(STATUS_CODE_OUT_OF_RANGE);
         }
       } catch (StatusCodeException &exception) {
