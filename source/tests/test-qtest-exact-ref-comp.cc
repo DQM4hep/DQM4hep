@@ -33,6 +33,8 @@
 #include <dqm4hep/PluginManager.h>
 
 #include <TH1.h>
+#include <TGraph.h>
+#include <TGraphErrors.h>
 
 // -- std headers
 #include <iostream>
@@ -71,6 +73,31 @@ void fillNotExact(TH1 *histogram) {
   histogram->Fill(106);// overflow
 }
 
+void fillExact(TGraph *graph) {
+  graph->SetPoint(0, 12, 75);
+  graph->SetPoint(1, 17, 45);
+  graph->SetPoint(2, 25, 73);
+  graph->SetPoint(3, 30, 12);
+}
+
+void fillNotExact(TGraph *graph) {
+  graph->SetPoint(0, 112, 75);
+  graph->SetPoint(1, 117, 45);
+  graph->SetPoint(2, 125, 73);
+  graph->SetPoint(3, 130, 78);
+}
+
+void fillDifferentNPoints(TGraph *graph) {
+  graph->SetPoint(0, 12, 75);
+  graph->SetPoint(1, 17, 45);
+  graph->SetPoint(2, 25, 73);
+  graph->SetPoint(3, 30, 12);
+  graph->SetPoint(4, 112, 75);
+  graph->SetPoint(5, 117, 45);
+  graph->SetPoint(6, 125, 73);
+  graph->SetPoint(7, 130, 78);
+}
+
 int main(int argc, char *argv[]) {
   
   Logger::createLogger("test-qtest-exact-ref-comp", {Logger::coloredConsole()});
@@ -79,7 +106,7 @@ int main(int argc, char *argv[]) {
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
-  // create our test element
+  // create our test element - TH1
   MonitorElementPtr testElement;
   meMgr->bookObject("/", "TestHisto", testElement, TH1FAllocator(), "", "A test histogram", 100, 0.f, 99.f);
   TH1F *histogram = testElement->objectTo<TH1F>();
@@ -149,6 +176,90 @@ int main(int argc, char *argv[]) {
   assert_test(report.m_qualityFlag == ERROR); // valid test but reference is different
   
   assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
+  
+  // create our test element - TScalar
+  meMgr->bookObject("/", "TestScalar", testElement, TScalarIntAllocator(), 42);
+  TScalarInt *integer = testElement->objectTo<TScalarInt>();
+  assert_test(nullptr != integer);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  
+  reference.set(new TScalarInt(42), true);
+  badReferenceContent.set(new TScalarInt(45), true);
+  badReferenceType.set(new TScalarFloat(4.f), true);
+  
+  storage.clear();
+  testElement->setReferenceObject(reference);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == SUCCESS); // same scalar values
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceContent);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == ERROR); // different scalar values
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceType);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == INVALID); // wrong reference type
 
+  assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
+  
+  // create our test element - TGraph (1D)
+  meMgr->bookObject("/", "TestGraph", testElement, TGraphAllocator());
+  TGraph *graph = testElement->objectTo<TGraph>();
+  assert_test(nullptr != graph);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  fillExact(graph);
+  
+  reference.set(new TGraph(), true);
+  fillExact((TGraph*)reference.ptr());
+  badReferenceBining.set(new TGraph(), true);
+  fillDifferentNPoints((TGraph*)badReferenceBining.ptr());
+  badReferenceContent.set(new TGraph(), true);
+  fillNotExact((TGraph*)badReferenceContent.ptr());
+  badReferenceType.set(new TGraphErrors(), true);
+  fillExact((TGraph*)badReferenceType.ptr());
+  
+  storage.clear();
+  testElement->setReferenceObject(reference);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == SUCCESS); // same graphs
+
+  storage.clear();
+  testElement->setReferenceObject(badReferenceBining);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == INVALID); // reference has a different n points
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceType);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == INVALID); // wrong reference type
+  
+  storage.clear();
+  testElement->setReferenceObject(badReferenceContent);
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  report.toJson(jsonReport);
+  std::cout << jsonReport.dump(2) << std::endl;
+  assert_test(report.m_qualityFlag == ERROR); // valid test but reference is different
+  
   return 0;
 }
