@@ -33,6 +33,8 @@
 #include <dqm4hep/QualityTest.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XmlHelper.h>
+#include <dqm4hep/AnalysisHelper.h>
+//#include <dqm4hep/AnalysisHelper.cc>
 
 // -- root headers
 #include <TH1.h>
@@ -110,7 +112,10 @@ namespace dqm4hep {
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
 
-      const float mean(pHistogram->GetMean());
+      // Currently the testType and percentage vairables are hardcoded -- these should instead be read in from the XML file, and assigned default fallback falues (-1 and 1.0, respectively).
+
+      //const float mean(pHistogram->GetMean());
+      float mean = AnalysisHelper::findMean(monitorElement, 1, 1.0);
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
       if (m_meanDeviationLower < mean && mean < m_meanDeviationUpper) {
