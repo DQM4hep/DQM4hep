@@ -33,6 +33,8 @@
 #include <dqm4hep/Internal.h>
 #include <iomanip>
 
+#define fmt_value(val) std::setw(16) << std::left << std::setprecision(1) << std::fixed << val
+
 int main(int /*argc*/, char ** /*argv[]*/) {
   
   while(1) {
@@ -40,11 +42,29 @@ int main(int /*argc*/, char ** /*argv[]*/) {
     dqm4hep::core::MemoryStats stats;
     dqm4hep::core::memStats(stats);
     
-    std::cout << std::setw(10) << std::left << "" << std::setw(16) << std::left << "Total (Bytes)" << std::setw(16) << std::left << "Used (Bytes)" << std::setw(16) << std::left << "Process (Kb)" << std::endl;
+    std::cout << std::setw(10) << std::left << "Memory" 
+              << fmt_value("Total (Mb)") 
+              << fmt_value("Used (Mb)")
+              << fmt_value("Process (Mb)") 
+              << fmt_value("Used (%)")
+              << fmt_value("Proc used (%)")
+              << std::endl;
     
-    std::cout << std::setw(10) << std::left << "Physical" << std::setw(16) << std::left << stats.pmtot << std::setw(16) << std::left << stats.pmused << std::setw(16) << std::left << stats.pmproc << std::endl;
+    std::cout << std::setw(10) << std::left << "Resident" 
+              << fmt_value(stats.rsstot/(1024.*1024.)) 
+              << fmt_value(stats.rssused/(1024.*1024.)) 
+              << fmt_value(stats.rssproc/(1024.)) 
+              << fmt_value((stats.rssused/(stats.rsstot*1.))*100)
+              << fmt_value((stats.rssproc/(stats.rsstot*1.))*(100/1024.))
+              << std::endl;
     
-    std::cout << std::setw(10) << std::left << "Virtual"  << std::setw(16) << std::left << stats.vmtot << std::setw(16) << std::left << stats.vmused << std::setw(16) << std::left << stats.vmproc << std::endl;
+    std::cout << std::setw(10) << std::left << "Virtual" 
+              << fmt_value(stats.vmtot/(1024.*1024.)) 
+              << fmt_value(stats.vmused/(1024.*1024.)) 
+              << fmt_value(stats.vmproc/(1024.)) 
+              << fmt_value((stats.vmused/(stats.vmtot*1.))*100)
+              << fmt_value((stats.vmproc/(stats.vmtot*1.))*(100/1024.))
+              << std::endl;
     
     std::cout << std::endl;
     dqm4hep::core::sleep(std::chrono::seconds(2));
