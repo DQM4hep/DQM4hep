@@ -51,6 +51,7 @@
 
 #include <sys/stat.h>
 #include <sys/utsname.h>
+#include <sys/sysinfo.h>
 #include <thread>
 #include <unistd.h>
 
@@ -359,6 +360,42 @@ namespace dqm4hep {
 
       return true;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    /**
+     *  @brief  Get the current process id
+     */
+    inline int pid() {
+#if _WIN32
+      return GetCurrentProcessId();
+#else
+      return ::getpid();
+#endif
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  MemoryStats struct
+     */
+    struct MemoryStats {
+      uint64_t vmtot  = {0};
+      uint64_t vmused = {0};
+      uint64_t vmproc = {0};
+      uint64_t pmtot  = {0};
+      uint64_t pmused = {0};
+      uint64_t pmproc = {0};
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  Get some memory stats
+     *
+     *  @param  object the json object to receive
+     */
+    void memStats(MemoryStats &stats);
   }
 }
 
