@@ -79,17 +79,17 @@ namespace dqm4hep {
       stats.vmused *= memInfo.mem_unit;
             
       // Total physical memory
-      stats.pmtot = memInfo.totalram;
-      stats.pmtot *= memInfo.mem_unit;
+      stats.rsstot = memInfo.totalram;
+      stats.rsstot *= memInfo.mem_unit;
       
       // Total physical memory in use
-      stats.pmused = memInfo.totalram - memInfo.freeram;
-      stats.pmused *= memInfo.mem_unit;
+      stats.rssused = memInfo.totalram - memInfo.freeram;
+      stats.rssused *= memInfo.mem_unit;
       
       // Process virtual memory size and physical memory size
       std::stringstream procstat; procstat << "/proc/" << core::pid() << "/status";
       stats.vmproc = getProcValue(procstat.str().c_str(), "VmSize:");
-      stats.pmproc = getProcValue(procstat.str().c_str(), "VmRSS:");
+      stats.rssproc = getProcValue(procstat.str().c_str(), "VmRSS:");
     }
 #elif __unix__
     void memStats(MemoryStats &) {

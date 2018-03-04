@@ -383,9 +383,9 @@ namespace dqm4hep {
       uint64_t vmtot  = {0};
       uint64_t vmused = {0};
       uint64_t vmproc = {0};
-      uint64_t pmtot  = {0};
-      uint64_t pmused = {0};
-      uint64_t pmproc = {0};
+      uint64_t rsstot  = {0};
+      uint64_t rssused = {0};
+      uint64_t rssproc = {0};
     };
     
     //-------------------------------------------------------------------------------------------------
