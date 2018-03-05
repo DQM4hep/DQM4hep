@@ -34,7 +34,7 @@ namespace dqm4hep {
 
     //----------------------------------------------------------------------------------------------------
 
-    float AnalysisHelper::findMean(MonitorElementPtr pMonitorElement, int testType = -1, float percentage = 1.0)
+    float AnalysisHelper::mainHelper(MonitorElementPtr pMonitorElement, int testType = -1, float percentage = 1.0)
     {
 
       if (nullptr == pMonitorElement) {
@@ -44,41 +44,74 @@ namespace dqm4hep {
       TH1 *h = pMonitorElement->objectTo<TH1>();
       TAxis *axis = h->GetXaxis();
       int nbins = axis->GetNbins();
-      int itest = -1;
 
-      if (testType = 1)
+      if (testType == 1) // Test type is MEAN
 	{
-	  // Mean
-	  itest = axis->FindBin(h->GetMean());
+	  if (percentage < 1.0)
+	    {
+	      std::cout << "Percetnage triggered" << std::endl;
+	      float result = AnalysisHelper::findMeanOfPercent(pMonitorElement, percentage);
+	      return result;
+	    }
+	  else
+	    {
+	      float result = h->GetMean();
+	      return result;
+	    }
 	}
-      else if (testType = 2)
+      else if (testType == 2) // Test type is RMS
 	{
-	  // RMS
-	   itest = axis->FindBin(h->GetRMS());
+	  if (percentage < 1.0)
+	    {
+	      std::cout << "RMS triggered" << std::endl;
+	      float result = 0.0;
+	      //float result = AnalysisHelper::findRMSOfPercent();
+	      return result;
+	    }
+	  else
+	    {
+	      float result = h->GetRMS();
+	      return result;
+	    }
 	}
       else
 	{
 	  throw StatusCodeException(STATUS_CODE_FAILURE); // The generic error statuscode is temporary until a specific statuscode for this exists, or a custom error message can be written here
 	}
+    }
+
+    float AnalysisHelper::findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage = 1.0)
+    {
+
+      // Ideally, we'd not do the below as boilerplate; we'dpass the axis from above instead, but I have to think about dereferencing for that.
+
+      if (nullptr == pMonitorElement) {
+        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
+      }
+
+      TH1 *h = pMonitorElement->objectTo<TH1>();
+      TAxis *axis = h->GetXaxis();
+      int nbins = axis->GetNbins();
+      int imean = axis->FindBin(h->GetMean());
 
       float entries = percentage*h->GetEntries();
-      float w = h->GetBinContent(itest);
-      float x = h->GetBinCenter(itest);
+      float w = h->GetBinContent(imean);
+      float x = h->GetBinCenter(imean);
       float sumw = w;
       float sumwx = w*x;
 
-      for (Int_t i=1;i<nbins;i++)
+      for (int i=1;i<nbins;i++)
 	{
 	  if (i>0)
 	    {
-	      w = h->GetBinContent(itest-i);
-	      x = h->GetBinCenter(itest-i);
+	      w = h->GetBinContent(imean-i);
+	      x = h->GetBinCenter(imean-i);
 	      sumw += w;
 	      sumwx += w*x;
 	    }
 	  if (i<= nbins) {
-	    w = h->GetBinContent(itest+i);
-	    x = h->GetBinCenter(itest+i);
+	    w = h->GetBinContent(imean+i);
+	    x = h->GetBinCenter(imean+i);
 	    sumw += w;
 	    sumwx += w*x;
 	  }

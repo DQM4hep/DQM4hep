@@ -53,7 +53,9 @@ namespace dqm4hep {
       // Will need to use templates here, since the data type used for means could be at least:
       //    Int, Float, Double, LongInt, and many more numerical types
 
-      static float findMean(MonitorElementPtr pMonitorElement, int testType, float percentage);
+      static float mainHelper(MonitorElementPtr pMonitorElement, int testType, float percentage);
+
+      static float findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage);
 
     };
 

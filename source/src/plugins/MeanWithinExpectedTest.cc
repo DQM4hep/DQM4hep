@@ -62,6 +62,8 @@ namespace dqm4hep {
       float m_expectedMean;
       float m_meanDeviationLower;
       float m_meanDeviationUpper;
+      int   m_testType;
+      float m_percentage;
     };
 
     typedef MeanWithinExpectedTest::Factory MeanWithinExpectedTestFactory;
@@ -80,7 +82,9 @@ namespace dqm4hep {
         : QualityTest("MeanWithinExpected", qname),
           m_expectedMean(0.f),
           m_meanDeviationLower(0.f),
-          m_meanDeviationUpper(0.f) {
+          m_meanDeviationUpper(0.f),
+	  m_testType(0),
+	  m_percentage(0.f){
       m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is "
                       "defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean "
                       "(using TMath::Prob(chi2,1))";
@@ -99,6 +103,10 @@ namespace dqm4hep {
                        XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper,
                                                 [this](const float &value) { return value > this->m_expectedMean; }));
 
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "TestType", m_testType));
+
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
+
       return STATUS_CODE_SUCCESS;
     }
 
@@ -112,10 +120,8 @@ namespace dqm4hep {
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
 
-      // Currently the testType and percentage vairables are hardcoded -- these should instead be read in from the XML file, and assigned default fallback falues (-1 and 1.0, respectively).
-
       //const float mean(pHistogram->GetMean());
-      float mean = AnalysisHelper::findMean(monitorElement, 1, 1.0);
+      float mean = AnalysisHelper::mainHelper(monitorElement, m_testType, m_percentage);
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
       if (m_meanDeviationLower < mean && mean < m_meanDeviationUpper) {
