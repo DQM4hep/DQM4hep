@@ -53,7 +53,7 @@ inline void ServicePrinter::printT(const Buffer &buffer) {
 
 template <>
 inline void ServicePrinter::printT<json>(const Buffer &buffer) {
-  json value = json::parse(buffer.begin());
+  json value = json::parse(buffer.begin(), buffer.end());
   std::cout << "=== " << m_serviceName << " ===" << std::endl << value.dump(2) << std::endl;
 }
 

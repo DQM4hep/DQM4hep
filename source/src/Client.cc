@@ -51,7 +51,7 @@ namespace dqm4hep {
     void Client::queryServerInfo(const std::string &serverName, core::json &serverInfo) const {
       Buffer request;
       this->sendRequest("/" + serverName + "/info", request,
-                        [&serverInfo](const Buffer &buffer) { serverInfo = core::json::parse(buffer.begin()); });
+                        [&serverInfo](const Buffer &buffer) { serverInfo = core::json::parse(buffer.begin(), buffer.end()); });
     }
 
     //-------------------------------------------------------------------------------------------------
