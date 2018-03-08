@@ -49,7 +49,6 @@ namespace dqm4hep {
 	{
 	  if (percentage < 1.0)
 	    {
-	      std::cout << "Percetnage triggered" << std::endl;
 	      float result = AnalysisHelper::findMeanOfPercent(pMonitorElement, percentage);
 	      return result;
 	    }
@@ -63,7 +62,6 @@ namespace dqm4hep {
 	{
 	  if (percentage < 1.0)
 	    {
-	      std::cout << "RMS triggered" << std::endl;
 	      float result = 0.0;
 	      //float result = AnalysisHelper::findRMSOfPercent();
 	      return result;
@@ -82,8 +80,6 @@ namespace dqm4hep {
 
     float AnalysisHelper::findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage = 1.0)
     {
-
-      // Ideally, we'd not do the below as boilerplate; we'dpass the axis from above instead, but I have to think about dereferencing for that.
 
       if (nullptr == pMonitorElement) {
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
