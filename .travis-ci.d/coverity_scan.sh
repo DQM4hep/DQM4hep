@@ -19,6 +19,8 @@ export PATH=$PWD/cov-analysis-linux64/bin:$PATH
 source dependencies/root/bin/thisroot.sh
 mkdir -p build && cd build
 cmake -DINSTALL_DOC=OFF -Dxdrstream_DIR=$PWD/../dependencies/xdrstream -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake -DBUILD_TESTS=ON ..
+cov-configure --comptype gcc --compiler /usr/bin/${CC}
+cov-configure --comptype g++ --compiler /usr/bin/${CXX}
 cov-build --dir cov-int make -j2
 tar czvf myproject.tgz cov-int
 
