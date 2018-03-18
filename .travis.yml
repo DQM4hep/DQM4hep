@@ -18,11 +18,9 @@ addons:
       - g++-4.9
 
 script:
-  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${CXX}" == "gcc-4.9"  ]]
-    then 
-      ./.travis-ci.d/coverity_scan.sh # coverity scan
-    else 
-      ./.travis-ci.d/compile_and_test.sh # normal build
+  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${CXX}" == "g++-4.9"  ]];
+    then ./.travis-ci.d/coverity_scan.sh;
+    else ./.travis-ci.d/compile_and_test.sh;
     fi
 
 before_install:
