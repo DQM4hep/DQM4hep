@@ -72,6 +72,11 @@ namespace dqm4hep {
 	      return result;
 	    }
 	}
+      else if (testType == 3) // Test type is MEDIAN
+	{
+	  float result = AnalysisHelper::findMedian(pMonitorElement);
+	  return result;
+	}
       else
 	{
 	  throw StatusCodeException(STATUS_CODE_FAILURE); // The generic error statuscode is temporary until a specific statuscode for this exists, or a custom error message can be written here
@@ -119,7 +124,27 @@ namespace dqm4hep {
 	      
     }
 
+    float AnalysisHelper::findMedian(MonitorElementPtr pMonitorElement)
+    {
 
+      if (nullptr == pMonitorElement) {
+        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
+      }
+
+      TH1 *h = pMonitorElement->objectTo<TH1>();
+      //TAxis *axis = h->GetXaxis();
+      //int nbins = axis->GetNbins();
+
+      Double_t xq[1];
+      Double_t yq[1];
+      xq[0] = 0.5;
+
+      h->GetQuantiles(1, yq, xq);
+      float result = yq[0];
+
+      return result;
+      
+    }
   }
 
 }
