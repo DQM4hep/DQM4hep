@@ -43,11 +43,15 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     PluginManager::~PluginManager() {
-      for (PluginMap::const_iterator iter = m_pluginMap.begin(), endIter = m_pluginMap.end(); endIter != iter; ++iter) {
-        delete iter->second;
+      for (auto iter : m_pluginMap) {
+        delete iter.second;
       }
-
       m_pluginMap.clear();
+      
+      for (auto iter : m_dlLibraries) {
+        (void) dlclose(iter);
+      }
+      m_dlLibraries.clear();
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -103,12 +107,14 @@ namespace dqm4hep {
         dqm_info("<!-- Loading shared library : {0} ({1})-->", libraryName, libBaseName);
       }
 
-      void *pLibPointer = dlopen(libraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL);
+      void *pLibPointer = dlopen(libraryName.c_str(), RTLD_LAZY | RTLD_GLOBAL | RTLD_NODELETE);
 
       if (pLibPointer == nullptr) {
         dqm_error("<!-- ERROR loading shared library : {0}\n    ->    {1} -->", libraryName, dlerror());
         return STATUS_CODE_FAILURE;
       }
+      
+      m_dlLibraries.push_back(pLibPointer);
 
       return STATUS_CODE_SUCCESS;
     }

@@ -124,7 +124,8 @@ namespace dqm4hep {
       StatusCode registerPlugin(Plugin *pPlugin);
 
     private:
-      PluginMap m_pluginMap;
+      PluginMap               m_pluginMap;       ///< The map of registered plugins
+      std::vector<void*>      m_dlLibraries;     ///< The list of loaded libraries
     };
 
     //-------------------------------------------------------------------------------------------------
