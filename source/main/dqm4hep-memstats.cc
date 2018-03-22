@@ -51,19 +51,19 @@ int main(int /*argc*/, char ** /*argv[]*/) {
               << std::endl;
     
     std::cout << std::setw(10) << std::left << "Resident" 
-              << fmt_value(stats.rsstot/(1024.*1024.)) 
-              << fmt_value(stats.rssused/(1024.*1024.)) 
-              << fmt_value(stats.rssproc/(1024.)) 
+              << fmt_value(stats.rsstot) 
+              << fmt_value(stats.rssused)
+              << fmt_value(stats.rssproc)
               << fmt_value((stats.rssused/(stats.rsstot*1.))*100)
-              << fmt_value((stats.rssproc/(stats.rsstot*1.))*(100/1024.))
+              << fmt_value((stats.rssproc/(stats.rsstot*1.))*100)
               << std::endl;
     
     std::cout << std::setw(10) << std::left << "Virtual" 
-              << fmt_value(stats.vmtot/(1024.*1024.)) 
-              << fmt_value(stats.vmused/(1024.*1024.)) 
-              << fmt_value(stats.vmproc/(1024.)) 
+              << fmt_value(stats.vmtot)
+              << fmt_value(stats.vmused) 
+              << fmt_value(stats.vmproc) 
               << fmt_value((stats.vmused/(stats.vmtot*1.))*100)
-              << fmt_value((stats.vmproc/(stats.vmtot*1.))*(100/1024.))
+              << fmt_value((stats.vmproc/(stats.vmtot*1.))*100.)
               << std::endl;
     
     std::cout << std::endl;

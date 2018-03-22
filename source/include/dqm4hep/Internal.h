@@ -378,14 +378,15 @@ namespace dqm4hep {
     
     /**
      *  @brief  MemoryStats struct
+     *          Alll units in Mb
      */
     struct MemoryStats {
-      uint64_t vmtot  = {0};
-      uint64_t vmused = {0};
-      uint64_t vmproc = {0};
-      uint64_t rsstot  = {0};
-      uint64_t rssused = {0};
-      uint64_t rssproc = {0};
+      double   vmtot  = {0.};
+      double   vmused = {0.};
+      double   vmproc = {0.};
+      double   rsstot  = {0.};
+      double   rssused = {0.};
+      double   rssproc = {0.};
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -393,7 +394,7 @@ namespace dqm4hep {
     /**
      *  @brief  Get some memory stats
      *
-     *  @param  object the json object to receive
+     *  @param  object the MemoryStats object to receive
      */
     void memStats(MemoryStats &stats);
   }
