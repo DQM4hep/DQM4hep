@@ -32,7 +32,8 @@
 namespace dqm4hep {
 
   namespace core {
-    
+
+#ifdef DQM4HEP_WITH_PROC_FS
     // only for unix systems
     int getProcValue(const std::string fname, const std::string &entry) {
       FILE* file = fopen(fname.c_str(), "r");
@@ -54,6 +55,7 @@ namespace dqm4hep {
       fclose(file);
       return result;
     }
+#endif
 
 #ifdef _WIN32
     void memStats(MemoryStats &) {
