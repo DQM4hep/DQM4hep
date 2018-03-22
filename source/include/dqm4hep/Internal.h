@@ -51,7 +51,6 @@
 
 #include <sys/stat.h>
 #include <sys/utsname.h>
-#include <sys/sysinfo.h>
 #include <thread>
 #include <unistd.h>
 
@@ -67,6 +66,7 @@
 #include <sys/_types/_int16_t.h>
 #include <sys/_types/_int64_t.h>
 #else
+#include <sys/sysinfo.h>
 #include <bits/pthreadtypes.h>
 #include <stdint.h>
 #endif
