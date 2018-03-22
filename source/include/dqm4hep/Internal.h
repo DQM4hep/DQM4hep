@@ -91,6 +91,9 @@
 #define IS_INF std::isinf
 #endif
 
+// Useful macro to silent any exception
+#define DQM4HEP_NO_EXCEPTION( Code ) try { Code } catch(...) {}
+
 namespace dqm4hep {
 
   namespace core {
