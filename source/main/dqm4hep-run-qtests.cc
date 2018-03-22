@@ -286,7 +286,7 @@ int main(int argc, char *argv[]) {
     }
   }
   catch (StatusCodeException &e) {
-    dqm_error("Caught status code exception: {0}", e.toString());
+    DQM4HEP_NO_EXCEPTION( dqm_error("Caught status code exception: {0}", e.toString()); );
     return e.getStatusCode();
   } 
   catch (...) {
