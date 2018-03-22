@@ -52,7 +52,7 @@ namespace dqm4hep {
     public:
       /** Constructor
        */
-      Archiver();
+      Archiver() = default;
 
       /** Constructor with file name and opening mode
        */
@@ -61,7 +61,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      virtual ~Archiver();
+      ~Archiver();
 
       /** Open a new archive.
        *  Close the current file if opened. Supported opening mode are the TFile opening mode option (see TFile)
@@ -104,10 +104,10 @@ namespace dqm4hep {
 
     private:
       // members
-      std::string m_fileName;    ///< The root file name
-      std::string m_openingMode; ///< The root file opening mode
-      bool m_isOpened;           ///< Whether the archive is opened
-      TFile *m_pArchiveFile;     ///< The actual archive implementation (root file)
+      std::string    m_fileName = {""};              ///< The root file name
+      std::string    m_openingMode = {"RECREATE"};   ///< The root file opening mode
+      bool           m_isOpened = {false};           ///< Whether the archive is opened
+      TFile         *m_pArchiveFile = {nullptr};     ///< The actual archive implementation (root file)
     };
   }
 }

@@ -41,12 +41,6 @@ namespace dqm4hep {
 
   namespace core {
 
-    Archiver::Archiver() : m_fileName(""), m_openingMode(""), m_pArchiveFile(nullptr), m_isOpened(false) {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     Archiver::Archiver(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix) {
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, openingMode, allowSuffix));
     }
