@@ -568,7 +568,30 @@ namespace dqm4hep {
             delete pParameterElement;
           }
 
-          pParentElement->RemoveChild(element);
+          TiXmlElement *previousElement(nullptr);
+          TiXmlNode *previousNode(element);
+          
+          while(nullptr != previousNode->PreviousSibling()) {
+            if(nullptr != previousNode->PreviousSibling()->ToElement()) {
+              previousElement = previousNode->PreviousSibling()->ToElement();
+              break;
+            }
+            else {
+              previousNode = previousNode->PreviousSibling();
+            }
+          }
+          // if a previous element is available, 
+          // continue the loop from it
+          if(nullptr != previousElement) {
+            pParentElement->RemoveChild(element);
+            element = previousElement;
+          }
+          // if no previous element is available,
+          // restart from the first child of input
+          else {
+            pParentElement->RemoveChild(element);
+            element = pParentElement->FirstChildElement();
+          }
         } else {
           // recursive call on childs !
           this->resolveAllDbSelect(element);
