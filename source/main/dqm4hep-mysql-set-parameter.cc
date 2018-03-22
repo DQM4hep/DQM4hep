@@ -98,7 +98,7 @@ int main(int argc, char *argv[]) {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.createParameterTable(dbTableArg.getValue(), true, false));
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.setParameters(dbTableArg.getValue(), parameters));
   } catch (StatusCodeException &exception) {
-    dqm_error("MySQL error, couldn't set parameter into table: {0}", exception.toString());
+    DQM4HEP_NO_EXCEPTION( dqm_error("MySQL error, couldn't set parameter into table: {0}", exception.toString()); );
     return 1;
   }
 
