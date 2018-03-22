@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
   assert_test(nullptr == graphJson.value("reference", json(nullptr)));
   assert_test(0 != graphJson.count("path"));
   
-  dqm_debug(graphJson.dump(2));
+  DQM4HEP_NO_EXCEPTION( dqm_debug(graphJson.dump(2)); );
 
   return 0;
 }
