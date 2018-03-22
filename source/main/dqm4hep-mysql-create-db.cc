@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
   try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.connect(dbHostArg.getValue(), "root", password, ""));
   } catch (StatusCodeException &exception) {
-    dqm_error("MySQL error, couldn't connect to host '{0}' as root: {1}", dbHostArg.getValue(), exception.toString());
+    DQM4HEP_NO_EXCEPTION( dqm_error("MySQL error, couldn't connect to host '{0}' as root: {1}", dbHostArg.getValue(), exception.toString()); );
     return 1;
   }
 
@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     query << "CREATE DATABASE IF NOT EXISTS " << dbDbArg.getValue() << " ;";
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.execute(query.str()));
   } catch (StatusCodeException &exception) {
-    dqm_error("MySQL error, couldn't create database '{0}': {1}", dbDbArg.getValue(), exception.toString());
+    DQM4HEP_NO_EXCEPTION( dqm_error("MySQL error, couldn't create database '{0}': {1}", dbDbArg.getValue(), exception.toString()); );
     return 1;
   }
 
