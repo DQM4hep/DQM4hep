@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
                     interface.connect(dbHostArg.getValue(), "DQM4HEP", "", dbDbArg.getValue()));
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.dumpParameterTable(dbTableArg.getValue()));
   } catch (StatusCodeException &exception) {
-    dqm_error("MySQL error, couldn't dump parameters from table: {0}", exception.toString());
+    DQM4HEP_NO_EXCEPTION( dqm_error("MySQL error, couldn't dump parameters from table: {0}", exception.toString()); );
     return 1;
   }
 

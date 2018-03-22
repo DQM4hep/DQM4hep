@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
     PluginManager::instance()->dump();
   } catch (StatusCodeException &e) {
-    dqm_error("While loading libraries : Caught {0}", e.toString());
+    DQM4HEP_NO_EXCEPTION( dqm_error("While loading libraries : Caught {0}", e.toString()); );
     return e.getStatusCode();
   } catch (...) {
     dqm_error("While loading libraries : Caught unknown error");
