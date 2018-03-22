@@ -71,8 +71,6 @@ namespace dqm4hep {
       size_t lengthSwap = sizeof(swapStats);
       if (KERN_SUCCESS != sysctlbyname("vm.swapusage", &swapStats, &lengthSwap, NULL, 0))
         std::cerr << "[OSX] - Failed to get swap statistics" << std::endl;
-      u_int64_t availSwap = swapStats.xsu_avail;
-      u_int64_t usedSwap = swapStats.xsu_used;
 
       // Total physical memory
       int64_t physicalMem;
@@ -97,19 +95,18 @@ namespace dqm4hep {
       double active = vmStat.active_count; // currently in use, can go inactive if not accessed for some time
       double inactive = vmStat.inactive_count; // was in use not long ago, still retrievable -> Not Sure wheter to include in used ram
       double free = vmStat.free_count; // real free ram usable instantly -> Always around 0-50mb max on my mac
-      double total = wired + active;
+      double total = wired + active + inactive;
       stats.vmtot = physicalMem + swapStats.xsu_total;
       stats.vmtot /= unit;
 
       // Physical/Virtual memory used
-      stats.rssused = total * pageSize;
+      stats.rssused = (total - free) * pageSize;
+      stats.vmused = stats.rssused + swapStats.xsu_used;
       stats.rssused /= unit;
-      stats.vmused = total * pageSize + swapStats.xsu_used;
       stats.vmused /= unit;
 
-      // Process virtual memory size and physical memory size
-      // There is no proper Physical memory definition on OSX, everything is considered Virtual Memory.
-      // Physical memory in this case is the actual memory taken by the process (I would say it "corresponds" to the virtual memory definition of linux)
+      // Process virtual and physical memory size
+      // Physical memory in this case is the actual memory taken by the process
       // Virtual memory: Most processes are assigned ~4Go of virtual mem whether they use it or not. No idea what is governing this, or the real meaning of it.
       struct task_basic_info_64 taskInfo;
       mach_msg_type_number_t taskInfoCount = TASK_BASIC_INFO_64_COUNT;
