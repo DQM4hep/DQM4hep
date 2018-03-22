@@ -43,9 +43,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     PluginManager::~PluginManager() {
-      for (auto iter : m_pluginMap) {
-        delete iter.second;
-      }
+      // No memory clean here, as the plugin instances are static
       m_pluginMap.clear();
       
       for (auto iter : m_dlLibraries) {
