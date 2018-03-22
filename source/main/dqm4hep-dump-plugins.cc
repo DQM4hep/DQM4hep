@@ -38,16 +38,22 @@ using namespace std;
 using namespace dqm4hep::core;
 
 int main(int argc, char *argv[]) {
+  
   try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());
     PluginManager::instance()->dump();
-  } catch (StatusCodeException &e) {
+    PluginManager::kill();
+  } 
+  catch (StatusCodeException &e) {
     DQM4HEP_NO_EXCEPTION( dqm_error("While loading libraries : Caught {0}", e.toString()); );
+    PluginManager::kill();
     return e.getStatusCode();
-  } catch (...) {
+  } 
+  catch (...) {
     dqm_error("While loading libraries : Caught unknown error");
+    PluginManager::kill();
     return 1;
   }
-
+  
   return 0;
 }

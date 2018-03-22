@@ -287,12 +287,16 @@ int main(int argc, char *argv[]) {
   }
   catch (StatusCodeException &e) {
     DQM4HEP_NO_EXCEPTION( dqm_error("Caught status code exception: {0}", e.toString()); );
+    PluginManager::kill();
     return e.getStatusCode();
   } 
   catch (...) {
     dqm_error("Caught unknown exception ...");
+    PluginManager::kill();
     return 1;
   }
+  
+  PluginManager::kill();
 
   if (returnFailure) {
     dqm_warning("Option --return-on {0} was given => return -1 !", qualityExitArg.getValue());
