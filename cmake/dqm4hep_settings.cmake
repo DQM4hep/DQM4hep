@@ -19,6 +19,7 @@ INCLUDE( dqm4hep_library_versioning )
 INCLUDE( dqm4hep_build_output_directories )
 INCLUDE( dqm4hep_rpath_settings )
 INCLUDE( dqm4hep_clang_tools )
+INCLUDE( dqm4hep_with_proc_fs )
 #INCLUDE( build_32bit_compatible )
 
 # uninstall target may only be created once per project
