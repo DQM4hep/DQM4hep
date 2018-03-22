@@ -62,9 +62,65 @@ namespace dqm4hep {
       /* WINDOWS implementation: TBD */
     }
 #elif __APPLE__
-    void memStats(MemoryStats &) {
-      /* MACOSX implementation: TBD */
+    void memStats(MemoryStats &stats) {
+      double unit = 1024. * 1024.; // Store everything in mb
+
+      // Swap info
+      // Swap is dynamically alotted on OSX, It will expand as the system needs it until the boot drive is filled.
+      struct xsw_usage swapStats;
+      size_t lengthSwap = sizeof(swapStats);
+      if (KERN_SUCCESS != sysctlbyname("vm.swapusage", &swapStats, &lengthSwap, NULL, 0))
+        std::cerr << "[OSX] - Failed to get swap statistics" << std::endl;
+      u_int64_t availSwap = swapStats.xsu_avail;
+      u_int64_t usedSwap = swapStats.xsu_used;
+
+      // Total physical memory
+      int64_t physicalMem;
+      size_t lengthPM = sizeof(physicalMem);
+      if (KERN_SUCCESS != sysctlbyname("hw.memsize", &physicalMem, &lengthPM, NULL, 0))
+        std::cerr << "[OSX] - Failed to get physical memory statistics" << std::endl;
+      stats.rsstot = physicalMem;
+      stats.rsstot /= unit;
+
+      // Total virtual memory
+      int pageSize;
+      size_t lengthPage = sizeof(pageSize);
+      if (KERN_SUCCESS != sysctlbyname("hw.pagesize", &pageSize, &lengthPage, NULL, 0))
+        std::cerr << "[OSX] - Failed to get page size" << std::endl;
+
+      vm_statistics_data_t vmStat;
+      mach_msg_type_number_t vmInfoCount = HOST_VM_INFO_COUNT;
+      if (KERN_SUCCESS != host_statistics (mach_host_self (), HOST_VM_INFO, (host_info_t) &vmStat, &vmInfoCount))
+        std::cerr << "[OSX] - Failed to get VM statistics." << std::endl;
+
+      double wired = vmStat.wire_count; // in use, cannot go inactive
+      double active = vmStat.active_count; // currently in use, can go inactive if not accessed for some time
+      double inactive = vmStat.inactive_count; // was in use not long ago, still retrievable -> Not Sure wheter to include in used ram
+      double free = vmStat.free_count; // real free ram usable instantly -> Always around 0-50mb max on my mac
+      double total = wired + active;
+      stats.vmtot = physicalMem + swapStats.xsu_total;
+      stats.vmtot /= unit;
+
+      // Physical/Virtual memory used
+      stats.rssused = total * pageSize;
+      stats.rssused /= unit;
+      stats.vmused = total * pageSize + swapStats.xsu_used;
+      stats.vmused /= unit;
+
+      // Process virtual memory size and physical memory size
+      // There is no proper Physical memory definition on OSX, everything is considered Virtual Memory.
+      // Physical memory in this case is the actual memory taken by the process (I would say it "corresponds" to the virtual memory definition of linux)
+      // Virtual memory: Most processes are assigned ~4Go of virtual mem whether they use it or not. No idea what is governing this, or the real meaning of it.
+      struct task_basic_info_64 taskInfo;
+      mach_msg_type_number_t taskInfoCount = TASK_BASIC_INFO_64_COUNT;
+      if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO_64, (task_info_t) &taskInfo, &taskInfoCount))
+        std::cerr << "[OSX] - There was a big ass error " << std::endl;
+      stats.rssproc = taskInfo.resident_size; // Corresponds to the `Real Mem` column from the Activity Monitor
+      stats.rssproc /= unit;
+      stats.vmproc = taskInfo.virtual_size; // I was hoping to get the `Memory` column from the Activity Monitor. Haven't figure out a way to do it
+      stats.vmproc /= unit;
     }
+
 #elif __linux__ || defined(_POSIX_VERSION)
     void memStats(MemoryStats &stats) {
       struct sysinfo memInfo;

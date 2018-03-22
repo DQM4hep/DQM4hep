@@ -65,6 +65,9 @@
 #include <sys/_pthread/_pthread_types.h>
 #include <sys/_types/_int16_t.h>
 #include <sys/_types/_int64_t.h>
+// for memStats
+#include <sys/sysctl.h>
+#include <mach/mach.h>
 #else
 #include <sys/sysinfo.h>
 #include <bits/pthreadtypes.h>
