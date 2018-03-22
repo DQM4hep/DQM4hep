@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
                       findIter->second.m_dbInterface->createParameterTable(dbTable, true, false));
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, findIter->second.m_dbInterface->setParameters(dbTable, parameterMap));
     } catch (StatusCodeException &exception) {
-      dqm_error("MySQL error, couldn't push parameters into table: {0}", exception.toString());
+      DQM4HEP_NO_EXCEPTION( dqm_error("MySQL error, couldn't push parameters into table: {0}", exception.toString()); );
       return 1;
     }
 
