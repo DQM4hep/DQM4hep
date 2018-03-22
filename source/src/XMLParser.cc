@@ -237,11 +237,45 @@ namespace dqm4hep {
              includeElement = includeElement->NextSiblingElement())
           includeAfter = node->InsertAfterChild(includeAfter, *includeElement);
 
-        // tricky lines :
-        // 1) Remove the include element
-        node->RemoveChild(child);
-        // 2) Go to the next sibling element of the last included element to skip nested <include> elements
-        child = includeAfter->NextSiblingElement();
+        // case where at least one element has been inserted from the include file
+        if(includeAfter != child) {
+          node->RemoveChild(child);
+          child = includeAfter->NextSiblingElement();          
+        }
+        // case where nothing was inserted
+        else {
+          dqm_debug( "XMLParser::resolveIncludes(): No element in included file" );
+          // Find the previous element to point to if any
+          TiXmlElement *previousElement(nullptr);
+          TiXmlNode *previousNode(child);
+          while(nullptr != previousNode->PreviousSibling()) {
+            if(nullptr != previousNode->PreviousSibling()->ToElement()) {
+              previousElement = previousNode->PreviousSibling()->ToElement();
+              break;
+            }
+            else {
+              previousNode = previousNode->PreviousSibling();
+            }
+          }
+          // node->RemoveChild(child);
+          // if a previous element is available, 
+          // continue the while from it
+          if(nullptr != previousElement) {
+            dqm_debug( "XMLParser::resolveIncludes(): Previous element found" );
+            std::cout << "Child: " << child->ValueStr() << std::endl;
+            std::cout << "Previous: " << previousElement->ValueStr() << std::endl;
+            node->RemoveChild(child);
+            child = previousElement;
+          }
+          // if no previous element is available,
+          // restart from the first child of input
+          else {
+            dqm_debug( "XMLParser::resolveIncludes(): No previous element" );
+            node->RemoveChild(child);
+            child = node->FirstChildElement();
+          }
+        }
+
       }
     }
 
