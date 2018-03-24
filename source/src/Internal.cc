@@ -26,6 +26,7 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/Logging.h> // Include here to avoid cycling include in the header
 
 #include <cstring>
 
@@ -70,14 +71,20 @@ namespace dqm4hep {
       struct xsw_usage swapStats;
       size_t lengthSwap = sizeof(swapStats);
       if (KERN_SUCCESS != sysctlbyname("vm.swapusage", &swapStats, &lengthSwap, NULL, 0))
-        std::cerr << "[OSX] - Failed to get swap statistics" << std::endl;
+      {
+        dqm_error("[{0}] - Failed to get swap statistics.", __FUNCTION__);
+        throw core::StatusCodeException(STATUS_CODE_FAILURE);
+      }
 
       // Total physical memory
       // Retrieved in Bytes
       int64_t physicalMem;
       size_t lengthPM = sizeof(physicalMem);
       if (KERN_SUCCESS != sysctlbyname("hw.memsize", &physicalMem, &lengthPM, NULL, 0))
-        std::cerr << "[OSX] - Failed to get physical memory statistics" << std::endl;
+      {
+        dqm_error("[{0}] - Failed to get physical memory statistics.", __FUNCTION__);
+        throw core::StatusCodeException(STATUS_CODE_FAILURE);
+      }
       stats.rsstot = physicalMem;
       stats.rsstot /= unit;
 
@@ -90,17 +97,21 @@ namespace dqm4hep {
       int pageSize;
       size_t lengthPage = sizeof(pageSize);
       if (KERN_SUCCESS != sysctlbyname("hw.pagesize", &pageSize, &lengthPage, NULL, 0))
-        std::cerr << "[OSX] - Failed to get page size" << std::endl;
-
+      {
+        dqm_error("[{0}] - Failed to get page size.", __FUNCTION__);
+        throw core::StatusCodeException(STATUS_CODE_FAILURE);
+      }
       vm_statistics_data_t vmStat;
       mach_msg_type_number_t vmInfoCount = HOST_VM_INFO_COUNT;
       if (KERN_SUCCESS != host_statistics (mach_host_self (), HOST_VM_INFO, (host_info_t) &vmStat, &vmInfoCount))
-        std::cerr << "[OSX] - Failed to get VM statistics." << std::endl;
-
-      double wired = vmStat.wire_count; // in use, cannot go inactive
-      double active = vmStat.active_count; // currently in use, can go inactive if not accessed for some time
-      double inactive = vmStat.inactive_count; // was in use not long ago, still retrievable -> Not Sure wheter to include in used ram
-      double free = vmStat.free_count; // real free ram usable instantly -> Always around 0-50mb max on my mac
+      {
+        dqm_error("[{0}] - Failed to get VM statistics.", __FUNCTION__);
+        throw core::StatusCodeException(STATUS_CODE_FAILURE);
+      }
+      double wired = vmStat.wire_count; // In use, cannot go inactive
+      double active = vmStat.active_count; // Currently in use, can go inactive if not accessed for some time
+      double inactive = vmStat.inactive_count; // Was in use not long ago, still retrievable -> Not Sure wheter to include in used ram
+      double free = vmStat.free_count; // Real free ram usable instantly -> Always around 0-50mb max on my mac
       double total = wired + active + inactive;
 
       stats.rssused = (total - free) * pageSize;
@@ -116,8 +127,11 @@ namespace dqm4hep {
       struct task_basic_info_64 taskInfo;
       mach_msg_type_number_t taskInfoCount = TASK_BASIC_INFO_64_COUNT;
       if (KERN_SUCCESS != task_info(mach_task_self(), TASK_BASIC_INFO_64, (task_info_t) &taskInfo, &taskInfoCount))
-        std::cerr << "[OSX] - There was a big ass error " << std::endl;
-      stats.rssproc = taskInfo.resident_size; // Corresponds to the `Real Mem` column from the Activity Monitor
+      {
+        dqm_error("[{0}] - Failed to get process memory statistics.", __FUNCTION__);
+        throw core::StatusCodeException(STATUS_CODE_FAILURE);
+      }
+      stats.rssproc = taskInfo.resident_size;
       stats.rssproc /= unit;
       stats.vmproc = taskInfo.resident_size; // Display physical size, as virtual_size is meaningless in this context
       stats.vmproc /= unit;
