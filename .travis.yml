@@ -4,10 +4,6 @@ sudo: required
 os:
   - linux
 
-env:
-  global:
-    - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
-    
 addons:
   apt:
     sources:
@@ -18,15 +14,18 @@ addons:
       - g++-4.9
 
 script:
-  - ./.travis-ci.d/compile_and_test.sh
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
+  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${CXX}" == "g++"  ]];
+    then ./.travis-ci.d/coverity_scan.sh;
+    else ./.travis-ci.d/compile_and_test.sh;
+    fi
 
 before_install:
-  - eval "${MATRIX_EVAL}"
   - ./.travis-ci.d/install_dependencies.sh
 
 after_success:
   - ./.travis-ci.d/deploy-doxygen.sh
-  
+
 compiler:
   - gcc
   - clang
