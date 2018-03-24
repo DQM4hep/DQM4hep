@@ -66,13 +66,14 @@ namespace dqm4hep {
       double unit = 1024. * 1024.; // Store everything in mb
 
       // Swap info
-      // Swap is dynamically alotted on OSX, It will expand as the system needs it until the boot drive is filled.
+      // Retrieved in Bytes
       struct xsw_usage swapStats;
       size_t lengthSwap = sizeof(swapStats);
       if (KERN_SUCCESS != sysctlbyname("vm.swapusage", &swapStats, &lengthSwap, NULL, 0))
         std::cerr << "[OSX] - Failed to get swap statistics" << std::endl;
 
       // Total physical memory
+      // Retrieved in Bytes
       int64_t physicalMem;
       size_t lengthPM = sizeof(physicalMem);
       if (KERN_SUCCESS != sysctlbyname("hw.memsize", &physicalMem, &lengthPM, NULL, 0))
@@ -81,6 +82,11 @@ namespace dqm4hep {
       stats.rsstot /= unit;
 
       // Total virtual memory
+      stats.vmtot = physicalMem + swapStats.xsu_total;
+      stats.vmtot /= unit;
+
+      // Used Physical/Virtual Memory 
+      // Retrieved in number of pages
       int pageSize;
       size_t lengthPage = sizeof(pageSize);
       if (KERN_SUCCESS != sysctlbyname("hw.pagesize", &pageSize, &lengthPage, NULL, 0))
@@ -96,16 +102,15 @@ namespace dqm4hep {
       double inactive = vmStat.inactive_count; // was in use not long ago, still retrievable -> Not Sure wheter to include in used ram
       double free = vmStat.free_count; // real free ram usable instantly -> Always around 0-50mb max on my mac
       double total = wired + active + inactive;
-      stats.vmtot = physicalMem + swapStats.xsu_total;
-      stats.vmtot /= unit;
 
-      // Physical/Virtual memory used
       stats.rssused = (total - free) * pageSize;
       stats.vmused = stats.rssused + swapStats.xsu_used;
       stats.rssused /= unit;
       stats.vmused /= unit;
 
+
       // Process virtual and physical memory size
+      // Retrieved in Bytes
       // Physical memory in this case is the actual memory taken by the process
       // Virtual memory: Most processes are assigned ~4Go of virtual mem whether they use it or not. No idea what is governing this, or the real meaning of it.
       struct task_basic_info_64 taskInfo;
@@ -114,7 +119,7 @@ namespace dqm4hep {
         std::cerr << "[OSX] - There was a big ass error " << std::endl;
       stats.rssproc = taskInfo.resident_size; // Corresponds to the `Real Mem` column from the Activity Monitor
       stats.rssproc /= unit;
-      stats.vmproc = taskInfo.virtual_size; // I was hoping to get the `Memory` column from the Activity Monitor. Haven't figure out a way to do it
+      stats.vmproc = taskInfo.resident_size; // Display physical size, as virtual_size is meaningless in this context
       stats.vmproc /= unit;
     }
 
