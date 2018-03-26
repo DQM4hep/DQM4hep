@@ -384,7 +384,7 @@ namespace dqm4hep {
     
     /**
      *  @brief  MemoryStats struct
-     *          Alll units in Mb
+     *          All units in Mb
      */
     struct MemoryStats {
       double   vmtot  = {0.};
@@ -403,6 +403,31 @@ namespace dqm4hep {
      *  @param  object the MemoryStats object to receive
      */
     void memStats(MemoryStats &stats);
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  INetworkStats struct
+     */
+    struct INetworkStats {
+      uint64_t    rcv_bytes;
+      uint64_t    rcv_packets;
+      uint64_t    rcv_errs;
+      uint64_t    snd_bytes;
+      uint64_t    snd_packets;
+      uint64_t    snd_errs;
+    };
+    
+    typedef std::map<std::string, INetworkStats> NetworkStats;
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  Get some network stats
+     *
+     *  @param  object the NetworkStats object to receive
+     */
+    void netStats(NetworkStats &stats);
   }
 }
 

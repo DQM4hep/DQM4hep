@@ -62,6 +62,12 @@ namespace dqm4hep {
     void memStats(MemoryStats &) {
       /* WINDOWS implementation: TBD */
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void netStats(NetworkStats &stats) {
+      /* WINDOWS implementation: TBD */
+    }
 #elif __APPLE__
     void memStats(MemoryStats &stats) {
       double unit = 1024. * 1024.; // Store everything in mb
@@ -136,7 +142,12 @@ namespace dqm4hep {
       stats.vmproc = taskInfo.resident_size; // Display physical size, as virtual_size is meaningless in this context
       stats.vmproc /= unit;
     }
-
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void netStats(NetworkStats &stats) {
+      /* MACOSX implementation: TBD */
+    }
 #elif __linux__ || defined(_POSIX_VERSION)
     void memStats(MemoryStats &stats) {
       struct sysinfo memInfo;
@@ -169,14 +180,74 @@ namespace dqm4hep {
       stats.vmproc = getProcValue(procstat.str().c_str(), "VmSize:")/(1024.);
       stats.rssproc = getProcValue(procstat.str().c_str(), "VmRSS:")/(1024.);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void netStats(NetworkStats &stats) {
+#ifdef DQM4HEP_WITH_PROC_FS
+      FILE* file = fopen("/proc/net/dev", "r");
+      int result = -1;
+      char line[256];
+      
+      // skip first two lines
+      result = fscanf(file, "%*[^\n]\n");
+      result = fscanf(file, "%*[^\n]\n");
+
+      while(1) {
+        // get interface name
+        std::string iname;
+        char c; 
+        do {
+          c = fgetc(file);
+          if(c == ':')
+            break;
+          iname += c;
+        }
+        while(c != EOF && c != '\n');
+        
+        if(c == EOF)
+          break;
+        
+        INetworkStats stat;
+        
+        // read received stats
+        result = fscanf(file, "%lu %lu %lu", 
+          &stat.rcv_bytes, 
+          &stat.rcv_packets, 
+          &stat.rcv_errs);
+        
+        // skip uneeded fields
+        uint32_t dummy;
+        if(EOF == fscanf(file, "%u %u %u %u %u", &dummy, &dummy, &dummy, &dummy, &dummy))
+            break;
+        
+        // read send stats
+        result = fscanf(file, "%lu %lu %lu", 
+          &stat.snd_bytes,
+          &stat.snd_packets,
+          &stat.snd_errs);
+        
+        if(EOF == fscanf(file, "%*[^\n]\n"))
+          break;
+        
+        stats[iname] = stat;
+      }
+      
+      fclose(file);
+#endif
+    }
 #elif __unix__
     void memStats(MemoryStats &) {
-      /* nop */
+      /* UNIX implementation: TBD */
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void netStats(NetworkStats &stats) {
+      /* UNIX implementation: TBD */
     }
 #else
-    void memStats(MemoryStats &) {
-      /* nop */
-    }
+#error "Unrecognized OS plateform (not windows, linux, OSX or unix) !"
 #endif
   }
 }
