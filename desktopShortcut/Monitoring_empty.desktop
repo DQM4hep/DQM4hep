@@ -1,7 +1,0 @@
-[Desktop Entry]
-Comment=
-Terminal=false
-Name=Monitoring
-Exec=/home/acqilc/dqmsoftware/dqm4hep/scripts/startMonitoringWindow
-Type=Application
-Icon=/opt/dqmsoftware/dqm4hep/DQMViz/icons/MON_WIN.png
