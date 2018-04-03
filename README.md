@@ -76,7 +76,7 @@ A cmake configuration file is available with properly configured version of root
 mkdir build
 cd build
 unset QTDIR
-cmake [-DOPTIONS=..] -C ../cvmfsInstall.cmake ..
+cmake [-DOPTIONS=..] -C ../cmake/cvmfsInstall.cmake ..
 make -jN
 ```
 
@@ -86,7 +86,7 @@ If you plan on installing DQM4ILC, you can use the ILCSoft installation availabl
 export ILCSOFT=/cvmfs/ilc.desy.de/sw/x86_64_gcc48_sl6/v01-17-11
 mkdir build
 cd build
-cmake [-DOPTIONS=..] -C $ILCSOFT/ILCSoft.cmake -C ../cvmfsInstall.cmake ..
+cmake [-DOPTIONS=..] -C $ILCSOFT/ILCSoft.cmake -C ../cmake/cvmfsInstall.cmake ..
 make -jN
 ```
 
