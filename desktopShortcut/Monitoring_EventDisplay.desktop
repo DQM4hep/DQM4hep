@@ -1,8 +1,0 @@
-[Desktop Entry]
-Comment=
-Terminal=false
-Name=Monitoring
-Exec=/home/acqilc/dqmsoftware/dqm4hep/scripts/startMonitoringWindow /home/acqilc/dqmsoftware/dqm4hep/dqm_setup/SPS_June2016/Monitoring_EventDisplay.xml
-Type=Application
-Icon=/opt/dqmsoftware/dqm4hep/DQMViz/icons/MON_WIN.png
-Name[en_US]=Monitoring_EventDisplay
