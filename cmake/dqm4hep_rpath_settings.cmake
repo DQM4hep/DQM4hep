@@ -1,14 +1,14 @@
 # add library install path to the rpath list
-SET( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
-MARK_AS_ADVANCED( CMAKE_INSTALL_RPATH )
+set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
+mark_as_advanced( CMAKE_INSTALL_RPATH )
 
 # add install path to the rpath list (apple)
-IF( APPLE )
-    SET( CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
-    MARK_AS_ADVANCED( CMAKE_INSTALL_NAME_DIR )
-ENDIF()
+if( APPLE )
+  set( CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
+  mark_as_advanced( CMAKE_INSTALL_NAME_DIR )
+endif()
 
 # append link pathes to rpath list
-SET( CMAKE_INSTALL_RPATH_USE_LINK_PATH 1 )
-MARK_AS_ADVANCED( CMAKE_INSTALL_RPATH_USE_LINK_PATH )
+set( CMAKE_INSTALL_RPATH_USE_LINK_PATH 1 )
+mark_as_advanced( CMAKE_INSTALL_RPATH_USE_LINK_PATH )
 

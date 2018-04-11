@@ -3,8 +3,8 @@
 # author: rete, DESY
 
 # -------------------------------------------------
-# clang_tidy macro
-macro( CLANG_TIDY )
+# dqm4hep_clang_tidy macro
+macro( DQM4HEP_CLANG_TIDY )
   
   if( NOT CLANG_TIDY_PROGRAM )
     message( SEND_ERROR "CLANG_TIDY - Couldn't create cland-tidy target: the clang-tidy program is not defined" )
@@ -80,14 +80,14 @@ macro( DQM4HEP_RUN_CLANG_TIDY )
     # reformat checks list
     string( REPLACE ";" "," DQM4HEP_CLANG_TIDY_CHECKS "${DQM4HEP_CLANG_TIDY_CHECKS}" )
     
-    clang_tidy( SOURCES ${DQM4HEP_CLANG_TIDY_SOURCES} CHECKS ${DQM4HEP_CLANG_TIDY_CHECKS} )
+    dqm4hep_clang_tidy( SOURCES ${DQM4HEP_CLANG_TIDY_SOURCES} CHECKS ${DQM4HEP_CLANG_TIDY_CHECKS} )
   endif()
   
 endmacro()
 
 # -------------------------------------------------
-# clang_tidy macro
-macro( CLANG_FORMAT )
+# dqm4hep_clang_tidy macro
+macro( DQM4HEP_CLANG_FORMAT )
   
   if( NOT CLANG_FORMAT_PROGRAM )
     message( SEND_ERROR "CLANG_FORMAT - Couldn't create clang-format target: the clang-format program is not defined" )
@@ -156,7 +156,7 @@ macro( DQM4HEP_RUN_CLANG_FORMAT )
     # copy the clang format config into project source directory
     file( GENERATE OUTPUT ${PROJECT_SOURCE_DIR}/.clang-format INPUT ${DQM4HEP_CMAKE_MODULES_ROOT}/dqm4hep_clang_format_config.yml )
     
-    clang_format( SOURCES ${DQM4HEP_CLANG_FORMAT_SOURCES} STYLE file DEBUG )
+    dqm4hep_clang_format( SOURCES ${DQM4HEP_CLANG_FORMAT_SOURCES} STYLE file DEBUG )
   endif()
   
 endmacro()
