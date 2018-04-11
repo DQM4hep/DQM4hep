@@ -1,35 +1,30 @@
-MARK_AS_ADVANCED( CMAKE_BACKWARDS_COMPATIBILITY )
-SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE ) # default in cmake 2.6
+mark_as_advanced( CMAKE_BACKWARDS_COMPATIBILITY )
+set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE ) # default in cmake 2.6
 
-SET( DQM4HEP_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
+set( DQM4HEP_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
+set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
+
+include( CMakeParseArguments )
 
 # include helper macros
-INCLUDE( MacroAddSharedLibrary )
-INCLUDE( MacroInstallSharedLibrary )
-INCLUDE( MacroInstallDirectory )
-INCLUDE( MacroDisplayStandardVariables )
-INCLUDE( MacroGeneratePackageConfigFiles )
-
+include( MacroAddSharedLibrary )
+include( MacroInstallSharedLibrary )
+include( MacroInstallDirectory )
+include( MacroDisplayStandardVariables )
+include( MacroGeneratePackageConfigFiles )
 
 # include dqm4hep settings
-INCLUDE( dqm4hep_install_prefix )
-INCLUDE( dqm4hep_build_type )
-INCLUDE( dqm4hep_enable_ctest )
-INCLUDE( dqm4hep_library_versioning )
-INCLUDE( dqm4hep_build_output_directories )
-INCLUDE( dqm4hep_rpath_settings )
-INCLUDE( dqm4hep_clang_tools )
-INCLUDE( dqm4hep_with_proc_fs )
-#INCLUDE( build_32bit_compatible )
+include( dqm4hep_install_prefix )
+include( dqm4hep_build_type )
+include( dqm4hep_enable_ctest )
+include( dqm4hep_library_versioning )
+include( dqm4hep_build_output_directories )
+include( dqm4hep_rpath_settings )
+include( dqm4hep_clang_tools )
+include( dqm4hep_with_proc_fs )
+include( dqm4hep_package_config )
+include( dqm4hep_compiler_settings )
+include( dqm4hep_root_dictionary )
+include( dqm4hep_make_executables )
+include( dqm4hep_find_packages )
 
-# uninstall target may only be created once per project
-# otherwise problems occur due to duplicate targets. even
-# setting CMAKE_POLICY(SET CMP0002 OLD) causes an error
-# calling 'make uninstall'
-IF( NOT _dqm4hep_settings_loaded )
-
-    INCLUDE( dqm4hep_uninstall_target )
-
-    SET( _dqm4hep_settings_loaded TRUE )
-
-ENDIF()

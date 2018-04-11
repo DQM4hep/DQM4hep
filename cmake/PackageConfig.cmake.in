@@ -1,0 +1,83 @@
+##############################################################################
+# cmake configuration file for @PACKAGE_CONFIG_PACKAGE_NAME@
+#
+# requires:
+#   MacroCheckPackageLibs.cmake for checking package libraries
+#   MacroExportPackageDeps.cmake for exporting package dependencies
+#
+# returns following variables:
+#
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_FOUND      : set to TRUE if @PACKAGE_CONFIG_PACKAGE_NAME@ found
+#       if FIND_PACKAGE called with REQUIRED and COMPONENTS arguments
+#       @PACKAGE_CONFIG_PACKAGE_NAME@_FOUND is only set to TRUE if ALL components are also found
+#       if REQUIRED is NOT set components may or may not be available
+#
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_ROOT       : path to this @PACKAGE_CONFIG_PACKAGE_NAME@ installation
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_VERSION    : package version
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_LIBRARIES  : list of @PACKAGE_CONFIG_PACKAGE_NAME@ libraries (NOT including COMPONENTS)
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_INCLUDE_DIRS  : list of paths to be used with INCLUDE_DIRECTORIES
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_LIBRARY_DIRS  : list of paths to be used with LINK_DIRECTORIES
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_COMPONENT_LIBRARIES      : list of @PACKAGE_CONFIG_PACKAGE_NAME@ component libraries
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_${COMPONENT}_FOUND       : set to TRUE or FALSE for each library
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_${COMPONENT}_LIBRARY     : path to individual libraries
+#   @PACKAGE_CONFIG_PACKAGE_NAME@_${COMPONENT}_LIB_DEPENDS : individual library dependencies
+#
+# @author: Remi Ete, DESY
+##############################################################################
+
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_ROOT "@CMAKE_INSTALL_PREFIX@" )
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_VERSION "@PACKAGE_CONFIG_PACKAGE_VERSION@" )
+
+
+# ---------- include dirs -----------------------------------------------------
+# do not store find results in cache
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_INCLUDE_DIRS @PACKAGE_CONFIG_PACKAGE_NAME@_INCLUDE_DIRS-NOTFOUND )
+MARK_AS_ADVANCED( @PACKAGE_CONFIG_PACKAGE_NAME@_INCLUDE_DIRS )
+
+FIND_PATH( @PACKAGE_CONFIG_PACKAGE_NAME@_INCLUDE_DIRS
+	NAMES @PACKAGE_CONFIG_PACKAGE_NAME@Config.h
+	PATHS @CMAKE_INSTALL_PREFIX@/include/
+	NO_DEFAULT_PATH
+)
+
+
+
+# ---------- libraries --------------------------------------------------------
+INCLUDE( "@DQM4HEP_CMAKE_MODULES_ROOT@/MacroCheckPackageLibs.cmake" )
+
+# only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
+# additional components are set by cmake in variable PKG_FIND_COMPONENTS
+# first argument should be the package name
+CHECK_PACKAGE_LIBS( @PACKAGE_CONFIG_PACKAGE_NAME@ @PACKAGE_CONFIG_PACKAGE_NAME@ )
+
+
+# ---------- dependencies -----------------------------------------------------
+INCLUDE( "@DQM4HEP_CMAKE_MODULES_ROOT@/MacroExportPackageDeps.cmake" )
+# exports following package dependencies (if set)
+# first argument of macro should be the package name
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_DEPENDS_INCLUDE_DIRS  @PACKAGE_CONFIG_DEPENDS_INCLUDE_DIRS@ )
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_DEPENDS_LIBRARY_DIRS  @PACKAGE_CONFIG_DEPENDS_LIBRARY_DIRS@ )
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_DEPENDS_LIBRARIES  @PACKAGE_CONFIG_DEPENDS_LIBRARIES@ )
+EXPORT_PACKAGE_DEPENDENCIES( @PACKAGE_CONFIG_PACKAGE_NAME@ )
+
+
+
+# ---------- final checking ---------------------------------------------------
+INCLUDE( FindPackageHandleStandardArgs )
+# set @PACKAGE_CONFIG_PACKAGE_NAME@_FOUND to TRUE if all listed variables are TRUE and not empty
+# @PACKAGE_CONFIG_PACKAGE_NAME@_COMPONENT_VARIABLES will be set if FIND_PACKAGE is called with REQUIRED argument
+FIND_PACKAGE_HANDLE_STANDARD_ARGS( @PACKAGE_CONFIG_PACKAGE_NAME@ DEFAULT_MSG @PACKAGE_CONFIG_PACKAGE_NAME@_ROOT @PACKAGE_CONFIG_PACKAGE_NAME@_INCLUDE_DIRS @PACKAGE_CONFIG_PACKAGE_NAME@_LIBRARIES ${@PACKAGE_CONFIG_PACKAGE_NAME@_COMPONENT_VARIABLES} )
+
+SET( @PACKAGE_CONFIG_PACKAGE_NAME@_FOUND ${@PACKAGE_CONFIG_PACKAGE_NAME@_FOUND} )
+
+
+
+# ---------- definitions ------------------------------------------------------
+IF( @PACKAGE_CONFIG_PACKAGE_NAME@_FOUND )
+
+    IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+        CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+        MARK_AS_ADVANCED( @PACKAGE_CONFIG_PACKAGE_NAME@_DEFINITIONS )
+    ENDIF()
+
+ENDIF()
