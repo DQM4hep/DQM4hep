@@ -1,4 +1,9 @@
 <img src="https://travis-ci.org/DQM4HEP/dqm4hep-core.svg?branch=master" align="left" />
+<img src="https://scan.coverity.com/projects/15199/badge.svg" align="left" />
+<img src="https://readthedocs.org/projects/dqm4hep/badge/?version=latest" align="left" />
+<a href="https://dqm4hep.github.io/dqm4hep-doxygen/doxygen/dqm4hep-core/master/index.html">
+<img src="https://codedocs.xyz/doxygen/doxygen.svg" align="left"/>
+</a>
 
 # DQM4HEP Core library, a Data Quality Monitoring framework for High Energy Physics
 
