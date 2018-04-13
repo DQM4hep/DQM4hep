@@ -28,6 +28,7 @@
 // -- dqm4hep headers
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Server.h>
+#include <dqm4hep/Logging.h>
 
 // -- std headers
 #include <sys/utsname.h>
@@ -373,6 +374,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     bool Server::serviceAlreadyRunning(const std::string &name) {
+      if(DimServer::inCallback()) {
+        dqm_warning( "Server::serviceAlreadyRunning: can't check for duplicated service on network !" );
+        return false;
+      }
       DimBrowser browser;
       int nServices = browser.getServices(name.c_str());
 
@@ -398,6 +403,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     bool Server::requestHandlerAlreadyRunning(const std::string &name) {
+      if(DimServer::inCallback()) {
+        dqm_warning( "Server::requestHandlerAlreadyRunning: can't check for duplicated request handler on network !" );
+        return false;
+      }
       DimBrowser browser;
       int nServices = browser.getServices(name.c_str());
 
@@ -423,6 +432,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     bool Server::commandHandlerAlreadyRunning(const std::string &name) {
+      if(DimServer::inCallback()) {
+        dqm_warning( "Server::commandHandlerAlreadyRunning: can't check for duplicated command on network !" );
+        return false;
+      }
       DimBrowser browser;
       int nServices = browser.getServices(name.c_str());
 
