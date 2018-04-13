@@ -64,6 +64,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
+    EventPtr GenericEvent::make_shared() {
+      auto ptr = std::shared_ptr<Event>(new EventBase<GenericEvent>(new GenericEvent()));
+      ptr->setStreamerName("GenericEventStreamer");
+      return ptr;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
     GenericEvent::GenericEvent() {
       /* nop */
     }

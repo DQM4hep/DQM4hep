@@ -66,6 +66,11 @@ namespace dqm4hep {
      */
     class GenericEvent {
     public:
+      /**
+       *  @brief  Allocate a shared pointer of EventPtr
+       */
+      static EventPtr make_shared();
+      
       /** Constructor
        */
       GenericEvent();
