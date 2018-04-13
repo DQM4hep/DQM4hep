@@ -34,7 +34,35 @@ namespace dqm4hep {
 
   namespace core {
 
-    DQM_PLUGIN_DECL(GenericEventStreamer, "GenericEventStreamer");
+    /**
+     * @brief GenericEventStreamer class
+     */
+    class GenericEventStreamer : public EventStreamerPlugin {
+    public:
+      /** Constructor
+       */
+      GenericEventStreamer();
+
+      /** Destructor
+       */
+      ~GenericEventStreamer() override;
+
+      /** Factory method to create the corresponding event to this streamer.
+       *  The event is expected to contains an allocated wrapped event
+       */
+      EventPtr createEvent() const override;
+
+      /** Serialize the event and store it into a data stream.
+       */
+      StatusCode write(EventPtr event, xdrstream::IODevice *pDevice) override;
+
+      /** De-serialize the event.
+       */
+      StatusCode read(EventPtr event, xdrstream::IODevice *pDevice) override;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
     GenericEvent::GenericEvent() {
       /* nop */
@@ -169,14 +197,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::write(const EventPtr &event, xdrstream::IODevice *pDevice) {
+    StatusCode GenericEventStreamer::write(EventPtr event, xdrstream::IODevice *pDevice) {
       const GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
 
       if (nullptr == pGenericEvent)
         return STATUS_CODE_INVALID_PARAMETER;
-
-      if (!XDR_TESTBIT(event->writeBase(pDevice), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
 
       // write event contents
       const GenericEvent::IntVectorMap &intVals(pGenericEvent->m_intValues);
@@ -197,13 +222,8 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::read(EventPtr &event, xdrstream::IODevice *pDevice) {
-      event = this->createEvent();
+    StatusCode GenericEventStreamer::read(EventPtr event, xdrstream::IODevice *pDevice) {
       GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
-
-      // read event info
-      if (!XDR_TESTBIT(event->readBase(pDevice), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
 
       // write event contents
       if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_intValues), xdrstream::XDR_SUCCESS))
@@ -217,5 +237,9 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    DQM_PLUGIN_DECL(GenericEventStreamer, "GenericEventStreamer");
   }
 }

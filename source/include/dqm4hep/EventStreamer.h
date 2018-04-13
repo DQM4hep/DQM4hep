@@ -41,14 +41,54 @@ namespace dqm4hep {
   namespace core {
 
     class Event;
-
-    /** EventStreamer class
-     */
+    
     class EventStreamer {
+    public:
+      /**
+       *  @brief  Default constructor
+       */
+      EventStreamer() = default;
+      
+      /**
+       *  @brief  Default destructor
+       */
+      ~EventStreamer() = default;
+      
+      /**
+       *  @brief  Write an event using an xdrstream device.
+       *          The streamer info is taken from Event::getStreamerName()
+       *          and from the plugin manager.
+       *          
+       *  @param  event the event to write
+       *  @param  device the xdrstream device to write with
+       */
+      StatusCode writeEvent(EventPtr event, xdrstream::IODevice *device);
+      
+      /**
+       *  @brief  Read an event using an xdrstream device.
+       *          The streamer info is read from the buffer
+       *          and the streamer if allocated from the plugin manager.
+       *          
+       *  @param  event the event to read
+       *  @param  device the xdrstream device to read with
+       */
+      StatusCode readEvent(EventPtr &event, xdrstream::IODevice *pDevice);
+      
+    private:
+      std::string                  m_streamerName = {""};     ///< The current event streamer name in use
+      EventStreamerPluginPtr       m_streamer = {nullptr};    ///< The current event streamer in use
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+
+    /** EventStreamerPlugin class
+     */
+    class EventStreamerPlugin {
     public:
       /** Destructor
        */
-      virtual ~EventStreamer() = default;
+      virtual ~EventStreamerPlugin() = default;
 
       /** Factory method to create the corresponding event to this streamer.
        *  The event is expected to contains an allocated wrapped event
@@ -57,32 +97,15 @@ namespace dqm4hep {
 
       /** Serialize an event object and store it in the data stream
        */
-      virtual StatusCode write(const EventPtr &event, xdrstream::IODevice *pDevice) = 0;
+      virtual StatusCode write(EventPtr event, xdrstream::IODevice *pDevice) = 0;
 
       /** De-serialize an event given from the data stream
        */
-      virtual StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice) = 0;
-
-      /** Serialize a part of a Event object identified by the reg exp 'subEventIdentifier' and store it in the data
-       * stream
-       *
-       *  Example : subEventIdentifier = "MyCollection1:MyCollection2"
-       *            subEventIdentifier = "*TpcCollection"
-       *
-       *  The identifier decoding has to be performed by the user, based on the event contents itself
-       */
-      virtual StatusCode write(const EventPtr &event, const std::string &subEventIdentifier,
-                               xdrstream::IODevice *pDevice);
+      virtual StatusCode read(EventPtr event, xdrstream::IODevice *pDevice) = 0;
     };
 
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode EventStreamer::write(const EventPtr &event, const std::string & /*subEventIdentifier*/,
-                                    xdrstream::IODevice *pDevice) {
-      return this->write(event, pDevice);
-    }
   }
+  
 }
 
 #endif //  DQM4HEP_EVENTSTREAMER_H

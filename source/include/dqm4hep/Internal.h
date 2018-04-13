@@ -102,6 +102,7 @@ namespace dqm4hep {
   namespace core {
 
     class Event;
+    class EventStreamerPlugin;
     class MonitorElement;
     class QualityTest;
     class QualityTestReport;
@@ -132,6 +133,7 @@ namespace dqm4hep {
     // event
     typedef std::shared_ptr<Event> EventPtr;
     typedef std::queue<EventPtr> EventQueue;
+    typedef std::shared_ptr<EventStreamerPlugin> EventStreamerPluginPtr;
 
     // plugin
     typedef std::shared_ptr<Plugin> PluginPtr;

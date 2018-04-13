@@ -114,36 +114,8 @@ namespace dqm4hep {
       friend class GenericEventStreamer;
     };
 
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    /**
-     * @brief GenericEventStreamer class
-     */
-    class GenericEventStreamer : public EventStreamer {
-    public:
-      /** Constructor
-       */
-      GenericEventStreamer();
-
-      /** Destructor
-       */
-      ~GenericEventStreamer() override;
-
-      /** Factory method to create the corresponding event to this streamer.
-       *  The event is expected to contains an allocated wrapped event
-       */
-      EventPtr createEvent() const override;
-
-      /** Serialize the event and store it into a data stream.
-       */
-      StatusCode write(const EventPtr &event, xdrstream::IODevice *pDevice) override;
-
-      /** De-serialize the lcio event.
-       */
-      StatusCode read(EventPtr &event, xdrstream::IODevice *pDevice) override;
-    };
   }
+  
 }
 
 #endif //  DQM4HEP_GENERICEVENT_H

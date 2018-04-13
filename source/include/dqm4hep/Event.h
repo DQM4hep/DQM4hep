@@ -38,6 +38,8 @@
 namespace dqm4hep {
 
   namespace core {
+    
+    class EventStreamer;
 
     /** EventType enumerator
      */
@@ -59,10 +61,11 @@ namespace dqm4hep {
      *  BaseEvent<T> implementation.
      */
     class Event {
+      friend class EventStreamer;
     public:
       /** Destructor
        */
-      virtual ~Event();
+      virtual ~Event() = default;
 
       /** Set the event type
        */
@@ -88,11 +91,6 @@ namespace dqm4hep {
        */
       const TimePoint &getTimeStamp() const;
 
-      /** Set the real event implementation size,
-       *  as extracted after its serialization (unit bytes)
-       */
-      void setEventSize(uint64_t eventSize);
-
       /** Get the real event implementation size,
        *  as extracted after its deserialization (unit bytes)
        */
@@ -113,6 +111,14 @@ namespace dqm4hep {
       /** Get the run number
        */
       uint32_t getRunNumber() const;
+      
+      /** Set the streamer name
+       */
+      void setStreamerName(const std::string &streamer);
+      
+      /** Get the streamer name
+       */
+      const std::string &getStreamerName() const;
 
       /** Clear the event.
        *  Should call the real event implementation
@@ -130,7 +136,15 @@ namespace dqm4hep {
        */
       template <typename T>
       void setEvent(T *pEvent, bool isOwner = true);
-
+      
+    protected:
+      Event() = default;
+      
+      /** Set the real event implementation size,
+       *  as extracted after its serialization (unit bytes)
+       */
+      void setEventSize(uint64_t eventSize);
+      
       /** Write the base event information in the xdrstream device
        */
       xdrstream::Status writeBase(xdrstream::IODevice *pDevice) const;
@@ -140,17 +154,13 @@ namespace dqm4hep {
       xdrstream::Status readBase(xdrstream::IODevice *pDevice);
 
     protected:
-      /** Private constructor
-       */
-      Event();
-
-    protected:
-      EventType m_type;       ///< The event type
-      std::string m_source;   ///< The event source
-      TimePoint m_timeStamp;  ///< The event time stamp
-      uint64_t m_eventSize;   ///< The serialized event size (unit bytes)
-      uint32_t m_eventNumber; ///< The event number
-      uint32_t m_runNumber;   ///< The run number
+      EventType              m_type = {UNKNOWN_EVENT};       ///< The event type
+      std::string            m_source = {""};                ///< The event source
+      TimePoint              m_timeStamp = {};               ///< The event time stamp
+      uint64_t               m_eventSize = {0};              ///< The serialized event size (unit bytes)
+      uint32_t               m_eventNumber = {0};            ///< The event number
+      uint32_t               m_runNumber = {0};              ///< The run number
+      std::string            m_streamerName = {""};
     };
 
     //-------------------------------------------------------------------------------------------------
