@@ -126,11 +126,9 @@ namespace dqm4hep {
        *
        *  @param  serviceName the service name
        *  @param  pController the controller class handling the service update
-       *  @param  function the controller method hadling the service update
        */
       template <typename Controller>
-      void unsubscribe(const std::string &serviceName, Controller *pController,
-                       void (Controller::*function)(const Buffer &));
+      void unsubscribe(const std::string &serviceName, Controller *pController);
 
       /**
        *  @brief  Whether this client already registered a service subscription
@@ -250,13 +248,12 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController,
-                                    void (Controller::*function)(const Buffer &)) {
+    inline void Client::unsubscribe(const std::string &serviceName, Controller *pController) {
       for (auto iter = m_serviceHandlerMap.begin(), endIter = m_serviceHandlerMap.end(); endIter != iter; ++iter) {
         if (serviceName != iter->first)
           continue;
 
-        if (iter->second->onServiceUpdate().disconnect(pController, function))
+        if (iter->second->onServiceUpdate().disconnect(pController))
           break;
       }
     }
