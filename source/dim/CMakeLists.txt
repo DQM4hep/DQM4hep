@@ -89,7 +89,7 @@ if( DIM_STATIC )
   set_target_properties( dim_static PROPERTIES OUTPUT_NAME dim )
   target_link_libraries( dim_static ${CMAKE_THREAD_LIBS_INIT} )
   install(
-    TARGETS dim_shared dim_static
+    TARGETS dim_static
     ARCHIVE DESTINATION lib
   )
 endif()
@@ -98,7 +98,7 @@ add_library( dim_shared SHARED ${DIM_SRCS} )
 set_target_properties( dim_shared PROPERTIES OUTPUT_NAME dim )
 target_link_libraries( dim_shared ${CMAKE_THREAD_LIBS_INIT} )
 install(
-  TARGETS dim_shared dim_static
+  TARGETS dim_shared
   LIBRARY DESTINATION lib
 )
 

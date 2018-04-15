@@ -1,7 +1,7 @@
 #################################################
 # cmake file for building DQMNet package
-# @author Eté Rémi
-# Copyright (c) CNRS / IPNL
+# @author Ete Remi
+# Copyright (c)
 cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
 #################################################
 
@@ -14,25 +14,11 @@ set( ${PROJECT_NAME}_VERSION_MINOR 0 )
 set( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 ###############################
-# Require C++11
-include( CheckCXXCompilerFlag )
-
-check_cxx_compiler_flag("-std=c++11" COMPILER_SUPPORTS_CXX11)
-
-if( COMPILER_SUPPORTS_CXX11 )
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-else()
-	message( SEND_ERROR "DQMNet requires C++11 support. Please upgrade your compiler !" )
-endif()
-
-###############################
-# Dependencies
-list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
+# Central settings
 include( dqm4hep_settings )
 
 ###############################
 # Define options
-
 option( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 option( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" OFF )
 
@@ -40,20 +26,10 @@ option( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" 
 find_package( Threads REQUIRED )
 
 # ----- Find DQMCore package -----
-find_package( DQMCore REQUIRED )
-
-# ----- Include package properties -----
-foreach( pkg DQMCore )
-
-  include_directories( ${${pkg}_INCLUDE_DIRS} )
-  link_libraries( ${${pkg}_LIBRARIES} )
-  add_definitions ( ${${pkg}_DEFINITIONS} )
-
-  list( APPEND ${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS ${${pkg}_INCLUDE_DIRS} )
-  list( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS ${${pkg}_LIBRARY_DIRS} )
-  list( APPEND ${PROJECT_NAME}_DEPENDS_LIBRARIES ${${pkg}_LIBRARIES} )
-
-endforeach()
+dqm4hep_find_packages( 
+  PACKAGES DQMCore 
+  REQUIRED ADD_DEPENDS
+)
 
 # ----- Install doc -----
 if( INSTALL_DOC )
@@ -90,13 +66,8 @@ if( DQMNET_WEBSOCKETS )
 endif()
 
 ###############################
-# Generate DQMNetConfig.h
-configure_file( "${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.h.cmake.in"
-    "${PROJECT_SOURCE_DIR}/source/include/${PROJECT_NAME}Config.h" @ONLY )
-
-###############################
 # Add source directory
-add_subdirectory( ./source )
+add_subdirectory( source )
 
 ###############################
 # display some variables and write them to cache
@@ -104,4 +75,4 @@ display_std_variables()
 
 ###############################
 # generate and install following configuration files
-generate_package_configuration_files( ${PROJECT_NAME}Config.cmake ${PROJECT_NAME}ConfigVersion.cmake ${PROJECT_NAME}LibDeps.cmake )
+dqm4hep_generate_package_confguration( PACKAGE ${PROJECT_NAME} )
