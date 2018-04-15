@@ -42,7 +42,7 @@ macro( DQM4HEP_FIND_PACKAGE )
   
   # parse the macro arguments
   set( FLAG_OPTIONS REQUIRED QUIET ADD_DEPENDS )
-  set( SINGLE_OPTIONS PACKAGE )
+  set( SINGLE_OPTIONS PACKAGE VERSION )
   set( MULTI_OPTIONS COMPONENTS )
   cmake_parse_arguments( FIND_PKG "${FLAG_OPTIONS}" "${SINGLE_OPTIONS}" "${MULTI_OPTIONS}" ${ARGN} )
   
@@ -59,9 +59,9 @@ macro( DQM4HEP_FIND_PACKAGE )
   endif()
   
   if( FIND_PKG_COMPONENTS )
-    find_package( ${FIND_PKG_PACKAGE} ${FIND_PKG_PKG_MODE} COMPONENTS ${FIND_PKG_COMPONENTS} )
+    find_package( ${FIND_PKG_PACKAGE} ${FIND_PKG_VERSION} ${FIND_PKG_PKG_MODE} COMPONENTS ${FIND_PKG_COMPONENTS} )
   else()
-    find_package( ${FIND_PKG_PACKAGE} ${FIND_PKG_PKG_MODE} )
+    find_package( ${FIND_PKG_PACKAGE} ${FIND_PKG_VERSION} ${FIND_PKG_PKG_MODE} )
   endif()
   
   include_directories( ${${FIND_PKG_PACKAGE}_INCLUDE_DIRS} )
