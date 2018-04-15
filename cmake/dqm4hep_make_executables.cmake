@@ -38,11 +38,22 @@ endmacro()
 
 # macro to add all executable in the main directory
 macro( DQM4HEP_ADD_MAIN_EXECUTABLES )
+  # parse the macro arguments
+  set( FLAG_OPTIONS "" )
+  set( SINGLE_OPTIONS "" )
+  set( MULTI_OPTIONS EXCEPT )
+  cmake_parse_arguments( MAIN_BINS "${FLAG_OPTIONS}" "${SINGLE_OPTIONS}" "${MULTI_OPTIONS}" ${ARGN} )
+  
   file( GLOB MAIN_SRCS "${PROJECT_SOURCE_DIR}/source/main/*.cc" )
 
   foreach( MAIN_SRC ${MAIN_SRCS} )
     get_filename_component( MAIN_SRC_NO_EXT ${MAIN_SRC} NAME_WE )
-    dqm4hep_add_executable( main ${MAIN_SRC_NO_EXT} bin )
+    # check if you should skip this executable
+    list( FIND MAIN_BINS_EXCEPT ${MAIN_SRC_NO_EXT} SKIP_BIN )
+    if( NOT ${SKIP_BIN} GREATER -1 )
+      # add executable
+      dqm4hep_add_executable( main ${MAIN_SRC_NO_EXT} bin )
+    endif()
   endforeach()
 endmacro()
 
