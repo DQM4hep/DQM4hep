@@ -50,7 +50,8 @@ namespace dqm4hep {
     {
     public:
       
-      static float mainHelper(MonitorElementPtr pMonitorElement, std::string testType, float percentage = 1.0);
+      static float mainHelper(MonitorElementPtr pMonitorElement, std::string testType, float percentage);
+
       static float findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage);
 
     };
