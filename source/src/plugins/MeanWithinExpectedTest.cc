@@ -62,8 +62,10 @@ namespace dqm4hep {
       float m_expectedMean;
       float m_meanDeviationLower;
       float m_meanDeviationUpper;
-      int   m_testType;
       float m_percentage;
+
+      std::vector<std::string> m_testTypesList;
+
     };
 
     typedef MeanWithinExpectedTest::Factory MeanWithinExpectedTestFactory;
@@ -83,8 +85,8 @@ namespace dqm4hep {
           m_expectedMean(0.f),
           m_meanDeviationLower(0.f),
           m_meanDeviationUpper(0.f),
-	  m_testType(0),
-	  m_percentage(0.f){
+	  m_percentage(1.0)
+{
       m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is "
                       "defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean "
                       "(using TMath::Prob(chi2,1))";
@@ -93,7 +95,19 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle) {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      //RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      //RETURN_RESULT_IF(STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      //XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean);
+      
+      // Okay so the below code is the readParameter function with the optional validator to check the result;
+      // the code below fails when the ExpectedMean isn't found, because the given lower bound is above the mean,
+      // because it defaults to 0. This behaviour is good, but doesn't reveal itself very well when run, giving
+      // cryptic error messages that don't explain what went wrong.
+
+      // It can easily be removed, but this will result in some strange behavior further down when we actually
+      // solve for the mean. Ideally, we throw an error and include a message explaining that the bound is too
+      // high or too low, and to check the XML file to fix it.
 
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
                        XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower,
@@ -103,9 +117,10 @@ namespace dqm4hep {
                        XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper,
                                                 [this](const float &value) { return value > this->m_expectedMean; }));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "TestType", m_testType));
+      // This only succeeds if there's no percentage -- so we need to use the SOFT version I think?
+      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypeList", m_testTypesList));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -120,20 +135,24 @@ namespace dqm4hep {
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
 
-      //const float mean(pHistogram->GetMean());
-      float mean = AnalysisHelper::mainHelper(monitorElement, m_testType, m_percentage);
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
+      float result;
 
-      if (m_meanDeviationLower < mean && mean < m_meanDeviationUpper) {
+      for (std::vector<std::string>::iterator it = m_testTypesList.begin(); it != m_testTypesList.end(); it++){
+
+	result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
+      }
+
+      if (m_meanDeviationLower < result && result < m_meanDeviationUpper) {
         report.m_message =
-            "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
+            "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(result);
       } 
       else {
         report.m_message =
-            "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(mean);
+            "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(result);
       }
 
-      const float chi = (mean - m_expectedMean) / range;
+      const float chi = (result - m_expectedMean) / range;
       report.m_quality = TMath::Prob(chi * chi, 1);
     }
 
