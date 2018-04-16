@@ -26,7 +26,7 @@
  */
 
 #ifndef DQM4HEP_ANALYSISHELPER_H
-#define DQM4HEP_ANALYSYSHELPER_H
+#define DQM4HEP_ANALYSISHELPER_H
 
 // Need to include ROOT headers so that it can interpret things like TH1 etc.
 
@@ -50,11 +50,7 @@ namespace dqm4hep {
     {
     public:
       
-      // Will need to use templates here, since the data type used for means could be at least:
-      //    Int, Float, Double, LongInt, and many more numerical types
-
-      static float mainHelper(MonitorElementPtr pMonitorElement, int testType, float percentage);
-
+      static float mainHelper(MonitorElementPtr pMonitorElement, std::string testType, float percentage = 1.0);
       static float findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage);
 
     };
