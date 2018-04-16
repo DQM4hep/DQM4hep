@@ -19,7 +19,6 @@ include( dqm4hep_settings )
 
 ###############################
 # Define options
-option( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
 option( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" OFF )
 
 # ----- Find Threads for multithreading -----
@@ -32,17 +31,7 @@ dqm4hep_find_packages(
 )
 
 # ----- Install doc -----
-if( INSTALL_DOC )
-    find_package( Doxygen )
-
-    if( DOXYGEN_FOUND )
-        add_subdirectory( ./doc )
-    else()
-        message( SEND_ERROR "Could not find doxygen required to build documentation" )
-        message( "Please install doxygen or set INSTALL_DOC to OFF" )
-        message( "" )
-    endif()
-endif()
+dqm4hep_build_doxygen()
 
 # ----- Build web socket lib -----
 if( DQMNET_WEBSOCKETS )
