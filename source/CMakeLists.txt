@@ -26,7 +26,7 @@ dqm4hep_create_dictionary(
 # -------------------------------------------------
 # build the project library
 aux_source_directory( src SRC_FILES )
-aux_source_directory( src/qtest SRC_FILES )
+aux_source_directory( src/plugins SRC_FILES )
 add_shared_library( ${PROJECT_NAME} ${SRC_FILES} ${PROJECT_DICTIONARY} )
 install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib )
 install_directory( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
