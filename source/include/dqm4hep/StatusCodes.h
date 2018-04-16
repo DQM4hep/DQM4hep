@@ -36,6 +36,19 @@
 #include <execinfo.h>
 #endif
 
+#define SOFT_RETURN_RESULT_IF(Command)                                                                                \
+  {                                                                                                                    \
+    const dqm4hep::core::StatusCode statusCode(Command);                                                               \
+    if (statusCode == STATUS_CODE_FAILURE) {                                                                           \
+      dqm_error("{0} return {1}, ", #Command, dqm4hep::core::statusCodeToString(statusCode));                          \
+      dqm_error("    in function: {0}", __FUNCTION__);                                                                 \
+      dqm_error("    in file:     {0} line#: {1}", __FILE__, __LINE__);                                                \
+      return statusCode;                                                                                               \
+    }                                                                                                                  \
+  }
+
+//-------------------------------------------------------------------------------------------------
+
 #define RETURN_RESULT_IF(StatusCode1, Operator, Command)                                                               \
   {                                                                                                                    \
     const dqm4hep::core::StatusCode statusCode(Command);                                                               \
