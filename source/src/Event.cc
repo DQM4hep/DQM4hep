@@ -40,7 +40,6 @@ namespace dqm4hep {
       m_eventSize = 0;
       m_eventNumber = 0;
       m_runNumber = 0;
-      m_streamerName = "";
     }
     
     //-------------------------------------------------------------------------------------------------
