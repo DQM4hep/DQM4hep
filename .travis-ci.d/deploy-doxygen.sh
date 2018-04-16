@@ -44,7 +44,7 @@ cd "$TRAVIS_BUILD_DIR"
 cd build
 
 # activate doxygen building target
-cmake -DINSTALL_DOC=ON ..
+cmake -DDQM4HEP_DOXYGEN_DOC=ON ..
 
 if [ $? -ne 0 ]; then
     echo "Failed to run cmake"
@@ -76,7 +76,7 @@ cd doxygen/${doxygenDirectory}
 rm -rf *
 
 # copy the new one in place
-cp -r $TRAVIS_BUILD_DIR/build/docbuild/html/* .
+cp -r $TRAVIS_BUILD_DIR/build/docbuild/DQMNet/html/* .
 
 # commit the new doc
 git add ./*
