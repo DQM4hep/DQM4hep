@@ -27,4 +27,5 @@ include( dqm4hep_compiler_settings )
 include( dqm4hep_root_dictionary )
 include( dqm4hep_make_executables )
 include( dqm4hep_find_packages )
+include( dqm4hep_doxygen_documentation )
 
