@@ -34,7 +34,7 @@ namespace dqm4hep {
 
     //----------------------------------------------------------------------------------------------------
 
-    float AnalysisHelper::mainHelper(MonitorElementPtr pMonitorElement, int testType = -1, float percentage = 1.0)
+    float AnalysisHelper::mainHelper(MonitorElementPtr pMonitorElement, std::string testType, float percentage)
     {
 
       if (nullptr == pMonitorElement) {
@@ -45,7 +45,7 @@ namespace dqm4hep {
       TAxis *axis = h->GetXaxis();
       int nbins = axis->GetNbins();
 
-      if (testType == 1) // Test type is MEAN
+      if (testType == "Mean")
 	{
 	  if (percentage < 1.0)
 	    {
@@ -58,7 +58,7 @@ namespace dqm4hep {
 	      return result;
 	    }
 	}
-      else if (testType == 2) // Test type is RMS
+      else if (testType == "RMS")
 	{
 	  if (percentage < 1.0)
 	    {
@@ -72,7 +72,7 @@ namespace dqm4hep {
 	      return result;
 	    }
 	}
-      else if (testType == 3) // Test type is MEDIAN
+      else if (testType == "Median")
 	{
 	  float result = AnalysisHelper::findMedian(pMonitorElement);
 	  return result;
@@ -132,8 +132,6 @@ namespace dqm4hep {
       }
 
       TH1 *h = pMonitorElement->objectTo<TH1>();
-      //TAxis *axis = h->GetXaxis();
-      //int nbins = axis->GetNbins();
 
       Double_t xq[1];
       Double_t yq[1];
@@ -145,6 +143,7 @@ namespace dqm4hep {
       return result;
       
     }
+
   }
 
 }
