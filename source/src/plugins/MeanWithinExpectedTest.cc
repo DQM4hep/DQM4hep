@@ -64,7 +64,7 @@ namespace dqm4hep {
       float m_meanDeviationUpper;
       float m_percentage;
 
-      std::vector<std::string> m_testTypesList;
+      std::vector<std::string> m_testTypes;
 
     };
 
@@ -109,6 +109,16 @@ namespace dqm4hep {
       // solve for the mean. Ideally, we throw an error and include a message explaining that the bound is too
       // high or too low, and to check the XML file to fix it.
 
+      // IF lowerBound == EXISTS:
+      //     IF lowerBound < expectedMean:
+      //         (read it in and proceed normally)
+      //     ELSE
+      //         (throw error since it's wrong)
+      // ELSE
+      //     (trigger logic switch for lower-than tests) (which is probably leaving the number as -9999 or whatever)
+
+      // if XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_expectedMean)
+
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
                        XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower,
                                                 [this](const float &value) { return value < this->m_expectedMean; }));
@@ -120,7 +130,7 @@ namespace dqm4hep {
       // This only succeeds if there's no percentage -- so we need to use the SOFT version I think?
       SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypeList", m_testTypesList));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypes", m_testTypes));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -138,8 +148,7 @@ namespace dqm4hep {
       const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
       float result;
 
-      for (std::vector<std::string>::iterator it = m_testTypesList.begin(); it != m_testTypesList.end(); it++){
-
+      for (std::vector<std::string>::iterator it = m_testTypes.begin(); it != m_testTypes.end(); it++){
 	result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
       }
 
