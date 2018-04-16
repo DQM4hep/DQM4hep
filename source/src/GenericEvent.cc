@@ -34,36 +34,6 @@ namespace dqm4hep {
 
   namespace core {
 
-    /**
-     * @brief GenericEventStreamer class
-     */
-    class GenericEventStreamer : public EventStreamerPlugin {
-    public:
-      /** Constructor
-       */
-      GenericEventStreamer();
-
-      /** Destructor
-       */
-      ~GenericEventStreamer() override;
-
-      /** Factory method to create the corresponding event to this streamer.
-       *  The event is expected to contains an allocated wrapped event
-       */
-      EventPtr createEvent() const override;
-
-      /** Serialize the event and store it into a data stream.
-       */
-      StatusCode write(EventPtr event, xdrstream::IODevice *pDevice) override;
-
-      /** De-serialize the event.
-       */
-      StatusCode read(EventPtr event, xdrstream::IODevice *pDevice) override;
-    };
-    
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
     EventPtr GenericEvent::make_shared() {
       auto ptr = std::shared_ptr<Event>(new EventBase<GenericEvent>(new GenericEvent()));
       ptr->setStreamerName("GenericEventStreamer");
@@ -184,70 +154,5 @@ namespace dqm4hep {
       return STATUS_CODE_NOT_FOUND;
     }
 
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    GenericEventStreamer::GenericEventStreamer() {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    GenericEventStreamer::~GenericEventStreamer() {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    EventPtr GenericEventStreamer::createEvent() const {
-      return std::shared_ptr<Event>(new EventBase<GenericEvent>(new GenericEvent()));
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode GenericEventStreamer::write(EventPtr event, xdrstream::IODevice *pDevice) {
-      const GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
-
-      if (nullptr == pGenericEvent)
-        return STATUS_CODE_INVALID_PARAMETER;
-
-      // write event contents
-      const GenericEvent::IntVectorMap &intVals(pGenericEvent->m_intValues);
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, intVals), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_floatValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_doubleValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_stringValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode GenericEventStreamer::read(EventPtr event, xdrstream::IODevice *pDevice) {
-      GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
-
-      // write event contents
-      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_intValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_floatValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_doubleValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      return STATUS_CODE_SUCCESS;
-    }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    DQM_PLUGIN_DECL(GenericEventStreamer, "GenericEventStreamer");
   }
 }
