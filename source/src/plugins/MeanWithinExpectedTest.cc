@@ -83,8 +83,8 @@ namespace dqm4hep {
     MeanWithinExpectedTest::MeanWithinExpectedTest(const std::string &qname)
         : QualityTest("MeanWithinExpected", qname),
           m_expectedMean(0.f),
-          m_meanDeviationLower(0.f),
-          m_meanDeviationUpper(0.f),
+	  m_meanDeviationLower(float NAN),
+	  m_meanDeviationUpper(float NAN),
 	  m_percentage(1.0)
 {
       m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is "
@@ -95,42 +95,19 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle) {
-      //RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
-      //RETURN_RESULT_IF(STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypes", m_testTypes));
+
       SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
-      //XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean);
-      
-      // Okay so the below code is the readParameter function with the optional validator to check the result;
-      // the code below fails when the ExpectedMean isn't found, because the given lower bound is above the mean,
-      // because it defaults to 0. This behaviour is good, but doesn't reveal itself very well when run, giving
-      // cryptic error messages that don't explain what went wrong.
 
-      // It can easily be removed, but this will result in some strange behavior further down when we actually
-      // solve for the mean. Ideally, we throw an error and include a message explaining that the bound is too
-      // high or too low, and to check the XML file to fix it.
-
-      // IF lowerBound == EXISTS:
-      //     IF lowerBound < expectedMean:
-      //         (read it in and proceed normally)
-      //     ELSE
-      //         (throw error since it's wrong)
-      // ELSE
-      //     (trigger logic switch for lower-than tests) (which is probably leaving the number as -9999 or whatever)
-
-      // if XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_expectedMean)
-
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
-                       XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower,
-                                                [this](const float &value) { return value < this->m_expectedMean; }));
-
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
-                       XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper,
-                                                [this](const float &value) { return value > this->m_expectedMean; }));
-
-      // This only succeeds if there's no percentage -- so we need to use the SOFT version I think?
       SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypes", m_testTypes));
+      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower));
+
+      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper));
+      
+      if ( (std::isnan(m_meanDeviationLower)) && (std::isnan(m_meanDeviationUpper)) ) {
+	return STATUS_CODE_FAILURE;
+      }
 
       return STATUS_CODE_SUCCESS;
     }
@@ -145,24 +122,64 @@ namespace dqm4hep {
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
 
-      const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
       float result;
+
+      // Worth remembering that this is useless right now for multiple test-types; there's only one set of
+      // parameters and this will only allow the last test type to be operated on by the rest of the code
+
+      // It's not relevant for now, since we're unable to do more than one test type per "qtest" object,
+      // since the tests only operate on one set of parameters.
 
       for (std::vector<std::string>::iterator it = m_testTypes.begin(); it != m_testTypes.end(); it++){
 	result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
       }
 
-      if (m_meanDeviationLower < result && result < m_meanDeviationUpper) {
-        report.m_message =
-            "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(result);
-      } 
-      else {
-        report.m_message =
-            "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(result);
+      if ( std::isnan(m_meanDeviationLower) ) {
+	// Do the lower-than comparison
+	if (result < m_meanDeviationUpper) {
+	  report.m_message = 
+	    "Below expected value: expected " + typeToString(m_meanDeviationUpper) + ", got " + typeToString(result);
+	  report.m_quality = 1.0;
+	}
+	else { 
+	  report.m_message = 
+	    "Above expected value: expected " + typeToString(m_meanDeviationUpper) + ", got " + typeToString(result);
+	  report.m_quality = 0.0;
+	}
       }
+      else if ( std::isnan(m_meanDeviationUpper) ) {
+	// Do the higher-than comparison
+	if (result > m_meanDeviationLower) {
+	  report.m_message = 
+	    "Above expected value: expected " + typeToString(m_meanDeviationLower) + ", got " + typeToString(result);
+	  report.m_quality = 1.0;
+	}
+	else { 
+	  report.m_message = 
+	    "Below expected value: expected " + typeToString(m_meanDeviationLower) + ", got " + typeToString(result);
+	  report.m_quality = 0.0;
+	}
+      }
+      else {
+	// Do the within-range comparison
+	const float range(fabs(m_meanDeviationUpper - m_meanDeviationLower));
 
-      const float chi = (result - m_expectedMean) / range;
-      report.m_quality = TMath::Prob(chi * chi, 1);
+	if (m_meanDeviationLower < result && result < m_meanDeviationUpper) {
+	  report.m_message =
+            "Within expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(result);
+	} 
+	else {
+	  report.m_message =
+            "Out of expected range: expected " + typeToString(m_expectedMean) + ", got " + typeToString(result);
+	}
+
+	const float chi = (result - m_expectedMean) / range;
+	report.m_quality = TMath::Prob(chi * chi, 1);
+      }
+      
+      // Maybe think about each if-statement defining it's chi and m_quality, then report those separately
+      // at the end, outside the if-statements (reduces boilerplate?)
+
     }
 
     DQM_PLUGIN_DECL(MeanWithinExpectedTestFactory, "MeanWithinExpectedTest");
