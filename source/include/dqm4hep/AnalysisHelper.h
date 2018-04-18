@@ -52,10 +52,6 @@ namespace dqm4hep {
       
       static float mainHelper(MonitorElementPtr pMonitorElement, std::string testType, float percentage);
 
-      static float findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage);
-
-      static float findMedian(MonitorElementPtr pMonitorElement);
-
       static float mean(MonitorElementPtr pMonitorElement, float percentage);
       static float mean90(MonitorElementPtr pMonitorElement);
       static float rms(MonitorElementPtr pMonitorElement, float percentage);

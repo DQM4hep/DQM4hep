@@ -32,65 +32,13 @@ namespace dqm4hep {
 
   namespace core {
 
-    //----------------------------------------------------------------------------------------------------
-
-    float AnalysisHelper::mainHelper(MonitorElementPtr pMonitorElement, std::string testType, float percentage)
-    {
-
-      if (nullptr == pMonitorElement) {
-        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
-      }
-
-      TH1 *h = pMonitorElement->objectTo<TH1>();
-      TAxis *axis = h->GetXaxis();
-      int nbins = axis->GetNbins();
-
-      if (testType == "Mean")
-	{
-	  if (percentage < 1.0)
-	    {
-	      float result = AnalysisHelper::findMeanOfPercent(pMonitorElement, percentage);
-	      return result;
-	    }
-	  else
-	    {
-	      float result = h->GetMean();
-	      return result;
-	    }
-	}
-      else if (testType == "RMS")
-	{
-	  if (percentage < 1.0)
-	    {
-	      float result = 0.0;
-	      //float result = AnalysisHelper::findRMSOfPercent();
-	      return result;
-	    }
-	  else
-	    {
-	      float result = h->GetRMS();
-	      return result;
-	    }
-	}
-      else if (testType == "Median")
-	{
-	  float result = AnalysisHelper::findMedian(pMonitorElement);
-	  return result;
-	}
-      else
-	{
-	  throw StatusCodeException(STATUS_CODE_FAILURE); // The generic error statuscode is temporary until a specific statuscode for this exists, or a custom error message can be written here
-	}
-    }
-
-    // - - - - - - -
-
-    static float mean(MonitorElementPtr pMonitorElement, float percentage = 1.0);
+    float AnalysisHelper::mean(MonitorElementPtr pMonitorElement, float percentage = 1.0)
     {
       TH1 *h = pMonitorElement->objectTo<TH1>();
+      float result;
 
       if (percentage == 1.0) {
-	float result = h->GetMean();
+	result = h->GetMean();
       }
       else {
 	TAxis *axis = h->GetXaxis();
@@ -121,25 +69,33 @@ namespace dqm4hep {
 	    if (sumw > entries) break;
 	  }
 	      
-	float result = sumwx/sumw;
+	result = sumwx/sumw;
       }
-
       return result;
-
     }
 
-    static float mean90(MonitorElementPtr pMonitorElement);
+    float AnalysisHelper::mean90(MonitorElementPtr pMonitorElement)
     {
       float result = AnalysisHelper::mean(pMonitorElement, 0.9);
       return result;
     }
 
-    static float rms(MonitorElementPtr pMonitorElement, float percentage = 1.0);
+    float AnalysisHelper::rms(MonitorElementPtr pMonitorElement, float percentage = 1.0)
     {
-      // PROGRAM
+      TH1 *h = pMonitorElement->objectTo<TH1>();
+      float result;
+
+      if (percentage == 1.0) {
+	result = h->GetRMS();
+      }
+      else {
+	// PLACEHOLDER
+	float result = 0.0;
+      }
+      return result;
     }
 
-    static float rms90(MonitorElementPtr pMonitorElement);
+    float AnalysisHelper::rms90(MonitorElementPtr pMonitorElement)
     {
       float result = AnalysisHelper::rms(pMonitorElement, 0.9);
       return result;

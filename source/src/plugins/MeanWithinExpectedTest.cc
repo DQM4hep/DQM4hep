@@ -34,7 +34,6 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/AnalysisHelper.h>
-//#include <dqm4hep/AnalysisHelper.cc>
 
 // -- root headers
 #include <TH1.h>
@@ -97,14 +96,12 @@ namespace dqm4hep {
     StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle) {
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypes", m_testTypes));
 
-      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper));
 
-      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
-
-      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower));
-
-      SOFT_RETURN_RESULT_IF(XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper));
-      
+      // This should be replaced with validator lambdas in the expressions above
       if ( (std::isnan(m_meanDeviationLower)) && (std::isnan(m_meanDeviationUpper)) ) {
 	return STATUS_CODE_FAILURE;
       }
@@ -127,22 +124,23 @@ namespace dqm4hep {
 
       if (m_testTypes[0] == "Mean")
 	{
-	  result = AnalysisHelper::mean(pMonitorElement, m_percentage);
+	  result = AnalysisHelper::mean(monitorElement, m_percentage);
 	}
       else if (m_testTypes[0] == "Mean90")
 	{
-	  result = AnalysisHelper::mean90(pMonitorElement);
+	  result = AnalysisHelper::mean90(monitorElement);
 	}
-      else if (testType == "RMS")
+      else if (m_testTypes[0] == "RMS")
 	{
-	  result = AnalysisHelper::rms(pMonitorElement, m_percentage);
+	  result = AnalysisHelper::rms(monitorElement, m_percentage);
 	}
       else if (m_testTypes[0] == "RMS90")
 	{
-	  result = Analysishelper::rms90(pMonitorElement);
-      else if (testType == "Median")
+	  result = AnalysisHelper::rms90(monitorElement);
+	}
+      else if (m_testTypes[0] == "Median")
 	{
-	  result = AnalysisHelper::median(pMonitorElement);
+	  result = AnalysisHelper::median(monitorElement);
 	}
       else
 	{
