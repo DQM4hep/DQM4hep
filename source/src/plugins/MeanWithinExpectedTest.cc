@@ -34,7 +34,6 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/AnalysisHelper.h>
-//#include <dqm4hep/AnalysisHelper.cc>
 
 // -- root headers
 #include <TH1.h>
