@@ -114,6 +114,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void MeanWithinExpectedTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
+      
       TH1 *pHistogram = monitorElement->objectTo<TH1>();
 
       if (nullptr == pHistogram) {
@@ -123,15 +124,43 @@ namespace dqm4hep {
 
       float result;
 
+      if (m_testTypes[0] == "Mean")
+	{
+	  result = AnalysisHelper::mean(pMonitorElement, m_percentage);
+	}
+      else if (m_testTypes[0] == "Mean90")
+	{
+	  result = AnalysisHelper::mean90(pMonitorElement);
+	}
+      else if (testType == "RMS")
+	{
+	  result = AnalysisHelper::rms(pMonitorElement, m_percentage);
+	}
+      else if (m_testTypes[0] == "RMS90")
+	{
+	  result = Analysishelper::rms90(pMonitorElement);
+      else if (testType == "Median")
+	{
+	  result = AnalysisHelper::median(pMonitorElement);
+	}
+      else
+	{
+	  throw StatusCodeException(STATUS_CODE_FAILURE); // The generic error statuscode is temporary until a specific statuscode for this exists, or a custom error message can be written here
+	}
+
+      // # # # # # #
+
       // Worth remembering that this is useless right now for multiple test-types; there's only one set of
       // parameters and this will only allow the last test type to be operated on by the rest of the code
 
       // It's not relevant for now, since we're unable to do more than one test type per "qtest" object,
       // since the tests only operate on one set of parameters.
 
-      for (std::vector<std::string>::iterator it = m_testTypes.begin(); it != m_testTypes.end(); it++){
-	result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
-      }
+      //for (std::vector<std::string>::iterator it = m_testTypes.begin(); it != m_testTypes.end(); it++){
+      //  /result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
+      //}
+
+      // # # # # # #
 
       if ( std::isnan(m_meanDeviationLower) ) {
 	// Do the lower-than comparison
@@ -175,9 +204,6 @@ namespace dqm4hep {
 	const float chi = (result - m_expectedMean) / range;
 	report.m_quality = TMath::Prob(chi * chi, 1);
       }
-      
-      // Maybe think about each if-statement defining it's chi and m_quality, then report those separately
-      // at the end, outside the if-statements (reduces boilerplate?)
 
     }
 

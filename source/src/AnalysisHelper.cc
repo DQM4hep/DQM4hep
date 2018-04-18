@@ -83,53 +83,70 @@ namespace dqm4hep {
 	}
     }
 
-    float AnalysisHelper::findMeanOfPercent(MonitorElementPtr pMonitorElement, float percentage = 1.0)
+    // - - - - - - -
+
+    static float mean(MonitorElementPtr pMonitorElement, float percentage = 1.0);
     {
-
-      if (nullptr == pMonitorElement) {
-        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
-      }
-
       TH1 *h = pMonitorElement->objectTo<TH1>();
-      TAxis *axis = h->GetXaxis();
-      int nbins = axis->GetNbins();
-      int imean = axis->FindBin(h->GetMean());
 
-      float entries = percentage*h->GetEntries();
-      float w = h->GetBinContent(imean);
-      float x = h->GetBinCenter(imean);
-      float sumw = w;
-      float sumwx = w*x;
+      if (percentage == 1.0) {
+	float result = h->GetMean();
+      }
+      else {
+	TAxis *axis = h->GetXaxis();
+	int nbins = axis->GetNbins();
+	int imean = axis->FindBin(h->GetMean());
 
-      for (int i=1;i<nbins;i++)
-	{
-	  if (i>0)
-	    {
-	      w = h->GetBinContent(imean-i);
-	      x = h->GetBinCenter(imean-i);
+	float entries = percentage*h->GetEntries();
+	float w = h->GetBinContent(imean);
+	float x = h->GetBinCenter(imean);
+	float sumw = w;
+	float sumwx = w*x;
+
+	for (int i=1;i<nbins;i++)
+	  {
+	    if (i>0)
+	      {
+		w = h->GetBinContent(imean-i);
+		x = h->GetBinCenter(imean-i);
+		sumw += w;
+		sumwx += w*x;
+	      }
+	    if (i<= nbins) {
+	      w = h->GetBinContent(imean+i);
+	      x = h->GetBinCenter(imean+i);
 	      sumw += w;
 	      sumwx += w*x;
 	    }
-	  if (i<= nbins) {
-	    w = h->GetBinContent(imean+i);
-	    x = h->GetBinCenter(imean+i);
-	    sumw += w;
-	    sumwx += w*x;
+	    if (sumw > entries) break;
 	  }
-	  if (sumw > entries) break;
-	}
 	      
-      float result = sumwx/sumw;
+	float result = sumwx/sumw;
+      }
+
       return result;
-	      
+
     }
 
-    float AnalysisHelper::findMedian(MonitorElementPtr pMonitorElement)
+    static float mean90(MonitorElementPtr pMonitorElement);
     {
+      float result = AnalysisHelper::mean(pMonitorElement, 0.9);
+      return result;
+    }
 
-      if (nullptr == pMonitorElement) {
-        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
-      }
+    static float rms(MonitorElementPtr pMonitorElement, float percentage = 1.0);
+    {
+      // PROGRAM
+    }
+
+    static float rms90(MonitorElementPtr pMonitorElement);
+    {
+      float result = AnalysisHelper::rms(pMonitorElement, 0.9);
+      return result;
+    }
+
+    float AnalysisHelper::median(MonitorElementPtr pMonitorElement)
+    {
 
       TH1 *h = pMonitorElement->objectTo<TH1>();
 
