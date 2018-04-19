@@ -100,7 +100,7 @@ namespace dqm4hep {
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower));
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper,
-												       [this](&value){return !(isnan(this->m_meanDeviationLower) && isnan(value));}));
+												       [this](const float &value){return !(isnan(this->m_meanDeviationLower) && isnan(value));}));
 
       return STATUS_CODE_SUCCESS;
     }
