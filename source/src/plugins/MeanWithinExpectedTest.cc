@@ -63,7 +63,7 @@ namespace dqm4hep {
       float m_meanDeviationUpper;
       float m_percentage;
 
-      std::vector<std::string> m_testTypes;
+      std::vector<std::string> m_properties;
 
     };
 
@@ -94,17 +94,13 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     StatusCode MeanWithinExpectedTest::readSettings(const TiXmlHandle xmlHandle) {
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "TestTypes", m_testTypes));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameters(xmlHandle, "Properties", m_properties));
 
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "ExpectedMean", m_expectedMean));
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "Percentage", m_percentage));
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationLower", m_meanDeviationLower));
-      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper));
-
-      // This should be replaced with validator lambdas in the expressions above
-      if ( (std::isnan(m_meanDeviationLower)) && (std::isnan(m_meanDeviationUpper)) ) {
-	return STATUS_CODE_FAILURE;
-      }
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "MeanDeviationUpper", m_meanDeviationUpper,
+												       [this](&value){return !(isnan(this->m_meanDeviationLower) && isnan(value));}));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -122,23 +118,23 @@ namespace dqm4hep {
 
       float result;
 
-      if (m_testTypes[0] == "Mean")
+      if (m_properties[0] == "Mean")
 	{
 	  result = AnalysisHelper::mean(monitorElement, m_percentage);
 	}
-      else if (m_testTypes[0] == "Mean90")
+      else if (m_properties[0] == "Mean90")
 	{
 	  result = AnalysisHelper::mean90(monitorElement);
 	}
-      else if (m_testTypes[0] == "RMS")
+      else if (m_properties[0] == "RMS")
 	{
 	  result = AnalysisHelper::rms(monitorElement, m_percentage);
 	}
-      else if (m_testTypes[0] == "RMS90")
+      else if (m_properties[0] == "RMS90")
 	{
 	  result = AnalysisHelper::rms90(monitorElement);
 	}
-      else if (m_testTypes[0] == "Median")
+      else if (m_properties[0] == "Median")
 	{
 	  result = AnalysisHelper::median(monitorElement);
 	}
@@ -147,19 +143,11 @@ namespace dqm4hep {
 	  throw StatusCodeException(STATUS_CODE_FAILURE); // The generic error statuscode is temporary until a specific statuscode for this exists, or a custom error message can be written here
 	}
 
-      // # # # # # #
-
-      // Worth remembering that this is useless right now for multiple test-types; there's only one set of
-      // parameters and this will only allow the last test type to be operated on by the rest of the code
-
-      // It's not relevant for now, since we're unable to do more than one test type per "qtest" object,
-      // since the tests only operate on one set of parameters.
-
-      //for (std::vector<std::string>::iterator it = m_testTypes.begin(); it != m_testTypes.end(); it++){
-      //  /result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
-      //}
-
-      // # # # # # #
+      /*
+      for (std::vector<std::string>::iterator it = m_properties.begin(); it != m_properties.end(); it++){
+        result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
+      }
+      */
 
       if ( std::isnan(m_meanDeviationLower) ) {
 	// Do the lower-than comparison
