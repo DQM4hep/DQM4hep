@@ -213,7 +213,7 @@ namespace dqm4hep {
         if(fscanf(file, "%lu %lu %lu", 
           &stat.rcv_bytes, 
           &stat.rcv_packets, 
-          &stat.rcv_errs) == EOF) {
+          &stat.rcv_errs) == EOF) {
             return;
           }
         
