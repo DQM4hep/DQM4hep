@@ -6,7 +6,7 @@ macro( DQM4HEP_SET_CXX_FLAGS )
   # Require C++11
   include( CheckCXXCompilerFlag )
   
-  set( COMPILER_FLAGS -Wunused-value -Wall -Wextra -pedantic -Wshadow -Wformat-security -Wno-long-long -Wdeprecated -Wreturn-type )
+  set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wdeprecated -Wreturn-type -Wsuggest-attribute=const -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override -Wno-comments -Wzero-as-null-pointer-constant -Wparentheses -Wuseless-cast -Wlogical-op -Wredundant-decls )
   
   if( DQM4HEP_WARNING_AS_ERROR )
     set( COMPILER_FLAGS ${COMPILER_FLAGS} -Werror )
