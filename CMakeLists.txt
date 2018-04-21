@@ -35,17 +35,7 @@ dqm4hep_find_packages(
 )
 
 # ----- Install doc -----
-if( INSTALL_DOC )
-    find_package( Doxygen )
-
-    if( DOXYGEN_FOUND )
-        add_subdirectory( ./doc )
-    else()
-        message( SEND_ERROR "Could not find doxygen required to build documentation" )
-        message( "Please install doxygen or set INSTALL_DOC to OFF" )
-        message( "" )
-    endif()
-endif()
+dqm4hep_build_doxygen()
 
 ###############################
 # Add source directory

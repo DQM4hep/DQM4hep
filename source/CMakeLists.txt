@@ -9,9 +9,8 @@
 include_directories( BEFORE include )
 
 # -------------------------------------------------
-# require proper c++
-add_definitions( "-pedantic -Wunused-value -O2" )
-add_definitions("-Wno-long-long -Wreturn-type -Werror")
+# Set CXX_FLAGS
+dqm4hep_set_cxx_flags()
 
 # -------------------------------------------------
 # build the project dictionary
