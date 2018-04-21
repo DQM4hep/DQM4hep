@@ -17,10 +17,6 @@ set( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # Central settings
 include( dqm4hep_settings )
 
-###############################
-# Define options
-option( INSTALL_DOC "Set to OFF to skip build/install Documentation" OFF )
-
 # ----- Find ROOT package -----
 dqm4hep_find_package(
   PACKAGE ROOT
