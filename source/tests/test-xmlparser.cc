@@ -44,7 +44,7 @@ using namespace dqm4hep::core;
     exit(1);                                                                                                           \
   }
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char *argv[]) {
   Logger::createLogger("test-xmlparser", {Logger::coloredConsole()});
   Logger::setMainLogger("test-xmlparser");
   Logger::setLogLevel(spdlog::level::debug);

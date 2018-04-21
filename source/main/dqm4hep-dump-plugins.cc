@@ -37,7 +37,7 @@
 using namespace std;
 using namespace dqm4hep::core;
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   
   try {
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, PluginManager::instance()->loadLibraries());

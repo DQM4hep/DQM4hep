@@ -58,7 +58,7 @@ private:
 
 typedef Directory<Object> Directory_t;
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   Logger::createLogger("test-directory", {Logger::coloredConsole()});
   Logger::setMainLogger("test-directory");
   Logger::setLogLevel(spdlog::level::debug);

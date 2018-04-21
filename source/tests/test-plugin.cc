@@ -55,7 +55,7 @@ public:
 
 DQM_PLUGIN_DECL(TestPlugin, "TestPlugin");
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   Logger::createLogger("test-plugin", {Logger::coloredConsole()});
   Logger::setMainLogger("test-plugin");
   Logger::setLogLevel(spdlog::level::debug);

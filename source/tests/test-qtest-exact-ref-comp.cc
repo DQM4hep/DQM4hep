@@ -98,7 +98,7 @@ void fillDifferentNPoints(TGraph *graph) {
   graph->SetPoint(7, 130, 78);
 }
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   
   DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-qtest-exact-ref-comp", {Logger::coloredConsole()}); );
   Logger::setMainLogger("test-qtest-exact-ref-comp");

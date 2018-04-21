@@ -45,7 +45,7 @@ using namespace dqm4hep::core;
     exit(1);                                                                                                           \
   }
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   Logger::createLogger("test-me-json", {Logger::coloredConsole()});
   Logger::setMainLogger("test-me-json");
   Logger::setLogLevel(spdlog::level::debug);

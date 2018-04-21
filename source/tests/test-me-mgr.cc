@@ -44,7 +44,7 @@ using namespace dqm4hep::core;
     exit(1);                                                                                                           \
   }
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   Logger::createLogger("test-me-mgr", {Logger::coloredConsole()});
   Logger::setMainLogger("test-me-mgr");
   Logger::setLogLevel(spdlog::level::debug);

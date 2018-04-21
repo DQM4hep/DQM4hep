@@ -59,7 +59,7 @@ EventPtr createEvent() {
   return event;
 }
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   Logger::createLogger("test-root-event-streamer", {Logger::coloredConsole()});
   Logger::setMainLogger("test-root-event-streamer");
   Logger::setLogLevel(spdlog::level::debug);

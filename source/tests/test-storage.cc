@@ -60,7 +60,7 @@ typedef Directory<Object> Directory_t;
 typedef Storage<Object> Storage_t;
 typedef Storage_t::ObjectList ObjectList;
 
-int main(int argc, char *argv[]) {
+int main(int /*argc*/, char ** /*argv*/) {
   DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-storage", {Logger::coloredConsole()}); );
   Logger::setMainLogger("test-storage");
   Logger::setLogLevel(spdlog::level::debug);
