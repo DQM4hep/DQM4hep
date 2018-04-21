@@ -21,7 +21,7 @@ macro( DQM4HEP_FIND_PACKAGES )
     find_package( ${pkg} ${FIND_PACKAGES_PKG_MODE} )
     
     if( ${pkg}_FOUND )
-      include_directories( ${${pkg}_INCLUDE_DIRS} )
+      include_directories( SYSTEM ${${pkg}_INCLUDE_DIRS} )
       link_libraries( ${${pkg}_LIBRARIES} )
       add_definitions ( ${${pkg}_DEFINITIONS} )
 
@@ -64,7 +64,7 @@ macro( DQM4HEP_FIND_PACKAGE )
     find_package( ${FIND_PKG_PACKAGE} ${FIND_PKG_VERSION} ${FIND_PKG_PKG_MODE} )
   endif()
   
-  include_directories( ${${FIND_PKG_PACKAGE}_INCLUDE_DIRS} )
+  include_directories( SYSTEM ${${FIND_PKG_PACKAGE}_INCLUDE_DIRS} )
   link_libraries( ${${FIND_PKG_PACKAGE}_LIBRARIES} )
   add_definitions ( ${${FIND_PKG_PACKAGE}_DEFINITIONS} )
 
