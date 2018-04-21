@@ -182,7 +182,7 @@ StdOutput::_shortUsage( CmdLineInterface& _cmd,
 	// if the program name is too long, then adjust the second line offset 
 	int secondLineOffset = static_cast<int>(progName.length()) + 2;
 	if ( secondLineOffset > 75/2 )
-		secondLineOffset = static_cast<int>(75/2);
+		secondLineOffset = 75/2;
 
 	spacePrint( os, s, 75, 3, secondLineOffset );
 }
