@@ -99,7 +99,7 @@ namespace dqm4hep {
       /**
        *
        */
-      const Function getFunction() const;
+      Function getFunction() const;
 
     private:
       T *m_pClass;
@@ -129,7 +129,7 @@ namespace dqm4hep {
       /**
        *
        */
-      const Function getFunction() const;
+      Function getFunction() const;
 
     private:
       T *m_pClass;
@@ -424,7 +424,7 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
 
     template <typename T, typename... Args>
-    inline const typename SignalT<T, Args...>::Function SignalT<T, Args...>::getFunction() const {
+    inline typename SignalT<T, Args...>::Function SignalT<T, Args...>::getFunction() const {
       return m_function;
     }
 
@@ -453,7 +453,7 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
 
     template <typename T>
-    inline const typename SignalT<T, void>::Function SignalT<T, void>::getFunction() const {
+    inline typename SignalT<T, void>::Function SignalT<T, void>::getFunction() const {
       return m_function;
     }
   }
