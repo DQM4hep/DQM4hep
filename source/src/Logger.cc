@@ -96,13 +96,13 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void Logger::setLogLevel(Level level) {
-      m_mainLogger->set_level(static_cast<spdlog::level::level_enum>(level));
+      m_mainLogger->set_level(level);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     std::string Logger::logLevelToString(Logger::Level level) {
-      return spdlog::level::to_str(static_cast<spdlog::level::level_enum>(level));
+      return spdlog::level::to_str(level);
     }
 
     //-------------------------------------------------------------------------------------------------
