@@ -35,12 +35,8 @@ namespace dqm4hep {
 
   namespace core {
 
-    Path::Path() {
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    Path::Path(const std::string &path) : m_path(path) {
+    Path::Path(const std::string &path) : 
+      m_path(path) {
       Path::normalize(m_path);
     }
 

@@ -109,16 +109,18 @@
 //-------------------------------------------------------------------------------------------------
 
 // definitions of the status code table
-#define STATUS_CODE_TABLE(d)                                                                                           \
-  d(STATUS_CODE_SUCCESS, "STATUS_CODE_SUCCESS") d(STATUS_CODE_FAILURE, "STATUS_CODE_FAILURE")                          \
-      d(STATUS_CODE_NOT_FOUND, "STATUS_CODE_NOT_FOUND") d(STATUS_CODE_NOT_INITIALIZED, "STATUS_CODE_NOT_INITIALIZED")  \
-          d(STATUS_CODE_ALREADY_INITIALIZED, "STATUS_CODE_ALREADY_INITIALIZED")                                        \
-              d(STATUS_CODE_ALREADY_PRESENT, "STATUS_CODE_ALREADY_PRESENT")                                            \
-                  d(STATUS_CODE_OUT_OF_RANGE, "STATUS_CODE_OUT_OF_RANGE")                                              \
-                      d(STATUS_CODE_NOT_ALLOWED, "STATUS_CODE_NOT_ALLOWED")                                            \
-                          d(STATUS_CODE_INVALID_PARAMETER, "STATUS_CODE_INVALID_PARAMETER")                            \
-                              d(STATUS_CODE_UNCHANGED, "STATUS_CODE_UNCHANGED")                                        \
-                                  d(STATUS_CODE_INVALID_PTR, "STATUS_CODE_INVALID_PTR")
+#define STATUS_CODE_TABLE(d) \
+  d(STATUS_CODE_SUCCESS, "STATUS_CODE_SUCCESS") \
+  d(STATUS_CODE_FAILURE, "STATUS_CODE_FAILURE") \
+  d(STATUS_CODE_NOT_FOUND, "STATUS_CODE_NOT_FOUND") \
+  d(STATUS_CODE_NOT_INITIALIZED, "STATUS_CODE_NOT_INITIALIZED") \
+  d(STATUS_CODE_ALREADY_INITIALIZED, "STATUS_CODE_ALREADY_INITIALIZED") \
+  d(STATUS_CODE_ALREADY_PRESENT, "STATUS_CODE_ALREADY_PRESENT") \
+  d(STATUS_CODE_OUT_OF_RANGE, "STATUS_CODE_OUT_OF_RANGE") \
+  d(STATUS_CODE_NOT_ALLOWED, "STATUS_CODE_NOT_ALLOWED") \
+  d(STATUS_CODE_INVALID_PARAMETER, "STATUS_CODE_INVALID_PARAMETER") \
+  d(STATUS_CODE_UNCHANGED, "STATUS_CODE_UNCHANGED") \
+  d(STATUS_CODE_INVALID_PTR, "STATUS_CODE_INVALID_PTR")
 
 // macros for enumerators
 #define GET_ENUM_ENTRY(a, b) a,
@@ -134,7 +136,10 @@ namespace dqm4hep {
 
     /** StatusCode enumerator
      */
-    enum StatusCode { STATUS_CODE_TABLE(GET_ENUM_ENTRY) NUMBER_OF_STATUS_CODES };
+    enum StatusCode { 
+      STATUS_CODE_TABLE(GET_ENUM_ENTRY) 
+      NUMBER_OF_STATUS_CODES 
+    };
 
     std::string statusCodeToString(const StatusCode statusCode);
 
@@ -165,14 +170,15 @@ namespace dqm4hep {
       const std::string &getBackTrace() const;
 
     private:
-      const StatusCode m_statusCode; ///< The status code
-      std::string m_backTrace;       ///< The back trace
+      const StatusCode m_statusCode = {STATUS_CODE_SUCCESS};     ///< The status code
+      std::string m_backTrace = {""};                            ///< The back trace
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline StatusCodeException::StatusCodeException(const StatusCode statusCode) : m_statusCode(statusCode) {
+    inline StatusCodeException::StatusCodeException(const StatusCode statusCode) : 
+      m_statusCode(statusCode) {
 #if defined(__GNUC__) && defined(BACKTRACE)
       const size_t maxDepth = 100;
       void *stackAddresses[maxDepth];

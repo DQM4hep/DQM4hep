@@ -43,6 +43,7 @@
       if (reg)                                                                                                         \
         THROW_RESULT_IF(dqm4hep::core::STATUS_CODE_SUCCESS, !=, this->registerMe());                                   \
     }                                                                                                                  \
+    ~DQMPlugin_##ClassName() = default;                                                                                \
     dqm4hep::core::Plugin *create() const {                                                                            \
       return new DQMPlugin_##ClassName(false);                                                                         \
     }                                                                                                                  \
@@ -111,9 +112,9 @@ namespace dqm4hep {
       void dump() const;
 
     private:
-      /** Constructor
+      /** Default constructor
        */
-      PluginManager();
+      PluginManager() = default;
 
       /** Destructor
        */
@@ -124,8 +125,8 @@ namespace dqm4hep {
       StatusCode registerPlugin(Plugin *pPlugin);
 
     private:
-      PluginMap               m_pluginMap;       ///< The map of registered plugins
-      std::vector<void*>      m_dlLibraries;     ///< The list of loaded libraries
+      PluginMap               m_pluginMap = {};       ///< The map of registered plugins
+      std::vector<void*>      m_dlLibraries = {};     ///< The list of loaded libraries
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -150,16 +151,16 @@ namespace dqm4hep {
 
     template <typename T>
     inline StringVector PluginManager::pluginNamesMatchingType() const {
-      StringVector pluginNames;
+      StringVector names;
 
       for (auto plugin : m_pluginMap) {
         const Plugin *pPlugin(plugin.second);
 
         if (nullptr != dynamic_cast<const T *>(pPlugin))
-          pluginNames.push_back(plugin.first);
+          names.push_back(plugin.first);
       }
 
-      return pluginNames;
+      return names;
     }
   }
 }

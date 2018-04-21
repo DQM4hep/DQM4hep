@@ -33,22 +33,6 @@ namespace dqm4hep {
 
   namespace core {
 
-    QualityTestReport::QualityTestReport()
-        : m_qualityTestName(""),
-          m_qualityTestType(""),
-          m_qualityTestDescription(""),
-          m_monitorElementName(""),
-          m_monitorElementType(""),
-          m_monitorElementPath(""),
-          m_message(""),
-          m_quality(0.f),
-          m_qualityFlag(UNDEFINED),
-          m_extraInfos() {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     QualityTestReport::QualityTestReport(const QualityTestReport &qreport) {
       *this = qreport;
     }
@@ -66,7 +50,6 @@ namespace dqm4hep {
       m_quality = qreport.m_quality;
       m_qualityFlag = qreport.m_qualityFlag;
       m_extraInfos = qreport.m_extraInfos;
-
       return *this;
     }
 
@@ -110,14 +93,14 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void QReportStorage::addReport(const QReport &report, bool warnOnReplace) {
-      const std::string &path(report.m_monitorElementPath);
-      const std::string &name(report.m_monitorElementName);
-      const std::string &qtname(report.m_qualityTestName);
+    void QReportStorage::addReport(const QReport &qreport, bool warnOnReplace) {
+      const std::string &path(qreport.m_monitorElementPath);
+      const std::string &name(qreport.m_monitorElementName);
+      const std::string &qtname(qreport.m_qualityTestName);
 
       if (!warnOnReplace) {
         QReportContainer::key_type key(path, name);
-        m_reports[key][qtname] = report;
+        m_reports[key][qtname] = qreport;
       } else {
         QReportContainer::key_type key(path, name);
         auto iter1 = m_reports.find(key);
@@ -128,26 +111,26 @@ namespace dqm4hep {
         auto iter2 = iter1->second.find(qtname);
 
         if (iter1->second.end() == iter2) {
-          iter2 = iter1->second.insert(QReportMap::value_type(qtname, report)).first;
+          iter2 = iter1->second.insert(QReportMap::value_type(qtname, qreport)).first;
         } else {
           dqm_warning("QReportStorage::addReport: Replacing qreport path '{0}', name '{1}', qtest '{2}'", path, name,
                       qtname);
-          iter2->second = report;
+          iter2->second = qreport;
         }
       }
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    void QReportStorage::addReports(const QReportMap &reports, bool warnOnReplace) {
-      for (auto iter : reports)
+    void QReportStorage::addReports(const QReportMap &qreports, bool warnOnReplace) {
+      for (auto iter : qreports)
         this->addReport(iter.second, warnOnReplace);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     StatusCode QReportStorage::report(const std::string &path, const std::string &name,
-                                      const std::string &qualityTestName, QReport &report) {
+                                      const std::string &qualityTestName, QReport &qreport) {
       QReportContainer::key_type key(path, name);
       auto findIter = m_reports.find(key);
 
@@ -159,27 +142,27 @@ namespace dqm4hep {
       if (findIter->second.end() == findIter2)
         return STATUS_CODE_NOT_FOUND;
 
-      report = findIter2->second;
+      qreport = findIter2->second;
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode QReportStorage::reports(const std::string &path, const std::string &name, QReportMap &reports) {
+    StatusCode QReportStorage::reports(const std::string &path, const std::string &name, QReportMap &qreports) {
       QReportContainer::key_type key(path, name);
       auto findIter = m_reports.find(key);
 
       if (m_reports.end() == findIter)
         return STATUS_CODE_NOT_FOUND;
 
-      reports.insert(findIter->second.begin(), findIter->second.end());
+      qreports.insert(findIter->second.begin(), findIter->second.end());
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     StatusCode QReportStorage::reportsQualityHigher(const std::string &path, const std::string &name, float qlimit,
-                                                    QReportMap &reports) {
+                                                    QReportMap &qreports) {
       if (0.f < qlimit || qlimit > 1.f)
         return STATUS_CODE_OUT_OF_RANGE;
 
@@ -191,7 +174,7 @@ namespace dqm4hep {
 
       for (auto qtest : findIter->second) {
         if (qtest.second.m_quality >= qlimit) {
-          reports.insert(QReportMap::value_type(qtest.first, qtest.second));
+          qreports.insert(QReportMap::value_type(qtest.first, qtest.second));
         }
       }
 
@@ -201,7 +184,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     StatusCode QReportStorage::reportsQualityLower(const std::string &path, const std::string &name, float qlimit,
-                                                   QReportMap &reports) {
+                                                   QReportMap &qreports) {
       if (0.f < qlimit || qlimit > 1.f)
         return STATUS_CODE_OUT_OF_RANGE;
 
@@ -213,7 +196,7 @@ namespace dqm4hep {
 
       for (auto qtest : findIter->second) {
         if (qtest.second.m_quality <= qlimit) {
-          reports.insert(QReportMap::value_type(qtest.first, qtest.second));
+          qreports.insert(QReportMap::value_type(qtest.first, qtest.second));
         }
       }
 
@@ -228,7 +211,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode QReportStorage::reportsQualityHigher(float qlimit, QReportContainer &reports) {
+    StatusCode QReportStorage::reportsQualityHigher(float qlimit, QReportContainer &qreports) {
       if (0.f < qlimit || qlimit > 1.f)
         return STATUS_CODE_OUT_OF_RANGE;
 
@@ -244,7 +227,7 @@ namespace dqm4hep {
         if (reportMap.empty())
           continue;
 
-        m_reports.insert(QReportContainer::value_type(iter1.first, reportMap));
+        qreports.insert(QReportContainer::value_type(iter1.first, reportMap));
       }
 
       return STATUS_CODE_SUCCESS;
@@ -252,7 +235,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode QReportStorage::reportsQualityLower(float qlimit, QReportContainer &reports) {
+    StatusCode QReportStorage::reportsQualityLower(float qlimit, QReportContainer &qreports) {
       if (0.f < qlimit || qlimit > 1.f)
         return STATUS_CODE_OUT_OF_RANGE;
 
@@ -268,7 +251,7 @@ namespace dqm4hep {
         if (reportMap.empty())
           continue;
 
-        m_reports.insert(QReportContainer::value_type(iter1.first, reportMap));
+        qreports.insert(QReportContainer::value_type(iter1.first, reportMap));
       }
 
       return STATUS_CODE_SUCCESS;
@@ -300,12 +283,10 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
 
-    QualityTest::QualityTest(const std::string &type, const std::string &name)
-        : m_type(type),
-          m_name(name),
-          m_description(""),
-          m_warningLimit(m_defaultWarningLimit),
-          m_errorLimit(m_defaultErrorLimit) {
+    QualityTest::QualityTest(const std::string &qtype, const std::string &qname) :
+      m_type(qtype),
+      m_name(qname),
+      m_description("") {
       /* nop */
     }
 

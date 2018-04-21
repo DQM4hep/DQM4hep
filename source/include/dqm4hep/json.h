@@ -4033,7 +4033,7 @@ namespace nlohmann {
       /// associated JSON instance
       pointer m_object = nullptr;
       /// the actual iterator of the associated instance
-      internal_iterator<typename std::remove_const<BasicJsonType>::type> m_it;
+      internal_iterator<typename std::remove_const<BasicJsonType>::type> m_it = {};
     };
   }
 }
@@ -7658,7 +7658,7 @@ namespace nlohmann {
           return;
         }
 
-        const bool is_negative = (x <= 0) and (x != 0); // see issue #755
+        const bool is_negative = (x < 0); // see issue #755
         std::size_t i = 0;
 
         while (x != 0) {
@@ -15356,12 +15356,12 @@ namespace nlohmann {
 
     @since version 3.0.0
     */
-    void merge_patch(const basic_json &patch) {
-      if (patch.is_object()) {
+    void merge_patch(const basic_json &p) {
+      if (p.is_object()) {
         if (not is_object()) {
           *this = object();
         }
-        for (auto it = patch.begin(); it != patch.end(); ++it) {
+        for (auto it = p.begin(); it != p.end(); ++it) {
           if (it.value().is_null()) {
             erase(it.key());
           } else {
@@ -15369,7 +15369,7 @@ namespace nlohmann {
           }
         }
       } else {
-        *this = patch;
+        *this = p;
       }
     }
 

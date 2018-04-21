@@ -34,7 +34,8 @@ namespace dqm4hep {
 
   namespace core {
 
-    Plugin::Plugin(const std::string &pluginName) : m_pluginName(pluginName) {
+    Plugin::Plugin(const std::string &name) : 
+      m_pluginName(name) {
       /* nop */
     }
 

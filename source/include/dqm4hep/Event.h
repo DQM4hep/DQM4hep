@@ -135,10 +135,12 @@ namespace dqm4hep {
        *  Ownership transfered to event instance if isOwner argument set to true
        */
       template <typename T>
-      void setEvent(T *pEvent, bool isOwner = true);
+      void setEvent(T *pEvent, bool owner = true);
       
     protected:
       Event() = default;
+      Event(const Event&) = delete;
+      Event& operator=(const Event&) = delete;
       
       /** Set the real event implementation size,
        *  as extracted after its serialization (unit bytes)
@@ -174,6 +176,8 @@ namespace dqm4hep {
       /** Constructor
        */
       EventBase();
+      EventBase(const EventBase&) = delete;
+      EventBase& operator=(const EventBase&) = delete;
 
       /** Constructor with real event
        */
@@ -189,7 +193,7 @@ namespace dqm4hep {
 
       /** Set the real event implementation
        */
-      void setEvent(T *pEvent, bool isOwner = true);
+      void setEvent(T *pEvent, bool owner = true);
 
       /** Whether the event wrapper owns the real event implementation
        */
@@ -201,8 +205,8 @@ namespace dqm4hep {
       void clear() override;
 
     protected:
-      T *m_pEvent;    ///< The real event implementation
-      bool m_isOwner; ///< Whether the event wrapper owns the real event implementation
+      T *m_pEvent = {nullptr};    ///< The real event implementation
+      bool m_isOwner = {true}; ///< Whether the event wrapper owns the real event implementation
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -221,18 +225,16 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Event::setEvent(T *pEvent, bool isOwner) {
+    inline void Event::setEvent(T *pEvent, bool owner) {
       EventBase<T> *const pEventBase(dynamic_cast<EventBase<T> *const>(this));
-
       if (NULL == pEventBase) {
-        if (isOwner)
+        if (owner) {
           delete pEvent;
-
+        }
         return;
       }
-
       pEventBase->clear();
-      pEventBase->setEvent(pEvent, isOwner);
+      pEventBase->setEvent(pEvent, owner);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -311,14 +313,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline EventBase<T>::EventBase() : Event(), m_isOwner(true), m_pEvent(nullptr) {
+    inline EventBase<T>::EventBase() : 
+      Event() {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline EventBase<T>::EventBase(T *pEvent) : Event(), m_isOwner(true), m_pEvent(pEvent) {
+    inline EventBase<T>::EventBase(T *pEvent) : 
+      Event(), 
+      m_pEvent(pEvent) {
       /* nop */
     }
 
@@ -339,10 +344,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void EventBase<T>::setEvent(T *pEvent, bool isOwner) {
+    inline void EventBase<T>::setEvent(T *pEvent, bool owner) {
       this->clear();
       m_pEvent = pEvent;
-      m_isOwner = isOwner;
+      m_isOwner = owner;
     }
 
     //-------------------------------------------------------------------------------------------------

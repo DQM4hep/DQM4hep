@@ -111,8 +111,8 @@ namespace dqm4hep {
         row = col = -1;
       }
 
-      int row; // 0 based.
-      int col; // 0 based.
+      int row = {-1}; // 0 based.
+      int col = {-1}; // 0 based.
     };
 
     /**
@@ -381,10 +381,10 @@ namespace dqm4hep {
 
       static const char *errorString[TIXML_ERROR_STRING_COUNT];
 
-      TiXmlCursor location;
+      TiXmlCursor location = {};
 
       /// Field containing a generic user pointer
-      void *userData;
+      void *userData = {nullptr};
 
       // None of these methods are reliable for any language except English.
       // Good for approximation, not great for accuracy.
@@ -843,16 +843,16 @@ namespace dqm4hep {
       // Figure out what is at *p, and parse it. Returns null if it is not an xml node.
       TiXmlNode *Identify(const char *p, TiXmlEncoding encoding);
 
-      TiXmlNode *parent;
-      NodeType type;
+      TiXmlNode *parent = {nullptr};
+      NodeType type = {TINYXML_UNKNOWN};
 
-      TiXmlNode *firstChild;
-      TiXmlNode *lastChild;
+      TiXmlNode *firstChild = {nullptr};
+      TiXmlNode *lastChild = {nullptr};
 
-      TIXML_STRING value;
+      TIXML_STRING value = {""};
 
-      TiXmlNode *prev;
-      TiXmlNode *next;
+      TiXmlNode *prev = {nullptr};
+      TiXmlNode *next = {nullptr};
 
     private:
       TiXmlNode(const TiXmlNode &);          // not implemented.
@@ -990,11 +990,11 @@ namespace dqm4hep {
       TiXmlAttribute(const TiXmlAttribute &);     // not implemented.
       void operator=(const TiXmlAttribute &base); // not allowed.
 
-      TiXmlDocument *document; // A pointer back to a document, for error reporting.
-      TIXML_STRING name;
-      TIXML_STRING value;
-      TiXmlAttribute *prev;
-      TiXmlAttribute *next;
+      TiXmlDocument *document = {nullptr}; // A pointer back to a document, for error reporting.
+      TIXML_STRING name = {};
+      TIXML_STRING value = {};
+      TiXmlAttribute *prev = {nullptr};
+      TiXmlAttribute *next = {nullptr};
     };
 
     /*	A class used to manage a group of attributes.
@@ -1044,7 +1044,7 @@ namespace dqm4hep {
       TiXmlAttributeSet(const TiXmlAttributeSet &); // not allowed
       void operator=(const TiXmlAttributeSet &);    // not allowed (as TiXmlAttribute)
 
-      TiXmlAttribute sentinel;
+      TiXmlAttribute sentinel = {};
     };
 
     /** The element is a container class. It has a value, the element name,
@@ -1063,7 +1063,7 @@ namespace dqm4hep {
 
       TiXmlElement(const TiXmlElement & /*copy*/);
 
-      void operator=(const TiXmlElement &base);
+      TiXmlElement& operator=(const TiXmlElement &base);
 
       ~TiXmlElement() override;
 
@@ -1271,7 +1271,7 @@ namespace dqm4hep {
       const char *ReadValue(const char *p, TiXmlParsingData *data, TiXmlEncoding encoding);
 
     private:
-      TiXmlAttributeSet attributeSet;
+      TiXmlAttributeSet attributeSet = {};
     };
 
     /**	An XML comment.
@@ -1286,7 +1286,7 @@ namespace dqm4hep {
         SetValue(_value);
       }
       TiXmlComment(const TiXmlComment & /*copy*/);
-      void operator=(const TiXmlComment &base);
+      TiXmlComment& operator=(const TiXmlComment &base);
 
       ~TiXmlComment() override = default;
 
@@ -1353,8 +1353,9 @@ namespace dqm4hep {
       TiXmlText(const TiXmlText &copy) : TiXmlNode(TiXmlNode::TINYXML_TEXT) {
         copy.CopyTo(this);
       }
-      void operator=(const TiXmlText &base) {
+      TiXmlText& operator=(const TiXmlText &base) {
         base.CopyTo(this);
+        return *this;
       }
 
       // Write this text object to a FILE stream.
@@ -1394,7 +1395,7 @@ namespace dqm4hep {
 #endif
 
     private:
-      bool cdata; // true if this should be input and output as a CDATA style text element
+      bool cdata = {false}; // true if this should be input and output as a CDATA style text element
     };
 
     /** In correct XML the declaration is the first entry in the file.
@@ -1425,7 +1426,7 @@ namespace dqm4hep {
       TiXmlDeclaration(const char *_version, const char *_encoding, const char *_standalone);
 
       TiXmlDeclaration(const TiXmlDeclaration &copy);
-      void operator=(const TiXmlDeclaration &copy);
+      TiXmlDeclaration& operator=(const TiXmlDeclaration &copy);
 
       ~TiXmlDeclaration() override = default;
 
@@ -1471,9 +1472,9 @@ namespace dqm4hep {
 #endif
 
     private:
-      TIXML_STRING version;
-      TIXML_STRING encoding;
-      TIXML_STRING standalone;
+      TIXML_STRING version = {""};
+      TIXML_STRING encoding = {""};
+      TIXML_STRING standalone = {""};
     };
 
     /** Any tag that tinyXml doesn't recognize is saved as an
@@ -1492,8 +1493,9 @@ namespace dqm4hep {
       TiXmlUnknown(const TiXmlUnknown &copy) : TiXmlNode(TiXmlNode::TINYXML_UNKNOWN) {
         copy.CopyTo(this);
       }
-      void operator=(const TiXmlUnknown &copy) {
+      TiXmlUnknown& operator=(const TiXmlUnknown &copy) {
         copy.CopyTo(this);
+        return *this;
       }
 
       /// Creates a copy of this Unknown and returns it.
@@ -1541,7 +1543,7 @@ namespace dqm4hep {
 #endif
 
       TiXmlDocument(const TiXmlDocument &copy);
-      void operator=(const TiXmlDocument &copy);
+      TiXmlDocument& operator=(const TiXmlDocument &copy);
 
       ~TiXmlDocument() override = default;
 
@@ -1710,12 +1712,12 @@ namespace dqm4hep {
     private:
       void CopyTo(TiXmlDocument *target) const;
 
-      bool error;
-      int errorId;
-      TIXML_STRING errorDesc;
-      int tabsize;
-      TiXmlCursor errorLocation;
-      bool useMicrosoftBOM; // the UTF-8 BOM were found when read. Note this, and try to write.
+      bool error = {false};
+      int errorId = {-1};
+      TIXML_STRING errorDesc = {""};
+      int tabsize = {4};
+      TiXmlCursor errorLocation = {};
+      bool useMicrosoftBOM = false; // the UTF-8 BOM were found when read. Note this, and try to write.
     };
 
     /**
@@ -1811,7 +1813,7 @@ namespace dqm4hep {
       TiXmlHandle(const TiXmlHandle &ref) {
         this->node = ref.node;
       }
-      TiXmlHandle operator=(const TiXmlHandle &ref) {
+      TiXmlHandle& operator=(const TiXmlHandle &ref) {
         this->node = ref.node;
         return *this;
       }
@@ -1907,7 +1909,7 @@ namespace dqm4hep {
       }
 
     private:
-      TiXmlNode *node;
+      TiXmlNode *node = {nullptr};
     };
 
     /** Print to memory functionality. The TiXmlPrinter is useful when you need to:
@@ -1999,11 +2001,11 @@ namespace dqm4hep {
         buffer += lineBreak;
       }
 
-      int depth;
-      bool simpleTextPrint;
-      TIXML_STRING buffer;
-      TIXML_STRING indent;
-      TIXML_STRING lineBreak;
+      int depth = {0};
+      bool simpleTextPrint = {false};
+      TIXML_STRING buffer = {};
+      TIXML_STRING indent = {"    "};
+      TIXML_STRING lineBreak = {"\n"};
     };
   }
 }

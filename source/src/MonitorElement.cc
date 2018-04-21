@@ -125,8 +125,8 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
 
     //-------------------------------------------------------------------------------------------------
 
-    void MonitorElement::setPath(const std::string &path) {
-      m_path = path;
+    void MonitorElement::setPath(const std::string &p) {
+      m_path = p;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     
     //-------------------------------------------------------------------------------------------------
     
-    void MonitorElement::toJson(json &object) const {
+    void MonitorElement::toJson(json &jobject) const {
       
       json jsonObject = nullptr, jsonReference = nullptr;
       
@@ -225,7 +225,7 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
         jsonReference = json::parse(TBufferJSON::ConvertToJSON(m_referenceObject.ptr(), 23).Data());
       }
 
-      object = {
+      jobject = {
         {"object", jsonObject},
         {"reference", jsonReference},
         {"path", m_path}
@@ -268,21 +268,21 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     //-------------------------------------------------------------------------------------------------
 
     StatusCode MonitorElement::addQualityTest(QTestPtr qualityTest) {
-      const std::string &name(qualityTest->name());
-      auto iter = m_qualityTests.find(name);
+      const std::string &qname(qualityTest->name());
+      auto iter = m_qualityTests.find(qname);
 
       if (m_qualityTests.end() != iter)
         return STATUS_CODE_ALREADY_PRESENT;
 
-      m_qualityTests.insert(QTestMap::value_type(name, qualityTest));
+      m_qualityTests.insert(QTestMap::value_type(qname, qualityTest));
 
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElement::removeQualityTest(const std::string &name) {
-      auto iter = m_qualityTests.find(name);
+    StatusCode MonitorElement::removeQualityTest(const std::string &qname) {
+      auto iter = m_qualityTests.find(qname);
 
       if (m_qualityTests.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -312,8 +312,8 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElement::runQualityTest(const std::string &name, QReport &report) {
-      auto iter = m_qualityTests.find(name);
+    StatusCode MonitorElement::runQualityTest(const std::string &qname, QReport &report) {
+      auto iter = m_qualityTests.find(qname);
 
       if (m_qualityTests.end() == iter)
         return STATUS_CODE_NOT_FOUND;
@@ -361,7 +361,7 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
           return;
 
         Double_t lastX, lastY;
-        Int_t res = this->GetPoint(nPoints - 1, lastX, lastY);
+        this->GetPoint(nPoints - 1, lastX, lastY);
 
         this->GetXaxis()->SetRangeUser(lastX - m_rangeLength, lastX);
 

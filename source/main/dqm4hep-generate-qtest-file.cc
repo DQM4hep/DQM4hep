@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
   pCommandLine->parse(argc, argv);
 
   Path fullRootFilePath(rootFileArg.getValue());
-  fullRootFilePath = std::string(gSystem->GetWorkingDirectory()) + fullRootFilePath;
+  fullRootFilePath = gSystem->GetWorkingDirectory() + fullRootFilePath;
 
   // Create the output xml document
   TiXmlDocument document;

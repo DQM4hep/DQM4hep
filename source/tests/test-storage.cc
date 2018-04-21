@@ -46,7 +46,7 @@ using namespace dqm4hep::core;
 
 class Object {
 public:
-  Object(const std::string &name) : m_name(name) {
+  Object(const std::string &oname) : m_name(oname) {
   }
   const std::string &name() {
     return m_name;

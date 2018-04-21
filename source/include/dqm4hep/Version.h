@@ -84,10 +84,10 @@ namespace dqm4hep {
                                xdrstream::xdr_version_t version = 0) override;
 
     private:
-      unsigned int m_major;
-      unsigned int m_minor;
-      unsigned int m_patch;
-      std::string m_versionString;
+      unsigned int m_major = {0};
+      unsigned int m_minor = {0};
+      unsigned int m_patch = {0};
+      std::string m_versionString = {""};
     };
 
     // compare operators

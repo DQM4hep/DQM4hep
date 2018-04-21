@@ -186,7 +186,7 @@ namespace dqm4hep {
       std::string m_fileName = {""};       ///< The file name of the last parsed file
       TiXmlDocument m_document = {};       ///< The xml document
       StringMap m_constants = {};          ///< The constants map
-      DBInterfaceMap m_databases;          ///< The map of databases
+      DBInterfaceMap m_databases = {};     ///< The map of databases
     };
 
     //----------------------------------------------------------------------------------------------------

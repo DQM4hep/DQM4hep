@@ -64,7 +64,7 @@ namespace dqm4hep {
 
       /** Whether the handler owns the ptr
        */
-      bool owner() const;
+      bool isOwner() const;
 
       /** Pointer operator
        */
@@ -116,7 +116,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline PtrHandler<T>::PtrHandler(T *ptr, bool owner) : m_ptr(ptr), m_owner(owner) {
+    inline PtrHandler<T>::PtrHandler(T *pointer, bool owner) : m_ptr(pointer), m_owner(owner) {
       /* nop */
     }
 
@@ -124,17 +124,17 @@ namespace dqm4hep {
 
     template <typename T>
     inline T *PtrHandler<T>::take() {
-      T *ptr = m_ptr;
+      T *pointer = m_ptr;
       m_ptr = nullptr;
-      return ptr;
+      return pointer;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void PtrHandler<T>::set(T *ptr, bool owner) {
+    inline void PtrHandler<T>::set(T *pointer, bool owner) {
       this->clear();
-      m_ptr = ptr;
+      m_ptr = pointer;
       m_owner = owner;
     }
 
@@ -157,7 +157,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline bool PtrHandler<T>::owner() const {
+    inline bool PtrHandler<T>::isOwner() const {
       return m_owner;
     }
 

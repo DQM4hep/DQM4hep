@@ -62,10 +62,10 @@ namespace dqm4hep {
     public:
       class Factory : public QualityTestFactory {
       public:
-        QTestPtr createQualityTest(const std::string &name) const override;
+        QTestPtr createQualityTest(const std::string &qname) const override;
       };
 
-      ExactRefCompareTest(const std::string &name);
+      ExactRefCompareTest(const std::string &qname);
       ~ExactRefCompareTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
       void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
@@ -77,8 +77,8 @@ namespace dqm4hep {
       void doIsEqualTest(MonitorElementPtr monitorElement, QualityTestReport &report);
       
     private:
-      bool m_compareUnderflow;
-      bool m_compareOverflow;
+      bool m_compareUnderflow = {true};
+      bool m_compareOverflow = {true};
     };
 
     typedef ExactRefCompareTest::Factory ExactRefCompareTestFactory;
@@ -86,17 +86,15 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    inline QTestPtr ExactRefCompareTest::Factory::createQualityTest(const std::string &name) const {
-      return std::shared_ptr<QTest>(new ExactRefCompareTest(name));
+    inline QTestPtr ExactRefCompareTest::Factory::createQualityTest(const std::string &qname) const {
+      return std::shared_ptr<QTest>(new ExactRefCompareTest(qname));
     }
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    ExactRefCompareTest::ExactRefCompareTest(const std::string &name)
-        : QualityTest("ExactRefCompare", name), 
-        m_compareUnderflow(true), 
-        m_compareOverflow(true) {
+    ExactRefCompareTest::ExactRefCompareTest(const std::string &qname)
+        : QualityTest("ExactRefCompare", qname) {
       m_description = std::string("Compare the monitor element to its reference. ") + 
       "Look for an strict equality in terms of object content.\n" + 
       "For TH1 case (and all derived): \n" +
@@ -244,7 +242,7 @@ namespace dqm4hep {
       
       unsigned int nDifferentPoints(0);
       
-      for(Int_t point = 0 ; point < nPoints ; ++point) {
+      for(unsigned int point = 0 ; point < nPoints ; ++point) {
         Double_t x, y, xRef, yRef;
         graph->GetPoint(point, x, y);
         reference->GetPoint(point, xRef, yRef);
@@ -286,7 +284,7 @@ namespace dqm4hep {
       
       unsigned int nDifferentPoints(0);
       
-      for(Int_t point = 0 ; point < nPoints ; ++point) {
+      for(unsigned int point = 0 ; point < nPoints ; ++point) {
         const Double_t x = graph->GetX()[point];
         const Double_t y = graph->GetY()[point];
         const Double_t z = graph->GetZ()[point];

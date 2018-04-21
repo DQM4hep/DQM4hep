@@ -47,6 +47,7 @@ using namespace dqm4hep::core;
 class TestPlugin {
 public:
   TestPlugin() = default;
+  virtual ~TestPlugin() {};
   void print() {
     dqm_info("Hello world plugin !");
   }

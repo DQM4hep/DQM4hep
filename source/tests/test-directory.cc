@@ -46,7 +46,7 @@ using namespace dqm4hep::core;
 
 class Object {
 public:
-  Object(const std::string &name) : m_name(name) {
+  Object(const std::string &oname) : m_name(oname) {
   }
   const std::string &name() {
     return m_name;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
   pBibouDir->add(std::make_shared<Object>("tutu"));
   assert_test(pBibouDir->contents().size() == 3);
 
-  pBibouDir->remove([](std::shared_ptr<Object> object) { return object->name() == "toto"; });
+  pBibouDir->remove([](std::shared_ptr<Object> o) { return o->name() == "toto"; });
   assert_test(pBibouDir->contents().size() == 2);
   Path bibouPath = pBibouDir->fullPath();
   assert_test(bibouPath.getPath() == "/root/bibou");
@@ -95,10 +95,10 @@ int main(int argc, char *argv[]) {
   assert_test(root->isRoot());
   assert_test(!root->isEmpty());
   assert_test(!pBibouDir->isEmpty());
-  assert_test(pBibouDir->contains([](std::shared_ptr<Object> object) { return object->name() == "tata"; }));
-  assert_test(!pBibouDir->contains([](std::shared_ptr<Object> object) { return object->name() == "teufteuf"; }));
-  assert_test(pBibouDir->find([](std::shared_ptr<Object> object) { return object->name() == "tata"; }) != nullptr);
-  assert_test(pBibouDir->find([](std::shared_ptr<Object> object) { return object->name() == "teufteuf"; }) == nullptr);
+  assert_test(pBibouDir->contains([](std::shared_ptr<Object> o) { return o->name() == "tata"; }));
+  assert_test(!pBibouDir->contains([](std::shared_ptr<Object> o) { return o->name() == "teufteuf"; }));
+  assert_test(pBibouDir->find([](std::shared_ptr<Object> o) { return o->name() == "tata"; }) != nullptr);
+  assert_test(pBibouDir->find([](std::shared_ptr<Object> o) { return o->name() == "teufteuf"; }) == nullptr);
   assert_test(root->hasChild("bibou"));
   assert_test(root->mkdir("bibou") == pBibouDir);
   assert_test(pBibouDir->parent() == root);

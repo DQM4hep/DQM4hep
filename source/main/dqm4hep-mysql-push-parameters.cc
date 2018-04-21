@@ -43,11 +43,11 @@ using namespace std;
 using namespace dqm4hep::core;
 
 struct DBInterfaceMetadata {
-  std::shared_ptr<DBInterface> m_dbInterface;
-  std::string m_host;
-  std::string m_user;
-  std::string m_db;
-  std::string m_password;
+  std::shared_ptr<DBInterface> m_dbInterface = {nullptr};
+  std::string m_host = {""};
+  std::string m_user = {""};
+  std::string m_db = {""};
+  std::string m_password = {""};
 };
 
 typedef std::map<std::string, DBInterfaceMetadata> DBInterfaceMetadataMap;

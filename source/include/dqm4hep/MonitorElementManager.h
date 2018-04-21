@@ -307,10 +307,10 @@ namespace dqm4hep {
 
       typedef std::map<MonitorElementPtr, QualityTestMap> MonitorElementToQTestMap;
 
-      Storage<MonitorElement> m_storage;
-      QualityTestFactoryMap m_qualityTestFactoryMap;
-      QualityTestMap m_qualityTestMap;
-      MonitorElementToQTestMap m_monitorElementToQTestMap;
+      Storage<MonitorElement> m_storage = {};
+      QualityTestFactoryMap m_qualityTestFactoryMap = {};
+      QualityTestMap m_qualityTestMap = {};
+      MonitorElementToQTestMap m_monitorElementToQTestMap = {};
     };
 
     //-------------------------------------------------------------------------------------------------

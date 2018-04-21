@@ -53,6 +53,8 @@ namespace dqm4hep {
       /** Constructor
        */
       Archiver() = default;
+      Archiver(const Archiver &) = delete;
+      Archiver& operator=(const Archiver &) = delete;
 
       /** Constructor with file name and opening mode
        */

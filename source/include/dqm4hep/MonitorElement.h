@@ -202,10 +202,10 @@ namespace dqm4hep {
       StatusCode runQualityTest(const std::string &name, QReport &report);
 
     private:
-      std::string m_path;                    ///< The monitor element path
-      PtrHandler<TObject> m_monitorObject;   ///< The monitored object
-      PtrHandler<TObject> m_referenceObject; ///< The reference object
-      QTestMap m_qualityTests;               ///< The list of assigned quality tests
+      std::string m_path = {""};                    ///< The monitor element path
+      PtrHandler<TObject> m_monitorObject = {};     ///< The monitored object
+      PtrHandler<TObject> m_referenceObject = {};   ///< The reference object
+      QTestMap m_qualityTests = {};                 ///< The list of assigned quality tests
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -238,6 +238,8 @@ namespace dqm4hep {
       /** Default constructor
        */
       TScalarObject();
+      TScalarObject& operator=(const TScalarObject&) = delete;
+      TScalarObject(const TScalarObject&) = delete;
 
       /** Constructor with scalar value
        */
@@ -280,8 +282,8 @@ namespace dqm4hep {
        */
       void Init();
 
-      T m_scalar;             ///< The scalar value
-      TPaveText *m_pPaveText; ///< The pave text on which to draw the scalar value
+      T m_scalar = {};                     ///< The scalar value
+      TPaveText *m_pPaveText = {nullptr}; ///< The pave text on which to draw the scalar value
 
       ClassDefOverride(TScalarObject, 1);
     };
@@ -309,6 +311,8 @@ namespace dqm4hep {
       /** Constructor
        */
       TDynamicGraph();
+      TDynamicGraph& operator=(const TDynamicGraph&) = delete;
+      TDynamicGraph(const TDynamicGraph&) = delete;
 
       /** Destructor
        */
@@ -336,7 +340,7 @@ namespace dqm4hep {
       void ShrinkToRange();
 
     private:
-      Double_t m_rangeLength;
+      Double_t m_rangeLength = {0.};
 
       ClassDefOverride(TDynamicGraph, 1);
     };

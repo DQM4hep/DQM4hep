@@ -36,14 +36,8 @@ namespace dqm4hep {
 
   namespace core {
 
-    DBInterface::DBInterface() : m_pMySQL(nullptr), m_isConnected(false) {
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     DBInterface::DBInterface(const std::string &host, const std::string &user, const std::string &password,
-                             const std::string &database)
-        : m_pMySQL(nullptr), m_isConnected(false) {
+                             const std::string &database) {
       this->set(host, user, password, database);
       this->connect();
     }
@@ -81,10 +75,9 @@ namespace dqm4hep {
 
         if (!m_database.empty()) {
           // select data base
-          std::stringstream query;
-          query << "USE " << m_database << " ;";
-
-          THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+          std::stringstream uquery;
+          uquery << "USE " << m_database << " ;";
+          THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(uquery.str()));
         }
       } catch (const StatusCodeException &exception) {
         if (m_pMySQL != nullptr)
@@ -118,7 +111,6 @@ namespace dqm4hep {
                                     const std::string &database) {
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->set(host, user, password, database));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->connect());
-
       return STATUS_CODE_SUCCESS;
     }
 
@@ -133,7 +125,6 @@ namespace dqm4hep {
       m_user = user;
       m_password = password;
       m_database = database;
-
       return STATUS_CODE_SUCCESS;
     }
 
@@ -163,13 +154,13 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode DBInterface::queryRaw(const std::string &query, void *&pResult) {
+    StatusCode DBInterface::queryRaw(const std::string &uquery, void *&pResult) {
       pResult = nullptr;
 
       if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if (mysql_query(m_pMySQL, query.c_str()) != 0) {
+      if (mysql_query(m_pMySQL, uquery.c_str()) != 0) {
         dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
@@ -195,11 +186,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode DBInterface::execute(const std::string &query) {
+    StatusCode DBInterface::execute(const std::string &uquery) {
       if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if (mysql_query(m_pMySQL, query.c_str()) != 0) {
+      if (mysql_query(m_pMySQL, uquery.c_str()) != 0) {
         dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
@@ -223,24 +214,24 @@ namespace dqm4hep {
         return STATUS_CODE_INVALID_PARAMETER;
 
       if (dropExistingTable) {
-        std::stringstream query;
-        query << "DROP TABLE IF EXISTS " << table << ";";
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+        std::stringstream uquery;
+        uquery << "DROP TABLE IF EXISTS " << table << ";";
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(uquery.str()));
       }
 
-      std::stringstream query;
-      query << "CREATE TABLE ";
+      std::stringstream uquery;
+      uquery << "CREATE TABLE ";
 
       if (ifNotExists)
-        query << " IF NOT EXISTS ";
+        uquery << " IF NOT EXISTS ";
 
-      query << table << " ( "
+      uquery << table << " ( "
             << "parameter VARCHAR(256) NOT NULL,"
             << "value MEDIUMTEXT NOT NULL,"
             << "last_update DATETIME NOT NULL,"
             << "PRIMARY KEY (parameter) ) ENGINE=INNODB;";
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(uquery.str()));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -266,8 +257,8 @@ namespace dqm4hep {
       if (table.empty() || parameterValueMap.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
-      std::stringstream query;
-      query << "REPLACE INTO " << table << " (parameter, value, last_update) VALUES ";
+      std::stringstream uquery;
+      uquery << "REPLACE INTO " << table << " (parameter, value, last_update) VALUES ";
 
       bool firstEntry = true;
 
@@ -276,15 +267,15 @@ namespace dqm4hep {
         entry << "( \"" << pvPair.first << "\", \"" << pvPair.second << "\", NOW()) ";
 
         if (!firstEntry)
-          query << " , ";
+          uquery << " , ";
 
-        query << entry.str();
+        uquery << entry.str();
         firstEntry = false;
       }
 
-      query << " ;";
+      uquery << " ;";
 
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(query.str()));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->execute(uquery.str()));
 
       return STATUS_CODE_SUCCESS;
     }
@@ -298,10 +289,10 @@ namespace dqm4hep {
       if (table.empty() || backupTable.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
-      std::stringstream query;
-      query << "CREATE TABLE " << backupTable << " LIKE " << table << "; INSERT " << backupTable << " SELECT * FROM "
+      std::stringstream uquery;
+      uquery << "CREATE TABLE " << backupTable << " LIKE " << table << "; INSERT " << backupTable << " SELECT * FROM "
             << table << ";";
-      return this->execute(query.str());
+      return this->execute(uquery.str());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -313,18 +304,14 @@ namespace dqm4hep {
       if (table.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
-      std::stringstream query;
-      query << "SELECT parameter, value, last_update FROM " << table << ";";
+      std::stringstream uquery;
+      uquery << "SELECT parameter, value, last_update FROM " << table << ";";
 
-      return this->queryAndHandle(query.str(), [](MYSQL_RES *result) {
-
+      return this->queryAndHandle(uquery.str(), [](MYSQL_RES *result) {
         std::cout << std::setw(50) << std::left << "Parameter" << std::setw(50) << std::left << "Value" << std::setw(20)
                   << std::left << "Last update" << std::endl;
         std::cout << std::string(120, '-') << std::endl;
-
-        int num_fields = mysql_num_fields(result);
         MYSQL_ROW row;
-
         while ((row = mysql_fetch_row(result)) != nullptr)
           std::cout << std::setw(50) << std::left << row[0] << std::setw(50) << std::left << row[1] << std::setw(20)
                     << std::left << row[2] << std::endl;
@@ -340,14 +327,11 @@ namespace dqm4hep {
       if (table.empty())
         return STATUS_CODE_INVALID_PARAMETER;
 
-      std::stringstream query;
-      query << "SELECT parameter, value FROM " << table << ";";
+      std::stringstream uquery;
+      uquery << "SELECT parameter, value FROM " << table << ";";
 
-      return this->queryAndHandle(query.str(), [&parameterValueMap](MYSQL_RES *result) {
-
-        int num_fields = mysql_num_fields(result);
+      return this->queryAndHandle(uquery.str(), [&parameterValueMap](MYSQL_RES *result) {
         MYSQL_ROW row;
-
         while ((row = mysql_fetch_row(result)) != nullptr)
           parameterValueMap[row[0]] = row[1];
       });

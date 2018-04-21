@@ -42,7 +42,7 @@ namespace dqm4hep {
     public:
       /** Constructor
        */
-      Path();
+      Path() = default;
 
       /** Constructor with path
        */
@@ -93,7 +93,7 @@ namespace dqm4hep {
       friend bool operator==(const Path &lhs, const Path &rhs);
 
     private:
-      std::string m_path;
+      std::string m_path = {""};
     };
 
     //-------------------------------------------------------------------------------------------------

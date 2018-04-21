@@ -59,7 +59,7 @@ namespace dqm4hep {
 
   namespace core {
 
-    MonitorElementManager::MonitorElementManager() : m_storage() {
+    MonitorElementManager::MonitorElementManager() {
       PluginManager *pPluginMgr(PluginManager::instance());
       StringVector factoryNames(pPluginMgr->pluginNamesMatchingType<QualityTestFactory>());
 
@@ -233,9 +233,9 @@ namespace dqm4hep {
       TObject *pTObject = nullptr;
       // FIXME : bad handling of path in root path
       if (path == "/")
-        pTObject = (TObject *)pTFile->Get(name.c_str());
+        pTObject = pTFile->Get(name.c_str());
       else
-        pTObject = (TObject *)pTFile->Get(fullName.getPath().c_str());
+        pTObject = pTFile->Get(fullName.getPath().c_str());
         
       TObject::SetObjectStat(objectStat);
 
@@ -295,9 +295,9 @@ namespace dqm4hep {
       TObject *pTObject(nullptr);
 
       if (monitorElement->path() == "/")
-        pTObject = (TObject *)rootFile->Get(monitorElement->name().c_str());
+        pTObject = rootFile->Get(monitorElement->name().c_str());
       else
-        pTObject = (TObject *)rootFile->Get(fullName.getPath().c_str());
+        pTObject = rootFile->Get(fullName.getPath().c_str());
 
       TObject::SetObjectStat(objectStat);
 
@@ -410,10 +410,9 @@ namespace dqm4hep {
         m_monitorElementToQTestMap.erase(iter);
 
       // remove the element form storage. Call delete operator
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=,
-                       m_storage.remove(path, [&name](const MonitorElementPtr &monitorElement) {
-                         return (monitorElement->name() == name);
-                       }));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.remove(path, [&name](const MonitorElementPtr &element) {
+        return (element->name() == name);
+      }));
 
       return STATUS_CODE_SUCCESS;
     }

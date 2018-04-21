@@ -111,12 +111,12 @@ namespace dqm4hep {
       StringVector directoryList = path.getSplitPath();
 
       for (auto iter = directoryList.begin(), endIter = directoryList.end(); endIter != iter; ++iter) {
-        std::string dirName = *iter;
+        std::string dname = *iter;
 
-        if (dirName == ".")
+        if (dname == ".")
           continue;
 
-        if (dirName == "..") {
+        if (dname == "..") {
           if (directory == m_rootDirectory)
             return STATUS_CODE_FAILURE;
 
@@ -125,11 +125,11 @@ namespace dqm4hep {
         }
 
         // if sub dir doesn't exists, create it
-        if (!directory->hasChild(dirName))
-          directory->mkdir(dirName);
+        if (!directory->hasChild(dname))
+          directory->mkdir(dname);
 
         // navigate forward
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->find(dirName, directory));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->find(dname, directory));
       }
 
       return STATUS_CODE_SUCCESS;
@@ -161,12 +161,12 @@ namespace dqm4hep {
       StringVector directoryList = path.getSplitPath();
 
       for (auto iter = directoryList.begin(), endIter = directoryList.end(); endIter != iter; ++iter) {
-        std::string dirName = *iter;
+        std::string dname = *iter;
 
-        if (dirName == ".")
+        if (dname == ".")
           continue;
 
-        if (dirName == "..") {
+        if (dname == "..") {
           if (directory == m_rootDirectory)
             return STATUS_CODE_FAILURE;
 
@@ -175,7 +175,7 @@ namespace dqm4hep {
         }
 
         // navigate forward
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->find(dirName, directory));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->find(dname, directory));
       }
 
       if (nullptr == directory)
@@ -261,12 +261,12 @@ namespace dqm4hep {
       StringVector directoryList = path.getSplitPath();
 
       for (auto iter = directoryList.begin(), endIter = directoryList.end(); endIter != iter; ++iter) {
-        std::string dirName = *iter;
+        std::string dname = *iter;
 
-        if (dirName == ".")
+        if (dname == ".")
           continue;
 
-        if (dirName == "..") {
+        if (dname == "..") {
           if (directory == m_rootDirectory)
             return STATUS_CODE_FAILURE;
 
@@ -275,7 +275,7 @@ namespace dqm4hep {
         }
 
         // navigate forward
-        StatusCode statusCode = directory->find(dirName, directory);
+        StatusCode statusCode = directory->find(dname, directory);
 
         if (statusCode != STATUS_CODE_SUCCESS)
           return statusCode;

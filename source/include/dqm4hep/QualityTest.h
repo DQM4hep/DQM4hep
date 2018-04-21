@@ -57,7 +57,7 @@ namespace dqm4hep {
     public:
       /** Constructor
        */
-      QualityTestReport();
+      QualityTestReport() = default;
 
       /** Copy constructor
        */
@@ -80,16 +80,16 @@ namespace dqm4hep {
       void fromJson(const json &value);
 
     public:
-      std::string m_qualityTestName;
-      std::string m_qualityTestType;
-      std::string m_qualityTestDescription;
-      std::string m_monitorElementName;
-      std::string m_monitorElementType;
-      std::string m_monitorElementPath;
-      std::string m_message;
-      QualityFlag m_qualityFlag;
-      float m_quality;
-      json m_extraInfos;
+      std::string m_qualityTestName = {""};
+      std::string m_qualityTestType = {""};
+      std::string m_qualityTestDescription = {""};
+      std::string m_monitorElementName = {""};
+      std::string m_monitorElementType = {""};
+      std::string m_monitorElementPath = {""};
+      std::string m_message = {""};
+      QualityFlag m_qualityFlag = {UNDEFINED};
+      float m_quality = {0.f};
+      json m_extraInfos = {nullptr};
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -251,15 +251,15 @@ namespace dqm4hep {
       void fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const;
 
     private:
-      std::string m_type = {""};  ///< Quality test type (usually class name)
-      std::string m_name = {""};  ///< Quality test name
-      float m_warningLimit = {0}; ///< The quality test warning threshold
-      float m_errorLimit = {0};   ///< The quality test error threshold
+      std::string          m_type = {""};  ///< Quality test type (usually class name)
+      std::string          m_name = {""};  ///< Quality test name
+      float                m_warningLimit = {m_defaultWarningLimit}; ///< The quality test warning threshold
+      float                m_errorLimit = {m_defaultErrorLimit};   ///< The quality test error threshold
 
     protected:
-      std::string m_description; ///< Quality test description
-      static float m_defaultWarningLimit;
-      static float m_defaultErrorLimit;
+      std::string          m_description = {""}; ///< Quality test description
+      static float         m_defaultWarningLimit;
+      static float         m_defaultErrorLimit;
     };
 
     //-------------------------------------------------------------------------------------------------

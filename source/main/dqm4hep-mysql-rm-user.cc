@@ -87,15 +87,14 @@ int main(int argc, char *argv[]) {
     query << "select user,host from mysql.user where user=\"" << dbUserArg.getValue() << "\";";
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=,
                     interface.queryAndHandle(query.str(), [&interface, &nRemovedUsers](MYSQL_RES *result) {
-                      int num_fields = mysql_num_fields(result);
                       MYSQL_ROW row;
-
                       while ((row = mysql_fetch_row(result))) {
                         std::stringstream dropQuery;
                         dropQuery << "drop user \"" << row[0] << "\"@\"" << row[1] << "\";";
-
                         dqm_info("Removing user '{0}'@'{1}' ...", row[0], row[1]);
-                        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, interface.execute(dropQuery.str()));
+                        if(STATUS_CODE_SUCCESS != interface.execute(dropQuery.str())) {
+                          throw StatusCodeException(STATUS_CODE_FAILURE);
+                        }
                         ++nRemovedUsers;
                       }
                     }));

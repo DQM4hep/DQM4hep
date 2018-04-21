@@ -220,13 +220,13 @@ namespace dqm4hep {
         }
 
         // process the include and returns the parsed document
-        TiXmlDocument document;
-        this->resolveInclude(referencePath, child, document);
+        TiXmlDocument doc;
+        this->resolveInclude(referencePath, child, doc);
 
-        TiXmlElement *rootInclude = document.RootElement();
+        TiXmlElement *rootInclude = doc.RootElement();
 
         if (std::string(rootInclude->Value()) != "dqm4hep") {
-          dqm_error("XMLParser::resolveIncludes(): no <dqm4hep> root element in included file '{0}'", document.Value());
+          dqm_error("XMLParser::resolveIncludes(): no <dqm4hep> root element in included file '{0}'", doc.Value());
           throw StatusCodeException(STATUS_CODE_FAILURE);
         }
 
@@ -281,7 +281,7 @@ namespace dqm4hep {
 
     //----------------------------------------------------------------------------------------------------
 
-    void XMLParser::resolveInclude(const std::string &referencePath, TiXmlElement *element, TiXmlDocument &document) {
+    void XMLParser::resolveInclude(const std::string &referencePath, TiXmlElement *element, TiXmlDocument &doc) {
       if (element->Attribute("ref") == nullptr) {
         dqm_error("XMLParser::resolveInclude(): missing attribute \"ref\" in element <{0}/>", element->Value());
         throw StatusCodeException(STATUS_CODE_FAILURE);
@@ -298,11 +298,11 @@ namespace dqm4hep {
       std::string refFileName;
       this->getRelativeFileName(ref, referencePath, refFileName);
 
-      bool loadOkay = document.LoadFile(refFileName);
+      bool loadOkay = doc.LoadFile(refFileName);
 
       if (!loadOkay) {
         dqm_error("XMLParser::resolveInclude(): error in file [{0}, row: {1}, col: {2}] : {3}", refFileName,
-                  document.ErrorRow(), document.ErrorCol(), document.ErrorDesc());
+                  doc.ErrorRow(), doc.ErrorCol(), doc.ErrorDesc());
         throw StatusCodeException(STATUS_CODE_FAILURE);
       }
 
@@ -310,28 +310,28 @@ namespace dqm4hep {
       if (this->allowNestedIncludes()) {
         std::string includeReferencePath;
         this->getFilePath(refFileName, includeReferencePath);
-        this->resolveIncludes(includeReferencePath, &document);
+        this->resolveIncludes(includeReferencePath, &doc);
       }
     }
 
     //----------------------------------------------------------------------------------------------------
 
-    void XMLParser::getFilePath(const std::string &fileName, std::string &filePath) {
+    void XMLParser::getFilePath(const std::string &fName, std::string &filePath) {
       filePath = "";
-      size_t idx = fileName.find_last_of("/");
+      size_t idx = fName.find_last_of("/");
 
       if (idx != std::string::npos)
-        filePath = fileName.substr(0, idx);
+        filePath = fName.substr(0, idx);
     }
 
     //----------------------------------------------------------------------------------------------------
 
-    void XMLParser::getRelativeFileName(const std::string &fileName, const std::string &relativeTo,
+    void XMLParser::getRelativeFileName(const std::string &fName, const std::string &relativeTo,
                                         std::string &relativeFileName) {
-      if (fileName.at(0) != '/')
-        relativeFileName = relativeTo + "/" + fileName;
+      if (fName.at(0) != '/')
+        relativeFileName = relativeTo + "/" + fName;
       else
-        relativeFileName = fileName;
+        relativeFileName = fName;
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -358,8 +358,8 @@ namespace dqm4hep {
 
     //----------------------------------------------------------------------------------------------------
 
-    void XMLParser::readConstantsSection(TiXmlElement *constants) {
-      for (TiXmlElement *element = constants->FirstChildElement("constant"); element != nullptr;
+    void XMLParser::readConstantsSection(TiXmlElement *constantsElement) {
+      for (TiXmlElement *element = constantsElement->FirstChildElement("constant"); element != nullptr;
            element = element->NextSiblingElement("constant")) {
         this->resolveConstantsInElement(element);
 
@@ -495,9 +495,9 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------------------------
 
     void XMLParser::readDatabases() {
-      TiXmlDocument &document(this->document());
+      TiXmlDocument &doc(this->document());
 
-      TiXmlElement *databases = document.RootElement()->FirstChildElement("databases");
+      TiXmlElement *databases = doc.RootElement()->FirstChildElement("databases");
 
       if (databases == nullptr)
         return;

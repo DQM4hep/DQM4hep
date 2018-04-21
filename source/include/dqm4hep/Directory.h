@@ -183,8 +183,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline Directory<T>::Directory(const std::string &name, DirectoryPtr parent)
-        : m_name(name), m_parent(parent), m_subdirs(), m_contents() {
+    inline Directory<T>::Directory(const std::string &dname, DirectoryPtr dparent)
+        : m_name(dname), m_parent(dparent), m_subdirs(), m_contents() {
       /* nop */
     }
 
@@ -396,22 +396,22 @@ namespace dqm4hep {
 
     template <typename T>
     inline Path Directory<T>::fullPath() const {
-      Path fullPath = this->name();
+      Path fPath = this->name();
       DirectoryPtr dir = const_cast<Directory<T> *>(this)->shared_from_this();
 
       while (true) {
         DirectoryPtr parentDir = dir->parent();
 
         if (nullptr != parentDir) {
-          fullPath = parentDir->name() + fullPath;
+          fPath = parentDir->name() + fPath;
           dir = parentDir;
         } else {
-          fullPath = Path("/") + fullPath;
+          fPath = Path("/") + fPath;
           break;
         }
       }
 
-      return fullPath;
+      return fPath;
     }
 
     //-------------------------------------------------------------------------------------------------

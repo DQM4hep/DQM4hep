@@ -36,12 +36,6 @@ namespace dqm4hep {
 
   namespace core {
 
-    PluginManager::PluginManager() {
-      /* nop */
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
     PluginManager::~PluginManager() {
       // No memory clean here, as the plugin instances are static
       m_pluginMap.clear();

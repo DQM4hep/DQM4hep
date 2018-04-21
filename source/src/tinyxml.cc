@@ -441,9 +441,10 @@ namespace dqm4hep {
       copy.CopyTo(this);
     }
 
-    void TiXmlElement::operator=(const TiXmlElement &base) {
+    TiXmlElement& TiXmlElement::operator=(const TiXmlElement &base) {
       ClearThis();
       base.CopyTo(this);
+      return *this;
     }
 
     TiXmlElement::~TiXmlElement() {
@@ -727,9 +728,10 @@ namespace dqm4hep {
       copy.CopyTo(this);
     }
 
-    void TiXmlDocument::operator=(const TiXmlDocument &copy) {
+    TiXmlDocument& TiXmlDocument::operator=(const TiXmlDocument &copy) {
       Clear();
       copy.CopyTo(this);
+      return *this;
     }
 
     bool TiXmlDocument::LoadFile(TiXmlEncoding encoding) {
@@ -1031,9 +1033,10 @@ TiXmlAttribute* TiXmlAttribute::Previous()
       copy.CopyTo(this);
     }
 
-    void TiXmlComment::operator=(const TiXmlComment &base) {
+    TiXmlComment& TiXmlComment::operator=(const TiXmlComment &base) {
       Clear();
       base.CopyTo(this);
+      return *this;
     }
 
     void TiXmlComment::Print(FILE *cfile, int depth) const {
@@ -1119,9 +1122,10 @@ TiXmlAttribute* TiXmlAttribute::Previous()
       copy.CopyTo(this);
     }
 
-    void TiXmlDeclaration::operator=(const TiXmlDeclaration &copy) {
+    TiXmlDeclaration& TiXmlDeclaration::operator=(const TiXmlDeclaration &copy) {
       Clear();
       copy.CopyTo(this);
+      return *this;
     }
 
     void TiXmlDeclaration::Print(FILE *cfile, int /*depth*/, TIXML_STRING *str) const {

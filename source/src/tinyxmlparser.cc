@@ -182,9 +182,9 @@ namespace dqm4hep {
         cursor.col = col;
       }
 
-      TiXmlCursor cursor;
-      const char *stamp;
-      int tabsize;
+      TiXmlCursor cursor = {};
+      const char *stamp = {nullptr};
+      int tabsize = 4;
     };
 
     void TiXmlParsingData::Stamp(const char *now, TiXmlEncoding encoding) {

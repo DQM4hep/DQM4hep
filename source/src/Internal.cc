@@ -186,12 +186,10 @@ namespace dqm4hep {
     void netStats(NetworkStats &stats) {
 #ifdef DQM4HEP_WITH_PROC_FS
       FILE* file = fopen("/proc/net/dev", "r");
-      int result = -1;
-      char line[256];
       
       // skip first two lines
-      result = fscanf(file, "%*[^\n]\n");
-      result = fscanf(file, "%*[^\n]\n");
+      fscanf(file, "%*[^\n]\n");
+      fscanf(file, "%*[^\n]\n");
 
       while(1) {
         // get interface name
@@ -211,7 +209,7 @@ namespace dqm4hep {
         INetworkStats stat;
         
         // read received stats
-        result = fscanf(file, "%lu %lu %lu", 
+        fscanf(file, "%llu %llu %llu", 
           &stat.rcv_bytes, 
           &stat.rcv_packets, 
           &stat.rcv_errs);
@@ -222,7 +220,7 @@ namespace dqm4hep {
             break;
         
         // read send stats
-        result = fscanf(file, "%lu %lu %lu", 
+        fscanf(file, "%llu %llu %llu", 
           &stat.snd_bytes,
           &stat.snd_packets,
           &stat.snd_errs);

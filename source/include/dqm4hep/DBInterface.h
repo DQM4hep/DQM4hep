@@ -44,9 +44,11 @@ namespace dqm4hep {
     class DBInterface {
     public:
       /**
-       *  @brief  Constructor
+       *  @brief  Default constructor
        */
-      DBInterface();
+      DBInterface() = default;
+      DBInterface(const DBInterface&) = delete;
+      DBInterface& operator=(const DBInterface&) = delete;
 
       /**
        *  @brief  Constructor. Connect to database
@@ -224,25 +226,23 @@ namespace dqm4hep {
       StatusCode getTableParameters(const std::string &table, StringMap &parameterValueMap);
 
     private:
-      MYSQL *m_pMySQL;
-
-      std::string m_host;
-      std::string m_user;
-      std::string m_password;
-      std::string m_database;
-
-      bool m_isConnected;
+      MYSQL *m_pMySQL = {nullptr};
+      std::string m_host = {""};
+      std::string m_user = {""};
+      std::string m_password = {""};
+      std::string m_database = {""};
+      bool m_isConnected = {false};
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode DBInterface::query(const std::string &query, T &result) {
+    inline StatusCode DBInterface::query(const std::string &uquery, T &result) {
       if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if (mysql_query(m_pMySQL, query.c_str())) {
+      if (mysql_query(m_pMySQL, uquery.c_str())) {
         dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
@@ -269,11 +269,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline StatusCode DBInterface::queryVector(const std::string &query, std::vector<T> &result) {
+    inline StatusCode DBInterface::queryVector(const std::string &uquery, std::vector<T> &result) {
       if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if (mysql_query(m_pMySQL, query.c_str())) {
+      if (mysql_query(m_pMySQL, uquery.c_str())) {
         dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
@@ -304,11 +304,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Handler>
-    inline StatusCode DBInterface::queryAndHandle(const std::string &query, Handler handler) {
+    inline StatusCode DBInterface::queryAndHandle(const std::string &uquery, Handler handler) {
       if (!this->isConnected())
         return STATUS_CODE_NOT_INITIALIZED;
 
-      if (mysql_query(m_pMySQL, query.c_str())) {
+      if (mysql_query(m_pMySQL, uquery.c_str())) {
         dqm_error("MySQL query failed : {0}", mysql_error(m_pMySQL));
         return STATUS_CODE_FAILURE;
       }
