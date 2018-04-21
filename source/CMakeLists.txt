@@ -7,6 +7,7 @@
 # -------------------------------------------------
 # include directories
 include_directories( BEFORE include )
+include_directories( SYSTEM extern )
 
 # -------------------------------------------------
 # Set CXX_FLAGS
