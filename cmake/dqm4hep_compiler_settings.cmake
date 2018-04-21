@@ -1,16 +1,16 @@
 
 option( DQM4HEP_WARNING_AS_ERROR    "Whether to add -Werror flag to cxx flags" OFF )
-option( DQM4HEP_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" OFF )
+option( DQM4HEP_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" ON )
 option( DQM4HEP_DEV_WARNINGS        "Whether to add extra warning for developpers to cxx flags" OFF )
 
 macro( DQM4HEP_SET_CXX_FLAGS )
-  # Require C++11
+  
   include( CheckCXXCompilerFlag )
   
-  set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wdeprecated -Wreturn-type -Wuseless-cast -Wlogical-op -Wredundant-decls )
+  set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wdeprecated -Wreturn-type -Wuseless-cast -Wlogical-op -Wredundant-decls -Weffc++ -fdiagnostics-color=auto )
   
   if( DQM4HEP_DEV_WARNINGS )
-    set( COMPILER_FLAGS ${COMPILER_FLAGS} -Wsuggest-attribute=const -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override -Wno-comments -Wzero-as-null-pointer-constant -Wparentheses )
+    set( COMPILER_FLAGS ${COMPILER_FLAGS} -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override -Wno-comments -Wparentheses )
   endif()
   
   if( DQM4HEP_WARNING_AS_ERROR )
