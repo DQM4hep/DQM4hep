@@ -89,7 +89,7 @@ namespace dqm4hep {
       std::string m_message = {""};
       QualityFlag m_qualityFlag = {UNDEFINED};
       float m_quality = {0.f};
-      json m_extraInfos = {nullptr};
+      json m_extraInfos = {};
     };
 
     //-------------------------------------------------------------------------------------------------
