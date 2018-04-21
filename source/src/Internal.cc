@@ -188,7 +188,7 @@ namespace dqm4hep {
       FILE* file = fopen("/proc/net/dev", "r");
       
       // skip first two lines
-      fscanf(file, "%*[^\n]\n");
+      (void)fscanf(file, "%*[^\n]\n");
       fscanf(file, "%*[^\n]\n");
 
       while(1) {
@@ -209,18 +209,18 @@ namespace dqm4hep {
         INetworkStats stat;
         
         // read received stats
-        fscanf(file, "%llu %llu %llu", 
+        fscanf(file, "%lu %lu %lu", 
           &stat.rcv_bytes, 
           &stat.rcv_packets, 
           &stat.rcv_errs);
         
         // skip uneeded fields
-        uint32_t dummy;
-        if(EOF == fscanf(file, "%u %u %u %u %u", &dummy, &dummy, &dummy, &dummy, &dummy))
+        dqm_stat dummy;
+        if(EOF == fscanf(file, "%lu %lu %lu %lu %lu", &dummy, &dummy, &dummy, &dummy, &dummy))
             break;
         
         // read send stats
-        fscanf(file, "%llu %llu %llu", 
+        fscanf(file, "%lu %lu %lu", 
           &stat.snd_bytes,
           &stat.snd_packets,
           &stat.snd_errs);

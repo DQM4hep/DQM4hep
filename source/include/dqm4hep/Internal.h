@@ -153,6 +153,7 @@ namespace dqm4hep {
     typedef bool dqm_bool;
     typedef int64_t dqm_int;
     typedef uint64_t dqm_uint;
+    typedef long unsigned int dqm_stat;
 
     // basic typedefs
     typedef std::vector<int> IntVector;
@@ -412,12 +413,12 @@ namespace dqm4hep {
      *  @brief  INetworkStats struct
      */
     struct INetworkStats {
-      uint64_t    rcv_bytes;
-      uint64_t    rcv_packets;
-      uint64_t    rcv_errs;
-      uint64_t    snd_bytes;
-      uint64_t    snd_packets;
-      uint64_t    snd_errs;
+      dqm_stat    rcv_bytes;
+      dqm_stat    rcv_packets;
+      dqm_stat    rcv_errs;
+      dqm_stat    snd_bytes;
+      dqm_stat    snd_packets;
+      dqm_stat    snd_errs;
     };
     
     typedef std::map<std::string, INetworkStats> NetworkStats;
