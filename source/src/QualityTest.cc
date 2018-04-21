@@ -356,7 +356,7 @@ namespace dqm4hep {
           const std::string message("Quality value (" + typeToString(report.m_quality) + ") is out range !");
           
           if (!report.m_message.empty())
-            report.m_message + " " + message;
+            report.m_message += " " + message;
           else
             report.m_message = message;
             
@@ -366,7 +366,7 @@ namespace dqm4hep {
         const std::string message("Caught StatusCodeException while run QTest: " + exception.toString());
 
         if (!report.m_message.empty())
-          report.m_message + " " + message;
+          report.m_message += " " + message;
         else
           report.m_message = message;
 
@@ -376,7 +376,7 @@ namespace dqm4hep {
         const std::string message("Caught unknown exception while run QTest");
 
         if (!report.m_message.empty())
-          report.m_message + " " + message;
+          report.m_message += " " + message;
         else
           report.m_message = message;
 
