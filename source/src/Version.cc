@@ -39,7 +39,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     Version::Version(unsigned int major, unsigned int minor, unsigned int patch) {
-      set(m_major, m_minor, m_patch);
+      set(major, minor, patch);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -148,7 +148,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     xdrstream::Status Version::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-                                      xdrstream::xdr_version_t version) {
+                                      xdrstream::xdr_version_t /*version*/) {
       if (xdrstream::XDR_READ_STREAM == mode) {
         uint32_t major, minor, patch;
         XDR_STREAM(pDevice->read(&major));
