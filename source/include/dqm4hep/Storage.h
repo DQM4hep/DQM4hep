@@ -405,7 +405,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline void Storage<T>::getObjects(ObjectList &objectList) const {
-      this->iterate([&](const DirectoryPtr &directory, ObjectPtr object) {
+      this->iterate([&](const DirectoryPtr &/*directory*/, ObjectPtr object) {
         objectList.push_back(object);
         return true;
       });
