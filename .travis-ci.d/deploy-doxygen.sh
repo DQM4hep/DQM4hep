@@ -46,7 +46,7 @@ source dependencies/root/bin/thisroot.sh
 cd build
 
 # activate doxygen building target
-cmake -DINSTALL_DOC=ON ..
+cmake -DDQM4HEP_DOXYGEN_DOC=ON ..
 
 if [ $? -ne 0 ]; then
     echo "Failed to run cmake"

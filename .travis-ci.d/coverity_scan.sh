@@ -18,7 +18,7 @@ export PATH=$PWD/cov-analysis-Linux/bin:$PATH
 # run cmake and build with coverity
 source dependencies/root/bin/thisroot.sh
 mkdir -p build && cd build
-cmake -DINSTALL_DOC=OFF -Dxdrstream_DIR=$PWD/../dependencies/xdrstream -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake -DBUILD_TESTS=ON ..
+cmake -DDQM4HEP_DOXYGEN_DOC=OFF -Dxdrstream_DIR=$PWD/../dependencies/xdrstream -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake -DDQM4HEP_TESTING=ON -DDQM4HEP_WARNING_AS_ERROR=ON -DDQM4HEP_DEV_WARNINGS=ON ..
 cov-build --dir cov-int make -j2
 tar czvf myproject.tgz cov-int
 
