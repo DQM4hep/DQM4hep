@@ -54,7 +54,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # build doxygen documentation
-make doc
+make install
 
 if [ $? -ne 0 ]; then
     echo "Failed to run make doc"
@@ -62,7 +62,6 @@ if [ $? -ne 0 ]; then
 fi
 
 # get the doxygen package
-cd ../doc
 git clone https://rete:$GITHUB_ACCESS_TOKEN@github.com/dqm4hep/dqm4hep-doxygen.git --branch=gh-pages
 cd dqm4hep-doxygen
 
@@ -78,7 +77,7 @@ cd doxygen/${doxygenDirectory}
 rm -rf *
 
 # copy the new one in place
-cp -r $TRAVIS_BUILD_DIR/build/docbuild/html/* .
+cp -r $TRAVIS_BUILD_DIR/build/docbuild/DQMCore/html/* .
 
 # commit the new doc
 git add ./*
