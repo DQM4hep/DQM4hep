@@ -43,6 +43,7 @@ namespace dqm4hep {
       /** Constructor
        */
       Path() = default;
+      Path(const Path &path) = default;
 
       /** Constructor with path
        */

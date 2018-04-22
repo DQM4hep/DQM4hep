@@ -152,10 +152,11 @@ namespace dqm4hep {
       /** Constructor
        */
       StatusCodeException(const StatusCode statusCode);
+      StatusCodeException(const StatusCodeException &e) = default;
 
       /** Constructor
        */
-      ~StatusCodeException() throw() override;
+      ~StatusCodeException() override;
 
       /** Get status code
        */
@@ -199,7 +200,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline StatusCodeException::~StatusCodeException() throw() {
+    inline StatusCodeException::~StatusCodeException() {
       /* nop */
     }
 

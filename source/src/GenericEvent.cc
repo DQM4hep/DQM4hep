@@ -55,14 +55,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    StatusCode GenericEvent::setValues(const std::string &key, const T &vals) {
+    StatusCode GenericEvent::setValues(const std::string &/*key*/, const T &/vals*/) {
       return STATUS_CODE_FAILURE;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    StatusCode GenericEvent::getValues(const std::string &key, T &vals) const {
+    StatusCode GenericEvent::getValues(const std::string &/*key*/, T &/*vals*/) const {
       return STATUS_CODE_FAILURE;
     }
 
