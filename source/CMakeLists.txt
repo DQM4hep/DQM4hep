@@ -29,7 +29,10 @@ aux_source_directory( src SRC_FILES )
 aux_source_directory( src/plugins SRC_FILES )
 add_shared_library( ${PROJECT_NAME} ${SRC_FILES} ${PROJECT_DICTIONARY} )
 install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION lib )
+
 install_directory( include DESTINATION . FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
+install_directory( extern/spdlog DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
+install_directory( extern/tclap DESTINATION include FILES_MATCHING PATTERN "*.h" PATTERN "*.cc" )
 
 # -------------------------------------------------
 # build all binaries in main directory
