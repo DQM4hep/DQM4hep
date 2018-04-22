@@ -103,7 +103,7 @@ namespace dqm4hep {
 
         /** The dim rpc handler
          */
-        void infoHandler();
+        void infoHandler() override;
 
       private:
         ServiceHandler *m_pHandler = {nullptr};

@@ -118,7 +118,7 @@ namespace dqm4hep {
         /**
          * The dim rpc handler
          */
-        void rpcHandler();
+        void rpcHandler() override;
 
       private:
         RequestHandler *m_pHandler = {nullptr}; ///< The request handler owner instance
@@ -237,7 +237,7 @@ namespace dqm4hep {
         /**
          * The dim command handler
          */
-        void commandHandler();
+        void commandHandler() override;
 
       private:
         CommandHandler *m_pHandler = {nullptr}; ///< The request handler owner instance

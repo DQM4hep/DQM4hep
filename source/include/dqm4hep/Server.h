@@ -68,7 +68,7 @@ namespace dqm4hep {
       /**
        *  @brief  Destructor
        */
-      ~Server();
+      ~Server() override;
 
       /**
        *  @brief  Get the server name
