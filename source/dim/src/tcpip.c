@@ -815,17 +815,20 @@ void io_sig_handler(int num)
 {
     fd_set	rfds;
     int	conn_id, ret, selret, count;
-	struct timeval	timeout;
+
+#ifndef __linux__
+		struct timeval	timeout;
+#endif
 
 	if(num){}
 	do
 	{
-		timeout.tv_sec = 0;		/* Don't wait, just poll */
-		timeout.tv_usec = 0;
 		list_to_fds( &rfds );
 #ifdef __linux__
 		selret = poll(Pollfds, Pollfd_size, 0);
 #else
+    timeout.tv_sec = 0;		/* Don't wait, just poll */
+    timeout.tv_usec = 0;
 		selret = select(FD_SETSIZE, &rfds, NULL, NULL, &timeout);
 #endif
 		if(selret > 0)
