@@ -319,7 +319,8 @@ int dim_tcpip_init(int thr_flag)
 #else
 		if(DIM_IO_path[0] == -1)
 		{
-			pipe(DIM_IO_path);
+      int retval __attribute__((unused));
+			retval = pipe(DIM_IO_path);
 		}
 #endif
 	}
@@ -400,7 +401,8 @@ static int enable_sig(int conn_id)
 			if(!DIM_IO_Done)
 			{
 				DIM_IO_Done = 1;
-				write(DIM_IO_path[1], &flags, 4);
+        int retval __attribute__((unused));
+				retval = write(DIM_IO_path[1], &flags, 4);
 			}
 		}
 #endif
@@ -904,7 +906,8 @@ void tcpip_task( void *dummy)
 			if(MY_FD_ISSET(DIM_IO_path[0], pfds) )
 			{
 #ifndef WIN32
-				read(DIM_IO_path[0], &data, 4);
+        int retval __attribute__((unused));
+				retval = read(DIM_IO_path[0], &data, 4);
 				DIM_IO_Done = 0;
 #endif
 				MY_FD_CLR( (unsigned)DIM_IO_path[0], pfds );
