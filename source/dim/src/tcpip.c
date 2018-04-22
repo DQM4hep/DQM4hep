@@ -867,7 +867,8 @@ void tcpip_task( void *dummy)
 	/* wait for an IO signal, find out what is happening and
 	 * call the right routine to handle the situation.
 	 */
-	fd_set	rfds, *pfds;
+	fd_set	rfds;
+  fd_set	*pfds __attribute__((unused));
 #ifndef __linux__
 	fd_set efds;
 #endif
