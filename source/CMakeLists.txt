@@ -7,7 +7,7 @@
 add_subdirectory( dim )
 
 # include directories
-include_directories( BEFORE dim/include )
+include_directories( SYSTEM dim/include )
 include_directories( BEFORE include )
 dqm4hep_set_cxx_flags()
 
