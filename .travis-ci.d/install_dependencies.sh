@@ -38,7 +38,9 @@ cd ../..
 git clone https://github.com/dqm4hep/dqm4hep-core.git
 cd dqm4hep-core
 mkdir -p build && cd build
-cmake -DINSTALL_DOC=OFF -Dxdrstream_DIR=$PWD/../../xdrstream -DJSONCPP_DIR=$PWD/../../jsoncpp/install -DCMAKE_MODULE_PATH=$PWD/../../dqm4hep/cmake -DBUILD_TESTS=OFF ..
+cmake -DDQM4HEP_DOXYGEN_DOC=OFF -Dxdrstream_DIR=$PWD/../dependencies/xdrstream -DCMAKE_MODULE_PATH=$PWD/../dependencies/dqm4hep/cmake -DDQM4HEP_TESTING=ON -DDQM4HEP_WARNING_AS_ERROR=ON -DDQM4HEP_DEV_WARNINGS=ON ..
+
+cmake -DDQM4HEP_DOXYGEN_DOC=OFF -Dxdrstream_DIR=$PWD/../../xdrstream -DCMAKE_MODULE_PATH=$PWD/../../dqm4hep/cmake -DDQM4HEP_TESTING=OFF -DDQM4HEP_WARNING_AS_ERROR=OFF -DDQM4HEP_DEV_WARNINGS=OFF ..
 
 if [ $? -ne 0 ]; then
     echo "Failed to run dqm4hep-core cmake"
