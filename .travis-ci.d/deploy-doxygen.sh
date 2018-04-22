@@ -5,7 +5,7 @@ pkgVersion=""
 repository=$(basename $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 username=$(dirname $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 
-if [ ! "${CXX}" = "g++" ] || [ ! "${TRAVIS_OS_NAME}" = "linux" ] || [ ! "${TRAVIS_EVENT_TYPE}" = "cron" ]
+if [ ! "${CXX}" = "g++" ] || [ ! "${TRAVIS_OS_NAME}" = "linux" ] || [ "${TRAVIS_EVENT_TYPE}" = "cron" ]
 then
   echo "Build and push doxygen only one per push"
   exit 0
