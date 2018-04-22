@@ -71,6 +71,9 @@ namespace dqm4hep {
       template <typename Controller>
       RequestHandler(Server *pServer, const std::string &name, Controller *pController,
                      void (Controller::*function)(const Buffer &request, Buffer &response));
+      
+      RequestHandler(const RequestHandler&) = delete;
+      RequestHandler& operator=(const RequestHandler&) = delete;
 
       /**
        * Destructor
@@ -109,6 +112,8 @@ namespace dqm4hep {
          * Contructor
          */
         Rpc(RequestHandler *pHandler);
+        Rpc(const Rpc&) = delete;
+        Rpc& operator=(const Rpc&) = delete;
 
         /**
          * The dim rpc handler
@@ -116,7 +121,7 @@ namespace dqm4hep {
         void rpcHandler();
 
       private:
-        RequestHandler *m_pHandler; ///< The request handler owner instance
+        RequestHandler *m_pHandler = {nullptr}; ///< The request handler owner instance
       };
 
       friend class Rpc;
@@ -130,10 +135,10 @@ namespace dqm4hep {
       void handleRequest(const Buffer &request, Buffer &response);
 
     private:
-      std::string m_name; ///< The request handler name
-      Server *m_pServer;  ///< The server in which the request handler is declared
-      RequestSignal m_requestSignal;
-      Rpc *m_pRpc;
+      std::string           m_name = {""};            ///< The request handler name
+      Server               *m_pServer = {nullptr};         ///< The server in which the request handler is declared
+      RequestSignal         m_requestSignal = {};
+      Rpc                  *m_pRpc = {nullptr};
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -141,9 +146,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline RequestHandler::RequestHandler(Server *pServer, const std::string &name, Controller *pController,
+    inline RequestHandler::RequestHandler(Server *pServer, const std::string &rname, Controller *pController,
                                           void (Controller::*function)(const Buffer &request, Buffer &response))
-        : m_name(name), m_pServer(pServer), m_pRpc(nullptr) {
+        : m_name(rname), m_pServer(pServer), m_pRpc(nullptr) {
       m_requestSignal.connect(pController, function);
     }
 
@@ -177,6 +182,9 @@ namespace dqm4hep {
       template <typename Controller>
       CommandHandler(Server *pServer, const std::string &name, Controller *pController,
                      void (Controller::*function)(const Buffer &command));
+
+      CommandHandler(const CommandHandler&) = delete;
+      CommandHandler& operator=(const CommandHandler&) = delete;
 
       /**
        * Constructor
@@ -223,6 +231,8 @@ namespace dqm4hep {
          * Contructor
          */
         Command(CommandHandler *pHandler);
+        Command(const Command&) = delete;
+        Command& operator=(const Command&) = delete;
 
         /**
          * The dim command handler
@@ -230,7 +240,7 @@ namespace dqm4hep {
         void commandHandler();
 
       private:
-        CommandHandler *m_pHandler; ///< The request handler owner instance
+        CommandHandler *m_pHandler = {nullptr}; ///< The request handler owner instance
       };
 
       friend class Command;
@@ -244,10 +254,10 @@ namespace dqm4hep {
       void handleCommand(const Buffer &command);
 
     private:
-      std::string m_name; ///< The command handler name
-      Server *m_pServer;  ///< The server in which the command handler is declared
-      CommandSignal m_commandSignal;
-      Command *m_pCommand;
+      std::string         m_name = {""};           ///< The command handler name
+      Server             *m_pServer = {nullptr};   ///< The server in which the command handler is declared
+      CommandSignal       m_commandSignal = {};
+      Command            *m_pCommand = {nullptr};
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -255,9 +265,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline CommandHandler::CommandHandler(Server *pServer, const std::string &name, Controller *pController,
+    inline CommandHandler::CommandHandler(Server *pServer, const std::string &cname, Controller *pController,
                                           void (Controller::*function)(const Buffer &command))
-        : m_name(name), m_pServer(pServer), m_pCommand(nullptr) {
+        : m_name(cname), m_pServer(pServer) {
       m_commandSignal.connect(pController, function);
     }
   }

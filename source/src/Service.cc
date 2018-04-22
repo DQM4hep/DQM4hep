@@ -32,7 +32,9 @@ namespace dqm4hep {
 
   namespace net {
 
-    Service::Service(Server *pServer, const std::string &name) : m_pService(nullptr), m_name(name), m_pServer(pServer) {
+    Service::Service(Server *pServer, const std::string &sname) : 
+      m_name(sname), 
+      m_pServer(pServer) {
       /* nop */
     }
 

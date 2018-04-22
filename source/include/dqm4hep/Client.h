@@ -154,7 +154,7 @@ namespace dqm4hep {
     private:
       typedef std::map<std::string, ServiceHandler *> ServiceHandlerMap;
       typedef std::vector<ServiceHandler *> ServiceHandlerList;
-      ServiceHandlerMap m_serviceHandlerMap; ///< The service map
+      ServiceHandlerMap m_serviceHandlerMap = {}; ///< The service map
     };
 
     //-------------------------------------------------------------------------------------------------

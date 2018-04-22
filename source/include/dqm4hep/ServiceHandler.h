@@ -78,6 +78,10 @@ namespace dqm4hep {
       ServiceHandler(Client *pClient, const std::string &name, Controller *pController,
                      void (Controller::*function)(const Buffer &));
 
+      ServiceHandler() = delete;
+      ServiceHandler(const ServiceHandler&) = delete;
+      ServiceHandler& operator=(const ServiceHandler&) = delete;
+
       /**
        * Destructor
        */
@@ -93,13 +97,16 @@ namespace dqm4hep {
         /** Contructor
          */
         ServiceInfo(ServiceHandler *pHandler);
+        ServiceInfo() = delete;
+        ServiceInfo(const ServiceInfo&) = delete;
+        ServiceInfo& operator=(const ServiceInfo&) = delete;
 
         /** The dim rpc handler
          */
         void infoHandler();
 
       private:
-        ServiceHandler *m_pHandler;
+        ServiceHandler *m_pHandler = {nullptr};
       };
 
       /**
@@ -109,19 +116,19 @@ namespace dqm4hep {
       void receiveServiceUpdated(const Buffer &);
 
     private:
-      std::string m_name; ///< The request handler name
-      Client *m_pClient;  ///< The client manager
-      ServiceInfo m_serviceInfo;
-      UpdateSignal m_updateSignal;
+      std::string          m_name = {""};           ///< The request handler name
+      Client              *m_pClient = {nullptr};   ///< The client manager
+      ServiceInfo          m_serviceInfo;
+      UpdateSignal         m_updateSignal = {};
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &name, Controller *pController,
+    inline ServiceHandler::ServiceHandler(Client *pClient, const std::string &sname, Controller *pController,
                                           void (Controller::*function)(const Buffer &))
-        : m_name(name), m_pClient(pClient), m_serviceInfo(this) {
+        : m_name(sname), m_pClient(pClient), m_serviceInfo(this) {
       m_updateSignal.connect(pController, function);
     }
   }

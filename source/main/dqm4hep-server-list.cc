@@ -29,7 +29,7 @@
 
 using namespace dqm4hep::net;
 
-int main(int argc, char **argv) {
+int main(int /*argc*/, char ** /*argv*/) {
   std::vector<std::string> runningServers(Server::runningServers());
 
   for (auto iter = runningServers.begin(), endIter = runningServers.end(); endIter != iter; ++iter)

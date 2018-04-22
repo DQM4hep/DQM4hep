@@ -50,7 +50,7 @@ public:
   }
 };
 
-int main(int argc, char **argv) {
+int main(int /*argc*/, char ** /*argv*/) {
   MyPrintClass printer;
 
   Server *pServer = new Server("TestServer");

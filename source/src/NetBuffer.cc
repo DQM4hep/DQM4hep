@@ -62,9 +62,9 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void RawBuffer::adopt(const char *buffer, size_t size) {
+    void RawBuffer::adopt(const char *buffer, size_t s) {
       m_pBuffer = buffer;
-      m_size = size;
+      m_size = s;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -76,8 +76,8 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void BufferModel::handle(const char *buffer, size_t size) {
-      m_rawBuffer.adopt(buffer, size);
+    void BufferModel::handle(const char *buffer, size_t s) {
+      m_rawBuffer.adopt(buffer, s);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -101,10 +101,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Buffer::setModel(std::shared_ptr<BufferModel> model) {
-      if (!model)
+    void Buffer::setModel(std::shared_ptr<BufferModel> m) {
+      if (!m)
         return;
-      m_model = model;
+      m_model = m;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -127,10 +127,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void Buffer::adopt(const char *buffer, size_t size) {
-      auto model = this->createModel();
-      model->handle(buffer, size);
-      this->setModel(model);
+    void Buffer::adopt(const char *buffer, size_t s) {
+      auto m = this->createModel();
+      m->handle(buffer, s);
+      this->setModel(m);
     }
 
     //-------------------------------------------------------------------------------------------------

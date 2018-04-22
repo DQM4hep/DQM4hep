@@ -122,7 +122,7 @@ namespace dqm4hep {
       void handle(const char *buffer, size_t size);
 
     protected:
-      RawBuffer m_rawBuffer; ///< The raw buffer
+      RawBuffer m_rawBuffer = {}; ///< The raw buffer
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ namespace dqm4hep {
       void move(T &&value);
 
     private:
-      T m_value; ///< An internal copy of the stored value
+      T m_value = {}; ///< An internal copy of the stored value
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -182,7 +182,7 @@ namespace dqm4hep {
       }
 
     private:
-      std::string m_value; ///< An internal copy of the stored value as std::string
+      std::string m_value = {""}; ///< An internal copy of the stored value as std::string
     };
 
     typedef std::shared_ptr<BufferModel> BufferModelPtr;
@@ -257,7 +257,7 @@ namespace dqm4hep {
       BufferModelPtr model() const;
 
     private:
-      BufferModelPtr m_model; ///< The buffer model handling the raw buffer
+      BufferModelPtr m_model = {nullptr}; ///< The buffer model handling the raw buffer
     };
 
     //-------------------------------------------------------------------------------------------------

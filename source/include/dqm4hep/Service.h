@@ -117,6 +117,8 @@ namespace dqm4hep {
        * @param name the service name
        */
       Service(Server *pServer, const std::string &name);
+      Service(const Service&) = delete;
+      Service& operator=(const Service&) = delete;
 
       /**
        * Destructor
@@ -144,9 +146,9 @@ namespace dqm4hep {
       void sendData(const Buffer &buffer, const std::vector<int> &clientIds);
 
     private:
-      DimService *m_pService; ///< The service implementation
-      std::string m_name;     ///< The service name
-      Server *m_pServer;      ///< The server in which the service is declared
+      DimService         *m_pService = {nullptr};      ///< The service implementation
+      std::string         m_name = {""};               ///< The service name
+      Server             *m_pServer = {nullptr};       ///< The server in which the service is declared
     };
 
     //-------------------------------------------------------------------------------------------------

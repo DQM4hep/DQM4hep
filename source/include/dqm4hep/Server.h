@@ -61,6 +61,9 @@ namespace dqm4hep {
        *  @param  name the server name
        */
       Server(const std::string &name);
+      Server() = delete;
+      Server(const Server&) = delete;
+      Server& operator=(const Server&) = delete;
 
       /**
        *  @brief  Destructor
@@ -223,17 +226,6 @@ namespace dqm4hep {
       int clientId() const;
 
       /**
-       *  @brief  Create a new timer
-       *
-       *  @param  controller the object receiving the callback on timer timeout
-       *  @param  function the object method to callback on timer timeout
-       *  @param  nSeconds the number of seconds to wait before timeout
-       *  @param  singleShot whether the timer is single shot or repetitve
-       */
-      template <typename Controller>
-      void createTimer(Controller *controller, void (Controller::*function)(), int nSeconds, bool singleShot = true);
-
-      /**
       *  @brief  Get the dim dns node.
        *         First look at DimServer::getDnsNode() then
        *         environment variable "DIM_DNS_NODE"
@@ -284,49 +276,18 @@ namespace dqm4hep {
       CommandHandler *commandHandler(const std::string &name) const;
       void clientExitHandler();
 
-      /**
-       *  @brief  Timer class
-       */
-      class Timer : private DimTimer, public std::enable_shared_from_this<Timer> {
-      public:
-        Timer(Server *server);
-        ~Timer() {
-        }
-        void setPeriod(int nSeconds);
-        int period() const;
-        void startTimer();
-        void stopTimer();
-        void setSingleShot(bool single);
-        bool singleShot() const;
-        core::Signal<void> &onTimeout();
-
-      private:
-        void timerHandler();
-
-      private:
-        core::Signal<void> m_timeoutSignal;
-        bool m_singleShot = true;
-        Server *m_pServer = nullptr;
-        int m_period = 10;
-      };
-
-      void removeTimer(std::shared_ptr<Timer> timer);
-
     private:
-      friend class Timer;
       typedef std::map<std::string, Service *> ServiceMap;
       typedef std::map<std::string, RequestHandler *> RequestHandlerMap;
       typedef std::map<std::string, CommandHandler *> CommandHandlerMap;
-      typedef std::vector<std::shared_ptr<Timer>> TimerPtrVector;
 
-      std::string m_name;                    ///< The short server name
-      bool m_started;                        ///< Whether the server has been started
-      ServiceMap m_serviceMap;               ///< The map of registered services
-      RequestHandlerMap m_requestHandlerMap; ///< The map of registered request handlers
-      CommandHandlerMap m_commandHandlerMap; ///< The map of registered command handlers
-      RequestHandler m_serverInfoHandler;    ///< The built-in request handler for server info
-      core::Signal<int> m_clientExitSignal;  ///< The signal emitted whenever a client exits
-      TimerPtrVector m_timers;               ///< The list of timers
+      std::string                   m_name = {""};             ///< The short server name
+      bool                          m_started = {false};       ///< Whether the server has been started
+      ServiceMap                    m_serviceMap = {};         ///< The map of registered services
+      RequestHandlerMap             m_requestHandlerMap = {};  ///< The map of registered request handlers
+      CommandHandlerMap             m_commandHandlerMap = {};  ///< The map of registered command handlers
+      RequestHandler               *m_serverInfoHandler = {nullptr};  ///< The built-in request handler for server info
+      core::Signal<int>             m_clientExitSignal = {};   ///< The signal emitted whenever a client exits
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -334,24 +295,23 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::createRequestHandler(const std::string &name, Controller *pController,
+    inline void Server::createRequestHandler(const std::string &rname, Controller *pController,
                                              void (Controller::*function)(const Buffer &request, Buffer &response)) {
-      auto findIter = m_requestHandlerMap.find(name);
+      auto findIter = m_requestHandlerMap.find(rname);
 
       if (findIter != m_requestHandlerMap.end())
-        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name +
+        throw std::runtime_error("Server::createRequestHandler(): request handler '" + rname +
                                  "' already exists in this client");
 
-      if (Server::requestHandlerAlreadyRunning(name))
-        throw std::runtime_error("Server::createRequestHandler(): request handler '" + name +
+      if (Server::requestHandlerAlreadyRunning(rname))
+        throw std::runtime_error("Server::createRequestHandler(): request handler '" + rname +
                                  "' already running on network");
 
       // first insert nullptr, then create request handler
-      std::pair<RequestHandlerMap::iterator, bool> inserted =
-          m_requestHandlerMap.insert(RequestHandlerMap::value_type(name, nullptr));
+      auto inserted = m_requestHandlerMap.insert(RequestHandlerMap::value_type(rname, nullptr));
 
       if (inserted.second) {
-        RequestHandler *pRequestHandler = new RequestHandler(this, name, pController, function);
+        RequestHandler *pRequestHandler = new RequestHandler(this, rname, pController, function);
         inserted.first->second = pRequestHandler;
 
         if (this->isRunning())
@@ -363,9 +323,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::createCommandHandler(const std::string &name, Controller *pController,
+    inline void Server::createCommandHandler(const std::string &cname, Controller *pController,
                                              void (Controller::*function)(const Buffer &command)) {
-      auto findIter = m_commandHandlerMap.find(name);
+      auto findIter = m_commandHandlerMap.find(cname);
 
       if (findIter != m_commandHandlerMap.end()) {
         findIter->second->onCommand().connect(pController, function);
@@ -376,16 +336,15 @@ namespace dqm4hep {
         return;
       }
 
-      if (Server::commandHandlerAlreadyRunning(name))
-        throw std::runtime_error("Server::createCommandHandler(): command handler '" + name +
+      if (Server::commandHandlerAlreadyRunning(cname))
+        throw std::runtime_error("Server::createCommandHandler(): command handler '" + cname +
                                  "' already running on network");
 
       // first insert nullptr, then create command handler
-      std::pair<CommandHandlerMap::iterator, bool> inserted =
-          m_commandHandlerMap.insert(CommandHandlerMap::value_type(name, nullptr));
+      auto inserted = m_commandHandlerMap.insert(CommandHandlerMap::value_type(cname, nullptr));
 
       if (inserted.second) {
-        CommandHandler *pCommandHandler = new CommandHandler(this, name, pController, function);
+        CommandHandler *pCommandHandler = new CommandHandler(this, cname, pController, function);
         inserted.first->second = pCommandHandler;
 
         if (this->isRunning())
@@ -397,8 +356,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::stopCommandHandler(const std::string &name, Controller *pController) {
-      auto findIter = m_commandHandlerMap.find(name);
+    inline void Server::stopCommandHandler(const std::string &cname, Controller *pController) {
+      auto findIter = m_commandHandlerMap.find(cname);
 
       if (findIter != m_commandHandlerMap.end()) {
         findIter->second->onCommand().disconnect(pController);
@@ -411,9 +370,9 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename Controller>
-    inline void Server::stopCommandHandler(const std::string &name, Controller *pController,
+    inline void Server::stopCommandHandler(const std::string &cname, Controller *pController,
                                            void (Controller::*function)(const Buffer &command)) {
-      auto findIter = m_commandHandlerMap.find(name);
+      auto findIter = m_commandHandlerMap.find(cname);
 
       if (findIter != m_commandHandlerMap.end()) {
         findIter->second->onCommand().disconnect(pController, function);
@@ -423,21 +382,8 @@ namespace dqm4hep {
       }
     }
 
-    //-------------------------------------------------------------------------------------------------
-
-    template <typename Controller>
-    inline void Server::createTimer(Controller *controller, void (Controller::*function)(), int nSeconds,
-                                    bool singleShot) {
-      auto timer = std::make_shared<Timer>(this);
-      timer->onTimeout().connect(controller, function);
-      timer->setSingleShot(singleShot);
-      timer->setPeriod(nSeconds);
-      m_timers.push_back(timer);
-
-      if (this->isRunning())
-        timer->startTimer();
-    }
   }
+  
 }
 
 #endif //  SERVER_H

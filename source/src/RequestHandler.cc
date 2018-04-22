@@ -31,8 +31,6 @@ namespace dqm4hep {
 
   namespace net {
 
-    // namespace experimental {
-
     RequestHandler::~RequestHandler() {
       this->stopHandlingRequest();
     }
@@ -110,8 +108,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    CommandHandler::CommandHandler(Server *pServer, const std::string &name)
-        : m_name(name), m_pServer(pServer), m_pCommand(nullptr) {
+    CommandHandler::CommandHandler(Server *pServer, const std::string &cname)
+        : m_name(cname), m_pServer(pServer), m_pCommand(nullptr) {
     }
 
     //-------------------------------------------------------------------------------------------------
