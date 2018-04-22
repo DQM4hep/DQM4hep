@@ -274,7 +274,8 @@ namespace dqm4hep {
       void handleServerInfoRequest(const Buffer &, Buffer &response);
       RequestHandler *requestHandler(const std::string &name) const;
       CommandHandler *commandHandler(const std::string &name) const;
-      void clientExitHandler();
+      void clientExitHandler() override;
+      void commandHandler() override {};
 
     private:
       typedef std::map<std::string, Service *> ServiceMap;
