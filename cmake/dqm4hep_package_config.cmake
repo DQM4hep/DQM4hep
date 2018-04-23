@@ -5,7 +5,7 @@ macro( dqm4hep_generate_package_confguration )
   # parse the macro arguments
   set( FLAG_OPTIONS "" )
   set( SINGLE_OPTIONS PACKAGE_NAME HEADER_OUTPUT_PATH )
-  set( MULTI_OPTIONS "" )
+  set( MULTI_OPTIONS LIBRARIES )
   cmake_parse_arguments( PACKAGE_CONFIG "${FLAG_OPTIONS}" "${SINGLE_OPTIONS}" "${MULTI_OPTIONS}" ${ARGN} )
 
   if( NOT PACKAGE_CONFIG_PACKAGE_NAME )
@@ -16,6 +16,14 @@ macro( dqm4hep_generate_package_confguration )
   if( NOT PACKAGE_CONFIG_HEADER_OUTPUT_PATH )
     set( PACKAGE_CONFIG_HEADER_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/source/include )
     message( STATUS "Package config: package config header output path set to ${PACKAGE_CONFIG_HEADER_OUTPUT_PATH}" )
+  endif()
+  
+  if( NOT PACKAGE_CONFIG_LIBRARIES )
+    set( PACKAGE_CONFIG_PACKAGE_LIBRARIES ${PROJECT_NAME} )
+  else()
+    foreach( lib ${PACKAGE_CONFIG_LIBRARIES} )
+      set( PACKAGE_CONFIG_PACKAGE_LIBRARIES "${PACKAGE_CONFIG_PACKAGE_LIBRARIES} ${lib}" )      
+    endforeach()
   endif()
   
   # package dependencies
