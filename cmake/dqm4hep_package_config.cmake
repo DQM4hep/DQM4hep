@@ -1,6 +1,6 @@
 
 # Standard macro to export a DQM4hep package as a CMake project
-macro( dqm4hep_generate_package_confguration )
+macro( dqm4hep_generate_package_configuration )
   
   # parse the macro arguments
   set( FLAG_OPTIONS "" )
