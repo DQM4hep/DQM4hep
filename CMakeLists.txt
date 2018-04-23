@@ -43,4 +43,4 @@ display_std_variables()
 
 ###############################
 # generate and install following configuration files
-dqm4hep_generate_package_confguration( PACKAGE_NAME ${PROJECT_NAME} )
+dqm4hep_generate_package_configuration( PACKAGE_NAME ${PROJECT_NAME} )
