@@ -116,6 +116,14 @@ namespace dqm4hep {
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
 
+      // For-loop code for doing multiple test types per qtest; use TBD
+      /*
+      for (std::vector<std::string>::iterator it = m_properties.begin(); it != m_properties.end(); it++
+      {
+        // Do something
+      }
+      */
+
       float result;
 
       if (m_properties[0] == "Mean")
@@ -142,12 +150,6 @@ namespace dqm4hep {
 	{
 	  throw StatusCodeException(STATUS_CODE_FAILURE); // The generic error statuscode is temporary until a specific statuscode for this exists, or a custom error message can be written here
 	}
-
-      /*
-      for (std::vector<std::string>::iterator it = m_properties.begin(); it != m_properties.end(); it++){
-        result = AnalysisHelper::mainHelper(monitorElement, *it, m_percentage);
-      }
-      */
 
       if ( std::isnan(m_meanDeviationLower) ) {
 	// Do the lower-than comparison
