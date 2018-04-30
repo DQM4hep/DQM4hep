@@ -55,23 +55,23 @@ namespace dqm4hep {
 
       /** Get the run number
        */
-      int getRunNumber() const;
+      int runNumber() const;
 
       /** Get the start time
        */
-      TimePoint getStartTime() const;
+      TimePoint startTime() const;
 
       /** Get the end time
        */
-      TimePoint getEndTime() const;
+      TimePoint endTime() const;
 
       /** Get the run description
        */
-      const std::string &getDescription() const;
+      const std::string &description() const;
 
       /** Get the detector name related to this run
        */
-      const std::string &getDetectorName() const;
+      const std::string &detectorName() const;
 
       /** Set the run number
        */
@@ -104,15 +104,15 @@ namespace dqm4hep {
        *  If the parameter is not found, the value remains unchanged
        */
       template <typename T>
-      void getParameter(const std::string &key, T &value) const;
+      void parameter(const std::string &key, T &value) const;
 
       /** Get the number of parameters
        */
-      unsigned int getNParameters() const;
+      unsigned int nParameters() const;
 
       /** Get the parameters keys
        */
-      StringVector getParameterKeys() const;
+      StringVector parameterKeys() const;
       
       /**
        *  @brief  Get the run parameters
@@ -132,12 +132,12 @@ namespace dqm4hep {
       void fromJson(const json &value);
 
     protected:
-      int m_runNumber;
-      TimePoint m_startTime;
-      TimePoint m_endTime;
-      std::string m_detectorName;
-      std::string m_description;
-      std::map<std::string, std::string> m_parametersMap;
+      int                     m_runNumber = {0};
+      TimePoint               m_startTime = {};
+      TimePoint               m_endTime = {};
+      std::string             m_detectorName = {""};
+      std::string             m_description = {""};
+      StringMap               m_parametersMap = {};
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -147,62 +147,62 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline int Run::getRunNumber() const {
+    inline int Run::runNumber() const {
       return m_runNumber;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline TimePoint Run::getStartTime() const {
+    inline TimePoint Run::startTime() const {
       return m_startTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline TimePoint Run::getEndTime() const {
+    inline TimePoint Run::endTime() const {
       return m_endTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const std::string &Run::getDescription() const {
+    inline const std::string &Run::description() const {
       return m_description;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const std::string &Run::getDetectorName() const {
+    inline const std::string &Run::detectorName() const {
       return m_detectorName;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setRunNumber(int runNumber) {
-      m_runNumber = runNumber;
+    inline void Run::setRunNumber(int rn) {
+      m_runNumber = rn;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setStartTime(const TimePoint &startTime) {
-      m_startTime = startTime;
+    inline void Run::setStartTime(const TimePoint &st) {
+      m_startTime = st;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setEndTime(const TimePoint &endTime) {
-      m_endTime = endTime;
+    inline void Run::setEndTime(const TimePoint &et) {
+      m_endTime = et;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setDescription(const std::string &description) {
-      m_description = description;
+    inline void Run::setDescription(const std::string &des) {
+      m_description = des;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setDetectorName(const std::string &detectorName) {
-      m_detectorName = detectorName;
+    inline void Run::setDetectorName(const std::string &dn) {
+      m_detectorName = dn;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Run::getParameter(const std::string &key, T &value) const {
+    inline void Run::parameter(const std::string &key, T &value) const {
       auto findIter = m_parametersMap.find(key);
 
       if (m_parametersMap.end() == findIter)
@@ -234,7 +234,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <>
-    inline void Run::getParameter(const std::string &key, std::string &value) const {
+    inline void Run::parameter(const std::string &key, std::string &value) const {
       auto findIter = m_parametersMap.find(key);
 
       if (m_parametersMap.end() == findIter)
@@ -245,7 +245,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline unsigned int Run::getNParameters() const {
+    inline unsigned int Run::nParameters() const {
       return m_parametersMap.size();
     }
   }

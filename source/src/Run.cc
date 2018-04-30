@@ -32,24 +32,20 @@ namespace dqm4hep {
 
   namespace core {
 
-    Run::Run(int runNumber, const std::string &description, const std::string &detectorName)
-        : m_runNumber(runNumber),
-          m_startTime(dqm4hep::core::now()),
-          m_endTime(),
-          m_detectorName(detectorName),
-          m_description(description),
-          m_parametersMap() {
+    Run::Run(int rn, const std::string &des, const std::string &dn) : 
+      m_runNumber(rn),
+      m_startTime(dqm4hep::core::now()),
+      m_detectorName(dn),
+      m_description(des) {
       /* nop */
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StringVector Run::getParameterKeys() const {
+    StringVector Run::parameterKeys() const {
       StringVector keys;
-
       for (auto iter = m_parametersMap.begin(), endIter = m_parametersMap.end(); endIter != iter; ++iter)
         keys.push_back(iter->first);
-
       return keys;
     }
     
@@ -73,21 +69,26 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void Run::toJson(json &value) const {
-      auto startTime = std::chrono::system_clock::to_time_t(m_startTime);
-      auto endTime = std::chrono::system_clock::to_time_t(m_endTime);
-
-      value = {{"runNumber", m_runNumber},   {"startTime", startTime},       {"endTime", endTime},
-               {"detector", m_detectorName}, {"description", m_description}, {"parameters", m_parametersMap}};
+      auto st = std::chrono::system_clock::to_time_t(m_startTime);
+      auto et = std::chrono::system_clock::to_time_t(m_endTime);
+      value = {
+        {"runNumber", m_runNumber},
+        {"startTime", st},
+        {"endTime", et},
+        {"detector", m_detectorName},
+        {"description", m_description}, 
+        {"parameters", m_parametersMap}
+      };
     }
 
     //-------------------------------------------------------------------------------------------------
 
     void Run::fromJson(const json &value) {
       m_runNumber = value.value<int>("runNumber", 0);
-      auto startTime = value.value<int64_t>("startTime", 0);
-      auto endTime = value.value<int64_t>("endTime", 0);
-      m_startTime = std::chrono::system_clock::from_time_t(startTime);
-      m_endTime = std::chrono::system_clock::from_time_t(endTime);
+      auto st = value.value<int64_t>("startTime", 0);
+      auto et = value.value<int64_t>("endTime", 0);
+      m_startTime = std::chrono::system_clock::from_time_t(st);
+      m_endTime = std::chrono::system_clock::from_time_t(et);
       m_detectorName = value.value<std::string>("detector", "");
       m_description = value.value<std::string>("description", "");
       m_parametersMap = value.value<StringMap>("parameters", StringMap());
