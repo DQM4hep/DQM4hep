@@ -116,6 +116,21 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     std::string MonitorElement::title() const {
       return (m_monitorObject ? m_monitorObject->GetTitle() : "");
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void MonitorElement::setTitle(const std::string &t) {
+      if(nullptr == m_monitorObject) {
+        dqm_error("Trying to set monitor element title: not initialized!");
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+      }
+      if(not m_monitorObject.ptr()->InheritsFrom("TNamed")) {
+        dqm_error("Trying to set monitor element title: does not inherits from TNamed!");
+        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+      }
+      TNamed *named = objectTo<TNamed>();
+      named->SetTitle(t.c_str());
+    }
 
     //-------------------------------------------------------------------------------------------------
 

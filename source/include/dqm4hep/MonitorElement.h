@@ -83,10 +83,19 @@ namespace dqm4hep {
       /** Get the object name
        */
       std::string name() const;
-
+      
       /** Get the object title
        */
       std::string title() const;
+      
+      /**
+       *  @brief  Set the object title.
+       *
+       *  Throw if the object does not inherit the TNamed class
+       * 
+       *  @param  title the object title
+       */
+      void setTitle(const std::string &title);
 
       /** Get the object path (in directory structure)
        */
