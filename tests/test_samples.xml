@@ -11,24 +11,24 @@
         <parameter name="ExpectedMean" value="10"/>
         <parameter name="MeanDeviationLower" value="8"/>
         <parameter name="MeanDeviationUpper" value="12"/>
-	<parameter name="TestTypes"> Mean </parameter>
+	<parameter name="Properties"> Mean </parameter>
       </qtest>
 
       <qtest type="MeanWithinExpectedTest" name="MeanBelow12">
         <parameter name="MeanDeviationUpper" value="12" />
-	<parameter name="TestTypes"> Mean </parameter>
+	<parameter name="Properties"> Mean </parameter>
       </qtest>
 
       <qtest type="MeanWithinExpectedTest" name="MeanAbove8">
         <parameter name="MeanDeviationLower" value="8" />
-	<parameter name="TestTypes"> Mean </parameter>
+	<parameter name="Properties"> Mean </parameter>
       </qtest>
 
       <qtest type="MeanWithinExpectedTest" name="Mean90Around10Short">
         <parameter name="ExpectedMean" value="10"/>
         <parameter name="MeanDeviationLower" value="9.5"/>
         <parameter name="MeanDeviationUpper" value="10.5"/>
-	<parameter name="TestTypes"> Mean </parameter>
+	<parameter name="Properties"> Mean </parameter>
 	<parameter name="Percentage"> 90 </parameter>
       </qtest>
 
@@ -36,28 +36,28 @@
         <parameter name="ExpectedMean" value="15"/>
         <parameter name="MeanDeviationLower" value="14.5"/>
         <parameter name="MeanDeviationUpper" value="15.5"/>
-	<parameter name="TestTypes"> Mean </parameter>
+	<parameter name="Properties"> Mean </parameter>
       </qtest>
 
       <qtest type="MeanWithinExpectedTest" name="RMSAround2Long">
         <parameter name="ExpectedMean" value="2"/>
         <parameter name="MeanDeviationLower" value="0"/>
         <parameter name="MeanDeviationUpper" value="4"/>
-	<parameter name="TestTypes"> RMS </parameter>
+	<parameter name="Properties"> RMS </parameter>
       </qtest>
 
       <qtest type="MeanWithinExpectedTest" name="MedianAround10Long">
         <parameter name="ExpectedMean" value="10"/>
         <parameter name="MeanDeviationLower" value="8"/>
         <parameter name="MeanDeviationUpper" value="12"/>
-	<parameter name="TestTypes"> Median </parameter>
+	<parameter name="Properties"> Median </parameter>
       </qtest>
 
       <qtest type="MeanWithinExpectedTest" name="MedianAround10Short" error="0.5" warning="0.75">
         <parameter name="ExpectedMean" value="10"/>
         <parameter name="MeanDeviationLower" value="9"/>
         <parameter name="MeanDeviationUpper" value="11"/>
-	<parameter name="TestTypes"> Median  </parameter>
+	<parameter name="Properties"> Median  </parameter>
       </qtest>
 
     </qtests>
