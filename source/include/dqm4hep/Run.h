@@ -140,6 +140,18 @@ namespace dqm4hep {
        */
       template <typename T>
       void parameter(const std::string &key, T &value) const;
+      
+      /** 
+       *  @brief  Get a run parameter
+       *          The value is converted into template type using the << operator
+       *          If the parameter is not found, the fallback value is used instead
+       *
+       *  @param  key the parameter name
+       *  @param  value the value to receive
+       *  @param  fallback the fallback value
+       */
+      template <typename T>
+      void parameter(const std::string &key, T &value, const T &fallback) const;
 
       /** 
        *  @brief  Get the number of run parameters
@@ -267,10 +279,20 @@ namespace dqm4hep {
     template <typename T>
     inline void Run::parameter(const std::string &key, T &value) const {
       auto findIter = m_parametersMap.find(key);
-
       if (m_parametersMap.end() == findIter)
         return;
-
+      dqm4hep::core::stringToType(findIter->second, value);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline void Run::parameter(const std::string &key, T &value, const T &fallback) const {
+      auto findIter = m_parametersMap.find(key);
+      if (m_parametersMap.end() == findIter) {
+        value = fallback;
+        return;
+      }
       dqm4hep::core::stringToType(findIter->second, value);
     }
 
@@ -286,10 +308,20 @@ namespace dqm4hep {
     template <>
     inline void Run::parameter(const std::string &key, std::string &value) const {
       auto findIter = m_parametersMap.find(key);
-
       if (m_parametersMap.end() == findIter)
         return;
+      value = findIter->second;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
 
+    template <>
+    inline void Run::parameter(const std::string &key, std::string &value, const std::string &fallback) const {
+      auto findIter = m_parametersMap.find(key);
+      if (m_parametersMap.end() == findIter) {
+        value = fallback;
+        return;
+      }
       value = findIter->second;
     }
 
