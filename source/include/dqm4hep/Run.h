@@ -113,6 +113,11 @@ namespace dqm4hep {
       /** Get the parameters keys
        */
       StringVector getParameterKeys() const;
+      
+      /**
+       *  @brief  Get the run parameters
+       */
+      const StringMap &parameters() const;
 
       /** Reset the run
        */
@@ -133,30 +138,12 @@ namespace dqm4hep {
       std::string m_detectorName;
       std::string m_description;
       std::map<std::string, std::string> m_parametersMap;
-
-      template <typename T>
-      friend T &operator<<(T & /*out*/, const Run & /*run*/);
     };
 
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename T>
-    inline T &operator<<(T &out, const Run &run) {
-      out << "Run :\n"
-             "  -> run number : "
-          << run.getRunNumber() << "\n"
-                                   "  -> detector : "
-          << run.getDetectorName() << "\n"
-                                      "  -> description : "
-          << run.getDescription() << "\n"
-                                     "  -> parameters : \n";
-
-      for (auto iter = run.m_parametersMap.begin(), endIter = run.m_parametersMap.end(); endIter != iter; ++iter)
-        out << "   * " << iter->first << " = " << iter->second << "\n";
-
-      return out;
-    }
+    std::ostream& operator<<(std::ostream &out, const Run &run);
 
     //-------------------------------------------------------------------------------------------------
 

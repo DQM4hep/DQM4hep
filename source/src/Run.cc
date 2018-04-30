@@ -52,6 +52,12 @@ namespace dqm4hep {
 
       return keys;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    const StringMap &Run::parameters() const {
+      return m_parametersMap;
+    }
 
     //-------------------------------------------------------------------------------------------------
 
@@ -85,6 +91,15 @@ namespace dqm4hep {
       m_detectorName = value.value<std::string>("detector", "");
       m_description = value.value<std::string>("description", "");
       m_parametersMap = value.value<StringMap>("parameters", StringMap());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    std::ostream& operator<<(std::ostream &out, const Run &run) {
+      core::json jrun;
+      run.toJson(jrun);
+      out << jrun.dump(2);
+      return out;
     }
   }
 }
