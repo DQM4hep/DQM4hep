@@ -41,76 +41,113 @@ namespace dqm4hep {
 
   namespace core {
 
-    /** Run class
+    /** 
+     *  @brief  Run class
      */
     class Run {
     public:
-      /** Constructor with run number (optional)
+      /** 
+       *  @brief  Constructor
+       *
+       *  @param  runNumber the run number
+       *  @param  description the run description
+       *  @param  detectorName the detector name
        */
       Run(int runNumber = 0, const std::string &description = "", const std::string &detectorName = "");
 
-      /** Destructor
+      /** 
+       *  @brief  Default destructor
        */
       ~Run() = default;
 
-      /** Get the run number
+      /** 
+       *  @brief  Get the run number
        */
       int runNumber() const;
 
-      /** Get the start time
+      /** 
+       *  @brief  Get the run start time
        */
       TimePoint startTime() const;
 
-      /** Get the end time
+      /** 
+       *  @brief  Get the run end time
        */
       TimePoint endTime() const;
 
-      /** Get the run description
+      /** 
+       *  @brief  Get the run description
        */
       const std::string &description() const;
 
-      /** Get the detector name related to this run
+      /** 
+       *  @brief  Get the detector name
        */
       const std::string &detectorName() const;
 
-      /** Set the run number
+      /** 
+       *  @brief  Set the run number
+       *
+       *  @param  runNumber the run number
        */
       void setRunNumber(int runNumber);
 
-      /** Set the start time
+      /** 
+       *  @brief  Set the run start time
+       *
+       *  @param  startTime the run start time
        */
       void setStartTime(const TimePoint &startTime);
 
-      /** Set the end time
+      /** 
+       *  @brief  Set the run end tim
+       *
+       *  @param  endTime the run end time
        */
       void setEndTime(const TimePoint &endTime);
 
-      /** Set the run description
+      /** 
+       *  @brief  Set the run description
+       *
+       *  @param  description the run description
        */
       void setDescription(const std::string &description);
 
-      /** Set the detector name related to this run
+      /** 
+       *  @brief  Set the detector name
+       *
+       *  @param  detectorName the detector name
        */
       void setDetectorName(const std::string &detectorName);
 
-      /** Set a parameter.
-       *  The template value is converted into string
+      /** 
+       *  @brief  Set a run parameter
+       *          The value is converted to string
+       *
+       *  @param  key the parameter name
+       *  @param  value the parameter value to set
        */
       template <typename T>
       void setParameter(const std::string &key, const T &value);
 
-      /** Get a parameter.
-       *  The value is converted into asked type.
-       *  If the parameter is not found, the value remains unchanged
+      /** 
+       *  @brief  Get a run parameter
+       *          The value is converted into template type using the << operator
+       *          If the parameter is not found, the value remains unchanged
+       *
+       *  @param  key the parameter name
+       *  @param  value the value to receive
        */
       template <typename T>
       void parameter(const std::string &key, T &value) const;
 
-      /** Get the number of parameters
+      /** 
+       *  @brief  Get the number of run parameters
        */
       unsigned int nParameters() const;
 
-      /** Get the parameters keys
+      /** 
+       *  @brief  Get the run parameters keys
        */
       StringVector parameterKeys() const;
       
@@ -119,24 +156,37 @@ namespace dqm4hep {
        */
       const StringMap &parameters() const;
 
-      /** Reset the run
+      /** 
+       *  @brief  Reset the run properties
        */
       void reset();
 
-      /** Convert run to json
+      /** 
+       *  @brief  Convert the run object to json
+       *
+       *  @param  value the json value to receive 
        */
       void toJson(json &value) const;
 
-      /** Read run info from json
+      /** 
+       *  @brief  Read and set run info from json object
+       *
+       *  @param  value the json object to read
        */
       void fromJson(const json &value);
 
     protected:
+      /// The run number
       int                     m_runNumber = {0};
+      /// The run start time
       TimePoint               m_startTime = {};
+      /// The run end time
       TimePoint               m_endTime = {};
+      /// The detector name
       std::string             m_detectorName = {""};
+      /// The run description 
       std::string             m_description = {""};
+      /// The run parameters
       StringMap               m_parametersMap = {};
     };
 
