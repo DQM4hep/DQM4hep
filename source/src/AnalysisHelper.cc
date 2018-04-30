@@ -27,6 +27,7 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/AnalysisHelper.h>
+#include <typeinfo>
 
 namespace dqm4hep {
 
@@ -34,32 +35,56 @@ namespace dqm4hep {
 
     float AnalysisHelper::mean(MonitorElementPtr pMonitorElement, float percentage = 1.0)
     {
-      TH1 *h = pMonitorElement->objectTo<TH1>();
+
+      std::string ObjectType;
+
       float result;
 
-      if (percentage == 1.0) {
-	result = h->GetMean();
+      TObject *ThisObject = pMonitorElement->objectTo<TObject>();
+
+      if (pMonitorElement->type() == "TH1F" || pMonitorElement->type() == "TH1I") {  // How many types of TH1 histogram do we have to recognise? TH1F, TH1I, ...?
+	ObjectType = "TH1";
+      }
+      else if (pMonitorElement->type() == "TGraph") {
+	ObjectType = "TGraph";
       }
       else {
-	TAxis *axis = h->GetXaxis();
-	int nbins = axis->GetNbins();
-	int imean = axis->FindBin(h->GetMean());
+	// Really this should be replaced with something that goes in the log
+	std::cout << "The monitor element " << pMonitorElement->name() << " of type " << pMonitorElement->type() << " could not be classified." << std::endl;
+	throw StatusCodeException(STATUS_CODE_FAILURE);
+      }
 
-	float entries = percentage*h->GetEntries();
-	float w = h->GetBinContent(imean);
-	float x = h->GetBinCenter(imean);
-	float sumw = w;
-	float sumwx = w*x;
+      if (percentage == 1.0) {
+	if (ObjectType == "TH1") {
+	  TH1 *h = (TH1*)(ThisObject);
+	  result = h->GetMean(1);
+	}
+	if (ObjectType == "TGraph") {
+	  TGraph *h = (TGraph*)(ThisObject);
+	  result = h->GetMean(2);
+	}
+      }
+      else {
 
-	for (int i=1;i<nbins;i++)
-	  {
-	    if (i>0)
-	      {
-		w = h->GetBinContent(imean-i);
-		x = h->GetBinCenter(imean-i);
-		sumw += w;
-		sumwx += w*x;
-	      }
+	if (ObjectType == "TH1") {
+	  TH1 *h = (TH1*)(ThisObject);
+	  TAxis *axis = h->GetXaxis();
+	  int nbins = axis->GetNbins();
+	  int imean = axis->FindBin(h->GetMean());
+	  float entries = percentage*h->GetEntries();
+	  float w = h->GetBinContent(imean);
+	  float x = h->GetBinCenter(imean);
+
+	  float sumw = w;
+	  float sumwx = w*x;
+
+	  for (int i=1;i<nbins;i++) {
+	    if (i>0) {
+	      w = h->GetBinContent(imean-i);
+	      x = h->GetBinCenter(imean-i);
+	      sumw += w;
+	      sumwx += w*x;
+	    }
 	    if (i<= nbins) {
 	      w = h->GetBinContent(imean+i);
 	      x = h->GetBinCenter(imean+i);
@@ -68,8 +93,40 @@ namespace dqm4hep {
 	    }
 	    if (sumw > entries) break;
 	  }
-	      
-	result = sumwx/sumw;
+	  result = sumwx/sumw;
+	}
+
+	if (ObjectType == "TGraph") {
+	  TGraph *h = (TGraph*)(ThisObject);
+	  TAxis *axis = h->GetYaxis();
+	  int nbins = axis->GetNbins();
+	  int imean = axis->FindBin(h->GetMean());
+
+	  TH1F* ThisAxis = h->GetHistogram();
+	  float entries = percentage*ThisAxis->GetEntries();
+	  float w = ThisAxis->GetBinContent(imean);
+	  float x = ThisAxis->GetBinCenter(imean);
+
+	  float sumw = w;
+	  float sumwx = w*x;
+
+	  for (int i=1;i<nbins;i++) {
+	    if (i>0) {
+	      w = ThisAxis->GetBinContent(imean-i);
+	      x = ThisAxis->GetBinCenter(imean-i);
+	      sumw += w;
+	      sumwx += w*x;
+	    }
+	    if (i<= nbins) {
+	      w = ThisAxis->GetBinContent(imean+i);
+	      x = ThisAxis->GetBinCenter(imean+i);
+	      sumw += w;
+	      sumwx += w*x;
+	    }
+	    if (sumw > entries) break;
+	  }
+	  result = sumwx/sumw;
+	}
       }
       return result;
     }
@@ -82,11 +139,12 @@ namespace dqm4hep {
 
     float AnalysisHelper::rms(MonitorElementPtr pMonitorElement, float percentage = 1.0)
     {
-      TH1 *h = pMonitorElement->objectTo<TH1>();
       float result;
 
+      TH1 *h = pMonitorElement->objectTo<TH1>();
+
       if (percentage == 1.0) {
-	result = h->GetRMS();
+	result = h->GetRMS(1);
       }
       else {
 	// PLACEHOLDER
@@ -103,7 +161,7 @@ namespace dqm4hep {
 
     float AnalysisHelper::median(MonitorElementPtr pMonitorElement)
     {
-
+      // This method works ONLY for a TH1 and must be changed to handle a TGraph
       TH1 *h = pMonitorElement->objectTo<TH1>();
 
       Double_t xq[1];
@@ -114,7 +172,6 @@ namespace dqm4hep {
       float result = yq[0];
 
       return result;
-      
     }
 
   }
