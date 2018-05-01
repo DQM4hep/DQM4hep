@@ -146,7 +146,7 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     
     //-------------------------------------------------------------------------------------------------
     
-    void setName(const std::string &n) {
+    void MonitorElement::setName(const std::string &n) {
       if(nullptr == m_monitorObject) {
         dqm_error("Trying to set monitor element name: not initialized!");
         throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
