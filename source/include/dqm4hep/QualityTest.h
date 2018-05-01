@@ -194,7 +194,7 @@ namespace dqm4hep {
 
       /** Perform the quality test result and fill the quality test report
        */
-      void run(MonitorElementPtr monitorElement, QualityTestReport &report);
+      void run(MonitorElement* monitorElement, QualityTestReport &report);
 
       /** Read the settings from the xml handle
        */
@@ -209,7 +209,7 @@ namespace dqm4hep {
        *
        *  @param  monitorElement the monitor element to check
        */
-      virtual bool enoughStatistics(MonitorElementPtr monitorElement) const;
+      virtual bool enoughStatistics(MonitorElement* monitorElement) const;
 
       /**
        *  @brief  Set the warning and error limits on quality test result.
@@ -243,12 +243,12 @@ namespace dqm4hep {
     protected:
       /** Runs a quality test on the given monitor element and return a quality estimate
        */
-      virtual void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) = 0;
+      virtual void userRun(MonitorElement* monitorElement, QualityTestReport &report) = 0;
 
       /** Fill basic info in the qtest report.
        *  Must be called at start of qtest run
        */
-      void fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const;
+      void fillBasicInfo(MonitorElement* monitorElement, QualityTestReport &report) const;
 
     private:
       std::string          m_type = {""};  ///< Quality test type (usually class name)
@@ -287,7 +287,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    inline bool QualityTest::enoughStatistics(MonitorElementPtr /*monitorElement*/) const {
+    inline bool QualityTest::enoughStatistics(MonitorElement * /*monitorElement*/) const {
       return true;
     }
 

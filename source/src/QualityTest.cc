@@ -316,7 +316,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTest::run(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void QualityTest::run(MonitorElement* monitorElement, QualityTestReport &report) {
       this->fillBasicInfo(monitorElement, report);
 
       if (nullptr == monitorElement) {
@@ -424,7 +424,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void QualityTest::fillBasicInfo(MonitorElementPtr monitorElement, QualityTestReport &report) const {
+    void QualityTest::fillBasicInfo(MonitorElement* monitorElement, QualityTestReport &report) const {
       report.m_qualityTestName = this->name();
       report.m_qualityTestType = this->type();
       report.m_qualityTestDescription = this->description();
