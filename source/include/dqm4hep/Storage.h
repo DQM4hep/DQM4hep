@@ -71,7 +71,8 @@ namespace dqm4hep {
       bool containsObject(const std::string &dirName, const ObjectPtr &object) const;
       template <typename F>
       void iterate(F function) const;
-      void getObjects(ObjectList &objectList) const;
+      template <typename U>
+      void getObjects(std::vector<std::shared_ptr<U>> &objectList) const;
       void clear();
 
     private:
@@ -404,9 +405,10 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline void Storage<T>::getObjects(ObjectList &objectList) const {
+    template <typename U>
+    inline void Storage<T>::getObjects(std::vector<std::shared_ptr<U>> &objectList) const {
       this->iterate([&](const DirectoryPtr &/*directory*/, ObjectPtr object) {
-        objectList.push_back(object);
+        objectList.push_back(std::dynamic_pointer_cast<U>(object));
         return true;
       });
     }
