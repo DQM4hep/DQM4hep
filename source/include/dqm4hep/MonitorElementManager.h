@@ -36,6 +36,7 @@
 #include <dqm4hep/QualityTest.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Storage.h>
+#include <dqm4hep/Path.h>
 #include <dqm4hep/XmlHelper.h>
 
 // -- root headers
@@ -177,19 +178,22 @@ namespace dqm4hep {
        *  WARNING : The ROOT object is owned by the framework.
        *  The caller must NOT delete the object
        */
-      StatusCode addMonitorElement(const std::string &path, TObject *pObject, MonitorElementPtr &monitorElement);
+      template <typename T>
+      StatusCode addMonitorElement(const std::string &path, TObject *pObject, std::shared_ptr<T> &monitorElement);
 
       /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
+      template <typename T>
       StatusCode readMonitorElement(const std::string &fileName, const std::string &path, const std::string &name,
-                                    MonitorElementPtr &monitorElement);
+                                    std::shared_ptr<T> &monitorElement);
 
       /** Read TObject from file and add it to list.
        *  The ROOT TObject is owned by the manager
        */
+      template <typename T>
       StatusCode readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name,
-                                    MonitorElementPtr &monitorElement);
+                                    std::shared_ptr<T> &monitorElement);
 
       /** Book a monitor element using the ROOT TClass facility.
        *  The className is passed to TClass::GetClass() to get the corresponding
@@ -198,20 +202,22 @@ namespace dqm4hep {
        *    - ROOT object is disabled so that object with same can be allocated safely memory leak
        *  The resulting monitored TObject is owned by the manager
        */
+      template <typename T>
       StatusCode bookMonitorElement(const std::string &className, const std::string &path, const std::string &name,
-                                    MonitorElementPtr &monitorElement);
+                                    std::shared_ptr<T> &monitorElement);
 
       /** Add a monitor element from an external source.
       *  WARNING : The ROOT object is NOT owned by the framework.
       *  The caller must delete the object on termination
        */
-      StatusCode handleMonitorElement(const std::string &path, TObject *pObject, MonitorElementPtr &monitorElement);
+      template <typename T>
+      StatusCode handleMonitorElement(const std::string &path, TObject *pObject, std::shared_ptr<T> &monitorElement);
 
       /** Book a monitor element. The objectType must inherit TObject and have a ROOT dictionnary.
        *
        */
-      template <typename ObjectType, typename... Args>
-      StatusCode bookObject(const std::string &path, const std::string &name, MonitorElementPtr &monitorElement,
+      template <typename T, typename ObjectType, typename... Args>
+      StatusCode bookObject(const std::string &path, const std::string &name, std::shared_ptr<T> &monitorElement,
                             allocator_helper<TObject, ObjectType, Args...> allocator, Args... args);
 
       /**
@@ -220,7 +226,8 @@ namespace dqm4hep {
        * @param  pMonitorElement the monitor element to attach the reference
        * @param  fileName        the root file name contaning the reference
        */
-      StatusCode attachReference(MonitorElementPtr monitorElement, const std::string &fileName);
+      template <typename T>
+      StatusCode attachReference(std::shared_ptr<T> monitorElement, const std::string &fileName);
       
       /**
        *  @brief  Read monitor element described by the xml element from a root file
@@ -229,6 +236,7 @@ namespace dqm4hep {
        *  @param  pXmlElement the xml element describing the objects to read
        *  @param  readQTests whether to associate qtest to monitor elements
        */
+      template <typename T>
       StatusCode readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests = true);
       
       /**
@@ -245,16 +253,19 @@ namespace dqm4hep {
 
       /** Get all the monitor elements already booked by this module in all the directories
        */
-      void getMonitorElements(MonitorElementList &monitorElements) const;
+      template <typename T>
+      void getMonitorElements(std::vector<std::shared_ptr<T>> &monitorElements) const;
 
       /** Get the monitor element in the current directory (result by ptr reference)
        */
-      StatusCode getMonitorElement(const std::string &name, MonitorElementPtr &monitorElement) const;
+      template <typename T>
+      StatusCode getMonitorElement(const std::string &name, std::shared_ptr<T> &monitorElement) const;
 
       /** Get the monitor element in the given directory (result by ptr reference)
        */
+      template <typename T>
       StatusCode getMonitorElement(const std::string &dirName, const std::string &name,
-                                   MonitorElementPtr &monitorElement) const;
+                                   std::shared_ptr<T> &monitorElement) const;
 
       ////////////////////////
       // DELETION INTERFACE //
@@ -301,10 +312,20 @@ namespace dqm4hep {
                                 QReportStorage &reports);
 
     private:
+      
+      bool checkClass(TClass *cls);
+      StatusCode addToStorage(const std::string &path, MonitorElementPtr element);
+      template <typename T>
+      StatusCode createAndAddMonitorElement(const std::string &path, TObject *pObject, std::shared_ptr<T> &monitorElement, bool owner);
+      
+      template <typename T, typename... Args>
+      std::shared_ptr<T> createMonitorElement(Args ...args);
+      
       /** Get the monitor element storage
        */
       const Storage<MonitorElement> &getStorage() const;
-
+      
+    private:
       typedef std::map<MonitorElementPtr, QualityTestMap> MonitorElementToQTestMap;
 
       Storage<MonitorElement> m_storage = {};
@@ -316,30 +337,48 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    template <typename ObjectType, typename... Args>
-    StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name,
-                                                 MonitorElementPtr &monitorElement,
+    template <typename T>
+    inline void MonitorElementManager::getMonitorElements(std::vector<std::shared_ptr<T>> &monitorElements) const {
+      m_storage.getObjects(monitorElements);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementManager::getMonitorElement(const std::string &name,
+                                                        std::shared_ptr<T> &monitorElement) const {
+      monitorElement = std::dynamic_pointer_cast<T>(m_storage.findObject([&name](const MonitorElementPtr &elt) { return (elt->name() == name); }));
+
+      if (nullptr == monitorElement)
+        return STATUS_CODE_NOT_FOUND;
+
+      return STATUS_CODE_SUCCESS;
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode MonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &name,
+                                                        std::shared_ptr<T> &monitorElement) const {
+      monitorElement = std::dynamic_pointer_cast<T>(
+          m_storage.findObject(dirName, [&name](const MonitorElementPtr &elt) { return (elt->name() == name); }));
+
+      if (nullptr == monitorElement)
+        return STATUS_CODE_NOT_FOUND;
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T, typename ObjectType, typename... Args>
+    inline StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name,
+                                                 std::shared_ptr<T> &monitorElement,
                                                  allocator_helper<TObject, ObjectType, Args...> allocator,
                                                  Args... args) {
       monitorElement = nullptr;
-
-      if (!ObjectType::Class()->HasDictionary()) {
-        dqm_error("Couldn't book object of type '{0}', because this class has no dictionnary!",
-                  ObjectType::Class_Name());
-        return STATUS_CODE_NOT_ALLOWED;
-      }
-
-      if (ObjectType::Class()->IsForeign()) {
-        dqm_error(
-            "Couldn't book object of type '{0}', because this class is foreign (does not have a Streamer method))!",
-            ObjectType::Class_Name());
-        return STATUS_CODE_NOT_ALLOWED;
-      }
-
-      if (!ObjectType::Class()->InheritsFrom("TNamed")) {
-        dqm_error("Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call "
-                  "SetName())!",
-                  ObjectType::Class_Name());
+      
+      if(not checkClass(ObjectType::Class())) {
         return STATUS_CODE_NOT_ALLOWED;
       }
 
@@ -355,10 +394,186 @@ namespace dqm4hep {
       }
 
       ((TNamed *)pTObject)->SetName(name.c_str());
-
-      return this->addMonitorElement(path, pTObject, monitorElement);
+      return addMonitorElement<T>(path, pTObject, monitorElement);
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T, typename... Args>
+    inline std::shared_ptr<T> MonitorElementManager::createMonitorElement(Args ...args) {
+      return T::make_shared(args...);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementManager::createAndAddMonitorElement(const std::string &path, TObject *pObject, std::shared_ptr<T> &monitorElement, bool owner) {
+      PtrHandler<TObject> ptrObject(pObject, owner);
+      monitorElement = nullptr;
+      TClass *cls = TClass::GetClass(pObject->ClassName());
+      if(not checkClass(cls)) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+      
+      monitorElement = createMonitorElement<T>(ptrObject);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, addToStorage(path, monitorElement));
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject, std::shared_ptr<T> &monitorElement) {
+      return createAndAddMonitorElement<T>(path, pObject, monitorElement, true);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject,
+                                                           std::shared_ptr<T> &monitorElement) {
+      return createAndAddMonitorElement<T>(path, pObject, monitorElement, false);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path,
+                                                         const std::string &name, std::shared_ptr<T> &monitorElement) {
+      monitorElement = nullptr;
+      std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
+      return readMonitorElement<T>(rootFile.get(), path, name, monitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path, const std::string &name, std::shared_ptr<T> &monitorElement) {
+      monitorElement = nullptr;
+      Path fullName = path;
+      fullName += name;
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject = nullptr;
+      // FIXME : bad handling of path in root path
+      if (path == "/")
+        pTObject = pTFile->Get(name.c_str());
+      else
+        pTObject = pTFile->Get(fullName.getPath().c_str());
+      TObject::SetObjectStat(objectStat);
+
+      if (pTObject == nullptr)
+        return STATUS_CODE_NOT_FOUND;
+
+      return addMonitorElement<T>(path, pTObject, monitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path,
+                                                         const std::string &name, std::shared_ptr<T> &monitorElement) {
+      monitorElement = nullptr;
+      TClass *pTClass = TClass::GetClass(className.c_str());
+      
+      if(not checkClass(pTClass)) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject = (TObject *)pTClass->New();
+      TObject::SetObjectStat(objectStat);
+
+      if (pTObject == nullptr) {
+        dqm_error("MonitorElementManager::bookMonitorElement: Couldn't allocate ROOT class '{0}' from TClass facility",
+                  className);
+        return STATUS_CODE_FAILURE;
+      }
+
+      ((TNamed *)pTObject)->SetName(name.c_str());
+      return addMonitorElement<T>(path, pTObject, monitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    template <typename T>
+    inline StatusCode MonitorElementManager::attachReference(std::shared_ptr<T> monitorElement, const std::string &fileName) {
+      if (nullptr == monitorElement)
+        return STATUS_CODE_INVALID_PTR;
+
+      Path fullName = monitorElement->path();
+      fullName += monitorElement->name();
+      dqm_debug("MonitorElementManager::attachReference: looking for element {0}", fullName.getPath());
+
+      std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
+
+      const bool objectStat(TObject::GetObjectStat());
+      TObject::SetObjectStat(false);
+      TObject *pTObject(nullptr);
+
+      if (monitorElement->path() == "/")
+        pTObject = rootFile->Get(monitorElement->name().c_str());
+      else
+        pTObject = rootFile->Get(fullName.getPath().c_str());
+
+      TObject::SetObjectStat(objectStat);
+
+      if (pTObject == nullptr)
+        return STATUS_CODE_NOT_FOUND;
+
+      monitorElement->setReferenceObject(pTObject);
+
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementManager::readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests) {
+
+      if(nullptr == pTFile) {
+        dqm_error( "MonitorElementManager::readMonitorElements: Invalid TFile pointer !" );
+        return STATUS_CODE_INVALID_PARAMETER;
+      }
+      
+      if(nullptr == pXmlElement) {
+        dqm_error( "MonitorElementManager::readMonitorElements: Invalid xml element !" );
+        return STATUS_CODE_INVALID_PARAMETER;
+      }
+      
+      for (TiXmlElement *meElt = pXmlElement->FirstChildElement("monitorElement"); meElt != nullptr; meElt = meElt->NextSiblingElement("monitorElement")) {
+        
+        std::string path, name, reference;
+        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "path", path));
+        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "reference", reference));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
+
+        // read element from root file
+        std::shared_ptr<T> monitorElement;
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, readMonitorElement(pTFile, path, name, monitorElement));
+
+        // read reference element if any
+        if (!reference.empty()) {
+          dqm_debug("Monitor element '{0}' read, reference file '{1}'", name, reference);
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, attachReference(monitorElement, reference));
+        }
+        
+        // attach quality tests if option set
+        if(readQTests) {
+          for (TiXmlElement *qtest = meElt->FirstChildElement("qtest"); qtest != nullptr; qtest = qtest->NextSiblingElement("qtest")) {
+            std::string qTestName;
+            THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));
+            THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->addQualityTest(path, name, qTestName));
+          }          
+        }
+      }
+      
+      return STATUS_CODE_SUCCESS;
+    }
+    
   }
+  
 }
 
 #endif //  DQM4HEP_MONITORELEMENTMANAGER_H

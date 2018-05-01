@@ -141,217 +141,178 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject,
-                                                        MonitorElementPtr &monitorElement) {
-      PtrHandler<TObject> ptrObject(pObject, true);
-      monitorElement = nullptr;
+    // StatusCode MonitorElementManager::addMonitorElement(const std::string &path, TObject *pObject,
+    //                                                     MonitorElementPtr &monitorElement) {
+    //   PtrHandler<TObject> ptrObject(pObject, true);
+    //   monitorElement = nullptr;
+    //   
+    //   if(not checkClass(pObject->Class())) {
+    //     return STATUS_CODE_NOT_ALLOWED;
+    //   }
+    //   
+    //   monitorElement = MonitorElement::make_shared(ptrObject);
+    // 
+    //   if(not addToStorage(path, monitorElement)) {
+    //     return STATUS_CODE_FAILURE;
+    //   }
+    //   return STATUS_CODE_SUCCESS;
+    // }
 
-      try {
-        if (!pObject->Class()->HasDictionary()) {
-          dqm_error("Couldn't book object of type '{0}', because this class has no dictionnary!", pObject->ClassName());
-          throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
-        }
+    // //-------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject,
+    //                                                        MonitorElementPtr &monitorElement) {
+    //   PtrHandler<TObject> ptrObject(pObject, false);
+    //   monitorElement = MonitorElement::make_shared(ptrObject);
+    //   RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
+    //   monitorElement->setPath(path);
+    // 
+    //   return STATUS_CODE_SUCCESS;
+    // }
 
-        if (pObject->Class()->IsForeign()) {
-          dqm_error(
-              "Couldn't book object of type '{0}', because this class is foreign ( does not have a Streamer method))!",
-              pObject->ClassName());
-          throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
-        }
-
-        if (!pObject->InheritsFrom("TNamed")) {
-          dqm_error("Couldn't book object of type '{0}', because this class doesn't inherit TNamed (required to call "
-                    "SetName())!",
-                    pObject->ClassName());
-          throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
-        }
-
-        monitorElement = MonitorElement::make_shared(ptrObject);
-
-        if (nullptr !=
-            m_storage.findObject(path, [&](MonitorElementPtr obj) { return obj->name() == pObject->GetName(); })) {
-          dqm_error("Monitor element '{0}' in directory '{1}' already booked !", pObject->GetName(), path);
-          throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
-        }
-
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
-        monitorElement->setPath(path);
-      } catch (StatusCodeException &e) {
-        if (nullptr == monitorElement) {
-          // TObject should have been owned by the MonitorElement
-          // but creation failed, we need to delete it manually
-          delete pObject;
-        }
-
-        return e.getStatusCode();
-      } catch (...) {
-        if (nullptr == monitorElement) {
-          // TObject should have been owned by the MonitorElement
-          // but creation failed, we need to delete it manually
-          delete pObject;
-        }
-
-        return STATUS_CODE_FAILURE;
-      }
-
-      return STATUS_CODE_SUCCESS;
-    }
+    //-------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path,
+    //                                                      const std::string &name, MonitorElementPtr &monitorElement) {
+    //   monitorElement = nullptr;
+    //   std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
+    //   return this->readMonitorElement(rootFile.get(), path, name, monitorElement);
+    // }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::handleMonitorElement(const std::string &path, TObject *pObject,
-                                                           MonitorElementPtr &monitorElement) {
-      PtrHandler<TObject> ptrObject(pObject, false);
-      monitorElement = MonitorElement::make_shared(ptrObject);
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
-      monitorElement->setPath(path);
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElementManager::readMonitorElement(const std::string &fileName, const std::string &path,
-                                                         const std::string &name, MonitorElementPtr &monitorElement) {
-      monitorElement = nullptr;
-      std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
-      return this->readMonitorElement(rootFile.get(), path, name, monitorElement);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path,
-                                                         const std::string &name, MonitorElementPtr &monitorElement) {
-      monitorElement = nullptr;
-
-      Path fullName = path;
-      fullName += name;
-      dqm_debug("MonitorElementManager::readMonitorElement: looking for element {0}", fullName.getPath());
-
-      const bool objectStat(TObject::GetObjectStat());
-      TObject::SetObjectStat(false);
-      TObject *pTObject = nullptr;
-      // FIXME : bad handling of path in root path
-      if (path == "/")
-        pTObject = pTFile->Get(name.c_str());
-      else
-        pTObject = pTFile->Get(fullName.getPath().c_str());
-        
-      TObject::SetObjectStat(objectStat);
-
-      if (pTObject == nullptr)
-        return STATUS_CODE_NOT_FOUND;
-
-      return this->addMonitorElement(path, pTObject, monitorElement);
-    }
+    // StatusCode MonitorElementManager::readMonitorElement(TFile *pTFile, const std::string &path,
+    //                                                      const std::string &name, MonitorElementPtr &monitorElement) {
+    //   monitorElement = nullptr;
+    // 
+    //   Path fullName = path;
+    //   fullName += name;
+    //   dqm_debug("MonitorElementManager::readMonitorElement: looking for element {0}", fullName.getPath());
+    // 
+    //   const bool objectStat(TObject::GetObjectStat());
+    //   TObject::SetObjectStat(false);
+    //   TObject *pTObject = nullptr;
+    //   // FIXME : bad handling of path in root path
+    //   if (path == "/")
+    //     pTObject = pTFile->Get(name.c_str());
+    //   else
+    //     pTObject = pTFile->Get(fullName.getPath().c_str());
+    //     
+    //   TObject::SetObjectStat(objectStat);
+    // 
+    //   if (pTObject == nullptr)
+    //     return STATUS_CODE_NOT_FOUND;
+    // 
+    //   return this->addMonitorElement(path, pTObject, monitorElement);
+    // }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path,
-                                                         const std::string &name, MonitorElementPtr &monitorElement) {
-      monitorElement = nullptr;
-      TClass *pTClass = TClass::GetClass(className.c_str());
-
-      if (!pTClass->IsTObject()) {
-        dqm_error("MonitorElementManager::bookMonitorElement: ROOT class '{0}' does not inherit from TObject. Can only "
-                  "handle TObject object type",
-                  className);
-        return STATUS_CODE_FAILURE;
-      }
-
-      const bool objectStat(TObject::GetObjectStat());
-      TObject::SetObjectStat(false);
-      TObject *pTObject = (TObject *)pTClass->New();
-      TObject::SetObjectStat(objectStat);
-
-      if (pTObject == nullptr) {
-        dqm_error("MonitorElementManager::bookMonitorElement: Couldn't allocate ROOT class '{0}' from TClass facility",
-                  className);
-        return STATUS_CODE_FAILURE;
-      }
-
-      if (pTObject->InheritsFrom("TNamed")) {
-        dqm_debug("Set name of object {0} to '{1}'", (void *)pTObject, name);
-        ((TNamed *)pTObject)->SetName(name.c_str());
-      }
-
-      return this->addMonitorElement(path, pTObject, monitorElement);
-    }
+    // StatusCode MonitorElementManager::bookMonitorElement(const std::string &className, const std::string &path,
+    //                                                      const std::string &name, MonitorElementPtr &monitorElement) {
+    //   monitorElement = nullptr;
+    //   TClass *pTClass = TClass::GetClass(className.c_str());
+    // 
+    //   if (!pTClass->IsTObject()) {
+    //     dqm_error("MonitorElementManager::bookMonitorElement: ROOT class '{0}' does not inherit from TObject. Can only "
+    //               "handle TObject object type",
+    //               className);
+    //     return STATUS_CODE_FAILURE;
+    //   }
+    // 
+    //   const bool objectStat(TObject::GetObjectStat());
+    //   TObject::SetObjectStat(false);
+    //   TObject *pTObject = (TObject *)pTClass->New();
+    //   TObject::SetObjectStat(objectStat);
+    // 
+    //   if (pTObject == nullptr) {
+    //     dqm_error("MonitorElementManager::bookMonitorElement: Couldn't allocate ROOT class '{0}' from TClass facility",
+    //               className);
+    //     return STATUS_CODE_FAILURE;
+    //   }
+    // 
+    //   if (pTObject->InheritsFrom("TNamed")) {
+    //     dqm_debug("Set name of object {0} to '{1}'", (void *)pTObject, name);
+    //     ((TNamed *)pTObject)->SetName(name.c_str());
+    //   }
+    // 
+    //   return this->addMonitorElement(path, pTObject, monitorElement);
+    // }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::attachReference(MonitorElementPtr monitorElement, const std::string &fileName) {
-      if (nullptr == monitorElement)
-        return STATUS_CODE_INVALID_PTR;
-
-      Path fullName = monitorElement->path();
-      fullName += monitorElement->name();
-      dqm_debug("MonitorElementManager::attachReference: looking for element {0}", fullName.getPath());
-
-      std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
-
-      const bool objectStat(TObject::GetObjectStat());
-      TObject::SetObjectStat(false);
-      TObject *pTObject(nullptr);
-
-      if (monitorElement->path() == "/")
-        pTObject = rootFile->Get(monitorElement->name().c_str());
-      else
-        pTObject = rootFile->Get(fullName.getPath().c_str());
-
-      TObject::SetObjectStat(objectStat);
-
-      if (pTObject == nullptr)
-        return STATUS_CODE_NOT_FOUND;
-
-      monitorElement->setReferenceObject(pTObject);
-
-      return STATUS_CODE_SUCCESS;
-    }
+    // StatusCode MonitorElementManager::attachReference(MonitorElementPtr monitorElement, const std::string &fileName) {
+    //   if (nullptr == monitorElement)
+    //     return STATUS_CODE_INVALID_PTR;
+    // 
+    //   Path fullName = monitorElement->path();
+    //   fullName += monitorElement->name();
+    //   dqm_debug("MonitorElementManager::attachReference: looking for element {0}", fullName.getPath());
+    // 
+    //   std::unique_ptr<TFile> rootFile(new TFile(fileName.c_str(), "READ"));
+    // 
+    //   const bool objectStat(TObject::GetObjectStat());
+    //   TObject::SetObjectStat(false);
+    //   TObject *pTObject(nullptr);
+    // 
+    //   if (monitorElement->path() == "/")
+    //     pTObject = rootFile->Get(monitorElement->name().c_str());
+    //   else
+    //     pTObject = rootFile->Get(fullName.getPath().c_str());
+    // 
+    //   TObject::SetObjectStat(objectStat);
+    // 
+    //   if (pTObject == nullptr)
+    //     return STATUS_CODE_NOT_FOUND;
+    // 
+    //   monitorElement->setReferenceObject(pTObject);
+    // 
+    //   return STATUS_CODE_SUCCESS;
+    // }
     
-    //-------------------------------------------------------------------------------------------------
-    
-    StatusCode MonitorElementManager::readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests) {
-
-      if(nullptr == pTFile) {
-        dqm_error( "MonitorElementManager::readMonitorElements: Invalid TFile pointer !" );
-        return STATUS_CODE_INVALID_PARAMETER;
-      }
-      
-      if(nullptr == pXmlElement) {
-        dqm_error( "MonitorElementManager::readMonitorElements: Invalid xml element !" );
-        return STATUS_CODE_INVALID_PARAMETER;
-      }
-      
-      for (TiXmlElement *meElt = pXmlElement->FirstChildElement("monitorElement"); meElt != nullptr; meElt = meElt->NextSiblingElement("monitorElement")) {
-        
-        std::string path, name, reference;
-        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "path", path));
-        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "reference", reference));
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
-
-        // read element from root file
-        MonitorElementPtr monitorElement;
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->readMonitorElement(pTFile, path, name, monitorElement));
-
-        // read reference element if any
-        if (!reference.empty()) {
-          dqm_debug("Monitor element '{0}' read, reference file '{1}'", name, reference);
-          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->attachReference(monitorElement, reference));
-        }
-        
-        // attach quality tests if option set
-        if(readQTests) {
-          for (TiXmlElement *qtest = meElt->FirstChildElement("qtest"); qtest != nullptr; qtest = qtest->NextSiblingElement("qtest")) {
-            std::string qTestName;
-            THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));
-            THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->addQualityTest(path, name, qTestName));
-          }          
-        }
-      }
-      
-      return STATUS_CODE_SUCCESS;
-    }
+    // //-------------------------------------------------------------------------------------------------
+    // 
+    // StatusCode MonitorElementManager::readMonitorElements(TFile *pTFile, TiXmlElement *const pXmlElement, bool readQTests) {
+    // 
+    //   if(nullptr == pTFile) {
+    //     dqm_error( "MonitorElementManager::readMonitorElements: Invalid TFile pointer !" );
+    //     return STATUS_CODE_INVALID_PARAMETER;
+    //   }
+    //   
+    //   if(nullptr == pXmlElement) {
+    //     dqm_error( "MonitorElementManager::readMonitorElements: Invalid xml element !" );
+    //     return STATUS_CODE_INVALID_PARAMETER;
+    //   }
+    //   
+    //   for (TiXmlElement *meElt = pXmlElement->FirstChildElement("monitorElement"); meElt != nullptr; meElt = meElt->NextSiblingElement("monitorElement")) {
+    //     
+    //     std::string path, name, reference;
+    //     RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "path", path));
+    //     RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(meElt, "reference", reference));
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(meElt, "name", name));
+    // 
+    //     // read element from root file
+    //     MonitorElementPtr monitorElement;
+    //     RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->readMonitorElement(pTFile, path, name, monitorElement));
+    // 
+    //     // read reference element if any
+    //     if (!reference.empty()) {
+    //       dqm_debug("Monitor element '{0}' read, reference file '{1}'", name, reference);
+    //       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->attachReference(monitorElement, reference));
+    //     }
+    //     
+    //     // attach quality tests if option set
+    //     if(readQTests) {
+    //       for (TiXmlElement *qtest = meElt->FirstChildElement("qtest"); qtest != nullptr; qtest = qtest->NextSiblingElement("qtest")) {
+    //         std::string qTestName;
+    //         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(qtest, "name", qTestName));
+    //         THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->addQualityTest(path, name, qTestName));
+    //       }          
+    //     }
+    //   }
+    //   
+    //   return STATUS_CODE_SUCCESS;
+    // }
     
     //-------------------------------------------------------------------------------------------------
     
@@ -362,38 +323,6 @@ namespace dqm4hep {
         object.push_back(meObject);
         return true;
       });
-    }
-
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-
-    void MonitorElementManager::getMonitorElements(MonitorElementList &monitorElements) const {
-      m_storage.getObjects(monitorElements);
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElementManager::getMonitorElement(const std::string &name,
-                                                        MonitorElementPtr &monitorElement) const {
-      monitorElement = m_storage.findObject([&name](const MonitorElementPtr &elt) { return (elt->name() == name); });
-
-      if (nullptr == monitorElement)
-        return STATUS_CODE_NOT_FOUND;
-
-      return STATUS_CODE_SUCCESS;
-    }
-
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode MonitorElementManager::getMonitorElement(const std::string &dirName, const std::string &name,
-                                                        MonitorElementPtr &monitorElement) const {
-      monitorElement =
-          m_storage.findObject(dirName, [&name](const MonitorElementPtr &elt) { return (elt->name() == name); });
-
-      if (nullptr == monitorElement)
-        return STATUS_CODE_NOT_FOUND;
-
-      return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -562,5 +491,66 @@ namespace dqm4hep {
     const Storage<MonitorElement> &MonitorElementManager::getStorage() const {
       return m_storage;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    bool MonitorElementManager::checkClass(TClass *cls) {
+      if(nullptr == cls) {
+        dqm_error("MonitorElementManager::checkClass: class is nullptr! Please check for class existence !");
+        return false;
+      }
+      if(not cls->HasDictionary()) {
+        dqm_error("MonitorElementManager::checkClass: class '{0}' has no dictionnary!", cls->GetName());
+        return false;
+      }
+      if (cls->IsForeign()) {
+        dqm_error(
+            "MonitorElementManager::checkClass: class '{0}' is foreign (does not have a Streamer method)!",
+            cls->GetName());
+        return false;
+      }
+      if (not cls->InheritsFrom("TNamed")) {
+        dqm_error("MonitorElementManager::checkClass: class '{0}' doesn't inherit TNamed (required to call "
+                  "SetName())!",
+                  cls->GetName());
+        return false;
+      }
+      return true;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::addToStorage(const std::string &path, MonitorElementPtr monitorElement) {
+      // check for existence
+      if (nullptr != m_storage.findObject(path, [&](MonitorElementPtr obj) { 
+        return obj->name() == monitorElement->name(); 
+      })) {
+        dqm_error("Monitor element '{0}' in directory '{1}' already booked !", monitorElement->name(), path);
+        return STATUS_CODE_ALREADY_PRESENT;
+      }
+      // try to add it
+      try {
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
+        monitorElement->setPath(path);
+      } 
+      catch (StatusCodeException &e) {
+        if (nullptr == monitorElement) {
+          // TObject should have been owned by the MonitorElement
+          // but creation failed, we need to delete it manually
+          delete monitorElement->object();
+        }
+        return e.getStatusCode();
+      } 
+      catch (...) {
+        if (nullptr == monitorElement) {
+          // TObject should have been owned by the MonitorElement
+          // but creation failed, we need to delete it manually
+          delete monitorElement->object();
+        }
+        return STATUS_CODE_FAILURE;
+      }
+      return STATUS_CODE_SUCCESS;
+    }
+    
   }
 }
