@@ -54,7 +54,7 @@ namespace dqm4hep {
       MeanWithinExpectedTest(const std::string &name);
       ~MeanWithinExpectedTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
+      void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
 
     protected:
       float m_expectedMean;
@@ -102,7 +102,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void MeanWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void MeanWithinExpectedTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
       TH1 *pHistogram = monitorElement->objectTo<TH1>();
 
       if (nullptr == pHistogram) {

@@ -68,13 +68,13 @@ namespace dqm4hep {
       ExactRefCompareTest(const std::string &qname);
       ~ExactRefCompareTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
+      void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
       
     private:
-      void doHistogramTest(MonitorElementPtr monitorElement, QualityTestReport &report);
-      void doGraph1DTest(MonitorElementPtr monitorElement, QualityTestReport &report);
-      void doGraph2DTest(MonitorElementPtr monitorElement, QualityTestReport &report);
-      void doIsEqualTest(MonitorElementPtr monitorElement, QualityTestReport &report);
+      void doHistogramTest(MonitorElement* monitorElement, QualityTestReport &report);
+      void doGraph1DTest(MonitorElement* monitorElement, QualityTestReport &report);
+      void doGraph2DTest(MonitorElement* monitorElement, QualityTestReport &report);
+      void doIsEqualTest(MonitorElement* monitorElement, QualityTestReport &report);
       
     private:
       bool m_compareUnderflow = {true};
@@ -120,7 +120,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void ExactRefCompareTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void ExactRefCompareTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
       
       const bool hasObject = (monitorElement->object() != nullptr);
       const bool hasReference = (monitorElement->reference() != nullptr);
@@ -166,7 +166,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    void ExactRefCompareTest::doHistogramTest(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void ExactRefCompareTest::doHistogramTest(MonitorElement* monitorElement, QualityTestReport &report) {
       
       TH1 *histogram = monitorElement->objectTo<TH1>();
       TH1 *reference = monitorElement->referenceTo<TH1>();
@@ -227,7 +227,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    void ExactRefCompareTest::doGraph1DTest(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void ExactRefCompareTest::doGraph1DTest(MonitorElement* monitorElement, QualityTestReport &report) {
       
       TGraph *graph = monitorElement->objectTo<TGraph>();
       TGraph *reference = monitorElement->referenceTo<TGraph>();
@@ -269,7 +269,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    void ExactRefCompareTest::doGraph2DTest(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void ExactRefCompareTest::doGraph2DTest(MonitorElement* monitorElement, QualityTestReport &report) {
       
       TGraph2D *graph = monitorElement->objectTo<TGraph2D>();
       TGraph2D *reference = monitorElement->referenceTo<TGraph2D>();
@@ -315,7 +315,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    void ExactRefCompareTest::doIsEqualTest(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void ExactRefCompareTest::doIsEqualTest(MonitorElement* monitorElement, QualityTestReport &report) {
       
       TObject *object = monitorElement->object();
       TObject *reference = monitorElement->reference();
