@@ -38,79 +38,16 @@
 #include <dqm4hep/Storage.h>
 #include <dqm4hep/Path.h>
 #include <dqm4hep/XmlHelper.h>
+#include <dqm4hep/AllocatorHelper.h>
 
 // -- root headers
 #include <TFile.h>
 #include <TObject.h>
 #include <TClass.h>
 
-class TH1F;
-class TH1I;
-class TH1C;
-class TH1S;
-class TH2F;
-class TH2I;
-class TH2C;
-class TH2S;
-class TH3F;
-class TH3I;
-class THStack;
-class TMultiGraph;
-class TH2Poly;
-class TProfile;
-class TProfile2D;
-class TGraph;
-class TGraphErrors;
-class TGraph2D;
-
 namespace dqm4hep {
 
   namespace core {
-
-    class TDynamicGraph; // this one comes from DQM4HEP, not ROOT
-
-    typedef allocator_helper<TObject, TH1F, const char *, const char *, int, float, float> TH1FAllocator;
-    typedef allocator_helper<TObject, TH1I, const char *, const char *, int, float, float> TH1IAllocator;
-    typedef allocator_helper<TObject, TH1C, const char *, const char *, int, float, float> TH1CAllocator;
-    typedef allocator_helper<TObject, TH1S, const char *, const char *, int, float, float> TH1SAllocator;
-
-    typedef allocator_helper<TObject, TH2F, const char *, const char *, int, float, float, int, float, float>
-        TH2FAllocator;
-    typedef allocator_helper<TObject, TH2I, const char *, const char *, int, float, float, int, float, float>
-        TH2IAllocator;
-    typedef allocator_helper<TObject, TH2C, const char *, const char *, int, float, float, int, float, float>
-        TH2CAllocator;
-    typedef allocator_helper<TObject, TH2S, const char *, const char *, int, float, float, int, float, float>
-        TH2SAllocator;
-
-    typedef allocator_helper<TObject, TH3F, const char *, const char *, int, float, float, int, float, float, int,
-                             float, float>
-        TH3FAllocator;
-    typedef allocator_helper<TObject, TH3I, const char *, const char *, int, float, float, int, float, float, int,
-                             float, float>
-        TH3IAllocator;
-
-    typedef allocator_helper<TObject, THStack, const char *, const char *> THStackAllocator;
-    typedef allocator_helper<TObject, TH2Poly, const char *, const char *, double, double, double, double>
-        TH2PolyAllocator;
-
-    typedef allocator_helper<TObject, TProfile, const char *, const char *, int, float, float, float, float>
-        TProfileAllocator;
-    typedef allocator_helper<TObject, TProfile2D, const char *, const char *, int, float, float, int, float, float,
-                             float, float>
-        TProfile2DAllocator;
-
-    typedef allocator_helper<TObject, TScalarInt, int> TScalarIntAllocator;
-    typedef allocator_helper<TObject, TScalarFloat, float> TScalarFloatAllocator;
-    typedef allocator_helper<TObject, TScalarShort, short> TScalarShortAllocator;
-    typedef allocator_helper<TObject, TScalarString, std::string> TScalarStringAllocator;
-
-    typedef allocator_helper<TObject, TGraph> TGraphAllocator;
-    typedef allocator_helper<TObject, TGraphErrors> TGraphErrorsAllocator;
-    typedef allocator_helper<TObject, TGraph2D> TGraph2DAllocator;
-    typedef allocator_helper<TObject, TMultiGraph> TMultiGraphAllocator;
-
-    typedef allocator_helper<TObject, TDynamicGraph> TDynamicGraphAllocator;
 
     /** MonitorElementManager class
      */
@@ -218,7 +155,7 @@ namespace dqm4hep {
        */
       template <typename T, typename ObjectType, typename... Args>
       StatusCode bookObject(const std::string &path, const std::string &name, std::shared_ptr<T> &monitorElement,
-                            allocator_helper<TObject, ObjectType, Args...> allocator, Args... args);
+                            AllocatorHelper<TObject, ObjectType, Args...> allocator, Args... args);
 
       /**
        * @brief  Open root file, find reference object and attach it to the monitor element
@@ -374,7 +311,7 @@ namespace dqm4hep {
     template <typename T, typename ObjectType, typename... Args>
     inline StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name,
                                                  std::shared_ptr<T> &monitorElement,
-                                                 allocator_helper<TObject, ObjectType, Args...> allocator,
+                                                 AllocatorHelper<TObject, ObjectType, Args...> allocator,
                                                  Args... args) {
       monitorElement = nullptr;
       

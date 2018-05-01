@@ -113,19 +113,6 @@ namespace dqm4hep {
     template <typename T>
     class Storage;
 
-    /** allocator_helper class
-     */
-    template <typename BaseType, typename RealType, typename... Args>
-    class allocator_helper {
-    public:
-      /** Create a new instance of RealType, inheriting
-       *  from BaseType using Args type as constructor parameters
-       */
-      BaseType *create(Args... args) const {
-        return new RealType(args...);
-      }
-    };
-
     // time
     typedef std::chrono::system_clock::time_point TimePoint;
     typedef std::chrono::duration<double> TimeDuration;
