@@ -143,6 +143,21 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     void MonitorElement::setPath(const std::string &p) {
       m_path = p;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void setName(const std::string &n) {
+      if(nullptr == m_monitorObject) {
+        dqm_error("Trying to set monitor element name: not initialized!");
+        throw StatusCodeException(STATUS_CODE_NOT_INITIALIZED);
+      }
+      if(not m_monitorObject.ptr()->InheritsFrom("TNamed")) {
+        dqm_error("Trying to set monitor element name: does not inherits from TNamed!");
+        throw StatusCodeException(STATUS_CODE_NOT_ALLOWED);
+      }
+      TNamed *named = objectTo<TNamed>();
+      named->SetName(n.c_str());
+    }
 
     //-------------------------------------------------------------------------------------------------
 
@@ -313,7 +328,7 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
       try {
         for (auto iter : m_qualityTests) {
           QReport report;
-          iter.second->run(this->shared_from_this(), report);
+          iter.second->run(this, report);
           reports.insert(QReportMap::value_type(iter.first, report));
         }
       } catch (StatusCodeException &exception) {
@@ -333,7 +348,7 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
       if (m_qualityTests.end() == iter)
         return STATUS_CODE_NOT_FOUND;
 
-      iter->second->run(this->shared_from_this(), report);
+      iter->second->run(this, report);
 
       return STATUS_CODE_SUCCESS;
     }
