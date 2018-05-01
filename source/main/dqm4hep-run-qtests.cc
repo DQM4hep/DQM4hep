@@ -221,7 +221,7 @@ int main(int argc, char *argv[]) {
     // create, configure and run quality tests
     QReportStorage reportStorage;
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTests(qtestsElement));
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->readMonitorElements(rootFile.get(), rootElement, true));
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->readMonitorElements<MonitorElement>(rootFile.get(), rootElement, true));
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->runQualityTests(reportStorage));
     
     const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
