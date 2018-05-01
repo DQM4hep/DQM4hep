@@ -32,7 +32,7 @@
 #include <string>
 
 // -- root headers
-#include <RTypes.h>
+#include <Rtypes.h>
 
 class TObject;
 class TH1F;
@@ -61,7 +61,7 @@ namespace dqm4hep {
     
     // these ones come from DQM4HEP, not ROOT
     template <typename T>
-    class TScalar;
+    class TScalarObject;
     class TDynamicGraph; 
 
     /** 
@@ -74,7 +74,7 @@ namespace dqm4hep {
        *  @brief  Create a new instance of RealType, inheriting
        *          from BaseType using Args type as constructor parameters
        */
-      static BaseType *create(Args... args) const {
+      BaseType *create(Args... args) const {
         return new RealType(args...);
       }
     };
@@ -93,14 +93,14 @@ namespace dqm4hep {
     typedef AllocatorHelper<TObject, TH2Poly, const char *, const char *, double, double, double, double> TH2PolyAllocator;
     typedef AllocatorHelper<TObject, TProfile, const char *, const char *, int, float, float, float, float> TProfileAllocator;
     typedef AllocatorHelper<TObject, TProfile2D, const char *, const char *, int, float, float, int, float, float, float, float> TProfile2DAllocator;
-    typedef AllocatorHelper<TObject, TScalar<int>, int> TScalarIntAllocator;
-    typedef AllocatorHelper<TObject, TScalar<float>, float> TScalarRealAllocator;
-    typedef AllocatorHelper<TObject, TScalar<double>, double> TScalarDoubleAllocator;
-    typedef AllocatorHelper<TObject, TScalar<float>, float> TScalarFloatAllocator;
-    typedef AllocatorHelper<TObject, TScalar<short>, short> TScalarShortAllocator;
-    typedef AllocatorHelper<TObject, TScalar<long>, long> TScalarLongAllocator;
-    typedef AllocatorHelper<TObject, TScalar<Long64_t>, Long64_t> TScalarLong64Allocator;
-    typedef AllocatorHelper<TObject, TScalar<std::string>, std::string> TScalarStringAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<int>, int> TScalarIntAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<float>, float> TScalarRealAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<double>, double> TScalarDoubleAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<float>, float> TScalarFloatAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<short>, short> TScalarShortAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<long>, long> TScalarLongAllocator;
+    typedef AllocatorHelper<TObject, TScalarObject<Long64_t>, Long64_t> TScalarLong64Allocator;
+    typedef AllocatorHelper<TObject, TScalarObject<std::string>, std::string> TScalarStringAllocator;
     typedef AllocatorHelper<TObject, TGraph> TGraphAllocator;
     typedef AllocatorHelper<TObject, TGraphErrors> TGraphErrorsAllocator;
     typedef AllocatorHelper<TObject, TGraph2D> TGraph2DAllocator;
