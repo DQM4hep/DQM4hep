@@ -51,7 +51,7 @@ namespace dqm4hep {
      *
      *  @author Remi Ete, DESY
      */
-    class MonitorElement : public std::enable_shared_from_this<MonitorElement> {
+    class MonitorElement {
       friend class MonitorElementManager;
 
     public:
@@ -75,6 +75,8 @@ namespace dqm4hep {
        */
       static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject,
                                            const PtrHandler<TObject> &referenceObject);
+      
+      virtual ~MonitorElement() = default;
 
       /** Get the monitor element type (class name)
        */
@@ -169,7 +171,7 @@ namespace dqm4hep {
       // FIXME : ConvertFromJSON not yet available (ROOT 6.14 only)
       // void fromJson(const json &value);
 
-    private:
+    protected:
       /** Constructor
        */
       MonitorElement();
@@ -189,6 +191,10 @@ namespace dqm4hep {
       /** Constructor with ROOT object and reference ptr
        */
       MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
+      
+      /** Set the monitor element object name
+       */
+      void setName(const std::string &n);
 
       /** Set the monitor element object path
        */
