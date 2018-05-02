@@ -219,7 +219,7 @@ namespace dqm4hep {
        *
        *  @param  resetQtests whether to also reset the quality tests 
        */
-      void reset(bool resetQtests = true);
+      virtual void reset(bool resetQtests = true);
       
       /**
        *  @brief  Convert the monitor element to json
