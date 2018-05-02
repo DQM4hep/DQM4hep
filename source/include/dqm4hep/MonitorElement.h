@@ -40,6 +40,10 @@
 #include <TObject.h>
 #include <TPaveText.h>
 
+namespace xdrstream {
+  class IODevice;
+}
+
 namespace dqm4hep {
 
   namespace core {
@@ -162,14 +166,38 @@ namespace dqm4hep {
       void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
       
       /**
+       *  @brief  Reset the monitor element
+       */
+      void reset(bool resetQtests = true);
+      
+      /**
        *  @brief  Convert the monitor element to json
        *  
        *  @param  object the json object to receive
        */
       void toJson(json &object) const;
       
-      // FIXME : ConvertFromJSON not yet available (ROOT 6.14 only)
-      // void fromJson(const json &value);
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
+      /**
+       *  @brief  Parse the json object and set monitor element properties
+       *  
+       *  @param  object the json object to parse
+       */
+      void fromJson(const json &value);
+#endif
+      /**
+       *  @brief  Write monitor element to device
+       *  
+       *  @param  device the device to write to
+       */
+      virtual StatusCode toDevice(xdrstream::IODevice *device) const;
+      
+      /**
+       *  @brief  Read the monitor element from device
+       * 
+       *  @param  device the device to read from
+       */
+      virtual StatusCode fromDevice(xdrstream::IODevice *device);
 
     protected:
       /** Constructor
@@ -217,10 +245,14 @@ namespace dqm4hep {
       StatusCode runQualityTest(const std::string &name, QReport &report);
 
     private:
-      std::string m_path = {""};                    ///< The monitor element path
-      PtrHandler<TObject> m_monitorObject = {};     ///< The monitored object
-      PtrHandler<TObject> m_referenceObject = {};   ///< The reference object
-      QTestMap m_qualityTests = {};                 ///< The list of assigned quality tests
+      /// The monitor element path
+      std::string m_path = {""};
+      /// The monitored object
+      PtrHandler<TObject> m_monitorObject = {};
+      /// The reference object
+      PtrHandler<TObject> m_referenceObject = {};
+      /// The list of assigned quality tests
+      QTestMap m_qualityTests = {};
     };
 
     //-------------------------------------------------------------------------------------------------

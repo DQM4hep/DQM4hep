@@ -34,11 +34,17 @@
 #include <TAxis.h>
 #include <TH1.h>
 #include <TPad.h>
+#include <TClass.h>
 #include <TBufferJSON.h>
+#include <TBufferFile.h>
 
-templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicGraph)
+// -- xdrstream headers
+#include <xdrstream/xdrstream.h>
 
-    namespace dqm4hep {
+templateClassImp(dqm4hep::core::TScalarObject) 
+ClassImp(dqm4hep::core::TDynamicGraph)
+
+namespace dqm4hep {
 
   namespace core {
 
@@ -243,6 +249,17 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     
     //-------------------------------------------------------------------------------------------------
     
+    void MonitorElement::reset(bool resetQtests) {
+      m_monitorObject.clear();
+      m_referenceObject.clear();
+      m_path.clear();
+      if(resetQtests) {
+        m_qualityTests.clear();
+      }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
     void MonitorElement::toJson(json &jobject) const {
       
       json jsonObject = nullptr, jsonReference = nullptr;
@@ -263,37 +280,109 @@ templateClassImp(dqm4hep::core::TScalarObject) ClassImp(dqm4hep::core::TDynamicG
     }
   
     //-------------------------------------------------------------------------------------------------
+#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
+    void MonitorElement::fromJson(const json &object) {
+      // read object
+      m_monitorObject.clear();
+      auto jsonObject = object.value("object", json(nullptr));
+      if(nullptr != jsonObject) {
+        TObject *pTObject = TBufferJSON::ConvertFromJSON(jsonObject.dump().c_str());  
+        if(nullptr != pTObject) {
+          m_monitorObject.set(pTObject, true);
+        }
+      }
+      // read reference
+      m_referenceObject.clear();
+      auto jsonReference = object.value("reference", json(nullptr));
+      if(nullptr != jsonReference) {
+        TObject *pTObject = TBufferJSON::ConvertFromJSON(jsonReference.dump().c_str());
+        
+        if(nullptr != pTObject) {
+          m_referenceObject.set(pTObject, true);
+        }
+      }
+      // read path
+      m_path = object.value<std::string>("path", "");
+    }
+#endif
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElement::toDevice(xdrstream::IODevice *device) const {
+      // get initial device state
+      auto pos = device->getPosition();
+      // write path
+      XDRSTREAM_SUCCESS_RESTORE(device->write(&m_path), pos);
+      TBufferFile buffer(TBuffer::kWrite);
+      // write object
+      const bool hasObject = (nullptr == object());
+      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasObject), pos);
+      if(hasObject) {
+        TClass *objClass = TClass::GetClass(object()->ClassName());
+        if(not buffer.WriteObjectAny((void*)object(), objClass)) {
+          device->seek(pos);
+          return STATUS_CODE_FAILURE;
+        }
+        auto rawBuffer = buffer.Buffer();
+        auto length = buffer.Length();
+        XDRSTREAM_SUCCESS_RESTORE(device->writeArray(rawBuffer, length), pos);
+      }
+      // write reference
+      const bool hasReference = (nullptr == reference());
+      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasReference), pos);
+      if(hasReference) {
+        buffer.Reset();
+        TClass *refClass = TClass::GetClass(reference()->ClassName());
+        if(not buffer.WriteObjectAny((void*)reference(), refClass)) {
+          device->seek(pos);
+          return STATUS_CODE_FAILURE;
+        }
+        auto rawBuffer = buffer.Buffer();
+        auto length = buffer.Length();
+        XDRSTREAM_SUCCESS_RESTORE(device->writeArray(rawBuffer, length), pos);
+      }
+      return STATUS_CODE_SUCCESS;
+    }
     
-    // FIXME : ConvertFromJSON not yet available (ROOT 6.14 only)
-    // void MonitorElement::fromJson(const json &object) {
-    //   
-    //   // read object
-    //   m_monitorObject.clear();
-    //   auto jsonObject = object.value("object", json(nullptr));
-    //   
-    //   if(nullptr != jsonObject) {
-    //     TObject *pTObject = TBufferJSON::ConvertFromJSON(jsonObject.dump().c_str());
-    //     
-    //     if(nullptr != pTObject) {
-    //       m_monitorObject.set(pTObject, true);
-    //     }
-    //   }
-    //   
-    //   // read reference
-    //   m_referenceObject.clear();
-    //   auto jsonReference = object.value("reference", json(nullptr));
-    //   
-    //   if(nullptr != jsonReference) {
-    //     TObject *pTObject = TBufferJSON::ConvertFromJSON(jsonReference.dump().c_str());
-    //     
-    //     if(nullptr != pTObject) {
-    //       m_referenceObject.set(pTObject, true);
-    //     }
-    //   }
-    //   
-    //   // read path
-    //   m_path = object.value<std::string>("path", "");
-    // }
+    //-------------------------------------------------------------------------------------------------
+
+    StatusCode MonitorElement::fromDevice(xdrstream::IODevice *device) {
+      reset(false);
+      // get initial device state
+      auto pos = device->getPosition();
+      // write path
+      XDRSTREAM_SUCCESS_RESTORE(device->read(&m_path), pos);
+      bool hasObject(false);
+      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasObject), pos);
+      TBufferFile buffer(TBuffer::kRead);
+      if(hasObject) {
+        char *rawBuffer = nullptr;
+        xdrstream::xdr_size_t length = 0;
+        XDRSTREAM_SUCCESS_RESTORE(device->readDynamicArray(rawBuffer, length), pos);
+        buffer.SetBuffer(rawBuffer, length, kTRUE);
+        TObject *obj = buffer.ReadObject(nullptr);
+        if(nullptr == obj) {
+          device->seek(pos);
+          return STATUS_CODE_FAILURE;
+        }
+        m_monitorObject.set(obj, true);
+      }
+      bool hasReference(false);
+      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasReference), pos);
+      buffer.Reset();
+      if(hasReference) {
+        char *rawBuffer = nullptr;
+        xdrstream::xdr_size_t length = 0;
+        XDRSTREAM_SUCCESS_RESTORE(device->readDynamicArray(rawBuffer, length), pos);
+        buffer.SetBuffer(rawBuffer, length, kTRUE);
+        TObject *ref = buffer.ReadObject(nullptr);
+        if(nullptr == ref) {
+          device->seek(pos);
+          return STATUS_CODE_FAILURE;
+        }
+        m_referenceObject.set(ref, true);
+      }
+      return STATUS_CODE_SUCCESS;
+    }
 
     //-------------------------------------------------------------------------------------------------
 
