@@ -59,38 +59,59 @@ namespace dqm4hep {
       friend class MonitorElementManager;
 
     public:
-      /** Constructor
+      /** 
+       *  @brief  Make a shared pointer of MonitorElement
        */
       static MonitorElementPtr make_shared();
 
-      /** Constructor with ROOT object
+      /** 
+       *  @brief  Make a shared pointer of MonitorElement
+       *
+       *  @param  pMonitorObject a root object as main monitor object
        */
       static MonitorElementPtr make_shared(TObject *pMonitorObject);
 
-      /** Constructor with ROOT object and reference
+      /** 
+       *  @brief  Make a shared pointer of MonitorElement
+       *
+       *  @param  pMonitorObject a root object as main monitor object
+       *  @param  pReferenceObject a root object as reference object
        */
       static MonitorElementPtr make_shared(TObject *pMonitorObject, TObject *pReferenceObject);
 
-      /** Constructor with ROOT object ptr
+      /** 
+       *  @brief  Make a shared pointer of MonitorElement
+       *
+       *  @param  monitorObject a root object pointer as main monitor object
        */
       static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject);
 
-      /** Constructor with ROOT object and reference ptr
+      /** 
+       *  @brief  Make a shared pointer of MonitorElement
+       *
+       *  @param  monitorObject a root object pointer as main monitor object
+       *  @param  referenceObject a root object pointer as reference object
        */
       static MonitorElementPtr make_shared(const PtrHandler<TObject> &monitorObject,
                                            const PtrHandler<TObject> &referenceObject);
       
+      /**
+       *  @brief  Default destructor
+       */
       virtual ~MonitorElement() = default;
 
-      /** Get the monitor element type (class name)
+      /** 
+       *  @brief  Get the monitor element type (class name)
        */
       std::string type() const;
 
-      /** Get the object name
+      /** 
+       *  @brief  Get the object name
        */
       std::string name() const;
       
-      /** Get the object title
+      /** 
+       *  @brief  Get the object title
        */
       std::string title() const;
       
@@ -103,70 +124,100 @@ namespace dqm4hep {
        */
       void setTitle(const std::string &title);
 
-      /** Get the object path (in directory structure)
+      /** 
+       *  @brief  Get the object path (in directory structure)
        */
       std::string path() const;
 
-      /** Whether the monitor element has a valid object ptr
+      /** 
+       *  @brief  Whether the monitor element has a valid object ptr
        */
       bool hasObject() const;
 
-      /** Whether the monitor element has a valid reference ptr
+      /** 
+       *  @brief  Whether the monitor element has a valid reference ptr
        */
       bool hasReference() const;
 
-      /** Get the wrapped object
+      /**
+       *  @brief  Get the monitor object
        */
       TObject *object();
 
-      /** Get the wrapped object
+      /** Get the monitor object
        */
       const TObject *object() const;
 
-      /** Get the wrapped reference object
+      /** 
+       *  @brief  Get the reference object
        */
       TObject *reference();
 
-      /** Get the wrapped reference object
+      /** 
+       *  @brief  Get the reference object
        */
       const TObject *reference() const;
 
-      /** Get a casted version of the wrapped object
+      /** 
+       *  @brief  Get a casted version of the monitor object
        */
       template <typename T>
       T *objectTo();
 
-      /** Get a casted version of the wrapped reference object
+      /** 
+       *  @brief  Get a casted version of the reference object
        */
       template <typename T>
       T *referenceTo();
 
-      /** Set the wrapped object
+      /** 
+       *  @brief  Set the monitor object
+       *
+       *  @param  pMonitorObject a root object as main monitor object
        */
       void setMonitorObject(TObject *pMonitorObject);
 
-      /** Set the wrapped object (ptr handle)
+      /** 
+       *  @brief  Set the wrapped object (ptr handle)
+       *
+       *  @param  monitorObject a root object pointer as main monitor object
        */
       void setMonitorObject(const PtrHandler<TObject> &monitorObject);
 
-      /** Set the wrapped reference object
+      /** 
+       *  @brief  Set the wrapped reference object
+       *
+       *  @param  pReferenceObject a root object as reference object
        */
       void setReferenceObject(TObject *pReferenceObject);
 
-      /** Set the wrapped reference object (ptr handle)
+      /** 
+       *  @brief  Set the wrapped reference object (ptr handle)
+       *
+       *  @param  referenceObject a root object pointer as reference object
        */
       void setReferenceObject(const PtrHandler<TObject> &referenceObject);
 
-      /** Set the wrapped object and reference object
+      /** 
+       *  @brief  Set the wrapped object and reference object
+       *
+       *  @param  pMonitorObject a root object as main monitor object
+       *  @param  pReferenceObject a root object as reference object
        */
       void set(TObject *pMonitorObject, TObject *pReferenceObject);
 
-      /** Set the wrapped object and reference object (ptr handle)
+      /** 
+       *  @brief  Set the wrapped object and reference object (ptr handle)
+       *
+       *  @param  monitorObject a root object pointer as main monitor object
+       *  @param  referenceObject a root object pointer as reference object
        */
       void set(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
       
       /**
        *  @brief  Reset the monitor element
+       *
+       *  @param  resetQtests whether to also reset the quality tests 
        */
       void reset(bool resetQtests = true);
       
@@ -200,47 +251,81 @@ namespace dqm4hep {
       virtual StatusCode fromDevice(xdrstream::IODevice *device);
 
     protected:
-      /** Constructor
+      /** 
+       *  @brief  Constructor
        */
       MonitorElement();
 
-      /** Constructor with ROOT object
+      /** 
+       *  @brief  Constructor with ROOT object
+       *
+       *  @param  pMonitorObject a root object as main monitor object
        */
       MonitorElement(TObject *pMonitorObject);
 
-      /** Constructor with ROOT object and reference
+      /** 
+       *  @brief  Constructor with ROOT object and reference
+       *
+       *  @param  pMonitorObject a root object as main monitor object
+       *  @param  pReferenceObject a root object as reference object
        */
       MonitorElement(TObject *pMonitorObject, TObject *pReferenceObject);
 
-      /** Constructor with ROOT object ptr
+      /** 
+       *  @brief  Constructor with ROOT object ptr
+       *
+       *  @param  monitorObject a root object pointer as main monitor object
        */
       MonitorElement(const PtrHandler<TObject> &monitorObject);
 
-      /** Constructor with ROOT object and reference ptr
+      /** 
+       *  @brief  Constructor with ROOT object and reference ptr
+       *
+       *  @param  monitorObject a root object pointer as main monitor object
+       *  @param  referenceObject a root object pointer as reference object
        */
       MonitorElement(const PtrHandler<TObject> &monitorObject, const PtrHandler<TObject> &referenceObject);
       
-      /** Set the monitor element object name
+      /** 
+       *  @brief  Set the monitor element object name
+       *
+       *  @param  name the monitor element name
        */
-      void setName(const std::string &n);
+      void setName(const std::string &name);
 
-      /** Set the monitor element object path
+      /** 
+       *  @brief  Set the monitor element object path
+       *
+       *  @param  path the monitor element path
        */
       void setPath(const std::string &path);
 
-      /** Add a quality test
+      /** 
+       *  @brief  Add a quality test
+       *
+       *  @param  qualityTest a quality test pointer
        */
       StatusCode addQualityTest(QTestPtr qualityTest);
 
-      /** Remove a quality test
+      /** 
+       *  @brief  Remove a quality test
+       *
+       *  @param  name the quality test name
        */
       StatusCode removeQualityTest(const std::string &name);
 
-      /** Run all quality tests
+      /** 
+       *  @brief  Run all quality tests
+       *
+       *  @param  reports the list of quality test reports to receive
        */
       StatusCode runQualityTests(QReportMap &reports);
 
-      /** Run a specific quality test
+      /** 
+       *  @brief  Run a specific quality test
+       *
+       *  @param  name the quality test name to run
+       *  @param  report the quality test report to receive
        */
       StatusCode runQualityTest(const std::string &name, QReport &report);
 
