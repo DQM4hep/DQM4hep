@@ -54,5 +54,7 @@
 #include <dqm4hep/XMLParser.h>
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/json.h>
+#include <dqm4hep/AllocatorHelper.h>
+#include <dqm4hep/MonitorElementStreamer.h>
 
 #endif //  DQM4HEP_DQMCORE_H
