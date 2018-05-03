@@ -38,7 +38,7 @@ namespace dqm4hep {
 
       std::string ObjectType;
 
-      float result = NULL;
+      float result = 0.0;
 
       TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
@@ -139,7 +139,7 @@ namespace dqm4hep {
 
     float AnalysisHelper::rms(MonitorElementPtr pMonitorElement, float percentage = 1.0)
     {
-      float result = NULL;
+      float result = 0.0;
 
       TH1 *h = pMonitorElement->objectTo<TH1>();
 
