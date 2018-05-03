@@ -84,7 +84,7 @@ namespace dqm4hep {
 	  m_meanDeviationLower(float NAN),
 	  m_meanDeviationUpper(float NAN),
 	  m_percentage(1.0),
-	  m_properties[0]("")
+	  m_properties()
 {
       m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is "
                       "defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean "
