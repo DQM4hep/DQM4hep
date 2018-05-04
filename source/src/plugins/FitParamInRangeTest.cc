@@ -234,7 +234,7 @@ namespace dqm4hep {
         }));
       
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, 
-        "TestParameter", m_testParameter, [this,nParameters](unsigned int value){
+        "TestParameter", m_testParameter, [nParameters](unsigned int value){
           return (nParameters > value);
         }));
         
