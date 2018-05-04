@@ -345,16 +345,14 @@ namespace dqm4hep {
 
     template <typename T>
     inline T *MonitorElement::objectTo() {
-      T *objCast = (T *)this->object(); // use old C cast for ROOT objects ...
-      return objCast ? objCast : nullptr;
+      return dynamic_cast<T*>(object());
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline T *MonitorElement::referenceTo() {
-      T *objCast = (T *)this->reference(); // use old C cast for ROOT objects ...
-      return objCast ? objCast : nullptr;
+      return dynamic_cast<T*>(reference());
     }
 
     //-------------------------------------------------------------------------------------------------
