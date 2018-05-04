@@ -393,7 +393,7 @@ namespace dqm4hep {
     inline StatusCode XmlHelper::readParameters(const TiXmlHandle &xmlHandle, const std::string &parameterName,
                                                 std::vector<T> &vector, Validator validator) {
       
-      const StatusCode statusCode(XmlHelper::readParameter(xmlHandle, parameterName, vector));
+      const StatusCode statusCode(XmlHelper::readParameters(xmlHandle, parameterName, vector));
       
       if(STATUS_CODE_SUCCESS != statusCode)
         return statusCode;
