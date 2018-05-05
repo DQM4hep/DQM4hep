@@ -78,6 +78,13 @@ namespace dqm4hep {
           throw exception;
         }
       }
+      
+      try {
+        this->resolveForLoops();
+      } catch (StatusCodeException &exception) {
+        dqm_error("XMLParser::parse(): fail to resolve for loops, {0}", exception.toString());
+        throw exception;
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -596,6 +603,100 @@ namespace dqm4hep {
           // recursive call on childs !
           this->resolveAllDbSelect(element);
         }
+      }
+    }
+    
+    //----------------------------------------------------------------------------------------------------
+    
+    void XMLParser::resolveForLoops() {
+      TiXmlElement *root = m_document.RootElement();
+      resolveForLoops(root);
+    }
+    
+    //----------------------------------------------------------------------------------------------------
+    
+    void XMLParser::resolveForLoops(TiXmlElement *element) {
+      // first, resolve for loops in child elements 
+      for(auto child = element->FirstChildElement(); nullptr != child ; child = child->NextSiblingElement()) {
+        resolveForLoops(child);
+      }
+      // if loop element, resolve it
+      if(element->Value() == std::string("for")) {
+        auto parent = element->Parent();
+        if(nullptr == parent) {
+          return;
+        }
+        float begin(0.f), end(0.f), increment(0.f);
+        std::string loopId;
+        if(TIXML_SUCCESS != element->QueryFloatAttribute("begin", &begin)) {
+          dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'begin' attribute !" );
+          throw StatusCodeException(STATUS_CODE_FAILURE);
+        }
+        if(TIXML_SUCCESS != element->QueryFloatAttribute("end", &end)) {
+          dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'end' attribute !" );
+          throw StatusCodeException(STATUS_CODE_FAILURE);
+        }
+        if(TIXML_SUCCESS != element->QueryFloatAttribute("increment", &increment)) {
+          dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'increment' attribute !" );
+          throw StatusCodeException(STATUS_CODE_FAILURE);
+        }
+        if(TIXML_SUCCESS != element->QueryStringAttribute("id", &loopId) or loopId.empty()) {
+          dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'id' attribute !" );
+          throw StatusCodeException(STATUS_CODE_FAILURE);
+        }
+        const bool forwardLoop(begin < end);
+        if((forwardLoop and increment < 0) or (not forwardLoop and increment > 0)) {
+          dqm_error( "XMLParser::resolveForLoops: <for> element with infinite loop detected !" );
+          throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+        }
+        std::cout << "Found a valid for loop: id = " << loopId << std::endl; 
+        for(float i=begin ; i<=end ; i+=increment) {
+          for(auto child = element->FirstChild() ; nullptr != child ; child = child->NextSibling()) {
+            auto cloneChild = child->Clone();
+            if(nullptr != cloneChild) {
+              std::cout << "Resolve ..." << std::endl;
+              resolveForLoop(cloneChild, loopId, i);
+              std::cout << "Resolve ... OK" << std::endl;
+              parent->InsertBeforeChild(element, *cloneChild);
+              delete cloneChild;
+            }            
+          }
+        }
+        // remove the element itself from the tree
+        parent->RemoveChild(element);
+      }
+    }
+    
+    //----------------------------------------------------------------------------------------------------
+    
+    void XMLParser::resolveForLoop(TiXmlNode *node, const std::string &id, float value) {
+      std::string loopIDStr = "$FOR{" + id + "}";
+      std::string valueStr = typeToString(value);
+      if(node->Type() == TiXmlNode::TINYXML_ELEMENT) {
+        TiXmlElement *nodeElement = node->ToElement();
+        // replace occurences in all attributes
+        for(auto attr = nodeElement->FirstAttribute() ; nullptr != attr ; attr = attr->Next()) {
+          std::string attrValue(attr->ValueStr());
+          size_t pos = attrValue.find(loopIDStr, 0);
+          while(pos != std::string::npos) {
+            attrValue.replace(pos, loopIDStr.size(), valueStr);
+            pos = attrValue.find(loopIDStr, pos+valueStr.size());
+          }
+          attr->SetValue(attrValue);
+        }
+        // make it recursive
+        for(auto child = nodeElement->FirstChild() ; nullptr != child ; child->NextSibling()) {
+          resolveForLoop(child, id, value);
+        }
+      }
+      else if((node->Type() == TiXmlNode::TINYXML_COMMENT) or (node->Type() == TiXmlNode::TINYXML_TEXT)) {
+        std::string nodeValue = node->ValueStr();
+        size_t pos = nodeValue.find(loopIDStr, 0);
+        while(pos != std::string::npos) {
+          nodeValue.replace(pos, loopIDStr.size(), valueStr);
+          pos = nodeValue.find(loopIDStr, pos+valueStr.size());
+        }
+        node->SetValue(nodeValue);
       }
     }
   }

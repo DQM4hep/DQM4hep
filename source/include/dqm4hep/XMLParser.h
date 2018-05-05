@@ -153,6 +153,7 @@ namespace dqm4hep {
     private:
       // parsing functions
       void resolveIncludes();
+      void resolveForLoops();
       void resolveConstants();
       void resolveDbParameters();
 
@@ -174,6 +175,10 @@ namespace dqm4hep {
       // database related functions
       void readDatabases();
       void resolveAllDbSelect(TiXmlElement *pXmlElement);
+      
+      // for loop related
+      void resolveForLoops(TiXmlElement *element);
+      void resolveForLoop(TiXmlNode *node, const std::string &id, float value);
 
     private:
       typedef std::map<std::string, std::shared_ptr<DBInterface>> DBInterfaceMap;
