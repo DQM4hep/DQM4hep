@@ -1,5 +1,12 @@
 <dqm4hep>
   
+  <counters>
+    <for id="count" begin="0" end="10" increment="1">
+      <!-- This counter value is set to $FOR{count} -->
+      <counter name="${user}" value="$FOR{count}" />
+    </for>
+  </counters>
+  
   <constants>
     <constant name="user" value="superman"/>
     <constant name="planet" value="krypton"/>
