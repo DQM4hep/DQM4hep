@@ -59,6 +59,11 @@ int main(int /*argc*/, char *argv[]) {
   }
 
   assert_test(parseOkay);
+  
+  auto document = parser.document();
+  TiXmlPrinter printer;
+  document.Accept(&printer);
+  std::cout << printer.Str() << std::endl;
 
   TiXmlElement *root = parser.document().RootElement();
   assert_test(root != nullptr);
