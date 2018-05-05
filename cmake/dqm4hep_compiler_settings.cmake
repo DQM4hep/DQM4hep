@@ -7,7 +7,7 @@ macro( DQM4HEP_SET_CXX_FLAGS )
   
   include( CheckCXXCompilerFlag )
   
-  set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wdeprecated -Wreturn-type -Wuseless-cast -Wlogical-op -Wredundant-decls -Weffc++ -fdiagnostics-color=auto )
+  set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wdeprecated -Wreturn-type -Wuseless-cast -Wlogical-op -Wredundant-decls -Weffc++ -fdiagnostics-color=auto -Wno-unsequenced )
   
   if( DQM4HEP_DEV_WARNINGS )
     set( COMPILER_FLAGS ${COMPILER_FLAGS} -Wsuggest-final-types -Wsuggest-final-methods -Wsuggest-override -Wno-comments -Wparentheses )
