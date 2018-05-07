@@ -683,7 +683,7 @@ namespace dqm4hep {
           attr->SetValue(attrValue);
         }
         // make it recursive
-        for(auto child = nodeElement->FirstChild() ; nullptr != child ; child->NextSibling()) {
+        for(auto child = nodeElement->FirstChild() ; nullptr != child ; child = child->NextSibling()) {
           resolveForLoop(child, id, value);
         }
       }
