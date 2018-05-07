@@ -152,6 +152,15 @@ namespace dqm4hep {
       template <typename T, typename ObjectType, typename... Args>
       StatusCode bookObject(const std::string &path, const std::string &name, std::shared_ptr<T> &monitorElement,
                             AllocatorHelper<TObject, ObjectType, Args...> allocator, Args... args);
+      
+      /**
+       *  @brief  Book a monitor element from the xml element
+       *  
+       *  @param  xmlElement the xml element to parse
+       *  @param  monitorelement the monitor element to receive
+       */
+      template <typename T>
+      StatusCode bookMonitorElement(TiXmlElement *xmlElement, std::shared_ptr<T> &monitorElement);
 
       /**
        * @brief  Open root file, find reference object and attach it to the monitor element
@@ -264,12 +273,16 @@ namespace dqm4hep {
       const Storage<MonitorElement> &getStorage() const;
       
     private:
+      typedef std::shared_ptr<TObjectXMLAllocator> XMLAllocatorPtr;
       typedef std::map<MonitorElementPtr, QualityTestMap> MonitorElementToQTestMap;
+      typedef std::map<std::string, XMLAllocatorPtr> XMLAllocatorMap;
 
       Storage<MonitorElement> m_storage = {};
       QualityTestFactoryMap m_qualityTestFactoryMap = {};
       QualityTestMap m_qualityTestMap = {};
       MonitorElementToQTestMap m_monitorElementToQTestMap = {};
+      XMLAllocatorMap              m_xmlAllocatorMap = {};
+      XMLAllocatorPtr              m_defaultXMLAllocator = {nullptr};
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -430,6 +443,29 @@ namespace dqm4hep {
       }
 
       ((TNamed *)pTObject)->SetName(name.c_str());
+      return addMonitorElement<T>(path, pTObject, monitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementManager::bookMonitorElement(TiXmlElement *xmlElement, std::shared_ptr<T> &monitorElement) {
+      if(nullptr == xmlElement) {
+        return STATUS_CODE_INVALID_PTR;
+      }
+      std::string className, name, path, title;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(xmlElement, "type", className));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(xmlElement, "name", name));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(xmlElement, "path", path));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(xmlElement, "title", title));
+      
+      auto findIter = m_xmlAllocatorMap.find(className);
+      XMLAllocatorPtr allocator = (m_xmlAllocatorMap.end() == findIter) ? m_defaultXMLAllocator : findIter->second;
+      TObject *pTObject = allocator->create(xmlElement);
+      if(nullptr == pTObject) {
+        dqm_error( "Object of type '{0}' couldn't be created from xml element !", className );
+      }
+      ((TNamed *)pTObject)->SetNameTitle(name.c_str(), title.c_str());
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     

@@ -31,29 +31,8 @@
 // -- std headers
 #include <string>
 
-// -- root headers
-#include <Rtypes.h>
-
-class TObject;
-class TH1F;
-class TH1I;
-class TH1C;
-class TH1S;
-class TH2F;
-class TH2I;
-class TH2C;
-class TH2S;
-class TH3F;
-class TH3I;
-class THStack;
-class TMultiGraph;
-class TH2Poly;
-class TProfile;
-class TProfile2D;
-class TGraph;
-class TGraphErrors;
-class TGraph2D;
-class TMultiGraph;
+// -- dqm4hep headers
+#include <dqm4hep/RootHeaders.h>
 
 namespace dqm4hep {
 
@@ -62,7 +41,9 @@ namespace dqm4hep {
     // these ones come from DQM4HEP, not ROOT
     template <typename T>
     class TScalarObject;
-    class TDynamicGraph; 
+    class TDynamicGraph;
+    
+    class TiXmlElement;
 
     /** 
      *  @brief  AllocatorHelper class
@@ -79,16 +60,21 @@ namespace dqm4hep {
       }
     };
 
+    typedef AllocatorHelper<TObject, TH1D, const char *, const char *, int, float, float> TH1DAllocator;
     typedef AllocatorHelper<TObject, TH1F, const char *, const char *, int, float, float> TH1FAllocator;
     typedef AllocatorHelper<TObject, TH1I, const char *, const char *, int, float, float> TH1IAllocator;
     typedef AllocatorHelper<TObject, TH1C, const char *, const char *, int, float, float> TH1CAllocator;
     typedef AllocatorHelper<TObject, TH1S, const char *, const char *, int, float, float> TH1SAllocator;
+    typedef AllocatorHelper<TObject, TH2D, const char *, const char *, int, float, float, int, float, float> TH2DAllocator;
     typedef AllocatorHelper<TObject, TH2F, const char *, const char *, int, float, float, int, float, float> TH2FAllocator;
     typedef AllocatorHelper<TObject, TH2I, const char *, const char *, int, float, float, int, float, float> TH2IAllocator;
     typedef AllocatorHelper<TObject, TH2C, const char *, const char *, int, float, float, int, float, float> TH2CAllocator;
     typedef AllocatorHelper<TObject, TH2S, const char *, const char *, int, float, float, int, float, float> TH2SAllocator;
+    typedef AllocatorHelper<TObject, TH3D, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3DAllocator;
     typedef AllocatorHelper<TObject, TH3F, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3FAllocator;
     typedef AllocatorHelper<TObject, TH3I, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3IAllocator;
+    typedef AllocatorHelper<TObject, TH3C, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3CAllocator;
+    typedef AllocatorHelper<TObject, TH3S, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3SAllocator;
     typedef AllocatorHelper<TObject, THStack, const char *, const char *> THStackAllocator;
     typedef AllocatorHelper<TObject, TH2Poly, const char *, const char *, double, double, double, double> TH2PolyAllocator;
     typedef AllocatorHelper<TObject, TProfile, const char *, const char *, int, float, float, float, float> TProfileAllocator;
@@ -106,6 +92,99 @@ namespace dqm4hep {
     typedef AllocatorHelper<TObject, TGraph2D> TGraph2DAllocator;
     typedef AllocatorHelper<TObject, TMultiGraph> TMultiGraphAllocator;
     typedef AllocatorHelper<TObject, TDynamicGraph> TDynamicGraphAllocator;
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  TObjectXMLAllocator class
+     */
+    class TObjectXMLAllocator {
+    public:
+      /**
+       *  @brief  Destructor
+       */
+      virtual ~TObjectXMLAllocator() {}
+      /**
+       *  @brief  Create an instance of a sub class of TObject from the xml element 
+       *
+       * @param  element the input xml element describing the object to allocate
+       */
+      virtual TObject* create(TiXmlElement *element) const = 0;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TXMLDefaultAllocator class for all ROOT class with default constructor 
+    class DefaultXMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TH1XMLAllocator class for all TH1 types 
+    class TH1XMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TH2XMLAllocator class for all TH2 types 
+    class TH2XMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TH3XMLAllocator class for all TH3 types 
+    class TH3XMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// THStackXMLAllocator class for all THStack type
+    class THStackXMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// THStackXMLAllocator class for all TH2Poly type
+    class TH2PolyXMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TProfileXMLAllocator class for all TProfile type
+    class TProfileXMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TProfile2DXMLAllocator class for all TProfile2D type
+    class TProfile2DXMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /// TScalarXMLAllocator class for all scalar types
+    class TScalarXMLAllocator final : public TObjectXMLAllocator {
+      TObject* create(TiXmlElement *element) const;
+    };
+    
   }
   
 }

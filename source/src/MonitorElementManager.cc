@@ -56,6 +56,39 @@ namespace dqm4hep {
 
         m_qualityTestFactoryMap.insert(QualityTestFactoryMap::value_type(factoryName, factory));
       }
+      // the default one
+      m_defaultXMLAllocator = std::make_shared<DefaultXMLAllocator>();
+      // TH1
+      m_xmlAllocatorMap["TH1D"] = std::make_shared<TH1XMLAllocator>();
+      m_xmlAllocatorMap["TH1F"] = std::make_shared<TH1XMLAllocator>();
+      m_xmlAllocatorMap["TH1I"] = std::make_shared<TH1XMLAllocator>();
+      m_xmlAllocatorMap["TH1C"] = std::make_shared<TH1XMLAllocator>();
+      m_xmlAllocatorMap["TH1S"] = std::make_shared<TH1XMLAllocator>();
+      // TH2
+      m_xmlAllocatorMap["TH2D"] = std::make_shared<TH2XMLAllocator>();
+      m_xmlAllocatorMap["TH2F"] = std::make_shared<TH2XMLAllocator>();
+      m_xmlAllocatorMap["TH2I"] = std::make_shared<TH2XMLAllocator>();
+      m_xmlAllocatorMap["TH2C"] = std::make_shared<TH2XMLAllocator>();
+      m_xmlAllocatorMap["TH2S"] = std::make_shared<TH2XMLAllocator>(); 
+      // TH2
+      m_xmlAllocatorMap["TH3D"] = std::make_shared<TH3XMLAllocator>();
+      m_xmlAllocatorMap["TH3F"] = std::make_shared<TH3XMLAllocator>();
+      m_xmlAllocatorMap["TH3I"] = std::make_shared<TH3XMLAllocator>();
+      m_xmlAllocatorMap["TH3C"] = std::make_shared<TH3XMLAllocator>();
+      m_xmlAllocatorMap["TH3S"] = std::make_shared<TH3XMLAllocator>();
+      // scalars
+      m_xmlAllocatorMap["int"] = std::make_shared<TScalarXMLAllocator>();
+      m_xmlAllocatorMap["real"] = std::make_shared<TScalarXMLAllocator>();
+      m_xmlAllocatorMap["float"] = std::make_shared<TScalarXMLAllocator>();
+      m_xmlAllocatorMap["double"] = std::make_shared<TScalarXMLAllocator>();
+      m_xmlAllocatorMap["short"] = std::make_shared<TScalarXMLAllocator>();
+      m_xmlAllocatorMap["long"] = std::make_shared<TScalarXMLAllocator>();
+      m_xmlAllocatorMap["long64"] = std::make_shared<TScalarXMLAllocator>();
+      // others
+      m_xmlAllocatorMap["THStack"] = std::make_shared<THStackXMLAllocator>();
+      m_xmlAllocatorMap["TH2Poly"] = std::make_shared<TH2PolyXMLAllocator>();
+      m_xmlAllocatorMap["TProfile"] = std::make_shared<TProfileXMLAllocator>();
+      m_xmlAllocatorMap["TProfile2D"] = std::make_shared<TProfile2DXMLAllocator>();
     }
 
     //-------------------------------------------------------------------------------------------------
