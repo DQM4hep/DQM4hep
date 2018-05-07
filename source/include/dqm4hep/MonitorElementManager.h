@@ -39,11 +39,7 @@
 #include <dqm4hep/Path.h>
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/AllocatorHelper.h>
-
-// -- root headers
-#include <TFile.h>
-#include <TObject.h>
-#include <TClass.h>
+#include <dqm4hep/RootHeaders.h>
 
 namespace dqm4hep {
 
@@ -203,6 +199,11 @@ namespace dqm4hep {
       template <typename T>
       StatusCode getMonitorElement(const std::string &dirName, const std::string &name,
                                    std::shared_ptr<T> &monitorElement) const;
+      
+      /**
+       *  @brief  Reset all monitor elements
+       */
+      void resetMonitorElements();
 
       ////////////////////////
       // DELETION INTERFACE //
