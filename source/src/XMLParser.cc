@@ -269,8 +269,6 @@ namespace dqm4hep {
           // continue the while from it
           if(nullptr != previousElement) {
             dqm_debug( "XMLParser::resolveIncludes(): Previous element found" );
-            std::cout << "Child: " << child->ValueStr() << std::endl;
-            std::cout << "Previous: " << previousElement->ValueStr() << std::endl;
             node->RemoveChild(child);
             child = previousElement;
           }
@@ -647,14 +645,11 @@ namespace dqm4hep {
           dqm_error( "XMLParser::resolveForLoops: <for> element with infinite loop detected !" );
           throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
         }
-        std::cout << "Found a valid for loop: id = " << loopId << std::endl; 
         for(int i=begin ; i<=end ; i+=increment) {
           for(auto child = element->FirstChild() ; nullptr != child ; child = child->NextSibling()) {
             auto cloneChild = child->Clone();
             if(nullptr != cloneChild) {
-              std::cout << "Resolve ..." << std::endl;
               resolveForLoop(cloneChild, loopId, i);
-              std::cout << "Resolve ... OK" << std::endl;
               parent->InsertBeforeChild(element, *cloneChild);
               delete cloneChild;
             }            
