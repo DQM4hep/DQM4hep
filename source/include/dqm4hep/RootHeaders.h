@@ -31,8 +31,10 @@
 // base headers
 #include <Rtypes.h>
 #include <TObject.h>
+#include <TNamed.h>
 #include <TClass.h>
 #include <TFile.h>
+#include <TROOT.h>
 
 // histogram related
 #include <TH1.h>
@@ -41,13 +43,14 @@
 #include <TProfile.h>
 #include <TProfile2D.h>
 #include <THStack.h>
+#include <TH2Poly.h>
 
 // graph related
 #include <TGraph.h>
 #include <TGraphErrors.h>
 #include <TGraph2D.h>
 #include <TGraph2DErrors.h>
-#include <TGraphAsymErrors.h>
+#include <TGraphAsymmErrors.h>
 #include <TMultiGraph.h>
 
 // function related
