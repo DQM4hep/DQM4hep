@@ -178,7 +178,7 @@ namespace dqm4hep {
       
       // for loop related
       void resolveForLoops(TiXmlElement *element);
-      void resolveForLoop(TiXmlNode *node, const std::string &id, float value);
+      void resolveForLoop(TiXmlNode *node, const std::string &id, int value);
 
     private:
       typedef std::map<std::string, std::shared_ptr<DBInterface>> DBInterfaceMap;

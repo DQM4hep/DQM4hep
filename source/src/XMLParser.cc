@@ -626,31 +626,29 @@ namespace dqm4hep {
         if(nullptr == parent) {
           return;
         }
-        float begin(0.f), end(0.f), increment(0.f);
+        int begin(0), end(0), increment(0);
         std::string loopId;
-        if(TIXML_SUCCESS != element->QueryFloatAttribute("begin", &begin)) {
+        if(TIXML_SUCCESS != element->QueryIntAttribute("begin", &begin)) {
           dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'begin' attribute !" );
           throw StatusCodeException(STATUS_CODE_FAILURE);
         }
-        if(TIXML_SUCCESS != element->QueryFloatAttribute("end", &end)) {
+        if(TIXML_SUCCESS != element->QueryIntAttribute("end", &end)) {
           dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'end' attribute !" );
-          throw StatusCodeException(STATUS_CODE_FAILURE);
-        }
-        if(TIXML_SUCCESS != element->QueryFloatAttribute("increment", &increment)) {
-          dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'increment' attribute !" );
           throw StatusCodeException(STATUS_CODE_FAILURE);
         }
         if(TIXML_SUCCESS != element->QueryStringAttribute("id", &loopId) or loopId.empty()) {
           dqm_error( "XMLParser::resolveForLoops: <for> element with invalid 'id' attribute !" );
           throw StatusCodeException(STATUS_CODE_FAILURE);
         }
+        // optional attribute
+        element->QueryIntAttribute("increment", &increment);
         const bool forwardLoop(begin < end);
         if((forwardLoop and increment < 0) or (not forwardLoop and increment > 0)) {
           dqm_error( "XMLParser::resolveForLoops: <for> element with infinite loop detected !" );
           throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
         }
         std::cout << "Found a valid for loop: id = " << loopId << std::endl; 
-        for(float i=begin ; i<=end ; i+=increment) {
+        for(int i=begin ; i<=end ; i+=increment) {
           for(auto child = element->FirstChild() ; nullptr != child ; child = child->NextSibling()) {
             auto cloneChild = child->Clone();
             if(nullptr != cloneChild) {
@@ -669,7 +667,7 @@ namespace dqm4hep {
     
     //----------------------------------------------------------------------------------------------------
     
-    void XMLParser::resolveForLoop(TiXmlNode *node, const std::string &id, float value) {
+    void XMLParser::resolveForLoop(TiXmlNode *node, const std::string &id, int value) {
       std::string loopIDStr = "$FOR{" + id + "}";
       std::string valueStr = typeToString(value);
       if(node->Type() == TiXmlNode::TINYXML_ELEMENT) {
