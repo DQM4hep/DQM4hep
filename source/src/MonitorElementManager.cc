@@ -33,25 +33,6 @@
 #include <dqm4hep/QualityTest.h>
 #include <dqm4hep/Storage.h>
 
-// -- root headers
-#include <TClass.h>
-#include <TFile.h>
-#include <TH1C.h>
-#include <TH1F.h>
-#include <TH1I.h>
-#include <TH1S.h>
-#include <TH2C.h>
-#include <TH2F.h>
-#include <TH2I.h>
-#include <TH2S.h>
-#include <TH3F.h>
-#include <TH3I.h>
-#include <TNamed.h>
-#include <TObject.h>
-#include <TProfile.h>
-#include <TProfile2D.h>
-#include <TROOT.h>
-
 // -- std headers
 #include <stdexcept>
 
