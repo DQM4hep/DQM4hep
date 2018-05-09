@@ -108,7 +108,7 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   // create our test element - TH1
   MonitorElementPtr testElement;
-  meMgr->bookObject("/", "TestHisto", testElement, TH1FAllocator(), "", "A test histogram", 100, 0.f, 99.f);
+  meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElement, 100, 0.f, 99.f);
   TH1F *histogram = testElement->objectTo<TH1F>();
   assert_test(nullptr != histogram);
   fillExact(histogram);
@@ -178,7 +178,7 @@ int main(int /*argc*/, char ** /*argv*/) {
   assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
   
   // create our test element - TScalar
-  meMgr->bookObject("/", "TestScalar", testElement, TScalarIntAllocator(), 42);
+  meMgr->bookScalar<int>("/", "TestScalar", "A test int", testElement, 42);
   TScalarInt *integer = testElement->objectTo<TScalarInt>();
   assert_test(nullptr != integer);
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
@@ -214,7 +214,7 @@ int main(int /*argc*/, char ** /*argv*/) {
   assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
   
   // create our test element - TGraph (1D)
-  meMgr->bookObject("/", "TestGraph", testElement, TGraphAllocator());
+  meMgr->bookObject<TGraph>("/", "TestGraph", "A test graph", testElement);
   TGraph *graph = testElement->objectTo<TGraph>();
   assert_test(nullptr != graph);
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));

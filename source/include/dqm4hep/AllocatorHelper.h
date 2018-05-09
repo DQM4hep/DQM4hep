@@ -38,64 +38,11 @@ namespace dqm4hep {
 
   namespace core {
     
-    // these ones come from DQM4HEP, not ROOT
     template <typename T>
     class TScalarObject;
     class TDynamicGraph;
-    
     class TiXmlElement;
 
-    /** 
-     *  @brief  AllocatorHelper class
-     */
-    template <typename BaseType, typename RealType, typename... Args>
-    class AllocatorHelper {
-    public:
-      /** 
-       *  @brief  Create a new instance of RealType, inheriting
-       *          from BaseType using Args type as constructor parameters
-       */
-      BaseType *create(Args... args) const {
-        return new RealType(args...);
-      }
-    };
-
-    typedef AllocatorHelper<TObject, TH1D, const char *, const char *, int, float, float> TH1DAllocator;
-    typedef AllocatorHelper<TObject, TH1F, const char *, const char *, int, float, float> TH1FAllocator;
-    typedef AllocatorHelper<TObject, TH1I, const char *, const char *, int, float, float> TH1IAllocator;
-    typedef AllocatorHelper<TObject, TH1C, const char *, const char *, int, float, float> TH1CAllocator;
-    typedef AllocatorHelper<TObject, TH1S, const char *, const char *, int, float, float> TH1SAllocator;
-    typedef AllocatorHelper<TObject, TH2D, const char *, const char *, int, float, float, int, float, float> TH2DAllocator;
-    typedef AllocatorHelper<TObject, TH2F, const char *, const char *, int, float, float, int, float, float> TH2FAllocator;
-    typedef AllocatorHelper<TObject, TH2I, const char *, const char *, int, float, float, int, float, float> TH2IAllocator;
-    typedef AllocatorHelper<TObject, TH2C, const char *, const char *, int, float, float, int, float, float> TH2CAllocator;
-    typedef AllocatorHelper<TObject, TH2S, const char *, const char *, int, float, float, int, float, float> TH2SAllocator;
-    typedef AllocatorHelper<TObject, TH3D, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3DAllocator;
-    typedef AllocatorHelper<TObject, TH3F, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3FAllocator;
-    typedef AllocatorHelper<TObject, TH3I, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3IAllocator;
-    typedef AllocatorHelper<TObject, TH3C, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3CAllocator;
-    typedef AllocatorHelper<TObject, TH3S, const char *, const char *, int, float, float, int, float, float, int, float, float> TH3SAllocator;
-    typedef AllocatorHelper<TObject, THStack, const char *, const char *> THStackAllocator;
-    typedef AllocatorHelper<TObject, TH2Poly, const char *, const char *, double, double, double, double> TH2PolyAllocator;
-    typedef AllocatorHelper<TObject, TProfile, const char *, const char *, int, float, float, float, float> TProfileAllocator;
-    typedef AllocatorHelper<TObject, TProfile2D, const char *, const char *, int, float, float, int, float, float, float, float> TProfile2DAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<int>, int> TScalarIntAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<float>, float> TScalarRealAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<double>, double> TScalarDoubleAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<float>, float> TScalarFloatAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<short>, short> TScalarShortAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<long>, long> TScalarLongAllocator;
-    typedef AllocatorHelper<TObject, TScalarObject<Long64_t>, Long64_t> TScalarLong64Allocator;
-    typedef AllocatorHelper<TObject, TScalarObject<std::string>, std::string> TScalarStringAllocator;
-    typedef AllocatorHelper<TObject, TGraph> TGraphAllocator;
-    typedef AllocatorHelper<TObject, TGraphErrors> TGraphErrorsAllocator;
-    typedef AllocatorHelper<TObject, TGraph2D> TGraph2DAllocator;
-    typedef AllocatorHelper<TObject, TMultiGraph> TMultiGraphAllocator;
-    typedef AllocatorHelper<TObject, TDynamicGraph> TDynamicGraphAllocator;
-    
-    //-------------------------------------------------------------------------------------------------
-    //-------------------------------------------------------------------------------------------------
-    
     /**
      *  @brief  TObjectXMLAllocator class
      */

@@ -30,13 +30,6 @@
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/MonitorElement.h>
 
-#include <TH1.h>
-#include <TH2.h>
-#include <TH3.h>
-#include <TProfile.h>
-#include <TProfile2D.h>
-#include <TClass.h>
-
 namespace dqm4hep {
 
   namespace core {
@@ -85,24 +78,19 @@ namespace dqm4hep {
         return nullptr;
       }
       if(className == "TH1D") {
-        TH1DAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBins, minValue, maxValue);
+        return new TH1D(name.c_str(), title.c_str(), nBins, minValue, maxValue);
       }
       else if(className == "TH1F") {
-        TH1FAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBins, minValue, maxValue);
+        return new TH1F(name.c_str(), title.c_str(), nBins, minValue, maxValue);
       }
       else if(className == "TH1I") {
-        TH1IAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBins, minValue, maxValue);
+        return new TH1I(name.c_str(), title.c_str(), nBins, minValue, maxValue);
       }
       else if(className == "TH1C") {
-        TH1CAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBins, minValue, maxValue);
+        return new TH1C(name.c_str(), title.c_str(), nBins, minValue, maxValue);
       }
       else if(className == "TH1S") {
-        TH1SAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBins, minValue, maxValue);
+        return new TH1S(name.c_str(), title.c_str(), nBins, minValue, maxValue);
       }
       return nullptr;
     }
@@ -144,24 +132,19 @@ namespace dqm4hep {
         return nullptr;
       }
       if(className == "TH2D") {
-        TH2DAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
+        return new TH2D(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
       }
       else if(className == "TH2F") {
-        TH2FAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
+        return new TH2F(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
       }
       else if(className == "TH2I") {
-        TH2IAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
+        return new TH2I(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
       }
       else if(className == "TH2C") {
-        TH2CAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
+        return new TH2C(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
       }
       else if(className == "TH2S") {
-        TH2SAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
+        return new TH2S(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
       }
       return nullptr;
     }
@@ -212,24 +195,19 @@ namespace dqm4hep {
         return nullptr;
       }
       if(className == "TH3D") {
-        TH3DAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
+        return new TH3D(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
       }
       else if(className == "TH3F") {
-        TH3FAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
+        return new TH3F(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
       }
       else if(className == "TH3I") {
-        TH3IAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
+        return new TH3I(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
       }
       else if(className == "TH3C") {
-        TH3CAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
+        return new TH3C(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
       }
       else if(className == "TH3S") {
-        TH3SAllocator allocator;
-        return allocator.create(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
+        return new TH3S(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
       }
       return nullptr;
     }
@@ -248,40 +226,34 @@ namespace dqm4hep {
         return nullptr;
       }
       if(className == "int") {
-        TScalarIntAllocator allocator;
         int typeValue = 0;
         stringToType(value, typeValue);
-        return allocator.create(typeValue);
+        return new TScalarObject<int>(typeValue);
       }
       else if(className == "real" || className == "float") {
-        TScalarFloatAllocator allocator;
         float typeValue = 0;
         stringToType(value, typeValue);
-        return allocator.create(typeValue);
+        return new TScalarObject<float>(typeValue);
       }
       else if(className == "double") {
-        TScalarDoubleAllocator allocator;
         double typeValue = 0;
         stringToType(value, typeValue);
-        return allocator.create(typeValue);
+        return new TScalarObject<double>(typeValue);
       }
       else if(className == "short") {
-        TScalarShortAllocator allocator;
         short typeValue = 0;
         stringToType(value, typeValue);
-        return allocator.create(typeValue);
+        return new TScalarObject<short>(typeValue);
       }
       else if(className == "long") {
-        TScalarLongAllocator allocator;
         long typeValue = 0;
         stringToType(value, typeValue);
-        return allocator.create(typeValue);
+        return new TScalarObject<long>(typeValue);
       }
       else if(className == "long64") {
-        TScalarLong64Allocator allocator;
         Long64_t typeValue = 0;
         stringToType(value, typeValue);
-        return allocator.create(typeValue);
+        return new TScalarObject<Long64_t>(typeValue);
       }
       return nullptr;
     }
@@ -299,8 +271,7 @@ namespace dqm4hep {
       if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
         return nullptr;
       }
-      THStackAllocator allocator;
-      return allocator.create(name.c_str(), title.c_str());      
+      return new THStack(name.c_str(), title.c_str());      
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -329,8 +300,7 @@ namespace dqm4hep {
       if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
         return nullptr;
       }
-      TH2PolyAllocator allocator;
-      return allocator.create(name.c_str(), title.c_str(), xlow, xup, ylow, yup);
+      return new TH2Poly(name.c_str(), title.c_str(), xlow, xup, ylow, yup);
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -363,8 +333,7 @@ namespace dqm4hep {
       if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
         return nullptr;
       }
-      TProfileAllocator allocator;
-      return allocator.create(name.c_str(), title.c_str(), nBinsX, xlow, xup, ylow, yup);
+      return new TProfile(name.c_str(), title.c_str(), nBinsX, xlow, xup, ylow, yup);
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -406,8 +375,7 @@ namespace dqm4hep {
       if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
         return nullptr;
       }
-      TProfile2DAllocator allocator;
-      return allocator.create(name.c_str(), title.c_str(), nBinsX, xlow, xup, nBinsY, ylow, yup, zlow, zup);
+      return new TProfile2D(name.c_str(), title.c_str(), nBinsX, xlow, xup, nBinsY, ylow, yup, zlow, zup);
     }
 
   }
