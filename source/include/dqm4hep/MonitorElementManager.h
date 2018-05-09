@@ -149,9 +149,18 @@ namespace dqm4hep {
       /** Book a monitor element. The objectType must inherit TObject and have a ROOT dictionnary.
        *
        */
-      template <typename T, typename ObjectType, typename... Args>
-      StatusCode bookObject(const std::string &path, const std::string &name, std::shared_ptr<T> &monitorElement,
-                            AllocatorHelper<TObject, ObjectType, Args...> allocator, Args... args);
+      // template <typename T, typename ObjectType, typename... Args>
+      // StatusCode bookObject(const std::string &path, const std::string &name, std::shared_ptr<T> &monitorElement,
+      //                       AllocatorHelper<TObject, ObjectType, Args...> allocator, Args... args);
+                            
+      template <typename ObjectType, typename T, typename... Args>
+      StatusCode bookObject(const std::string &path, const std::string &name, const std::string &title, std::shared_ptr<T> &monitorElement, Args... args);
+      
+      template <typename HistoType, typename T, typename... Args>
+      StatusCode bookHisto(const std::string &path, const std::string &name, const std::string &title, std::shared_ptr<T> &monitorElement, Args... args);
+      
+      template <typename ScalarType, typename T, typename... Args>
+      StatusCode bookScalar(const std::string &path, const std::string &name, const std::string &title, std::shared_ptr<T> &monitorElement, Args... args);
       
       /**
        *  @brief  Book a monitor element from the xml element
@@ -332,27 +341,62 @@ namespace dqm4hep {
     }
     
     //-------------------------------------------------------------------------------------------------
-
-    template <typename T, typename ObjectType, typename... Args>
-    inline StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name,
-                                                 std::shared_ptr<T> &monitorElement,
-                                                 AllocatorHelper<TObject, ObjectType, Args...> allocator,
-                                                 Args... args) {
+    
+    template <typename ObjectType, typename T, typename... Args>
+    inline StatusCode MonitorElementManager::bookObject(const std::string &path, const std::string &name, const std::string &title, std::shared_ptr<T> &monitorElement, Args... args) {
       monitorElement = nullptr;
       if(not checkClass(ObjectType::Class())) {
         return STATUS_CODE_NOT_ALLOWED;
       }
       TObject *pTObject = nullptr;
       doROOTNotOwner([&](){
-        pTObject = allocator.create(args...);
+        pTObject = new ObjectType(args...);
       });
       if (!pTObject) {
         dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", ObjectType::Class_Name(),
                     path, name);
         return STATUS_CODE_FAILURE;
       }
-
-      ((TNamed *)pTObject)->SetName(name.c_str());
+      ((TNamed *)pTObject)->SetNameTitle(name.c_str(), title.c_str());
+      return addMonitorElement<T>(path, pTObject, monitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename HistoType, typename T, typename... Args>
+    inline StatusCode MonitorElementManager::bookHisto(const std::string &path, const std::string &name, const std::string &title, std::shared_ptr<T> &monitorElement, Args... args) {
+      monitorElement = nullptr;
+      if(not checkClass(HistoType::Class())) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+      TObject *pTObject = nullptr;
+      doROOTNotOwner([&](){
+        pTObject = new HistoType(name.c_str(), title.c_str(), args...);
+      });
+      if (!pTObject) {
+        dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", HistoType::Class_Name(), path, name);
+        return STATUS_CODE_FAILURE;
+      }
+      return addMonitorElement<T>(path, pTObject, monitorElement);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename ScalarType, typename T, typename... Args>
+    inline StatusCode MonitorElementManager::bookScalar(const std::string &path, const std::string &name, const std::string &title, std::shared_ptr<T> &monitorElement, Args... args) {
+      monitorElement = nullptr;
+      if(not checkClass(TScalarObject<ScalarType>::Class())) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
+      TObject *pTObject = nullptr;
+      doROOTNotOwner([&](){
+        pTObject = new TScalarObject<ScalarType>(args...);
+      });
+      if (!pTObject) {
+        dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", TScalarObject<ScalarType>::Class_Name(), path, name);
+        return STATUS_CODE_FAILURE;
+      }
+      ((TNamed *)pTObject)->SetNameTitle(name.c_str(), title.c_str());
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
