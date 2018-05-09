@@ -129,14 +129,14 @@ int main(int argc, char *argv[]) {
     "string");
   pCommandLine->add(qtestFileArg);
 
-  TCLAP::ValueArg<std::string> rootFileArg(
-    "r", 
-    "input-root-file", 
-    "The root input file", 
-    true, 
-    "", 
-    "string");
-  pCommandLine->add(rootFileArg);
+  // TCLAP::ValueArg<std::string> rootFileArg(
+  //   "r", 
+  //   "input-root-file", 
+  //   "The root input file", 
+  //   true, 
+  //   "", 
+  //   "string");
+  // pCommandLine->add(rootFileArg);
 
   TCLAP::ValueArg<std::string> outputJsonFileArg(
     "o", 
@@ -214,14 +214,14 @@ int main(int argc, char *argv[]) {
     StringMap constants;
     TiXmlElement *rootElement = document.RootElement();
     TiXmlElement *qtestsElement = rootElement->FirstChildElement("qtests");
+    TiXmlElement *mesElement = rootElement->FirstChildElement("monitorElements");
     
     std::unique_ptr<MonitorElementManager> monitorElementMgr(new MonitorElementManager());
-    std::unique_ptr<TFile> rootFile(new TFile(rootFileArg.getValue().c_str(), "READ"));
     
     // create, configure and run quality tests
     QReportStorage reportStorage;
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTests(qtestsElement));
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->readMonitorElements<MonitorElement>(rootFile.get(), rootElement, true));
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->readMonitorElements<MonitorElement>(mesElement, true));
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->runQualityTests(reportStorage));
     
     const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
