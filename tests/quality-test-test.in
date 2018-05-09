@@ -2,8 +2,7 @@
 
 cd @PROJECT_SOURCE_DIR@/tests
 
-rootFile="test_samples.root"
 qTestFile="test_samples.xml"
 
 # the qtest runner
-@PROJECT_BINARY_DIR@/bin/dqm4hep-run-qtests --exit-on failure --input-root-file ${rootFile} --input-qtest-file ${qTestFile}
+@PROJECT_BINARY_DIR@/bin/dqm4hep-run-qtests --exit-on failure --input-qtest-file ${qTestFile}
