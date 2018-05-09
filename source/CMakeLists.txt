@@ -50,16 +50,18 @@ if( DQM4HEP_TESTING )
   
   # Super-custom test
   configure_file( "${PROJECT_SOURCE_DIR}/tests/quality-test-test.in"
-      "${PROJECT_BINARY_DIR}/bin/quality-test-test" @ONLY )
+  "${PROJECT_BINARY_DIR}/bin/test-quality-test-test" @ONLY )
   
   install(
-  	FILES ${PROJECT_BINARY_DIR}/bin/quality-test-test
+  	FILES ${PROJECT_BINARY_DIR}/bin/test-quality-test-test
   	DESTINATION bin/tests
     PERMISSIONS
     OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
   )
+  
+  add_test( quality-test-test ${CMAKE_INSTALL_PREFIX}/bin/tests/test-quality-test-test )
 endif()
 
 # -------------------------------------------------
