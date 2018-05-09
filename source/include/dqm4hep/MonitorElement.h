@@ -226,7 +226,7 @@ namespace dqm4hep {
        *  
        *  @param  object the json object to receive
        */
-      void toJson(json &object) const;
+      virtual void toJson(json &object) const;
       
 #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
       /**
@@ -234,7 +234,7 @@ namespace dqm4hep {
        *  
        *  @param  object the json object to parse
        */
-      void fromJson(const json &value);
+      virtual void fromJson(const json &value);
 #endif
       /**
        *  @brief  Write monitor element to device
@@ -319,7 +319,7 @@ namespace dqm4hep {
        *
        *  @param  reports the list of quality test reports to receive
        */
-      StatusCode runQualityTests(QReportMap &reports);
+      virtual StatusCode runQualityTests(QReportMap &reports);
 
       /** 
        *  @brief  Run a specific quality test
@@ -327,7 +327,7 @@ namespace dqm4hep {
        *  @param  name the quality test name to run
        *  @param  report the quality test report to receive
        */
-      StatusCode runQualityTest(const std::string &name, QReport &report);
+      virtual StatusCode runQualityTest(const std::string &name, QReport &report);
 
     private:
       /// The monitor element path
