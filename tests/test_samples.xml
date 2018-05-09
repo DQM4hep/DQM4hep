@@ -24,14 +24,18 @@
     </qtests>
 
     <!-- All monitor elements and qtests to process -->
-    <monitorElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
-      <qtest name="MeanAround10Long" />
-    </monitorElement>
-    <monitorElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2_bck">
-      <qtest name="MeanAround10Short" />
-    </monitorElement>
-    <monitorElement path="${GaussiansDirectory}" name="DblGaus_Mean15_RMS2_RMS5">
-      <qtest name="MeanAround15Short" />
-    </monitorElement>
+    <monitorElements>
+      <file name="test_samples.root">
+        <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
+          <qtest name="MeanAround10Long" />
+        </fileElement>
+        <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2_bck">
+          <qtest name="MeanAround10Short" />
+        </fileElement>
+        <fileElement path="${GaussiansDirectory}" name="DblGaus_Mean15_RMS2_RMS5">
+          <qtest name="MeanAround15Short" />
+        </fileElement>
+      </file>
+    </monitorElements>
 
 </dqm4hep>
