@@ -42,6 +42,7 @@
 #include <TH3.h>
 #include <TProfile.h>
 #include <TProfile2D.h>
+#include <TProfile3D.h>
 #include <THStack.h>
 #include <TH2Poly.h>
 
