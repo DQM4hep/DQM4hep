@@ -122,6 +122,25 @@ int main(int /*argc*/, char ** /*argv*/) {
     double y = i*0.7 + (errors[i]-0.5)/10;
     graph->SetPoint(i, x, y);
   }
+  
+  MonitorElementPtr testElement3;
+  meMgr->bookObject<TGraph2D>("/", "TestGraph2D", "A test graph 2D", testElement3);
+  TGraph2D *graph2D = testElement3->objectTo<TGraph2D>();
+  assert_test(nullptr != graph2D);
+  Double_t errors2[100] = {0};
+  Double_t errors3[100] = {0};
+  gRandom->RndmArray(100, errors3);
+  gRandom->RndmArray(100, errors2);
+  Int_t pointID = 0;
+  for(unsigned int i=0 ; i<100 ; i++) {
+    for(unsigned int j=0 ; j<100 ; j++) {
+      double x = i;
+      double y = j;
+      double z = i*j*0.7 + ((errors3[i]-0.5)/10.)*((errors2[i]-0.5)/10.);
+      graph2D->SetPoint(pointID, x, y, z);
+      pointID++;
+    }
+  }
    
   std::shared_ptr<TiXmlElement> sharedQTest1(createQTestXml(
     "test1", 
@@ -202,6 +221,23 @@ int main(int /*argc*/, char ** /*argv*/) {
   storage.clear();
   assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement2->path(), testElement2->name(), "test6", storage));
   assert_test(STATUS_CODE_SUCCESS == storage.report(testElement2->path(), testElement2->name(), "test6", report));
+  report.toJson(jsonReport);
+  DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
+  assert_test(report.m_qualityFlag == SUCCESS);
+  
+  std::shared_ptr<TiXmlElement> sharedQTest7(createQTestXml(
+    "test7",
+    "[0]*x*y+[1]",
+    0,
+    0.6,
+    0.8
+  ));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest7.get()));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement3->path(), testElement3->name(), "test7"));
+  
+  storage.clear();
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement3->path(), testElement3->name(), "test7", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement3->path(), testElement3->name(), "test7", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
   assert_test(report.m_qualityFlag == SUCCESS);
