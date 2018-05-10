@@ -141,6 +141,10 @@ namespace dqm4hep {
       /** Whether the directory is empty
        */
       bool isEmpty() const;
+      
+      /** Get the number of parent directories
+       */
+      int nParents() const;
 
     private:
       /** Default constructor
@@ -426,6 +430,16 @@ namespace dqm4hep {
     template <typename T>
     inline bool Directory<T>::isEmpty() const {
       return (m_subdirs.empty() && m_contents.empty());
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline int Directory<T>::nParents() const {
+      if(isRoot()) {
+        return 0;
+      }
+      return parent()->nParents() + 1;
     }
   }
 }
