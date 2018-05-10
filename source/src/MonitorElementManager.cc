@@ -400,5 +400,13 @@ namespace dqm4hep {
       return STATUS_CODE_SUCCESS;
     }
     
+    //-------------------------------------------------------------------------------------------------
+    
+    void MonitorElementManager::dumpStorage() {
+      m_storage.dump([](MonitorElementPtr monitorElement){
+        return monitorElement->name() + " (" + monitorElement->type() + ")";
+      });
+    }
+    
   }
 }

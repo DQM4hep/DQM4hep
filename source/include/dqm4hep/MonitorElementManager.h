@@ -210,6 +210,8 @@ namespace dqm4hep {
        */
       template <typename T, typename Function>
       void iterate(Function function);
+      
+      void dumpStorage();
 
     public:
       ///////////////////////
@@ -518,8 +520,9 @@ namespace dqm4hep {
       });
       if(nullptr == pTObject) {
         dqm_error( "Object of type '{0}' couldn't be created from xml element !", className );
+        return STATUS_CODE_FAILURE;
       }
-      ((TNamed *)pTObject)->SetNameTitle(name.c_str(), title.c_str());
+      dynamic_cast<TNamed *>(pTObject)->SetNameTitle(name.c_str(), title.c_str());
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     

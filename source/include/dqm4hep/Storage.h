@@ -74,10 +74,15 @@ namespace dqm4hep {
       template <typename U>
       void getObjects(std::vector<std::shared_ptr<U>> &objectList) const;
       void clear();
+      template <typename F>
+      void dump(F function) const;
 
     private:
       template <typename F>
       bool iterate(const DirectoryPtr &directory, F function) const;
+      
+      template <typename F>
+      void dump(const DirectoryPtr &directory, F function) const;
 
     private:
       DirectoryPtr m_rootDirectory;
@@ -419,6 +424,30 @@ namespace dqm4hep {
     inline void Storage<T>::clear() {
       m_rootDirectory->clear();
       m_currentDirectory = m_rootDirectory;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline void Storage<T>::dump(F function) const {
+      dump(m_rootDirectory, function);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    template <typename F>
+    inline void Storage<T>::dump(const DirectoryPtr &directory, F function) const {
+      int nParents = directory->nParents();
+      dqm_info( "{0}+ {1}", std::string(nParents*2, ' '), directory->isRoot() ? "/" : directory->name()+"/" );
+      for(auto obj : directory->contents()) {
+        std::string objectStr = function(obj);
+        dqm_info( "{0}|- {1}", std::string(nParents*2, ' '), objectStr );
+      }
+      for(auto dir : directory->subdirs()) {
+        dump(dir, function);
+      }
     }
   }
 }
