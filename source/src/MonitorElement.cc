@@ -314,8 +314,8 @@ namespace dqm4hep {
       XDRSTREAM_SUCCESS_RESTORE(device->write(&m_path), pos);
       TBufferFile buffer(TBuffer::kWrite);
       // write object
-      const bool hasObject = (nullptr == object());
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasObject), pos);
+      const bool hasObjectWrite = hasObject();
+      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasObjectWrite), pos);
       if(hasObject) {
         TClass *objClass = TClass::GetClass(object()->ClassName());
         if(not buffer.WriteObjectAny((void*)object(), objClass)) {
@@ -327,8 +327,8 @@ namespace dqm4hep {
         XDRSTREAM_SUCCESS_RESTORE(device->writeArray(rawBuffer, length), pos);
       }
       // write reference
-      const bool hasReference = (nullptr == reference());
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasReference), pos);
+      const bool hasReferenceWrite = hasReference();
+      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasReferenceWrite), pos);
       if(hasReference) {
         buffer.Reset();
         TClass *refClass = TClass::GetClass(reference()->ClassName());
@@ -351,10 +351,10 @@ namespace dqm4hep {
       auto pos = device->getPosition();
       // write path
       XDRSTREAM_SUCCESS_RESTORE(device->read(&m_path), pos);
-      bool hasObject(false);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasObject), pos);
+      bool hasObjectRead(false);
+      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasObjectRead), pos);
       TBufferFile buffer(TBuffer::kRead);
-      if(hasObject) {
+      if(hasObjectRead) {
         char *rawBuffer = nullptr;
         xdrstream::xdr_size_t length = 0;
         XDRSTREAM_SUCCESS_RESTORE(device->readDynamicArray(rawBuffer, length), pos);
@@ -366,10 +366,10 @@ namespace dqm4hep {
         }
         m_monitorObject.set(obj, true);
       }
-      bool hasReference(false);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasReference), pos);
+      bool hasReferenceRead(false);
+      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasReferenceRead), pos);
       buffer.Reset();
-      if(hasReference) {
+      if(hasReferenceRead) {
         char *rawBuffer = nullptr;
         xdrstream::xdr_size_t length = 0;
         XDRSTREAM_SUCCESS_RESTORE(device->readDynamicArray(rawBuffer, length), pos);
