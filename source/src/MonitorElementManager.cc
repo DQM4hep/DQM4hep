@@ -404,7 +404,7 @@ namespace dqm4hep {
     
     void MonitorElementManager::dumpStorage() {
       m_storage.dump([](MonitorElementPtr monitorElement){
-        return monitorElement->name() + " (" + monitorElement->type() + ")";
+        return monitorElement->name() + " (" + monitorElement->type() + ") - " + monitorElement->title();
       });
     }
     
