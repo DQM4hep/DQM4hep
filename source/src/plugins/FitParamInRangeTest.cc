@@ -99,7 +99,7 @@ namespace dqm4hep {
        *  @param  monitorElement the monitor element to test
        *  @param  report the quality test report to receive
        */
-      void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
+      void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
       
     private:
       /**
@@ -112,7 +112,7 @@ namespace dqm4hep {
        *  
        *  @param  monitorElement the monitor element to check
        */
-      bool checkElement(MonitorElementPtr monitorElement) const;
+      bool checkElement(MonitorElement* monitorElement) const;
       
       /**
        *  @brief  Check consistency between the monitor element and the fit function
@@ -121,7 +121,7 @@ namespace dqm4hep {
        *  @param  function the fit function
        *  @param  report the quality test report to fill if error occurs 
        */
-      bool checkElement(MonitorElementPtr monitorElement, TF1 *function, QReport &report) const;
+      bool checkElement(MonitorElement* monitorElement, TF1 *function, QReport &report) const;
       
       /**
        *  @brief  Get the fit options
@@ -138,7 +138,7 @@ namespace dqm4hep {
        *  @param  fitFunction the function to fit
        *  @param  report the quality test report to fill
        */
-      TFitResultPtr performFit(MonitorElementPtr monitorElement, TF1 *fitFunction, QReport &report) const;
+      TFitResultPtr performFit(MonitorElement* monitorElement, TF1 *fitFunction, QReport &report) const;
       
       /**
        *  @brief  Perform the range test
@@ -265,7 +265,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void FitParamInRangeTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void FitParamInRangeTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
       // check monitor element first
       if(not checkElement(monitorElement)) {
         report.m_message = "Object attached to monitor element is not a TH1, TGraph or TGraph2D !";
@@ -339,7 +339,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    bool FitParamInRangeTest::checkElement(MonitorElementPtr monitorElement) const {
+    bool FitParamInRangeTest::checkElement(MonitorElement* monitorElement) const {
       const bool isHistogram = (nullptr == monitorElement->objectTo<TH1>());
       const bool isGraph = (nullptr == monitorElement->objectTo<TGraph>());
       const bool isGraph2D = (nullptr == monitorElement->objectTo<TGraph2D>());
@@ -348,7 +348,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    bool FitParamInRangeTest::checkElement(MonitorElementPtr monitorElement, TF1 *fitFunction, QReport &report) const {
+    bool FitParamInRangeTest::checkElement(MonitorElement* monitorElement, TF1 *fitFunction, QReport &report) const {
       TH1 *histogram = monitorElement->objectTo<TH1>();
       TGraph *graph = monitorElement->objectTo<TGraph>();
       TGraph2D *graph2D = monitorElement->objectTo<TGraph2D>();
@@ -396,7 +396,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    TFitResultPtr FitParamInRangeTest::performFit(MonitorElementPtr monitorElement, TF1 *fitFunction, QReport &report) const {
+    TFitResultPtr FitParamInRangeTest::performFit(MonitorElement* monitorElement, TF1 *fitFunction, QReport &report) const {
       TH1 *histogram = monitorElement->objectTo<TH1>();
       TGraph *graph = monitorElement->objectTo<TGraph>();
       TGraph2D *graph2D = monitorElement->objectTo<TGraph2D>();
