@@ -40,7 +40,11 @@ namespace dqm4hep {
     { \
       core::StatusCode statusCode = XmlHelper::getAttribute(element, #name, name); \
       if(statusCode != core::STATUS_CODE_SUCCESS) { \
-        if((statusCode != core::STATUS_CODE_NOT_FOUND) or (required and statusCode == core::STATUS_CODE_NOT_FOUND)) { \
+        if(statusCode != core::STATUS_CODE_NOT_FOUND) { \
+          dqm_error( "Couldn't get attribute '{0}' needed for object allocation !", #name ); \
+          return nullptr; \
+        } \
+        else if(required and statusCode == core::STATUS_CODE_NOT_FOUND) { \
           dqm_error( "Couldn't get attribute '{0}' needed for object allocation !", #name ); \
           return nullptr; \
         } \
