@@ -266,6 +266,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void FitParamInRangeTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
+      report.m_extraInfos["formula"] = m_fitFormula;
       // check monitor element first
       if(not checkElement(monitorElement)) {
         report.m_message = "Object attached to monitor element is not a TH1, TGraph or TGraph2D !";
