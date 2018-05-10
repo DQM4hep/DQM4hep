@@ -29,20 +29,32 @@
 #include <dqm4hep/AllocatorHelper.h>
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/MonitorElement.h>
+#include <dqm4hep/Logging.h>
 
 namespace dqm4hep {
 
   namespace core {
     
+#define READ_ATTRIBUTE( type, name, required ) \
+    type name; \
+    { \
+      core::StatusCode statusCode = XmlHelper::getAttribute(element, #name, name); \
+      if(statusCode != core::STATUS_CODE_SUCCESS) { \
+        if((statusCode != core::STATUS_CODE_NOT_FOUND) or (required and statusCode == core::STATUS_CODE_NOT_FOUND)) { \
+          dqm_error( "Couldn't get attribute '{0}' needed for object allocation !", #name ); \
+          return nullptr; \
+        } \
+      } \
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
     TObject* DefaultXMLAllocator::create(TiXmlElement *element) const {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string className;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "type", className)) {
-        return nullptr;
-      }
-      TClass* cls = TClass::GetClass(className.c_str());
+      READ_ATTRIBUTE( std::string, type, true );
+      TClass* cls = TClass::GetClass(type.c_str());
       if(nullptr == cls) {
         return nullptr;
       }
@@ -56,41 +68,26 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title, className;
-      int nBins = 0;
-      float minValue = 0.f, maxValue = 0.f;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBins", nBins)) {
-        return nullptr;
+      READ_ATTRIBUTE( std::string, type, true );
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
+      READ_ATTRIBUTE( int, nBinsX, true );
+      READ_ATTRIBUTE( float, minX, true );
+      READ_ATTRIBUTE( float, maxX, true );
+      if(type == "TH1D") {
+        return new TH1D(name.c_str(), title.c_str(), nBinsX, minX, maxX);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "min", minValue)) {
-        return nullptr;
+      else if(type == "TH1F") {
+        return new TH1F(name.c_str(), title.c_str(), nBinsX, minX, maxX);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "max", maxValue)) {
-        return nullptr;
+      else if(type == "TH1I") {
+        return new TH1I(name.c_str(), title.c_str(), nBinsX, minX, maxX);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
+      else if(type == "TH1C") {
+        return new TH1C(name.c_str(), title.c_str(), nBinsX, minX, maxX);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "type", className)) {
-        return nullptr;
-      }
-      if(className == "TH1D") {
-        return new TH1D(name.c_str(), title.c_str(), nBins, minValue, maxValue);
-      }
-      else if(className == "TH1F") {
-        return new TH1F(name.c_str(), title.c_str(), nBins, minValue, maxValue);
-      }
-      else if(className == "TH1I") {
-        return new TH1I(name.c_str(), title.c_str(), nBins, minValue, maxValue);
-      }
-      else if(className == "TH1C") {
-        return new TH1C(name.c_str(), title.c_str(), nBins, minValue, maxValue);
-      }
-      else if(className == "TH1S") {
-        return new TH1S(name.c_str(), title.c_str(), nBins, minValue, maxValue);
+      else if(type == "TH1S") {
+        return new TH1S(name.c_str(), title.c_str(), nBinsX, minX, maxX);
       }
       return nullptr;
     }
@@ -101,50 +98,29 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title, className;
-      int nBinsX = 0, nBinsY = 0;
-      float minValueX = 0.f, maxValueX = 0.f, minValueY = 0.f, maxValueY = 0.f;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsX", nBinsX)) {
-        return nullptr;
+      READ_ATTRIBUTE( std::string, type, true );
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
+      READ_ATTRIBUTE( int, nBinsX, true );
+      READ_ATTRIBUTE( float, minX, true );
+      READ_ATTRIBUTE( float, maxX, true );
+      READ_ATTRIBUTE( int, nBinsY, true );
+      READ_ATTRIBUTE( float, minY, true );
+      READ_ATTRIBUTE( float, maxY, true );
+      if(type == "TH2D") {
+        return new TH2D(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "minX", minValueX)) {
-        return nullptr;
+      else if(type == "TH2F") {
+        return new TH2F(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "maxX", maxValueX)) {
-        return nullptr;
+      else if(type == "TH2I") {
+        return new TH2I(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsY", nBinsY)) {
-        return nullptr;
+      else if(type == "TH2C") {
+        return new TH2C(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "minY", minValueY)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "maxY", maxValueY)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "type", className)) {
-        return nullptr;
-      }
-      if(className == "TH2D") {
-        return new TH2D(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
-      }
-      else if(className == "TH2F") {
-        return new TH2F(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
-      }
-      else if(className == "TH2I") {
-        return new TH2I(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
-      }
-      else if(className == "TH2C") {
-        return new TH2C(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
-      }
-      else if(className == "TH2S") {
-        return new TH2S(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY);
+      else if(type == "TH2S") {
+        return new TH2S(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY);
       }
       return nullptr;
     }
@@ -155,59 +131,32 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title, className;
-      int nBinsX = 0, nBinsY = 0, nBinsZ = 0;
-      float minValueX = 0.f, maxValueX = 0.f, minValueY = 0.f, maxValueY = 0.f, minValueZ = 0.f, maxValueZ = 0.f;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsX", nBinsX)) {
-        return nullptr;
+      READ_ATTRIBUTE( std::string, type, true );
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
+      READ_ATTRIBUTE( int, nBinsX, true );
+      READ_ATTRIBUTE( float, minX, true );
+      READ_ATTRIBUTE( float, maxX, true );
+      READ_ATTRIBUTE( int, nBinsY, true );
+      READ_ATTRIBUTE( float, minY, true );
+      READ_ATTRIBUTE( float, maxY, true );
+      READ_ATTRIBUTE( int, nBinsZ, true );
+      READ_ATTRIBUTE( float, minZ, true );
+      READ_ATTRIBUTE( float, maxZ, true );
+      if(type == "TH3D") {
+        return new TH3D(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "minX", minValueX)) {
-        return nullptr;
+      else if(type == "TH3F") {
+        return new TH3F(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "maxX", maxValueX)) {
-        return nullptr;
+      else if(type == "TH3I") {
+        return new TH3I(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsY", nBinsY)) {
-        return nullptr;
+      else if(type == "TH3C") {
+        return new TH3C(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ);
       }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "minY", minValueY)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "maxY", maxValueY)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsZ", nBinsZ)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "minZ", minValueZ)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "maxZ", maxValueZ)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "type", className)) {
-        return nullptr;
-      }
-      if(className == "TH3D") {
-        return new TH3D(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
-      }
-      else if(className == "TH3F") {
-        return new TH3F(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
-      }
-      else if(className == "TH3I") {
-        return new TH3I(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
-      }
-      else if(className == "TH3C") {
-        return new TH3C(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
-      }
-      else if(className == "TH3S") {
-        return new TH3S(name.c_str(), title.c_str(), nBinsX, minValueX, maxValueX, nBinsY, minValueY, maxValueY, nBinsZ, minValueZ, maxValueZ);
+      else if(type == "TH3S") {
+        return new TH3S(name.c_str(), title.c_str(), nBinsX, minX, maxX, nBinsY, minY, maxY, nBinsZ, minZ, maxZ);
       }
       return nullptr;
     }
@@ -218,39 +167,34 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string className, value;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "type", className)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "value", value)) {
-        return nullptr;
-      }
-      if(className == "int") {
+      READ_ATTRIBUTE( std::string, type, true );
+      READ_ATTRIBUTE( std::string, value, false );
+      if(type == "int") {
         int typeValue = 0;
         stringToType(value, typeValue);
         return new TScalarObject<int>(typeValue);
       }
-      else if(className == "real" || className == "float") {
+      else if(type == "real" || type == "float") {
         float typeValue = 0;
         stringToType(value, typeValue);
         return new TScalarObject<float>(typeValue);
       }
-      else if(className == "double") {
+      else if(type == "double") {
         double typeValue = 0;
         stringToType(value, typeValue);
         return new TScalarObject<double>(typeValue);
       }
-      else if(className == "short") {
+      else if(type == "short") {
         short typeValue = 0;
         stringToType(value, typeValue);
         return new TScalarObject<short>(typeValue);
       }
-      else if(className == "long") {
+      else if(type == "long") {
         long typeValue = 0;
         stringToType(value, typeValue);
         return new TScalarObject<long>(typeValue);
       }
-      else if(className == "long64") {
+      else if(type == "long64") {
         Long64_t typeValue = 0;
         stringToType(value, typeValue);
         return new TScalarObject<Long64_t>(typeValue);
@@ -264,13 +208,8 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
       return new THStack(name.c_str(), title.c_str());      
     }
     
@@ -280,26 +219,12 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title;
-      double xlow = 0, xup = 0, ylow = 0, yup = 0;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "xlow", xlow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "xup", xup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "ylow", ylow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "yup", yup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
+      READ_ATTRIBUTE( double, xlow, true );
+      READ_ATTRIBUTE( double, xup, true );
+      READ_ATTRIBUTE( double, ylow, true );
+      READ_ATTRIBUTE( double, yup, true );
       return new TH2Poly(name.c_str(), title.c_str(), xlow, xup, ylow, yup);
     }
     
@@ -309,30 +234,13 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title;
-      int nBinsX = 0;
-      float xlow = 0, xup = 0, ylow = 0, yup = 0;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsX", nBinsX)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "xlow", xlow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "xup", xup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "ylow", ylow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "yup", yup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
+      READ_ATTRIBUTE( int, nBinsX, true );
+      READ_ATTRIBUTE( float, xlow, true );
+      READ_ATTRIBUTE( float, xup, true );
+      READ_ATTRIBUTE( float, ylow, true );
+      READ_ATTRIBUTE( float, yup, true );
       return new TProfile(name.c_str(), title.c_str(), nBinsX, xlow, xup, ylow, yup);
     }
     
@@ -342,41 +250,20 @@ namespace dqm4hep {
       if(nullptr == element) {
         return nullptr;
       }
-      std::string name, title;
-      int nBinsX = 0, nBinsY = 0;
-      float xlow = 0, xup = 0, ylow = 0, yup = 0, zlow = 0, zup = 0;
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsX", nBinsX)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "nBinsY", nBinsY)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "xlow", xlow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "xup", xup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "ylow", ylow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "yup", yup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "zlow", zlow)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "zup", zup)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "name", name)) {
-        return nullptr;
-      }
-      if(STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "title", title)) {
-        return nullptr;
-      }
+      READ_ATTRIBUTE( std::string, name, true );
+      READ_ATTRIBUTE( std::string, title, false );
+      READ_ATTRIBUTE( int, nBinsX, true );
+      READ_ATTRIBUTE( int, nBinsY, true );
+      READ_ATTRIBUTE( float, xlow, true );
+      READ_ATTRIBUTE( float, xup, true );
+      READ_ATTRIBUTE( float, ylow, true );
+      READ_ATTRIBUTE( float, yup, true );
+      READ_ATTRIBUTE( float, zlow, true );
+      READ_ATTRIBUTE( float, zup, true );
       return new TProfile2D(name.c_str(), title.c_str(), nBinsX, xlow, xup, nBinsY, ylow, yup, zlow, zup);
     }
+    
+#undef READ_ATTRIBUTE
 
   }
   
