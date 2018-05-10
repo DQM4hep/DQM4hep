@@ -29,7 +29,6 @@
 #define DQM4HEP_MONITORELEMENTMANAGER_H
 
 // -- dqm4hep headers
-#include <dqm4hep/Directory.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/MonitorElement.h>
@@ -40,6 +39,7 @@
 #include <dqm4hep/XmlHelper.h>
 #include <dqm4hep/AllocatorHelper.h>
 #include <dqm4hep/RootHeaders.h>
+#include <dqm4hep/Directory.h>
 
 namespace dqm4hep {
 
@@ -204,6 +204,12 @@ namespace dqm4hep {
        *  @param  object the json object to receive
        */
       void monitorElementsToJson(json &object) const;
+      
+      /**
+       * 
+       */
+      template <typename T, typename Function>
+      void iterate(Function function);
 
     public:
       ///////////////////////
@@ -620,6 +626,16 @@ namespace dqm4hep {
       userFunction();
       TH1::AddDirectory(directoryStatus);
       TObject::SetObjectStat(objectStat);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T, typename Function>
+    inline void MonitorElementManager::iterate(Function function) {
+      m_storage.iterate([&](const Directory<MonitorElement>::DirectoryPtr &, MonitorElementPtr monitorElement){
+        auto castPointer = std::dynamic_pointer_cast<T>(monitorElement);
+        return function(castPointer);
+      });
     }
     
   }
