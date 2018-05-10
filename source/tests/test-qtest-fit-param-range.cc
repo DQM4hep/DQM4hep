@@ -106,13 +106,13 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   // create a test elements
   MonitorElementPtr testElement;
-  meMgr->bookObject("/", "TestHisto", testElement, TH1FAllocator(), "", "A test histogram", 101, -10.f, 10.f);
+  meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElement, 101, -10.f, 10.f);
   TH1F *histogram = testElement->objectTo<TH1F>();
   assert_test(nullptr != histogram);
   histogram->FillRandom("gaus", 10000);
   
   MonitorElementPtr testElement2;
-  meMgr->bookObject("/", "TestGraph", testElement2, TGraphAllocator());
+  meMgr->bookObject<TGraph>("/", "TestGraph", "A test graph", testElement2);
   TGraph *graph = testElement2->objectTo<TGraph>();
   assert_test(nullptr != graph);
   Double_t errors[100] = {0};
