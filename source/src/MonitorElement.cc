@@ -316,7 +316,7 @@ namespace dqm4hep {
       // write object
       const bool hasObjectWrite = hasObject();
       XDRSTREAM_SUCCESS_RESTORE(device->write(&hasObjectWrite), pos);
-      if(hasObject) {
+      if(hasObjectWrite) {
         TClass *objClass = TClass::GetClass(object()->ClassName());
         if(not buffer.WriteObjectAny((void*)object(), objClass)) {
           device->seek(pos);
@@ -329,7 +329,7 @@ namespace dqm4hep {
       // write reference
       const bool hasReferenceWrite = hasReference();
       XDRSTREAM_SUCCESS_RESTORE(device->write(&hasReferenceWrite), pos);
-      if(hasReference) {
+      if(hasReferenceWrite) {
         buffer.Reset();
         TClass *refClass = TClass::GetClass(reference()->ClassName());
         if(not buffer.WriteObjectAny((void*)reference(), refClass)) {
