@@ -31,6 +31,7 @@
 // -- dqm4hep headers
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/MonitorElement.h>
+#include <dqm4hep/QualityTest.h>
 #include <dqm4hep/Logging.h>
 
 // -- xdrstream headers
