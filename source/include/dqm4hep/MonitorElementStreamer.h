@@ -81,7 +81,7 @@ namespace dqm4hep {
        *  @param  device the xdrstream device to write with
        */
       template <typename T>
-      StatusCode writeMonitorElements(const std::vector<std::shared_ptr<T>> &elements, xdrstream::IODevice *device, bool returnOnFirstFail = true);
+      StatusCode writeMonitorElements(const std::vector<std::shared_ptr<T>> &elements, xdrstream::IODevice *device);
       
       /**
        *  @brief  Read a list of monitor elements using an xdrstream device.
@@ -91,6 +91,24 @@ namespace dqm4hep {
        */
       template <typename T>
       StatusCode readMonitorElements(std::vector<std::shared_ptr<T>> &elements, xdrstream::IODevice *device);
+      
+      /**
+       *  @brief  Write a map of monitor elements using an xdrstream device.
+       * 
+       *  @param  elements a map of monitor element vector to write
+       *  @param  device the xdrstream device to write with
+       */
+      template <typename T>
+      StatusCode writeMonitorElements(const std::map<std::string,std::vector<std::shared_ptr<T>>> &elements, xdrstream::IODevice *device);
+      
+      /**
+       *  @brief  Read a map of monitor elements using an xdrstream device.
+       * 
+       *  @param  elements a map of monitor element vector to receive
+       *  @param  device the xdrstream device to read with
+       */
+      template <typename T>
+      StatusCode readMonitorElements(std::map<std::string,std::vector<std::shared_ptr<T>>> &elements, xdrstream::IODevice *device);
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -122,7 +140,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     
     template <typename T>
-    inline StatusCode MonitorElementStreamer::writeMonitorElements(const std::vector<std::shared_ptr<T>> &elements, xdrstream::IODevice *device, bool returnOnFirstFail) {
+    inline StatusCode MonitorElementStreamer::writeMonitorElements(const std::vector<std::shared_ptr<T>> &elements, xdrstream::IODevice *device) {
       auto pos = device->getPosition();
       unsigned int nWritten = 0;
       XDRSTREAM_SUCCESS_RESTORE(device->write(&nWritten), pos);
@@ -130,15 +148,8 @@ namespace dqm4hep {
         auto eltPos = device->getPosition();
         StatusCode writeCode = writeMonitorElement(element, device);
         if(writeCode != STATUS_CODE_SUCCESS) {
-          if(returnOnFirstFail) {
-            // seek at begining and return
-            device->seek(pos);
-            return writeCode;
-          }
-          else {
-            // seek before current element
-            device->seek(eltPos);
-          }
+          device->seek(pos);
+          return writeCode;
         }
         nWritten++;
       }
@@ -165,6 +176,45 @@ namespace dqm4hep {
           return readCode;
         }
         elements.push_back(element);
+      }
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementStreamer::writeMonitorElements(const std::map<std::string,std::vector<std::shared_ptr<T>>> &elements, xdrstream::IODevice *device) {
+      auto pos = device->getPosition();
+      unsigned int nWritten = elements.size();
+      XDRSTREAM_SUCCESS_RESTORE(device->write(&nWritten), pos);
+      for(auto &iter : elements) {
+        XDRSTREAM_SUCCESS_RESTORE(device->write(&iter.first), pos);
+        StatusCode writeCode = writeMonitorElements(iter.second, device);
+        if(writeCode != STATUS_CODE_SUCCESS) {
+          device->seek(pos);
+          return writeCode;
+        }
+      }
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode MonitorElementStreamer::readMonitorElements(std::map<std::string,std::vector<std::shared_ptr<T>>> &elementMap, xdrstream::IODevice *device) {
+      auto pos = device->getPosition();
+      unsigned int nToRead = 0;
+      XDRSTREAM_SUCCESS_RESTORE(device->read(&nToRead), pos);
+      for(unsigned int i=0 ; i<nToRead ; ++i) {
+        std::string key;
+        XDRSTREAM_SUCCESS_RESTORE(device->read(&key), pos);
+        std::vector<std::shared_ptr<T>> elements;
+        StatusCode readCode = readMonitorElements(elements, device);
+        if(readCode != STATUS_CODE_SUCCESS) {
+          device->seek(pos);
+          return readCode;
+        }
+        elementMap[key] = elements;
       }
       return STATUS_CODE_SUCCESS;
     }
