@@ -3,6 +3,14 @@ option( DQM4HEP_WARNING_AS_ERROR    "Whether to add -Werror flag to cxx flags" O
 option( DQM4HEP_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" ON )
 option( DQM4HEP_DEV_WARNINGS        "Whether to add extra warning for developpers to cxx flags" OFF )
 
+macro( DQM4HEP_REQUIRE_CPP_STANDARD )
+  include( CheckCXXCompilerFlag )
+  check_cxx_compiler_flag( "-std=c++11" COMPILER_SUPPORTS_CXX11 )  
+  if( NOT COMPILER_SUPPORTS_CXX11 )
+    message( SEND_ERROR "${PROJECT_NAME} requires C++11 support. Please upgrade your compiler !" )
+  endif()
+endmacro()
+
 macro( DQM4HEP_SET_CXX_FLAGS )
   
   include( CheckCXXCompilerFlag )
