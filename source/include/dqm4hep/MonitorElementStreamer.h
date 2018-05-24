@@ -145,7 +145,6 @@ namespace dqm4hep {
       unsigned int nWritten = 0;
       XDRSTREAM_SUCCESS_RESTORE(device->write(&nWritten), pos);
       for(auto element : elements) {
-        auto eltPos = device->getPosition();
         StatusCode writeCode = writeMonitorElement(element, device);
         if(writeCode != STATUS_CODE_SUCCESS) {
           device->seek(pos);
