@@ -63,7 +63,24 @@ macro( dqm4hep_generate_package_configuration )
   
   # install all generate config cmake files
   install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}LibDeps.cmake" DESTINATION lib/cmake )
-  install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}ConfigVersion.cmake" DESTINATION . )
-  install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}Config.cmake" DESTINATION . )
+  install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}ConfigVersion.cmake" DESTINATION lib/cmake )
+  install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}Config.cmake" DESTINATION lib/cmake )
   
+endmacro()
+
+macro( dqm4hep_generate_master_config )
+  # generate DQM4hepConfig.cmake file
+  configure_file( 
+    "${DQM4HEP_CMAKE_MODULES_ROOT}/DQM4hepConfig.cmake.in"
+    "${PROJECT_BINARY_DIR}/DQM4hepConfig.cmake" 
+    @ONLY
+  )
+  # generate DQM4hepConfigVersion.cmake file
+  configure_file( 
+    "${DQM4HEP_CMAKE_MODULES_ROOT}/DQM4hepConfigVersion.cmake.in"
+    "${PROJECT_BINARY_DIR}/DQM4hepConfigVersion.cmake" 
+    @ONLY
+  )
+  install( FILES "${PROJECT_BINARY_DIR}/DQM4hepConfigVersion.cmake" DESTINATION lib/cmake )
+  install( FILES "${PROJECT_BINARY_DIR}/DQM4hepConfig.cmake" DESTINATION lib/cmake )
 endmacro()
