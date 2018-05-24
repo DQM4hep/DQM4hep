@@ -1,113 +1,41 @@
 language: cpp
-
 sudo: false
-
 dist: trusty
 
 compilers:
   - gcc
-#  - clang
+  - clang
 
 os:
   - linux
-#  - osx
-        
-script:
-  - make -j 4
 
 addons:
   apt:
     sources:
-    - sourceline: 'deb http://fr.archive.ubuntu.com/ubuntu trusty main universe'
+      - ubuntu-toolchain-r-test
     packages:
-      # - libqt4-dev
-      # - qt4-qmake
-      - libboost-thread-dev
-      - libboost-system-dev 
-      - libboost-filesystem-dev
+      - libmysqlclient-dev
       - doxygen
-      - liblog4cxx10
-      - liblog4cxx10-dev
-      
-  coverity_scan:
-    project:
-      name: "DQM4HEP/dqm4hep"
-      description: "Build submitted via Travis CI"
-    notification_email: antoine.pingault@ugent.be
-    build_command:   "make -j 4"
-    branch_pattern: coverity_scan
-
-env:
-  global:
-    # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
-    #   via the "travis encrypt" command using the project repo's public key
-    - secure: "pZjHh/r0l/NO3G7mB2XQOqoqIgpX2RDpPoTf4eXubMpItEuqDJNP2z9EUMrBFPaKdP37mUfsI6B+O1bVMJGCMmMLKUAujJ9394F6N3VpEuTi7CKQTiIhrwJ8cPoMDHoyTRHsBXE3sMAR4xD2iBGdJDpEhW4lmhoZs1cEL05nkv+pweVU8KR4ngeKUcgPxGMEj34als8M6a5bHbE1WB7XiUbhxM/QLID0SvZ5DuqBetFEbacfq2z7kAdTSl7Ui1F4Szi2OBk5izjHH0mkeW2Fb6wjvc/WN5YwDb8wgJTEkSjgj7KrF9gReR20zcQwlAbn9puE5tLFkZwdW+YpUaaxRcyKtwBgk9U3wHwPt4eOw1bf6eY8hVGBVkVJcb+FU6kTQSw0n15sfTkjIj2N/2NUILR2SbyS7sMDWCXlnNXXA7N7+7nEXHbT2T7bMUZsVL6BRBLgoJ7Fj/tIhHESXI1H+PTSohrPB8sIuBpx4KL8JU0tDgKiPKTJ0J43jLNzrBxCEqGWTE2umm/gIlHUa0ar/7ilkwRJz4ZiNKxZewQY6S4T6Oto/58xYQBmyBGnXa44qd0CCX+mXItDl8lUmmHv/zS/jNd/RjqnjT0Gi8fJHvvnaNbQ3oSN1uNKkyfUVBnTMsPQnAUVWyOZ3L9GpI/jNqDFIgMf7OIbmuySWcoHvGc="
-
-    - BUILD_DQMVIZ: OFF
-    - INSTALL_DOC: OFF    
-    - BUILD_EXAMPLES: OFF    
-    - BUILD_EVB: OFF    
-    - BUILD_HTTP: OFF
-    - LD_LIBRARY_PATH: "/usr/lib/x86_64-linux-gnu/root5.34/:$LD_LIBRARY_PATH"
-    - USE_COVERITY: false
-    
-  matrix:
-    # - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
-    - INSTALL_DOC: ON
-    - BUILD_EXAMPLES: ON
-    - BUILD_EVB: ON
-      USE_MASTER: OFF
-    - BUILD_HTTP: ON
-      USE_MASTER: OFF
-    - BUILD_DQMVIZ: OFF # Travis won't let root recompile with qt enable (build is too long)
-      INSTALL_DOC: ON
-      BUILD_EXAMPLES: ON
-      BUILD_EVB: ON
-      BUILD_HTTP: ON
-      USE_MASTER: OFF
-      USE_COVERITY: true
-      
-matrix:
-  include:
-#    - os: osx
-#      compiler: clang
-    - os: linux
-      compiler: gcc
+      - g++-4.9
       
 before_install:
-  # Don't run all the matrixes on coverity. Exiting gracefully so the build doesn't appear to have failed.
-  - if [ "$TRAVIS_BRANCH" == "coverity_scan" ] && [ "$USE_COVERITY" = false ];  then echo "Running on coverity branch, Skipping this build"; exit 0; fi 
-
-  # Downlad&Unpack root binaries (Qt not enable -> No viz)
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then cd .. && wget https://root.cern.ch/download/root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi 
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then tar -xf root_v5.34.36.Linux-ubuntu14-x86_64-gcc4.8.tar.gz; fi
-  - if [ "$TRAVIS_OS_NAME" == "linux" ]; then source root/bin/thisroot.sh; fi
-  # Checking root config
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
+  - mkdir -p dependencies
+  - cd dependencies
+  - wget https://root.cern.ch/download/root_v6.10.08.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+  - tar -xf root_v6.10.08.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
+  - source root/bin/thisroot.sh
   - root-config --version
-  - cd -
-  # Create build folder/run cmake here so we can build with coverity
+  - cd ..
   - mkdir -p build
   - cd build
-  # Don't waste time with the doc when using coverity
-  - if [ "$TRAVIS_BRANCH" == "coverity_scan" ];  then INSTALL_DOC=OFF; fi 
-  - cmake -DBUILD_DQMVIZ=$BUILD_DQMVIZ -DINSTALL_DOC=$INSTALL_DOC -DDIM_GUI=OFF -DBUILD_DQM4ILC=OFF -DBUILD_EXAMPLES=$BUILD_EXAMPLES -DBUILD_EVB=$BUILD_EVB -DBUILD_HTTP=$BUILD_HTTP -DUSE_MASTER=$USE_MASTER ..
-  
-  # Coverity Scan
-  # - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+  - cmake -DDQM4HEP_USE_MASTER=ON -DDQM4HEP_DOXYGEN_DOC=OFF -DDQM4HEP_TESTING=ON -DDQM4HEP_WARNING_AS_ERROR=ON -DDQM4HEP_DEV_WARNINGS=ON ..
 
+script:
+  - make install -j 4
+  
 notifications:
   email:
     on_success: never
     on_failure: always
 
-
-#before_script:
-#  - svn co svn://svn.freehep.org/lcio/tags/v02-05 LCIO # install lcio just in case
-#  - cd LCIO
-#  - mkdir -p build
-#  - cd build
-#  - cmake ..
-#  - make install
-#  - cd ../../
-#  - export LCIO_DIR=$PWD/LCIO
-  
