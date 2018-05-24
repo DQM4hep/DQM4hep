@@ -2,7 +2,7 @@ language: cpp
 sudo: false
 dist: trusty
 
-compilers:
+compiler:
   - gcc
   - clang
 
