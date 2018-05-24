@@ -1,6 +1,0 @@
-#!/bin/sh
-
-fileToPatch=$1
-inputPatchFile=$2
-
-patch ${fileToPatch} < ${inputPatchFile}
