@@ -1,0 +1,59 @@
+##############################################################################
+# cmake configuration file for DQM4hep
+#
+# returns following variables:
+#
+#   DQM4hep_FOUND      : set to TRUE if ALL components are found
+#       if REQUIRED is NOT set components may or may not be available
+#
+#   DQM4hep_ROOT       : path to this DQM4hep installation
+#   DQM4hep_VERSION    : package version
+#   DQM4hep_LIBRARIES  : list of DQM4hep libraries (with all components)
+#   DQM4hep_INCLUDE_DIRS  : list of paths to be used with INCLUDE_DIRECTORIES
+#   DQM4hep_${COMPONENT}_FOUND       : set to TRUE or FALSE for each library
+#   DQM4hep_${COMPONENT}_LIBRARIES   : path to individual libraries
+#   DQM4hep_${COMPONENT}_INCLUDE_DIRS : path to individual includes
+#
+# @author: Remi Ete, DESY
+##############################################################################
+
+set( DQM4hep_ROOT "@CMAKE_INSTALL_PREFIX@" )
+set( DQM4hep_VERSION "@DQM4hep_VERSION@" )
+
+if( NOT DQM4hep_FIND_COMPONENTS )
+    message( SEND_ERROR "The DQM4hep package requires at least one component" )
+    set( DQM4hep_FOUND false )
+    return()
+endif()
+
+set( DQM4HEP_CONFIG_FILES_LOCATION ${CMAKE_CURRENT_LIST_DIR} )
+
+foreach( component ${DQM4hep_FIND_COMPONENTS} )
+  find_package( 
+    ${component} 
+    ${DQM4hep_FIND_REQUIRED} 
+    ${DQM4hep_FIND_QUIET} 
+    PATHS ${DQM4HEP_CONFIG_FILES_LOCATION} NO_DEFAULT_PATH )
+  if( ${component}_NOTFOUND )
+    set( COMPONENT_NOTFOUND_MESSAGE "DQM4hep couldn't find component ${component} using location ${DQM4HEP_CONFIG_FILES_LOCATION}" )
+    if( DQM4hep_FIND_REQUIRED )
+      message( SEND_ERROR ${COMPONENT_NOTFOUND_MESSAGE} )
+      return()
+    else()
+      message( WARNING ${COMPONENT_NOTFOUND_MESSAGE} )
+    endif()
+  else()
+    list( APPEND DQM4hep_LIBRARIES ${${component}_LIBRARIES} )
+    list( APPEND DQM4hep_INCLUDE_DIRS ${${component}_INCLUDE_DIRS} )
+    set( DQM4hep_${component}_LIBRARIES ${${component}_LIBRARIES} )
+    set( DQM4hep_${component}_INCLUDE_DIRS ${${component}_INCLUDE_DIRS} )
+    set( DQM4hep_${component}_FOUND true )
+  endif()
+endforeach()
+
+list( REMOVE_DUPLICATES DQM4hep_LIBRARIES )
+list( REMOVE_DUPLICATES DQM4hep_INCLUDE_DIRS )
+set( DQM4hep_FOUND true )
+
+
+
