@@ -50,11 +50,11 @@ namespace dqm4hep {
     {
     public:
 
-      static float mean(MonitorElementPtr pMonitorElement, float percentage);
+      static float mean(MonitorElementPtr pMonitorElement, float percentage = 1.0);
 
       static float mean90(MonitorElementPtr pMonitorElement);
 
-      static float rms(MonitorElementPtr pMonitorElement, float percentage);
+      static float rms(MonitorElementPtr pMonitorElement, float percentage = 1.0);
 
       static float rms90(MonitorElementPtr pMonitorElement);
 
