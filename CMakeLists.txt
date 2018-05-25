@@ -30,7 +30,7 @@ dqm4hep_require_cpp_standard()
 # ----- Package options -----------------------------------------------------------------------
 option( DQM4HEP_USE_MASTER       "Whether to use master version of subpackages" ON )
 option( DQM4HEP_BUILD_OFFLINE    "Build offline" OFF )
-option( DQM4HEP_BUILD_MKDOCS     "Download and build mkdocs doucmentation" OFF )
+option( DQM4HEP_BUILD_MKDOCS     "Download and build mkdocs documentation" OFF )
 
 # ----- Versions of DQM4HEP subpackages -----
 # Don't forget to update when releasing DQM4hep
@@ -156,7 +156,7 @@ if( DQM4HEP_BUILD_MKDOCS )
       CONFIGURE_COMMAND ""
       BUILD_COMMAND ${MkDocs_EXECUTABLE} build
       UPDATE_COMMAND ""
-      INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/ && cp -r LICENCE site mkdocs.yml docs cinder ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/
+      INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/ COMMAND cp -r LICENCE site mkdocs.yml docs cinder ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/
       BUILD_IN_SOURCE 1 
   )
   list( APPEND DQM4HEP_INSTALL_PACKAGES DQMDoc )
