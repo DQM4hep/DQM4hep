@@ -30,21 +30,24 @@ dqm4hep_require_cpp_standard()
 # ----- Package options -----------------------------------------------------------------------
 option( DQM4HEP_USE_MASTER       "Whether to use master version of subpackages" ON )
 option( DQM4HEP_BUILD_OFFLINE    "Build offline" OFF )
+option( DQM4HEP_BUILD_MKDOCS     "Download and build mkdocs doucmentation" OFF )
 
 # ----- Versions of DQM4HEP subpackages -----
 # Don't forget to update when releasing DQM4hep
 # e.g. set( DQMCore_version "v01-00-00" )
-IF( DQM4HEP_USE_MASTER )
+if( DQM4HEP_USE_MASTER )
 	set_if_not( xdrstream_version            "master" )
 	set_if_not( DQMCore_version              "master" )
   set_if_not( DQMNet_version               "master" )
   set_if_not( DQMOnline_version            "master" )
-ELSE()
+  set_if_not( DQMDoc_version               "master" )
+else()
 	set_if_not( xdrstream_version            "v01-01-00" )
   set_if_not( DQMCore_version              "master" )
   set_if_not( DQMNet_version               "master" )
   set_if_not( DQMOnline_version            "master" )
-ENDIF()
+  set_if_not( DQMDoc_version               "master" )
+endif()
 
 # ----- Download settings -----
 # The external project in used are set gradually along the CMakeLists.txt
@@ -54,6 +57,7 @@ set_if_not( xdrstream_repository           "https://github.com/dqm4hep/xdrstream
 set_if_not( DQMCore_repository             "https://github.com/dqm4hep/dqm4hep-core.git" )
 set_if_not( DQMNet_repository              "https://github.com/dqm4hep/dqm4hep-net.git" )
 set_if_not( DQMOnline_repository           "https://github.com/dqm4hep/dqm4hep-online.git" )
+set_if_not( DQMDoc_repository              "https://github.com/dqm4hep/dqm4hep-doc.git" )
 
 # In order to pass semicolon-separated lists over the command line to all packages,
 # we need to separate list elements with '%' instead of the standard cmake list separator ';'
@@ -140,6 +144,22 @@ ExternalProject_Add( DQMOnline
     UPDATE_COMMAND ""
     TEST_COMMAND ${DQM4HEP_TEST_COMMAND}
 )
+
+if( DQM4HEP_BUILD_MKDOCS )
+  # ----- DQMDoc package -----
+  ExternalProject_Add( DQMDoc
+      GIT_REPOSITORY ${DQMDoc_repository}
+      GIT_TAG ${DQMDoc_version}
+      PREFIX ${CMAKE_CURRENT_BINARY_DIR}/DQMDoc-prefix
+      LIST_SEPARATOR %
+      SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/DQMDoc
+      CONFIGURE_COMMAND ""
+      BUILD_COMMAND ${MkDocs_EXECUTABLE} build
+      UPDATE_COMMAND ""
+      INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/ && cp -r LICENCE site mkdocs.yml docs cinder ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/
+      BUILD_IN_SOURCE 1 
+  )
+endif()
 
 # ----- Generate DQM4hep package config files -----
 dqm4hep_generate_master_config()

@@ -12,4 +12,8 @@ macro( DQM4HEP_CHECK_PACKAGE_DEPENDENCIES )
   if( DQM4HEP_DOXYGEN_DOC )
     find_package( Doxygen REQUIRED )
   endif()
+  # ----- check MkDocs package -----
+  if( DQM4HEP_BUILD_MKDOCS )
+    find_package( MkDocs REQUIRED )
+  endif()
 endmacro()
