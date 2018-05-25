@@ -20,6 +20,52 @@ void GenerateData()
   TDirectory *pSubDir = pTFile->mkdir("Gaussians");
   pSubDir->cd();
 
+  TDirectory *pSubDir2 = pTFile->mkdir("TGraphs");
+
+  //
+  // Generate TGraph
+  //
+  const int n1 = 10000;
+  double x1[n1], y1[n1];
+  const double mean1 = 0;
+  const double stddev1 = 2;
+  const double pi = 3.1415;
+  const double en = 2.7183;
+  for (unsigned int i=0 ; i<10000 ; i++) {
+    x1[i] = -5+(i*0.001);
+    y1[i] = (1/sqrt(2*pi*pow(stddev1,2)))*pow(en,-1*pow(x1[i]-mean1,2)/(2*pow(stddev1,2)));
+  }
+
+  TGraph *pGaus_Mean0_RMS2 = new TGraph(n1,x1,y1);
+  writeObject.push_back(pGaus_Mean0_RMS2);
+
+  pGaus_Mean0_RMS2->SetName("Gaus_Mean0_RMS2");
+  pGaus_Mean0_RMS2->SetTitle("Random gaus (0, 2)");
+
+  pSubDir2->Add(pGaus_Mean0_RMS2);
+
+
+  //
+  // Generate TGraph with offset mean
+  //
+  const int n2 = 10000;
+  double x2[n2], y2[n2];
+  const double mean2 = 3;
+  const double stddev2 = 2;
+  for (unsigned int i=0 ; i<10000 ; i++) {
+    x2[i] = -5+(i*0.001);
+    y2[i] = (1/sqrt(2*pi*pow(stddev2,2)))*pow(en,-1*pow(x2[i]-mean2,2)/(2*pow(stddev2,2)));
+  }
+
+  TGraph *pGaus_Mean3_RMS2 = new TGraph(n2,x2,y2);
+  writeObject.push_back(pGaus_Mean3_RMS2);
+
+  pGaus_Mean3_RMS2->SetName("Gaus_Mean3_RMS2");
+  pGaus_Mean3_RMS2->SetTitle("Random gaus (3, 2)");
+
+  pSubDir2->Add(pGaus_Mean3_RMS2);
+
+
   //
   // Generate random gaussian distribution
   //
