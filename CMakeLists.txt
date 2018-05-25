@@ -17,6 +17,11 @@ include( dqm4hep_check_package_dependencies )
 include( ExternalProject )
 list( APPEND CMAKE_PREFIX_PATH ${CMAKE_INSTALL_PREFIX}/lib/cmake )
 list( APPEND DQM4HEP_INSTALL_PACKAGES xdrstream DQMCore DQMNet DQMOnline )
+macro( set_if_not )
+  if( NOT ${ARGV0} )
+    set( ${ARGN} )
+  endif()
+endmacro()
 
 # ----- Check dependencies and various settings -----
 dqm4hep_check_package_dependencies()
@@ -29,26 +34,26 @@ option( DQM4HEP_BUILD_OFFLINE    "Build offline" OFF )
 # ----- Versions of DQM4HEP subpackages -----
 # Don't forget to update when releasing DQM4hep
 # e.g. set( DQMCore_version "v01-00-00" )
-IF( USE_MASTER )
-	SET( xdrstream_version            "master" )
-	SET( DQMCore_version              "master" )
-  SET( DQMNet_version               "master" )
-  SET( DQMOnline_version            "master" )
+IF( DQM4HEP_USE_MASTER )
+	set_if_not( xdrstream_version            "master" )
+	set_if_not( DQMCore_version              "master" )
+  set_if_not( DQMNet_version               "master" )
+  set_if_not( DQMOnline_version            "master" )
 ELSE()
-	SET( xdrstream_version            "v01-01-00" )
-  SET( DQMCore_version              "master" )
-  SET( DQMNet_version               "master" )
-  SET( DQMOnline_version            "master" )
+	set_if_not( xdrstream_version            "v01-01-00" )
+  set_if_not( DQMCore_version              "master" )
+  set_if_not( DQMNet_version               "master" )
+  set_if_not( DQMOnline_version            "master" )
 ENDIF()
 
 # ----- Download settings -----
 # The external project in used are set gradually along the CMakeLists.txt
 # When a project is added with ExternalProject_Add(...) these variables are set to the package name
 # Mandatory packages are directly set
-set( xdrstream_repository           "https://github.com/dqm4hep/xdrstream.git" )
-set( DQMCore_repository             "https://github.com/dqm4hep/dqm4hep-core.git" )
-set( DQMNet_repository              "https://github.com/dqm4hep/dqm4hep-net.git" )
-set( DQMOnline_repository           "https://github.com/dqm4hep/dqm4hep-online.git" )
+set_if_not( xdrstream_repository           "https://github.com/dqm4hep/xdrstream.git" )
+set_if_not( DQMCore_repository             "https://github.com/dqm4hep/dqm4hep-core.git" )
+set_if_not( DQMNet_repository              "https://github.com/dqm4hep/dqm4hep-net.git" )
+set_if_not( DQMOnline_repository           "https://github.com/dqm4hep/dqm4hep-online.git" )
 
 # In order to pass semicolon-separated lists over the command line to all packages,
 # we need to separate list elements with '%' instead of the standard cmake list separator ';'
@@ -74,7 +79,7 @@ set( DQM4HEP_COMMON_CMAKE_ARGS
   "-DDQM4HEP_TESTING=${DQM4HEP_TESTING}"
 )
 
-if( BUILD_OFFLINE )
+if( DQM4HEP_BUILD_OFFLINE )
   message( WARNING "Building framework offline - No update will be performed !")
   set_property( DIRECTORY ${PROJECT_SOURCE_DIR} PROPERTY EP_UPDATE_DISCONNECTED 1 )
 endif()
