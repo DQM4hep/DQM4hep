@@ -159,6 +159,7 @@ if( DQM4HEP_BUILD_MKDOCS )
       INSTALL_COMMAND mkdir -p ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/ && cp -r LICENCE site mkdocs.yml docs cinder ${CMAKE_INSTALL_PREFIX}/doc/mkdocs/
       BUILD_IN_SOURCE 1 
   )
+  list( APPEND DQM4HEP_INSTALL_PACKAGES DQMDoc )
 endif()
 
 # ----- Generate DQM4hep package config files -----
@@ -168,6 +169,6 @@ dqm4hep_generate_master_config()
 display_std_variables()
 message( STATUS "The following packages will be installed :" )
 foreach( pkg ${DQM4HEP_INSTALL_PACKAGES} )
-  message( STATUS " -> ${pkg} (${${pkg}_version})" )
+  message( STATUS " -> ${pkg}: ${${pkg}_repository} (${${pkg}_version})" )
 endforeach()
 message( STATUS "-------------------------------------------------------------------------------" )
