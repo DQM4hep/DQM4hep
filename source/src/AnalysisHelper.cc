@@ -28,12 +28,13 @@
 // -- dqm4hep headers
 #include <dqm4hep/AnalysisHelper.h>
 #include <typeinfo>
+#include <TH2.h>
 
 namespace dqm4hep {
 
   namespace core {
 
-    float AnalysisHelper::mean(MonitorElementPtr pMonitorElement, float percentage = 1.0)
+    float AnalysisHelper::mean(MonitorElementPtr pMonitorElement, float percentage)
     {
 
       std::string ObjectType;
@@ -42,26 +43,25 @@ namespace dqm4hep {
 
       TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
-      if (pMonitorElement->type() == "TH1F" || pMonitorElement->type() == "TH1I") {  // How many types of TH1 histogram do we have to recognise? TH1F, TH1I, ...?
-	ObjectType = "TH1";
-      }
-      else if (pMonitorElement->type() == "TGraph") {
+      if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
 	ObjectType = "TGraph";
       }
+      else if (nullptr != pMonitorElement->objectTo<TH1>()){
+	ObjectType = "TH1";
+      }
       else {
-	// Really this should be replaced with something that goes in the log
-	std::cout << "The monitor element " << pMonitorElement->name() << " of type " << pMonitorElement->type() << " could not be classified." << std::endl;
+	dqm_error("The monitor element {0} of type {1} could not be recognised.", pMonitorElement->name(), pMonitorElement->type());
 	throw StatusCodeException(STATUS_CODE_FAILURE);
       }
 
-      if (percentage == 1.0) {
+      if(fabs(percentage - 1.f) < std::numeric_limits<float>::epsilon()) {
 	if (ObjectType == "TH1") {
-	  TH1 *h = (TH1*)(ThisObject);
+	  TH1 *h = pMonitorElement->objectTo<TH1>();
 	  result = h->GetMean(1);
 	}
 	if (ObjectType == "TGraph") {
-	  TGraph *h = (TGraph*)(ThisObject);
-	  result = h->GetMean(2);
+	  TGraph *h = pMonitorElement->objectTo<TGraph>();
+	  result = h->GetMean(1);
 	}
       }
       else {
@@ -98,34 +98,17 @@ namespace dqm4hep {
 
 	if (ObjectType == "TGraph") {
 	  TGraph *h = (TGraph*)(ThisObject);
-	  TAxis *axis = h->GetYaxis();
-	  int nbins = axis->GetNbins();
-	  int imean = axis->FindBin(h->GetMean());
+	  double* arrayX = h->GetX();
+	  int entries = h->GetHistogram()->GetNbinsX();
+	  int startNum = 0.5*(1.0-percentage)*entries;
+	  int endNum = entries-startNum;
+	  double sum = 0.0;
 
-	  TH1F* ThisAxis = h->GetHistogram();
-	  float entries = percentage*ThisAxis->GetEntries();
-	  float w = ThisAxis->GetBinContent(imean);
-	  float x = ThisAxis->GetBinCenter(imean);
-
-	  float sumw = w;
-	  float sumwx = w*x;
-
-	  for (int i=1;i<nbins;i++) {
-	    if (i>0) {
-	      w = ThisAxis->GetBinContent(imean-i);
-	      x = ThisAxis->GetBinCenter(imean-i);
-	      sumw += w;
-	      sumwx += w*x;
-	    }
-	    if (i<= nbins) {
-	      w = ThisAxis->GetBinContent(imean+i);
-	      x = ThisAxis->GetBinCenter(imean+i);
-	      sumw += w;
-	      sumwx += w*x;
-	    }
-	    if (sumw > entries) break;
+	  for (int i=startNum; i<endNum; i++) {
+	    sum += arrayX[i];
 	  }
-	  result = sumwx/sumw;
+
+	  result = sum/(percentage*entries);
 	}
       }
       return result;
@@ -133,30 +116,104 @@ namespace dqm4hep {
 
     float AnalysisHelper::mean90(MonitorElementPtr pMonitorElement)
     {
-      float result = AnalysisHelper::mean(pMonitorElement, 0.9);
-      return result;
+      return AnalysisHelper::mean(pMonitorElement, 0.9);
     }
 
-    float AnalysisHelper::rms(MonitorElementPtr pMonitorElement, float percentage = 1.0)
+    float AnalysisHelper::rms(MonitorElementPtr pMonitorElement, float percentage)
     {
+      std::string ObjectType;
+
       float result = 0.0;
 
-      TH1 *h = pMonitorElement->objectTo<TH1>();
+      TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
-      if (percentage == 1.0) {
-	result = h->GetRMS(1);
+      if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
+	ObjectType = "TGraph";
+      }
+      else if (nullptr != pMonitorElement->objectTo<TH1>()){
+	ObjectType = "TH1";
       }
       else {
-	// PLACEHOLDER
-	result = 0.0;
+	dqm_error("The monitor element {0} of type {1} could not be recognised.", pMonitorElement->name(), pMonitorElement->type());
+	throw StatusCodeException(STATUS_CODE_FAILURE);
+      }
+
+      if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
+	ObjectType = "TGraph";
+      }
+      else if (nullptr != pMonitorElement->objectTo<TH1>()){
+	ObjectType = "TH1";
+      }
+      else {
+	dqm_error("The monitor element {0} of type {1} could not be recognised.", pMonitorElement->name(), pMonitorElement->type());
+	throw StatusCodeException(STATUS_CODE_FAILURE);
+      }
+
+      if(fabs(percentage - 1.f) < std::numeric_limits<float>::epsilon()) {
+	if (ObjectType == "TH1") {
+	  TH1 *h = pMonitorElement->objectTo<TH1>();
+	  result = h->GetRMS(1);
+	}
+	if (ObjectType == "TGraph") {
+	  TGraph *h = pMonitorElement->objectTo<TGraph>();
+	  result = h->GetRMS(1);
+	}
+      }
+      else {
+
+	if (ObjectType == "TH1") {
+	  TH1 *h = (TH1*)(ThisObject);
+	  TAxis *axis = h->GetXaxis();
+	  int nbins = axis->GetNbins();
+	  int imean = axis->FindBin(h->GetMean());
+	  float entries = percentage*h->GetEntries();
+	  float w = h->GetBinContent(imean);
+	  float x = h->GetBinCenter(imean);
+	  float mean = h->GetMean();
+
+	  float sumw = w;
+	  float sumwx = w*pow(x-mean,2);
+
+	  for (int i=1;i<nbins;i++) {
+	    if (i>0) {
+	      w = h->GetBinContent(imean-i);
+	      x = h->GetBinCenter(imean-i);
+	      sumw += w;
+	      sumwx += w*pow(x-mean,2);
+	    }
+	    if (i<= nbins) {
+	      w = h->GetBinContent(imean+i);
+	      x = h->GetBinCenter(imean+i);
+	      sumw += w;
+	      sumwx += w*pow(x-mean,2);
+	    }
+	    if (sumw > entries) break;
+	  }
+	  result = pow(sumwx/sumw,0.5);
+	}
+	if (ObjectType == "TGraph") {
+	  percentage = 0.9;
+	  TGraph *h = (TGraph*)(ThisObject);
+	  double* arrayX = h->GetX();
+	  int entries = h->GetHistogram()->GetNbinsX();
+	  int startNum = 0.5*(1.0-percentage)*entries;
+	  int endNum = entries-startNum;
+	  double sum = 0.0;
+	  float mean = h->GetMean(1);
+
+	  for (int i=startNum; i<endNum; i++) {
+	    sum += pow(arrayX[i]-mean,2);
+	  }
+
+	  result = pow(sum/(percentage*entries),0.5);
+	}
       }
       return result;
     }
 
     float AnalysisHelper::rms90(MonitorElementPtr pMonitorElement)
     {
-      float result = AnalysisHelper::rms(pMonitorElement, 0.9);
-      return result;
+      return AnalysisHelper::rms(pMonitorElement, 0.9);
     }
 
     float AnalysisHelper::median(MonitorElementPtr pMonitorElement)
