@@ -184,7 +184,7 @@ namespace dqm4hep {
         stats.cpuTimeSys = (dqm_float)(ru.ru_stime.tv_sec) + ((dqm_float)(ru.ru_stime.tv_usec) / 1000000.);
 
         //  TODO: Compute proc cpu load here
-        dqm_warning(__FUNCTION__, " Process cpu load has not been implemented yet!");
+        dqm_warning("[{0}] - Process cpu load has not been implemented yet!", __FUNCTION__);
         stats.cpuUser = -1;
         stats.cpuSys = -1;
         stats.cpuTot = -1;
@@ -422,7 +422,7 @@ namespace dqm4hep {
         stats.cpuTimeSys = (dqm_float)(ru.ru_stime.tv_sec) + ((dqm_float)(ru.ru_stime.tv_usec) / 1000000.);
 
         //TODO: Compute proc cpu load here
-        dqm_warning(__FUNCTION__, " Process cpu load has not been implemented yet!");
+        dqm_warning("[{0}] - Process cpu load has not been implemented yet!", __FUNCTION__);
         stats.cpuUser = -1;
         stats.cpuSys = -1;
         stats.cpuTot = -1;
@@ -612,7 +612,7 @@ namespace dqm4hep {
 #if defined(_WIN32)
     static void winCpuStats(CpuStats &stats, dqm_int sampleTime){
       /* WINDOWS implementation: TBD */
-      dqm_warning(__FUNCTION__, " has not been implemented!");
+      dqm_warning("[{0}] - has not been implemented!", __FUNCTION__);
       throw core::StatusCodeException(STATUS_CODE_NOT_FOUND);
     }
 
@@ -620,7 +620,7 @@ namespace dqm4hep {
 
     static void winMemStats(MemoryStats &stats) {
       /* WINDOWS implementation: TBD */
-      dqm_warning(__FUNCTION__, " has not been implemented!");
+      dqm_warning("[{0}] - has not been implemented!", __FUNCTION__);
       throw core::StatusCodeException(STATUS_CODE_NOT_FOUND);
     }
 
@@ -628,7 +628,7 @@ namespace dqm4hep {
 
     static void winProcStats(ProcessStats &stats) {
       /* WINDOWS implementation: TBD */
-      dqm_warning(__FUNCTION__, " has not been implemented!");
+      dqm_warning("[{0}] - has not been implemented!", __FUNCTION__);
       throw core::StatusCodeException(STATUS_CODE_NOT_FOUND);
     }
 
@@ -636,7 +636,7 @@ namespace dqm4hep {
 
     static void winNetStats(NetworkStats &stats, dqm_int sampleTime) {
       /* WINDOWS implementation: TBD */
-      dqm_warning(__FUNCTION__, " has not been implemented!");
+      dqm_warning("[{0}] - has not been implemented!", __FUNCTION__);
       throw core::StatusCodeException(STATUS_CODE_NOT_FOUND);
     }
 
