@@ -7,9 +7,6 @@ os:
   - osx
 
 matrix:
-  - os: osx
-    before_install:
-      - brew install mysql
   allow_failures:
   - os: osx
 
@@ -30,6 +27,9 @@ script:
 
 before_install:
   - ./.travis-ci.d/install_dependencies.sh
+  - if [[ "${TRAVIS_OS_NAME}" == "osx"  ]];
+    then brew install mysql;
+    fi
 
 after_success:
   - ./.travis-ci.d/deploy-doxygen.sh
