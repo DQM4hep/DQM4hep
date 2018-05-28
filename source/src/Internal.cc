@@ -210,8 +210,8 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    static void linuxNetStats(NetworkStats &stats) {
 #if defined(DQM4HEP_WITH_PROC_FS)
+    static void linuxNetStats(NetworkStats &stats, dqm_int /*sampleTime*/) {
       FILE *file = fopen("/proc/net/dev", "r");
 
       // skip first two lines
