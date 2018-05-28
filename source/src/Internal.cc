@@ -237,6 +237,7 @@ namespace dqm4hep {
 
         // read received stats
         if (fscanf(file, "%lu %lu %lu", &stat.tot_rcv_kbytes, &stat.tot_rcv_packets, &stat.tot_rcv_errs) == EOF) {
+          stat.tot_rcv_kbytes = (dqm_int) ((stat.tot_rcv_kbytes) >> 10); // divide by 1024
           return;
         }
 
@@ -247,6 +248,7 @@ namespace dqm4hep {
 
         // read send stats
         if (fscanf(file, "%lu %lu %lu", &stat.tot_snd_kbytes, &stat.tot_snd_packets, &stat.tot_snd_errs) == EOF) {
+          stat.tot_snd_kbytes = (dqm_int) ((stat.tot_snd_kbytes) >> 10); // divide by 1024
           return;
         }
 
