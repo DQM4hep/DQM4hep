@@ -30,6 +30,9 @@
 
 // -- ROOT header
 #include <TSystem.h>
+// #if defined(__linux__)
+#include <TPRegexp.h>
+// #endif
 
 #include <cstring>
 #include <dirent.h>
@@ -41,8 +44,6 @@ namespace dqm4hep {
 
 #if defined(__linux__)
 
-// -- ROOT header
-#include <TPRegexp.h>
 
 #if defined(DQM4HEP_WITH_PROC_FS)
     // only for unix systems
