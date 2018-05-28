@@ -40,6 +40,9 @@ namespace dqm4hep {
 
 #if defined(__linux__)
 
+// -- ROOT header
+#include <TPRegexp.h>
+
 #if defined(DQM4HEP_WITH_PROC_FS)
     // only for unix systems
     int getProcValue(const std::string fname, const std::string &entry) {
@@ -137,7 +140,6 @@ namespace dqm4hep {
         dqm_error("[{0}] - Failed to open '/proc/meminfo'", __FUNCTION__);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       }
-      dqm_long_long used = {0LL};
       dqm_long_long free = {0LL};
       dqm_long_long total = {0LL};
 
@@ -164,7 +166,8 @@ namespace dqm4hep {
       }
       fclose(f);
 
-      stats.vmTot = (dqm_int)(total + swap_total) stats.vmUsed = (dqm_int)(total - free);
+      stats.vmTot = (dqm_int)(total + swap_total);
+      stats.vmUsed = (dqm_int)(total - free);
       stats.vmFree = (dqm_int)(free + swap_free);
       stats.rssTot = (dqm_int)(total >> 20);
       stats.rssUsed = (dqm_int)((total - free) >> 20);
@@ -254,9 +257,9 @@ namespace dqm4hep {
       }
 
       fclose(file);
+#endif // DQM4HEP_WITH_PROC_FS
     }
 
-#endif // DQM4HEP_WITH_PROC_FS
 #endif // __linux__
 
     //---- System, CPU and Memory info ---------------------------------------------
@@ -414,7 +417,6 @@ namespace dqm4hep {
 
       struct rusage ru;
       if (getrusage(RUSAGE_SELF, &ru) < 0) {
-        // ::SysError("darwinProcStats", "getrusage failed");
         dqm_error("[{0}] - Failed to getrusage", __FUNCTION__);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       } else {
@@ -435,7 +437,6 @@ namespace dqm4hep {
 
       kern_return_t kr = task_info(a_task, TASK_BASIC_INFO, (task_info_t)&ti, &count);
       if (kr != KERN_SUCCESS) {
-        // ::Error("darwinProcStats", "task_info: %s", mach_error_string(kr));
         dqm_error("[{0}] - Failed to get task_info: {1}", __FUNCTION__, mach_error_string(kr));
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       } else {
