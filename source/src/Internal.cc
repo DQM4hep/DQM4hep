@@ -253,8 +253,17 @@ namespace dqm4hep {
         if (EOF == fscanf(file, "%*[^\n]\n"))
           break;
 
+      // TODO: Compute rate
+        stat.rcv_rate_kbytes = 0;
+        stat.rcv_rate_packets = 0;
+        stat.rcv_rate_errs = 0;
+        stat.snd_rate_kbytes = 0;
+        stat.snd_rate_packets = 0;
+        stat.snd_rate_errs = 0;
         stats[iname] = stat;
       }
+      // TODO: Compute rate, Warning displayed here to not pollute logs for each interface
+      dqm_warning("[{0}] - Network rate has not been implemented yet!", __FUNCTION__);
 
       fclose(file);
 #endif // DQM4HEP_WITH_PROC_FS
