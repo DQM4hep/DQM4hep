@@ -33,6 +33,7 @@
 
 #include <cstring>
 #include <dirent.h>
+#include <sys/resource.h>
 
 namespace dqm4hep {
 
@@ -281,7 +282,6 @@ namespace dqm4hep {
 #include <net/if.h>
 #include <net/if_dl.h>
 #include <net/route.h>
-#include <sys/resource.h>
 #include <sys/sysctl.h>
 
     ////////////////////////////////////////////////////////////////////////////////
