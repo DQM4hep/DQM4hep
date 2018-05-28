@@ -54,7 +54,7 @@
 #include <thread>
 #include <unistd.h>
 
-// apple stuff for stdint.h
+// -- apple headers for stdint.h
 #ifdef __APPLE__
 #include <_types.h>
 #include <_types/_uint16_t.h>
@@ -65,13 +65,10 @@
 #include <sys/_pthread/_pthread_types.h>
 #include <sys/_types/_int16_t.h>
 #include <sys/_types/_int64_t.h>
-// for memStats
-#include <sys/sysctl.h>
-#include <mach/mach.h>
 #else
-#include <sys/sysinfo.h>
 #include <bits/pthreadtypes.h>
 #include <stdint.h>
+#include <sys/sysinfo.h>
 #endif
 
 // -- dqm4hep headers
@@ -143,6 +140,8 @@ namespace dqm4hep {
     typedef float dqm_real;
     typedef float dqm_float;
     typedef double dqm_double;
+    typedef long dqm_long;
+    typedef long long dqm_long_long;
     typedef bool dqm_bool;
     typedef int64_t dqm_int;
     typedef uint64_t dqm_uint;
@@ -379,52 +378,105 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     
     /**
+     *  @brief  CpuStats struct
+     */
+    struct CpuStats {
+      dqm_float load1m = {0.};  // cpu load average over 1 m
+      dqm_float load5m = {0.};  // cpu load average over 5 m
+      dqm_float load15m = {0.}; // cpu load average over 15 m
+      dqm_float user = {0.};    // cpu user load in percentage
+      dqm_float sys = {0.};     // cpu sys load in percentage
+      dqm_float tot = {0.};     // cpu user+sys load in percentage
+      dqm_float idle = {0.};    // cpu idle percentage
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /**
+     *  @brief  Get some memory stats
+     *
+     *  @param  object the CpuStats object to receive
+     */
+    void cpuStats(CpuStats &stats, dqm_int sampleTime = 1 /*s*/);
+    //-------------------------------------------------------------------------------------------------
+
+    /**
      *  @brief  MemoryStats struct
      *          All units in Mb
      */
     struct MemoryStats {
-      double   vmtot  = {0.};
-      double   vmused = {0.};
-      double   vmproc = {0.};
-      double   rsstot  = {0.};
-      double   rssused = {0.};
-      double   rssproc = {0.};
+      dqm_int vmTot = {0};   // total virtual RAM (physical RAM + swap) in MB
+      dqm_int vmUsed = {0};  // used virtual RAM (physical RAM + swap) in MB
+      dqm_int vmFree = {0};  // free virtual RAM (physical RAM + swap) in MB
+      dqm_int rssTot = {0};  // total physical RAM in MB
+      dqm_int rssUsed = {0}; // used  physical RAM in MB
     };
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     /**
      *  @brief  Get some memory stats
      *
      *  @param  object the MemoryStats object to receive
      */
     void memStats(MemoryStats &stats);
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
+    /**
+     *  @brief  ProcessStats struct
+     *          All memory units in Mb
+     */
+    struct ProcessStats {
+      dqm_float cpuTimeUser = {0.}; // user time used by this process in seconds
+      dqm_float cpuTimeSys = {0.};  // system time used by this process in seconds
+      dqm_float cpuTimeTot = {0.};  // total time used by this process in seconds
+      dqm_float cpuUser = {0.};     // cpu user load used by this process in percentage
+      dqm_float cpuSys = {0.};      // cpu sys load used by this process in percentage
+      dqm_float cpuTot = {0.};      // total (sys+user) cpu load used by this process in percentage
+      dqm_long vm = {0L};           // virtual memory used by this process in KB
+      dqm_long rss = {0L};          // resident memory used by this process in KB
+    };
+
+    //-------------------------------------------------------------------------------------------------
+
+    /**
+     *  @brief  Get stats from current process
+     *
+     *  @param  object the ProcessStats object to receive
+     */
+    void procStats(ProcessStats &stats);
+    //-------------------------------------------------------------------------------------------------
+
     /**
      *  @brief  INetworkStats struct
      */
     struct INetworkStats {
-      dqm_stat    rcv_bytes;
-      dqm_stat    rcv_packets;
-      dqm_stat    rcv_errs;
-      dqm_stat    snd_bytes;
-      dqm_stat    snd_packets;
-      dqm_stat    snd_errs;
+      dqm_stat tot_rcv_kbytes = {0L};
+      dqm_stat tot_rcv_packets = {0L};
+      dqm_stat tot_rcv_errs = {0L};
+      dqm_stat tot_snd_kbytes = {0L};
+      dqm_stat tot_snd_packets = {0L};
+      dqm_stat tot_snd_errs = {0L};
+      dqm_stat rcv_rate_kbytes = {0L};
+      dqm_stat rcv_rate_packets = {0L};
+      dqm_stat rcv_rate_errs = {0L};
+      dqm_stat snd_rate_kbytes = {0L};
+      dqm_stat snd_rate_packets = {0L};
+      dqm_stat snd_rate_errs = {0L};
     };
-    
+
     typedef std::map<std::string, INetworkStats> NetworkStats;
-    
+
     //-------------------------------------------------------------------------------------------------
-    
+
     /**
      *  @brief  Get some network stats
      *
      *  @param  object the NetworkStats object to receive
      */
-    void netStats(NetworkStats &stats);
-  }
-}
+    void netStats(NetworkStats &stats, dqm_int sampleTime = 1 /*s*/);
+  } // namespace core
+} // namespace dqm4hep
 
 #endif //  DQM4HEP_ENUMERATORS_H
