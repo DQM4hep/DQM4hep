@@ -236,7 +236,7 @@ namespace dqm4hep {
         INetworkStats stat;
 
         // read received stats
-        if (fscanf(file, "%lu %lu %lu", &stat.rcv_bytes, &stat.rcv_packets, &stat.rcv_errs) == EOF) {
+        if (fscanf(file, "%lu %lu %lu", &stat.tot_rcv_kbytes, &stat.tot_rcv_packets, &stat.tot_rcv_errs) == EOF) {
           return;
         }
 
@@ -246,7 +246,7 @@ namespace dqm4hep {
           break;
 
         // read send stats
-        if (fscanf(file, "%lu %lu %lu", &stat.snd_bytes, &stat.snd_packets, &stat.snd_errs) == EOF) {
+        if (fscanf(file, "%lu %lu %lu", &stat.tot_snd_kbytes, &stat.tot_snd_packets, &stat.tot_snd_errs) == EOF) {
           return;
         }
 
