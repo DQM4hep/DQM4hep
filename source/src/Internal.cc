@@ -265,7 +265,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    static void  readLinuxNet(NetworkStats &stats, dqm_int sampleTime) {
+    static void  readLinuxNet(NetworkStats &stats) {
 #if defined(DQM4HEP_WITH_PROC_FS)
       FILE *file = fopen("/proc/net/dev", "r");
 
