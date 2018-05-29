@@ -77,6 +77,31 @@ TiXmlElement *createQTestXml(
   return qtestElement;
 }
 
+TiXmlElement *createQTestXml(
+  const std::string &name,
+  std::string property,
+  std::string method,
+  float limit) {
+  
+  TiXmlElement *qtestElement = new TiXmlElement("qtest");
+  qtestElement->SetAttribute("name", name);
+  qtestElement->SetAttribute("type", "PropertyWithinExpectedTest");
+  qtestElement->LinkEndChild(createParameter("Property", property));
+  qtestElement->LinkEndChild(createParameter("Method", method));
+
+  if (method == "LowerThan") {
+    qtestElement->LinkEndChild(createParameter("DeviationUpper", limit));
+  }
+  else if (method == "HigherThan") {
+    qtestElement->LinkEndChild(createParameter("DeviationUpper", limit));
+  }
+  else {
+    dqm_error("Error in unit test: creating the qtestXml for test {0} failed", name);
+    throw StatusCodeException(STATUS_CODE_FAILURE);
+  }
+  return qtestElement;
+}
+
 void fillTest(TH1 *histogram) {
   // mean 10, RMS 4
   histogram->Fill(2);
@@ -95,22 +120,24 @@ void fillTest(TH1 *histogram) {
   histogram->Fill(18);
 }
 
+/*
 void fillTest(TGraph *graph) {
-  histogram->SetPoint(2,0);
-  histogram->SetPoint(5,1);
-  histogram->SetPoint(6,2);
-  histogram->SetPoint(8,3);
-  histogram->SetPoint(8,3);
-  histogram->SetPoint(10,4);
-  histogram->SetPoint(10,5);
-  histogram->SetPoint(10,5);
-  histogram->SetPoint(10,4);
-  histogram->SetPoint(12,3);
-  histogram->SetPoint(12,3);
-  histogram->SetPoint(14,2);
-  histogram->SetPoint(15,1);
-  histogram->SetPoint(18,0);
+  graph->SetPoint(2,0);
+  graph->SetPoint(5,1);
+  graph->SetPoint(6,2);
+  graph->SetPoint(8,3);
+  graph->SetPoint(8,3);
+  graph->SetPoint(10,4);
+  graph->SetPoint(10,5);
+  graph->SetPoint(10,5);
+  graph->SetPoint(10,4);
+  graph->SetPoint(12,3);
+  graph->SetPoint(12,3);
+  graph->SetPoint(14,2);
+  graph->SetPoint(15,1);
+  graph->SetPoint(18,0);
 }
+*/
 
 int main(int /*argc*/, char ** /*argv*/) {
   
@@ -126,8 +153,8 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   // create test element TH1
   MonitorElementPtr testElementTH1;
-  meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElement, 21, 0.f, 20.f);
-  TH1F *histogram = testElement->objectTo<TH1F>();
+  meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElementTH1, 21, 0.f, 20.f);
+  TH1F *histogram = testElementTH1->objectTo<TH1F>();
   assert_test(nullptr != histogram);
   fillTest(histogram);
 
@@ -145,50 +172,50 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   // configure the qtest
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(qtestElement));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), qtestName));
 
   // configure reporting
   QReportStorage storage; QReport report; json jsonReport;
   
   // valid test
-  std::shared_ptr<TiXmlElement> sharedQTest1(createQTestXml());  // Need to set parameters for this here
+  std::shared_ptr<TiXmlElement> sharedQTest1(createQTestXml("ValidTest-Mean10Long", "Mean", "WithinRange", 10, 8, 12));
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest1.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test1"));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test1", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test1", report));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test1"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test1", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test1", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
   assert_test(report.m_qualityFlag == SUCCESS);
 
   // valid test but property is not within range
   storage.clear();
-  std::shared_ptr<TiXmlElement> sharedQTest2(createQTestXml());  // Need to set parameters for this here
+  std::shared_ptr<TiXmlElement> sharedQTest2(createQTestXml("InvalidTest-WrongValue-Mean20Long", "Mean", "WithinRange", 20, 18, 22));
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest2.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test2"));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test2", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test2", report));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test2"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test2", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test2", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
   assert_test(report.m_qualityFlag == SUCCESS);
 
   // invalid test - withinrange method but only one bound specified
   storage.clear();
-  std::shared_ptr<TiXmlElement> sharedQTest3(createQTestXml());  // Need to set parameters for this here
+  std::shared_ptr<TiXmlElement> sharedQTest3(createQTestXml("InvalidTest-TooFewBounds-Mean10Long", "Mean", "WithinRange", 0, 0, 0));  // Need to set parameters for this here
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest3.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test3"));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test3", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test3", report));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test3"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test3", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test3", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
   assert_test(report.m_qualityFlag == SUCCESS);
 
-  // invalid test - lowerthan method but with no bound specified
+  // invalid test - lowerthan method but with no upper bound specified
   storage.clear();
-  std::shared_ptr<TiXmlElement> sharedQTest4(createQTestXml());  // Need to set parameters for this here
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest2.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test4"));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test4", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test4", report));
+  std::shared_ptr<TiXmlElement> sharedQTest4(createQTestXml("InvalidTest-NoBound-MeanBelow12", "Mean", "LowerThan", 0, 0, 0));  // Need to set parameters for this here
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest4.get()));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test4"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test4", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test4", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
   assert_test(report.m_qualityFlag == SUCCESS);
@@ -203,8 +230,8 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   /*
   MonitorElementPtr testElementTGraph;
-  meMgr->bookObject("/", "TestGraph", testElement, TGraphAllocator());
-  TGraph *graph = testElement->objectTo<TGraph>();
+  meMgr->bookObject("/", "TestGraph", testElementTGraph, TGraphAllocator());
+  TGraph *graph = testElementTGraph->objectTo<TGraph>();
   assert_test(nullptr != graph);
   fillTest(graph);
   */

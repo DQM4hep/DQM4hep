@@ -41,7 +41,7 @@ namespace dqm4hep {
 
       float result = 0.0;
 
-      TObject *ThisObject = pMonitorElement->objectTo<TObject>();
+      //TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
       if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
 	ObjectType = "TGraph";
@@ -67,7 +67,9 @@ namespace dqm4hep {
       else {
 
 	if (ObjectType == "TH1") {
-	  TH1 *h = (TH1*)(ThisObject);
+	  //TH1 *h = (TH1*)(ThisObject);
+	  TH1 *h = pMonitorElement->objectTo<TH1>();
+	  
 	  TAxis *axis = h->GetXaxis();
 	  int nbins = axis->GetNbins();
 	  int imean = axis->FindBin(h->GetMean());
@@ -97,7 +99,9 @@ namespace dqm4hep {
 	}
 
 	if (ObjectType == "TGraph") {
-	  TGraph *h = (TGraph*)(ThisObject);
+	  //TGraph *h = (TGraph*)(ThisObject);
+	  TGraph *h = pMonitorElement->objectTo<TGraph>();
+
 	  double* arrayX = h->GetX();
 	  int entries = h->GetHistogram()->GetNbinsX();
 	  int startNum = 0.5*(1.0-percentage)*entries;
@@ -125,7 +129,7 @@ namespace dqm4hep {
 
       float result = 0.0;
 
-      TObject *ThisObject = pMonitorElement->objectTo<TObject>();
+      //TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
       if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
 	ObjectType = "TGraph";
@@ -162,7 +166,9 @@ namespace dqm4hep {
       else {
 
 	if (ObjectType == "TH1") {
-	  TH1 *h = (TH1*)(ThisObject);
+	  //TH1 *h = (TH1*)(ThisObject);
+	  TH1 *h = pMonitorElement->objectTo<TH1>();
+
 	  TAxis *axis = h->GetXaxis();
 	  int nbins = axis->GetNbins();
 	  int imean = axis->FindBin(h->GetMean());
@@ -193,7 +199,9 @@ namespace dqm4hep {
 	}
 	if (ObjectType == "TGraph") {
 	  percentage = 0.9;
-	  TGraph *h = (TGraph*)(ThisObject);
+	  //TGraph *h = (TGraph*)(ThisObject);
+	  TGraph *h = pMonitorElement->objectTo<TGraph>();
+
 	  double* arrayX = h->GetX();
 	  int entries = h->GetHistogram()->GetNbinsX();
 	  int startNum = 0.5*(1.0-percentage)*entries;
