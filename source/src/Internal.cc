@@ -36,14 +36,53 @@
 
 #include <cstring>
 #include <dirent.h>
-#include <sys/resource.h>
+#include <sys/resource.h> // getrusage
+#include <sys/time.h> // gettimeofday
 
 namespace dqm4hep {
 
   namespace core {
 
-#if defined(__linux__)
+    static void procCpuStats(ProcessStats &stats) {
+      struct rusage ru;
+      if (getrusage(RUSAGE_SELF, &ru) < 0) {
+        dqm_error("[{0}] - Failed to getrusage", __FUNCTION__);
+        throw core::StatusCodeException(STATUS_CODE_FAILURE);
+      } else {
 
+        dqm_float prevCpuTimeUser = stats.cpuTimeUser;
+        dqm_float prevCpuTimeSys = stats.cpuTimeSys;
+        stats.cpuTimeUser = (dqm_float)(ru.ru_utime.tv_sec) + ((dqm_float)(ru.ru_utime.tv_usec) / 1000000.);
+        stats.cpuTimeSys = (dqm_float)(ru.ru_stime.tv_sec) + ((dqm_float)(ru.ru_stime.tv_usec) / 1000000.);
+
+        struct timeval timeNow;
+        gettimeofday(&timeNow, NULL);
+        dqm_double start = stats.lastPollTime.tv_sec + stats.lastPollTime.tv_usec / 1000000;
+        dqm_double stop = timeNow.tv_sec + timeNow.tv_usec / 1000000;
+        stats.lastPollTime = timeNow;
+        if (stop > start) {
+          dqm_double timeDif = stop - start;
+          // Don't compute percentage for the first call
+          if (0 != prevCpuTimeUser || 0 != prevCpuTimeSys) {
+            stats.cpuUser = (stats.cpuTimeUser - prevCpuTimeUser) / timeDif;
+            stats.cpuSys = (stats.cpuTimeSys - prevCpuTimeSys) / timeDif;
+            stats.cpuTot = stats.cpuUser + stats.cpuSys;
+            stats.cpuUser *= 100.;
+            stats.cpuSys *= 100.;
+            stats.cpuTot *= 100.;
+          }
+        } else {
+          dqm_error("[{0}] - Something went wrong when comparing clocks", __FUNCTION__);
+          stats.cpuUser = -1;
+          stats.cpuSys = -1;
+          stats.cpuTot = -1;
+        }
+      }
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+#if defined(__linux__)
 
 #if defined(DQM4HEP_WITH_PROC_FS)
     // only for unix systems
@@ -70,7 +109,6 @@ namespace dqm4hep {
 #endif // DQM4HEP_WITH_PROC_FS
 
     //-------------------------------------------------------------------------------------------------
-    /// Read CPU load on Linux.
 
     static void readLinuxCpu(long *ticks) {
       ticks[0] = ticks[1] = ticks[2] = ticks[3] = 0;
@@ -90,8 +128,6 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Get CPU stat for Linux. Use sampleTime to set the interval over which
-    /// the CPU load will be measured, in s (default 1).
 
     static void linuxCpuStats(CpuStats &stats, dqm_int sampleTime) {
       dqm_double avg[3] = {-1.};
@@ -133,7 +169,6 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Get VM stat for Linux.
 
     static void linuxMemStats(MemoryStats &stats) {
       TString s;
@@ -176,24 +211,10 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Get process info for this process on Linux.
 
     static void linuxProcStats(ProcessStats &stats) {
-      struct rusage ru;
-      if (getrusage(RUSAGE_SELF, &ru) < 0) {
-        // ::SysError("getLinuxProcInfo", "getrusage failed");
-        dqm_error("[{0}] - Failed to getrusage", __FUNCTION__);
-        throw core::StatusCodeException(STATUS_CODE_FAILURE);
-      } else {
-        stats.cpuTimeUser = (dqm_float)(ru.ru_utime.tv_sec) + ((dqm_float)(ru.ru_utime.tv_usec) / 1000000.);
-        stats.cpuTimeSys = (dqm_float)(ru.ru_stime.tv_sec) + ((dqm_float)(ru.ru_stime.tv_usec) / 1000000.);
 
-        //  TODO: Compute proc cpu load here
-        dqm_warning("[{0}] - Process cpu load has not been implemented yet!", __FUNCTION__);
-        stats.cpuUser = -1;
-        stats.cpuSys = -1;
-        stats.cpuTot = -1;
-      }
+      procCpuStats(stats);
 
       stats.vm = -1;
       stats.rss = -1;
@@ -275,8 +296,6 @@ namespace dqm4hep {
 
 #endif // __linux__
 
-    //---- System, CPU and Memory info ---------------------------------------------
-
 #if defined(__APPLE__)
 #include <mach/mach.h>
 #include <mach/mach_error.h>
@@ -285,8 +304,7 @@ namespace dqm4hep {
 #include <net/route.h>
 #include <sys/sysctl.h>
 
-    ////////////////////////////////////////////////////////////////////////////////
-    /// Get CPU load on Mac OS X.
+    //-------------------------------------------------------------------------------------------------
 
     static void readDarwinCpu(long *ticks) {
       ticks[0] = ticks[1] = ticks[2] = ticks[3] = 0;
@@ -306,14 +324,11 @@ namespace dqm4hep {
       }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    /// Get CPU stat for Mac OS X. Use sampleTime to set the interval over which
-    /// the CPU load will be measured, in s (default 1).
+    //-------------------------------------------------------------------------------------------------
 
     static void darwinCpuStats(CpuStats &stats, dqm_int sampleTime) {
       dqm_double avg[3] = {-1.};
       if (getloadavg(avg, sizeof(avg)) < 0) {
-        // ::Error("darwinCpuStats", "getloadavg failed");
         dqm_error("[{0}] - Failed to getloadavg", __FUNCTION__);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       } else {
@@ -346,8 +361,7 @@ namespace dqm4hep {
       }
     }
 
-    ////////////////////////////////////////////////////////////////////////////////
-    /// Get VM stat for Mac OS X.
+    //-------------------------------------------------------------------------------------------------
 
     static void darwinMemStats(MemoryStats &stats) {
       vm_statistics_data_t vm_info;
@@ -355,7 +369,6 @@ namespace dqm4hep {
 
       kern_return_t kr = host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vm_info, &count);
       if (kr != KERN_SUCCESS) {
-        // ::Error("getDarwinMemInfo", "host_statistics: %s", mach_error_string(kr));
         dqm_error("[{0}] - Failed to get host_statistics: {1}", __FUNCTION__, mach_error_string(kr));
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       }
@@ -366,8 +379,7 @@ namespace dqm4hep {
         }
       }
 
-      dqm_long_long used = (dqm_long_long)(vm_info.active_count + vm_info.inactive_count + vm_info.wire_count)
-                           << pshift;
+      dqm_long_long used = (dqm_long_long)(vm_info.active_count + vm_info.inactive_count + vm_info.wire_count) << pshift;
       dqm_long_long free = (dqm_long_long)(vm_info.free_count) << pshift;
       dqm_long_long total =
           (dqm_long_long)(vm_info.active_count + vm_info.inactive_count + vm_info.free_count + vm_info.wire_count)
@@ -409,12 +421,6 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Get process info for this process on Mac OS X.
-    /// Code largely taken from:
-    /// http://www.opensource.apple.com/source/top/top-15/libtop.c
-    /// The virtual memory usage is slightly over estimated as we don't
-    /// subtract shared regions, but the value makes more sense
-    /// then pure vsize, which is useless on 64-bit machines.
 
     static void darwinProcStats(ProcessStats &stats) {
 #ifdef _LP64
@@ -427,21 +433,7 @@ namespace dqm4hep {
 #define SHARED_TEXT_REGION_SIZE 0x10000000
 #define SHARED_DATA_REGION_SIZE 0x10000000
 
-      struct rusage ru;
-      if (getrusage(RUSAGE_SELF, &ru) < 0) {
-        dqm_error("[{0}] - Failed to getrusage", __FUNCTION__);
-        throw core::StatusCodeException(STATUS_CODE_FAILURE);
-      } else {
-        stats.cpuTimeUser = (dqm_float)(ru.ru_utime.tv_sec) + ((dqm_float)(ru.ru_utime.tv_usec) / 1000000.);
-        stats.cpuTimeSys = (dqm_float)(ru.ru_stime.tv_sec) + ((dqm_float)(ru.ru_stime.tv_usec) / 1000000.);
-
-        //TODO: Compute proc cpu load here
-        dqm_warning("[{0}] - Process cpu load has not been implemented yet!", __FUNCTION__);
-        stats.cpuUser = -1;
-        stats.cpuSys = -1;
-        stats.cpuTot = -1;
-
-      }
+      procCpuStats(stats);
 
       task_t a_task = mach_task_self();
       task_basic_info_data_t ti;
@@ -523,6 +515,7 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
+
     static void readDarwinNet(NetworkStats &stats) {
       double unit = 1024.; // Store everything in kb
 
@@ -592,6 +585,9 @@ namespace dqm4hep {
         currentData += ifmsg->ifm_msglen;
       }
     }
+
+    //-------------------------------------------------------------------------------------------------
+
     static void darwinNetStats(NetworkStats &stats, dqm_int sampleTime) {
 
       NetworkStats tempStats;
@@ -657,9 +653,6 @@ namespace dqm4hep {
 #endif //_WIN32
 
     //-------------------------------------------------------------------------------------------------
-    /// Returns cpu load average and load info into the CpuInfo_t structure.
-    /// Use sampleTime to set the interval over which the CPU load will be measured,
-    /// In ms (default 1000).
 
     void cpuStats(CpuStats &stats, dqm_int sampleTime) {
 #if defined(__APPLE__)
@@ -674,7 +667,6 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Returns ram and swap memory usage info into the MemInfo_t structure.
 
     void memStats(MemoryStats &stats) {
 #if defined(__APPLE__)
@@ -689,7 +681,6 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Returns cpu and memory used by this process into the ProcInfo_t structure.
 
     void procStats(ProcessStats &stats) {
 #if defined(__APPLE__)
@@ -704,7 +695,6 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
-    /// Returns network and memory used by this process into the ProcInfo_t structure.
 
     void netStats(NetworkStats &stats, dqm_int sampleTime) {
 #if defined(__APPLE__)
