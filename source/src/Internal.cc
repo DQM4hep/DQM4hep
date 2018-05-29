@@ -43,6 +43,8 @@ namespace dqm4hep {
 
   namespace core {
 
+#if defined(__linux__) || defined(__APPLE__)
+
     static void procCpuStats(ProcessStats &stats) {
       struct rusage ru;
       if (getrusage(RUSAGE_SELF, &ru) < 0) {
@@ -81,6 +83,36 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
+    /**
+     *  @brief  Compute network rate and fill NetworkStats struct
+     *  @param  stats the NetworkStats struct to fill
+     *  @param  tempStats the NetworkStats struct to compare with
+     *  @param  sampleTime time between the two NetworkStats reading
+     */
+    static void fillNetRate(NetworkStats &stats, NetworkStats &tempStats, dqm_int sampleTime) {
+      for (const auto &ifcIter : tempStats) {
+        auto ifcIter2 = stats.find(ifcIter.first);
+
+        if (ifcIter.first != ifcIter2->first) {
+          dqm_error("[{0}] - Wrong interface comparison");
+          throw core::StatusCodeException(STATUS_CODE_FAILURE);
+        }
+
+        ifcIter2->second.rcv_rate_kbytes =
+            (ifcIter2->second.tot_rcv_kbytes - ifcIter.second.tot_rcv_kbytes) / sampleTime;
+        ifcIter2->second.rcv_rate_packets =
+            (ifcIter2->second.tot_rcv_packets - ifcIter.second.tot_rcv_packets) / sampleTime;
+        ifcIter2->second.rcv_rate_errs = (ifcIter2->second.tot_rcv_errs - ifcIter.second.tot_rcv_errs) / sampleTime;
+        ifcIter2->second.snd_rate_kbytes =
+            (ifcIter2->second.tot_snd_kbytes - ifcIter.second.tot_snd_kbytes) / sampleTime;
+        ifcIter2->second.snd_rate_packets =
+            (ifcIter2->second.tot_snd_packets - ifcIter.second.tot_snd_packets) / sampleTime;
+        ifcIter2->second.snd_rate_errs = (ifcIter2->second.tot_snd_errs - ifcIter.second.tot_snd_errs) / sampleTime;
+      }
+    }
+#endif // linux || __APPLE__
+
+      //-------------------------------------------------------------------------------------------------
 
 #if defined(__linux__)
 
@@ -233,8 +265,8 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    static void  readLinuxNet(NetworkStats &stats, dqm_int sampleTime) {
 #if defined(DQM4HEP_WITH_PROC_FS)
-    static void linuxNetStats(NetworkStats &stats, dqm_int /*sampleTime*/) {
       FILE *file = fopen("/proc/net/dev", "r");
 
       // skip first two lines
@@ -277,21 +309,20 @@ namespace dqm4hep {
 
         if (EOF == fscanf(file, "%*[^\n]\n"))
           break;
-
-      // TODO: Compute rate
-        stat.rcv_rate_kbytes = 0;
-        stat.rcv_rate_packets = 0;
-        stat.rcv_rate_errs = 0;
-        stat.snd_rate_kbytes = 0;
-        stat.snd_rate_packets = 0;
-        stat.snd_rate_errs = 0;
-        stats[iname] = stat;
       }
-      // TODO: Compute rate, Warning displayed here to not pollute logs for each interface
-      dqm_warning("[{0}] - Network rate has not been implemented yet!", __FUNCTION__);
-
       fclose(file);
 #endif // DQM4HEP_WITH_PROC_FS
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    static void linuxNetStats(NetworkStats &stats, dqm_int sampleTime) {
+      NetworkStats tempStats;
+      readLinuxNet(tempStats);
+      ::sleep(sampleTime);
+      readLinuxNet(stats);
+
+      fillNetRate(stats, tempStats, sampleTime);
     }
 
 #endif // __linux__
@@ -304,9 +335,9 @@ namespace dqm4hep {
 #include <net/route.h>
 #include <sys/sysctl.h>
 
-    //-------------------------------------------------------------------------------------------------
+        //-------------------------------------------------------------------------------------------------
 
-    static void readDarwinCpu(long *ticks) {
+        static void readDarwinCpu(long *ticks) {
       ticks[0] = ticks[1] = ticks[2] = ticks[3] = 0;
 
       host_cpu_load_info_data_t cpu;
@@ -595,25 +626,7 @@ namespace dqm4hep {
       ::sleep(sampleTime);
       readDarwinNet(stats);
 
-      for (const auto &ifcIter : tempStats) {
-        auto ifcIter2 = stats.find(ifcIter.first);
-
-        if (ifcIter.first != ifcIter2->first) {
-          dqm_error("[{0}] - Wrong interface comparison");
-          throw core::StatusCodeException(STATUS_CODE_FAILURE);
-        }
-
-        ifcIter2->second.rcv_rate_kbytes =
-            (ifcIter2->second.tot_rcv_kbytes - ifcIter.second.tot_rcv_kbytes) / sampleTime;
-        ifcIter2->second.rcv_rate_packets =
-            (ifcIter2->second.tot_rcv_packets - ifcIter.second.tot_rcv_packets) / sampleTime;
-        ifcIter2->second.rcv_rate_errs = (ifcIter2->second.tot_rcv_errs - ifcIter.second.tot_rcv_errs) / sampleTime;
-        ifcIter2->second.snd_rate_kbytes =
-            (ifcIter2->second.tot_snd_kbytes - ifcIter.second.tot_snd_kbytes) / sampleTime;
-        ifcIter2->second.snd_rate_packets =
-            (ifcIter2->second.tot_snd_packets - ifcIter.second.tot_snd_packets) / sampleTime;
-        ifcIter2->second.snd_rate_errs = (ifcIter2->second.tot_snd_errs - ifcIter.second.tot_snd_errs) / sampleTime;
-      }
+      fillNetRate(stats, tempStats, sampleTime);
     }
 
 #endif // __APPLE__
