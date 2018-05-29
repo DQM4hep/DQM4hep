@@ -436,7 +436,7 @@ namespace dqm4hep {
       dqm_float cpuTot = {0.};      // total (sys+user) cpu load used by this process in percentage
       dqm_long vm = {0L};           // virtual memory used by this process in KB
       dqm_long rss = {0L};          // resident memory used by this process in KB
-      timeval lastPollTime;         // last time process stats were polled
+      timeval lastPollTime {0, 0}; // last time process stats were polled
     };
 
     //-------------------------------------------------------------------------------------------------
