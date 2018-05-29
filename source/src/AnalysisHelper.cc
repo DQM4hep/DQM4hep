@@ -34,7 +34,7 @@ namespace dqm4hep {
 
   namespace core {
 
-    float AnalysisHelper::mean(MonitorElementPtr pMonitorElement, float percentage)
+    float AnalysisHelper::mean(MonitorElement* pMonitorElement, float percentage)
     {
 
       std::string ObjectType;
@@ -114,12 +114,12 @@ namespace dqm4hep {
       return result;
     }
 
-    float AnalysisHelper::mean90(MonitorElementPtr pMonitorElement)
+    float AnalysisHelper::mean90(MonitorElement* pMonitorElement)
     {
       return AnalysisHelper::mean(pMonitorElement, 0.9);
     }
 
-    float AnalysisHelper::rms(MonitorElementPtr pMonitorElement, float percentage)
+    float AnalysisHelper::rms(MonitorElement* pMonitorElement, float percentage)
     {
       std::string ObjectType;
 
@@ -211,12 +211,12 @@ namespace dqm4hep {
       return result;
     }
 
-    float AnalysisHelper::rms90(MonitorElementPtr pMonitorElement)
+    float AnalysisHelper::rms90(MonitorElement* pMonitorElement)
     {
       return AnalysisHelper::rms(pMonitorElement, 0.9);
     }
 
-    float AnalysisHelper::median(MonitorElementPtr pMonitorElement)
+    float AnalysisHelper::median(MonitorElement* pMonitorElement)
     {
       // This method works ONLY for a TH1 and must be changed to handle a TGraph
       TH1 *h = pMonitorElement->objectTo<TH1>();

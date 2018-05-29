@@ -55,7 +55,7 @@ namespace dqm4hep {
       PropertyWithinExpectedTest(const std::string &name);
       ~PropertyWithinExpectedTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      void userRun(MonitorElementPtr monitorElement, QualityTestReport &report) override;
+      void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
 
     protected:
       float m_expectedValue;
@@ -124,7 +124,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void PropertyWithinExpectedTest::userRun(MonitorElementPtr monitorElement, QualityTestReport &report) {
+    void PropertyWithinExpectedTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
 
       if (nullptr == monitorElement->objectTo<TH1>() || nullptr == monitorElement->objectTo<TGraph>()) {
 	report.m_message = "ROOT monitor element object is of unrecognised type!";
