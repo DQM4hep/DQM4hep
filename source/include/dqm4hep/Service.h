@@ -36,6 +36,7 @@
 #include "dis.hxx"
 
 // -- dqm4hep headers
+#include "dqm4hep/Internal.h"
 #include "dqm4hep/NetBuffer.h"
 
 namespace dqm4hep {
