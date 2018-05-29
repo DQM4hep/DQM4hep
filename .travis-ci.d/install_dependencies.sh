@@ -7,7 +7,7 @@ mkdir -p dependencies && cd dependencies
 if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then export ROOT_BUILD="Linux-ubuntu14-x86_64-gcc4.8";
 elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then export ROOT_BUILD="macosx64-";
     if [[ "${TRAVIS_OSX_IMAGE}" == "xcode8.3" ]]; then export ROOT_BUILD=$ROOT_BUILD"10.12-clang81";
-    elif [[ "${TRAVIS_OSX_IMAGE}" == "xcode9.2" ]]; then export ROOT_BUILD=$ROOT_BUILD"10.13-clang90";
+    elif [[ "${TRAVIS_OSX_IMAGE}" == "xcode9.3" ]]; then export ROOT_BUILD=$ROOT_BUILD"10.13-clang90";
     fi;
 fi
 export ROOT_BIN="root_v${ROOT_VERSION}.${ROOT_BUILD}.tar.gz"
