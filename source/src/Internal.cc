@@ -142,8 +142,8 @@ namespace dqm4hep {
         dqm_error("[{0}] - Failed to open '/proc/meminfo'", __FUNCTION__);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       }
-      dqm_long_long free = {0LL};
-      dqm_long_long total = {0LL};
+      dqm_long_long memFree = {0LL};
+      dqm_long_long memTotal = {0LL};
 
       dqm_long_long swap_total = {0LL};
       dqm_long_long swap_free = {0LL};
@@ -151,11 +151,11 @@ namespace dqm4hep {
       while (s.Gets(f)) {
         if (s.BeginsWith("MemTotal")) {
           TPRegexp("^.+: *([^ ]+).*").Substitute(s, "$1");
-          total = (s.Atoi() / 1024);
+          memTotal = (s.Atoi() / 1024);
         }
         if (s.BeginsWith("MemFree")) {
           TPRegexp("^.+: *([^ ]+).*").Substitute(s, "$1");
-          free = (s.Atoi() / 1024);
+          memFree = (s.Atoi() / 1024);
         }
         if (s.BeginsWith("SwapTotal")) {
           TPRegexp("^.+: *([^ ]+).*").Substitute(s, "$1");
@@ -168,11 +168,11 @@ namespace dqm4hep {
       }
       fclose(f);
 
-      stats.vmTot = (dqm_int)(total + swap_total);
-      stats.vmUsed = (dqm_int)(total - free);
-      stats.vmFree = (dqm_int)(free + swap_free);
-      stats.rssTot = (dqm_int)(total);
-      stats.rssUsed = (dqm_int)((total - free));
+      stats.vmTot = (dqm_int)(memTotal + swap_total);
+      stats.vmUsed = (dqm_int)(memTotal - rssFree);
+      stats.vmFree = (dqm_int)(memFree + swap_free);
+      stats.rssTot = (dqm_int)(memTotal);
+      stats.rssUsed = (dqm_int)(memTotal - memFree);
     }
 
     //-------------------------------------------------------------------------------------------------
