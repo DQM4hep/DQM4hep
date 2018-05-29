@@ -2,18 +2,6 @@ language: cpp
 dist: trusty
 sudo: required
 
-os:
-  - linux
-  - osx
-
-compiler:
-  - gcc
-  - clang
-
-osx_image:
-  - xcode8.3 # default, osx 10.12
-  - xcode9.2 # latest for root 6.10.08, osx 10.13
-
 env:
   - ROOT_VERSION=6.10.08
 
@@ -21,9 +9,16 @@ matrix:
   fast_finish: true
   allow_failures:
   - os: osx
-  exclude:
+  include:
+    - os: linux
+      compiler:
+        - gcc
+        - clang
     - os: osx
-      compiler: gcc
+      compiler: clang
+      osx_image:
+        - xcode8.3 # default, osx 10.12
+        - xcode9.2 # latest for root 6.10.08, osx 10.13
 
 addons:
   apt:
