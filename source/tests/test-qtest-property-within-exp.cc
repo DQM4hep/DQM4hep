@@ -120,24 +120,22 @@ void fillTest(TH1 *histogram) {
   histogram->Fill(18);
 }
 
-/*
 void fillTest(TGraph *graph) {
-  graph->SetPoint(2,0);
-  graph->SetPoint(5,1);
-  graph->SetPoint(6,2);
-  graph->SetPoint(8,3);
-  graph->SetPoint(8,3);
-  graph->SetPoint(10,4);
-  graph->SetPoint(10,5);
-  graph->SetPoint(10,5);
-  graph->SetPoint(10,4);
-  graph->SetPoint(12,3);
-  graph->SetPoint(12,3);
-  graph->SetPoint(14,2);
-  graph->SetPoint(15,1);
-  graph->SetPoint(18,0);
+  graph->SetPoint( 0,  2, 0);
+  graph->SetPoint( 1,  5, 1);
+  graph->SetPoint( 2,  6, 2);
+  graph->SetPoint( 3,  8, 3);
+  graph->SetPoint( 4,  8, 3);
+  graph->SetPoint( 5, 10, 4);
+  graph->SetPoint( 6, 10, 5);
+  graph->SetPoint( 7, 10, 5);
+  graph->SetPoint( 8, 10, 4);
+  graph->SetPoint( 9, 12, 3);
+  graph->SetPoint(10, 12, 3);
+  graph->SetPoint(11, 14, 2);
+  graph->SetPoint(12, 15, 1);
+  graph->SetPoint(13, 18, 0);
 }
-*/
 
 int main(int /*argc*/, char ** /*argv*/) {
   
@@ -147,38 +145,29 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
-  //
-  // TH1
-  //
-
   // create test element TH1
   MonitorElementPtr testElementTH1;
   meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElementTH1, 21, 0.f, 20.f);
   TH1F *histogram = testElementTH1->objectTo<TH1F>();
   assert_test(nullptr != histogram);
   fillTest(histogram);
-
-  // create the qtest XML config
-  const std::string qtestType("PropertyWithinExpectedTest");
-  const std::string qtestName("UnitTestPropertyWithinExp");
-  TiXmlElement *qtestElement = new TiXmlElement("qtest");
-  std::shared_ptr<TiXmlElement> sharedQTest(qtestElement);
-  qtestElement->SetAttribute("name", qtestName);
-  qtestElement->SetAttribute("type", qtestType);
-  qtestElement->LinkEndChild(createParameter("ExpectedValue", 10)); // Not sure about this, but this is what we've seen Remi using
-  qtestElement->LinkEndChild(createParameter("DeviationLower", 8));
-  qtestElement->LinkEndChild(createParameter("DeviationUpper", 12));
-  qtestElement->LinkEndChild(createParameter("Property", "Mean"));
-
-  // configure the qtest
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(qtestElement));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), qtestName));
+  
+  // create test element TGraph
+  MonitorElementPtr testElementTGraph;
+  meMgr->bookObject<TGraph>("/", "TestGraph", "A test graph", testElementTGraph);
+  TGraph *graph = testElementTGraph->objectTo<TGraph>();
+  assert_test(nullptr != graph);
+  fillTest(graph);
+  
+  //
+  // TH1 Tests
+  //
 
   // configure reporting
   QReportStorage storage; QReport report; json jsonReport;
   
   // valid test
-  std::shared_ptr<TiXmlElement> sharedQTest1(createQTestXml("ValidTest-Mean10Long", "Mean", "WithinRange", 10, 8, 12));
+  std::shared_ptr<TiXmlElement> sharedQTest1(createQTestXml("test1", "Mean", "WithinRange", 10, 8, 12));
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest1.get()));
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test1"));
   assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test1", storage));
@@ -189,52 +178,84 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   // valid test but property is not within range
   storage.clear();
-  std::shared_ptr<TiXmlElement> sharedQTest2(createQTestXml("InvalidTest-WrongValue-Mean20Long", "Mean", "WithinRange", 20, 18, 22));
+  std::shared_ptr<TiXmlElement> sharedQTest2(createQTestXml("test2", "Mean", "WithinRange", 20, 18, 22));
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest2.get()));
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test2"));
   assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test2", storage));
   assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test2", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  assert_test(report.m_qualityFlag == ERROR);
 
-  // invalid test - withinrange method but only one bound specified
+  // invalid test - unrecognised test type
   storage.clear();
-  std::shared_ptr<TiXmlElement> sharedQTest3(createQTestXml("InvalidTest-TooFewBounds-Mean10Long", "Mean", "WithinRange", 0, 0, 0));  // Need to set parameters for this here
+  std::shared_ptr<TiXmlElement> sharedQTest3(createQTestXml("test3", "Foo", "WithinRange", 10, 8, 12));
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest3.get()));
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test3"));
   assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test3", storage));
   assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test3", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  assert_test(report.m_qualityFlag == INVALID);
 
-  // invalid test - lowerthan method but with no upper bound specified
+  // invalid test - unrecognised test method
   storage.clear();
-  std::shared_ptr<TiXmlElement> sharedQTest4(createQTestXml("InvalidTest-NoBound-MeanBelow12", "Mean", "LowerThan", 0, 0, 0));  // Need to set parameters for this here
+  std::shared_ptr<TiXmlElement> sharedQTest4(createQTestXml("test4", "Mean", "Bar", 10, 8, 12));
   assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest4.get()));
   assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTH1->path(), testElementTH1->name(), "test4"));
   assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTH1->path(), testElementTH1->name(), "test4", storage));
   assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTH1->path(), testElementTH1->name(), "test4", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
+  assert_test(report.m_qualityFlag == INVALID);
+
+  //
+  // TGraph Tests
+  //
+
+  // valid test
+  storage.clear();
+  std::shared_ptr<TiXmlElement> sharedQTest5(createQTestXml("test5", "Mean", "WithinRange", 2.5, 2.0, 3.0));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest5.get()));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test5"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test5", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTGraph->path(), testElementTGraph->name(), "test5", report));
+  report.toJson(jsonReport);
+  DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
   assert_test(report.m_qualityFlag == SUCCESS);
 
+  // valid test but property is not within range
+  storage.clear();
+  std::shared_ptr<TiXmlElement> sharedQTest6(createQTestXml("test6", "Mean", "WithinRange", 5, 4.5, 5.5));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest6.get()));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test6"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test6", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTGraph->path(), testElementTGraph->name(), "test6", report));
+  report.toJson(jsonReport);
+  DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
+  assert_test(report.m_qualityFlag == ERROR);
 
-  //
-  // TGraph
-  //
+  // invalid test - unrecognised test type
+  storage.clear();
+  std::shared_ptr<TiXmlElement> sharedQTest7(createQTestXml("test7", "Foo", "WithinRange", 2.5, 2.0, 3.0));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest7.get()));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test7"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test7", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTGraph->path(), testElementTGraph->name(), "test7", report));
+  report.toJson(jsonReport);
+  DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
+  assert_test(report.m_qualityFlag == INVALID);
 
-  // create test element TGraph
-      // test the TH1 first, then move onto TGraphs
-
-  /*
-  MonitorElementPtr testElementTGraph;
-  meMgr->bookObject("/", "TestGraph", testElementTGraph, TGraphAllocator());
-  TGraph *graph = testElementTGraph->objectTo<TGraph>();
-  assert_test(nullptr != graph);
-  fillTest(graph);
-  */
+  // invalid test - unrecognised test method
+  storage.clear();
+  std::shared_ptr<TiXmlElement> sharedQTest8(createQTestXml("test8", "Mean", "Bar", 2.5, 2.0, 3.0));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest8.get()));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test8"));
+  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElementTGraph->path(), testElementTGraph->name(), "test8", storage));
+  assert_test(STATUS_CODE_SUCCESS == storage.report(testElementTGraph->path(), testElementTGraph->name(), "test8", report));
+  report.toJson(jsonReport);
+  DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
+  assert_test(report.m_qualityFlag == INVALID);
 
   return 0;
 }
