@@ -171,8 +171,8 @@ namespace dqm4hep {
       stats.vmTot = (dqm_int)(total + swap_total);
       stats.vmUsed = (dqm_int)(total - free);
       stats.vmFree = (dqm_int)(free + swap_free);
-      stats.rssTot = (dqm_int)(total >> 20);
-      stats.rssUsed = (dqm_int)((total - free) >> 20);
+      stats.rssTot = (dqm_int)(total);
+      stats.rssUsed = (dqm_int)((total - free));
     }
 
     //-------------------------------------------------------------------------------------------------
