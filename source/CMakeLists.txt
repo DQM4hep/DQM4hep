@@ -49,6 +49,8 @@ if( DQM4HEP_TESTING )
   dqm4hep_add_test( NAME test-xmlparser ARGS "${PROJECT_SOURCE_DIR}/tests/test_xmlparser.xml" )
   
   # Super-custom test
+  set(CUSTOM_TEST_LIBRARY_DIR ${${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS})
+  string(REPLACE ";" ":" CUSTOM_TEST_LIBRARY_DIR "${CUSTOM_TEST_LIBRARY_DIR}")
   configure_file( "${PROJECT_SOURCE_DIR}/tests/quality-test-test.in"
   "${PROJECT_BINARY_DIR}/bin/test-quality-test-test" @ONLY )
   
