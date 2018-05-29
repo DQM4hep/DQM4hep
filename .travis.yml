@@ -6,10 +6,21 @@ os:
   - linux
   - osx
 
+compiler:
+  - gcc
+  - clang
+
+osx_image:
+  - xcode8.3 # default, osx 10.12
+  - xcode9.3 # current, osx 10.13
+
 matrix:
   fast_finish: true
   allow_failures:
   - os: osx
+  exclude:
+    - os: osx
+      compiler: gcc
 
 addons:
   apt:
@@ -34,10 +45,6 @@ before_install:
 
 after_success:
   - ./.travis-ci.d/deploy-doxygen.sh
-
-compiler:
-  - gcc
-  - clang
 
 # Don't send e-mail notifications
 notifications:
