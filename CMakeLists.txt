@@ -25,8 +25,8 @@ option( DQMNET_WEBSOCKETS "Set to OFF to skip build/install web socket library" 
 find_package( Threads REQUIRED )
 
 # ----- Find DQMCore package -----
-dqm4hep_find_packages( 
-  PACKAGES DQMCore 
+dqm4hep_find_packages(
+  PACKAGES DQMCore
   REQUIRED ADD_DEPENDS
 )
 
@@ -46,12 +46,18 @@ if( DQMNET_WEBSOCKETS )
   endif()
 
   # ----- Boost package -----
-  find_package( Boost 1.54.0 COMPONENTS ${BOOST_COMPONENTS} REQUIRED )
-  include_directories( SYSTEM ${Boost_INCLUDE_DIR} )
+  dqm4hep_find_package(
+    PACKAGE Boost
+    VERSION 1.54.0
+    COMPONENTS ${BOOST_COMPONENTS}
+    REQUIRED ADD_DEPENDS
+  )
 
   # ----- OpenSSL package -----
-  find_package( OpenSSL REQUIRED )
-  include_directories( ${OPENSSL_INCLUDE_DIR} )
+  dqm4hep_find_package(
+    PACKAGE OpenSSL
+    REQUIRED ADD_DEPENDS
+   )
 endif()
 
 ###############################
@@ -64,7 +70,7 @@ display_std_variables()
 
 ###############################
 # generate and install following configuration files
-dqm4hep_generate_package_configuration( 
-  PACKAGE ${PROJECT_NAME}
+dqm4hep_generate_package_configuration(
+  PACKAGE_NAME ${PROJECT_NAME}
   LIBRARIES ${PROJECT_NAME} dim
 )
