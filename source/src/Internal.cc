@@ -309,6 +309,8 @@ namespace dqm4hep {
 
         if (EOF == fscanf(file, "%*[^\n]\n"))
           break;
+
+        stats[iname] = stat;
       }
       fclose(file);
 #endif // DQM4HEP_WITH_PROC_FS
