@@ -45,6 +45,10 @@ namespace dqm4hep {
 
 #if defined(__linux__) || defined(__APPLE__)
 
+    /**
+     *  @brief  Compute process cpu load for osx and linux
+     *  @param  stats the ProcessStats struct to fill
+     */
     static void procCpuStats(ProcessStats &stats) {
       struct rusage ru;
       if (getrusage(RUSAGE_SELF, &ru) < 0) {
@@ -83,8 +87,9 @@ namespace dqm4hep {
     }
 
     //-------------------------------------------------------------------------------------------------
+
     /**
-     *  @brief  Compute network rate and fill NetworkStats struct
+     *  @brief  Compute network rate and fill NetworkStats struct for osx and linux
      *  @param  stats the NetworkStats struct to fill
      *  @param  tempStats the NetworkStats struct to compare with
      *  @param  sampleTime time between the two NetworkStats reading
@@ -142,6 +147,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Read cpu load for linux
+     *  @param  ticks an array of length 4 to store the cpu ticks value
+     */
     static void readLinuxCpu(long *ticks) {
       ticks[0] = ticks[1] = ticks[2] = ticks[3] = 0;
 
@@ -161,6 +170,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get cpu stats for linux
+     *  @param  stats the CpuStats struct to store the data
+     *  @param  sampleTime the time between two cpu reading to compute the load
+     */
     static void linuxCpuStats(CpuStats &stats, dqm_int sampleTime) {
       dqm_double avg[3] = {-1.};
 #ifndef R__WINGCC
@@ -202,6 +216,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get memory stats for linux
+     *  @param  stats the MemoryStats struct to store the data
+     */
     static void linuxMemStats(MemoryStats &stats) {
       TString s;
       FILE *f = fopen("/proc/meminfo", "r");
@@ -244,6 +262,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get process stats for linux
+     *  @param  stats the ProcessStats struct to store the data
+     */
     static void linuxProcStats(ProcessStats &stats) {
 
       procCpuStats(stats);
@@ -265,6 +287,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Read network stats for linux from /proc/net.dev
+     *  @param  stats the NetworkStats struct to store the data
+     */
     static void  readLinuxNet(NetworkStats &stats) {
 #if defined(DQM4HEP_WITH_PROC_FS)
       FILE *file = fopen("/proc/net/dev", "r");
@@ -320,6 +346,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get network stats for linux
+     *  @param  stats the NetworkStats struct to store the data
+     *  @param  sampleTime the time between two network i/o reading to compute the rate
+     */
     static void linuxNetStats(NetworkStats &stats, dqm_int sampleTime) {
       NetworkStats tempStats;
       readLinuxNet(tempStats);
@@ -339,9 +370,13 @@ namespace dqm4hep {
 #include <net/route.h>
 #include <sys/sysctl.h>
 
-        //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
-        static void readDarwinCpu(long *ticks) {
+    /**
+     *  @brief  Read cpu load for osx
+     *  @param  ticks an array of length 4 to store the cpu ticks value
+     */
+    static void readDarwinCpu(long *ticks) {
       ticks[0] = ticks[1] = ticks[2] = ticks[3] = 0;
 
       host_cpu_load_info_data_t cpu;
@@ -361,6 +396,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get cpu stats for osx
+     *  @param  stats the CpuStats struct to store the data
+     *  @param  sampleTime the time between two cpu reading to compute the load
+     */
     static void darwinCpuStats(CpuStats &stats, dqm_int sampleTime) {
       dqm_double avg[3] = {-1.};
       if (getloadavg(avg, sizeof(avg)) < 0) {
@@ -398,6 +438,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get memory stats for osx
+     *  @param  stats the MemoryStats struct to store the data
+     */
     static void darwinMemStats(MemoryStats &stats) {
       vm_statistics_data_t vm_info;
       mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
@@ -457,6 +501,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get process stats for osx
+     *  @param  stats the ProcessStats struct to store the data
+     */
     static void darwinProcStats(ProcessStats &stats) {
 #ifdef _LP64
 #define vm_region vm_region_64
@@ -551,6 +599,10 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Read network stats for osx via sysctl
+     *  @param  stats the NetworkStats struct to store the data
+     */
     static void readDarwinNet(NetworkStats &stats) {
       double unit = 1024.; // Store everything in kb
 
@@ -623,6 +675,11 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
+    /**
+     *  @brief  Get network stats for osx
+     *  @param  stats the NetworkStats struct to store the data
+     *  @param  sampleTime the time between two network i/o reading to compute the rate
+     */
     static void darwinNetStats(NetworkStats &stats, dqm_int sampleTime) {
 
       NetworkStats tempStats;
