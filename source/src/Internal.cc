@@ -204,7 +204,7 @@ namespace dqm4hep {
       fclose(f);
 
       stats.vmTot = (dqm_int)(memTotal + swap_total);
-      stats.vmUsed = (dqm_int)(memTotal - rssFree);
+      stats.vmUsed = (dqm_int)(memTotal - memFree);
       stats.vmFree = (dqm_int)(memFree + swap_free);
       stats.rssTot = (dqm_int)(memTotal);
       stats.rssUsed = (dqm_int)(memTotal - memFree);
