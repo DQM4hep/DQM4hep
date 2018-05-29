@@ -43,7 +43,7 @@ namespace dqm4hep {
 
       //TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
-      if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
+      if (nullptr != pMonitorElement->objectTo<TGraph>()) {
 	ObjectType = "TGraph";
       }
       else if (nullptr != pMonitorElement->objectTo<TH1>()){
@@ -61,7 +61,7 @@ namespace dqm4hep {
 	}
 	if (ObjectType == "TGraph") {
 	  TGraph *h = pMonitorElement->objectTo<TGraph>();
-	  result = h->GetMean(1);
+	  result = h->GetMean(2);
 	}
       }
       else {
@@ -102,14 +102,14 @@ namespace dqm4hep {
 	  //TGraph *h = (TGraph*)(ThisObject);
 	  TGraph *h = pMonitorElement->objectTo<TGraph>();
 
-	  double* arrayX = h->GetX();
-	  int entries = h->GetHistogram()->GetNbinsX();
+	  double* arrayY = h->GetY();
+	  int entries = h->GetN();
 	  int startNum = 0.5*(1.0-percentage)*entries;
 	  int endNum = entries-startNum;
 	  double sum = 0.0;
 
 	  for (int i=startNum; i<endNum; i++) {
-	    sum += arrayX[i];
+	    sum += arrayY[i];
 	  }
 
 	  result = sum/(percentage*entries);
@@ -131,7 +131,7 @@ namespace dqm4hep {
 
       //TObject *ThisObject = pMonitorElement->objectTo<TObject>();
 
-      if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
+      if (nullptr != pMonitorElement->objectTo<TGraph>()) {
 	ObjectType = "TGraph";
       }
       else if (nullptr != pMonitorElement->objectTo<TH1>()){
@@ -142,7 +142,7 @@ namespace dqm4hep {
 	throw StatusCodeException(STATUS_CODE_FAILURE);
       }
 
-      if (nullptr != pMonitorElement->objectTo<TGraph>() && pMonitorElement->type() == "TGraph") {
+      if (nullptr != pMonitorElement->objectTo<TGraph>()) {
 	ObjectType = "TGraph";
       }
       else if (nullptr != pMonitorElement->objectTo<TH1>()){
@@ -202,15 +202,15 @@ namespace dqm4hep {
 	  //TGraph *h = (TGraph*)(ThisObject);
 	  TGraph *h = pMonitorElement->objectTo<TGraph>();
 
-	  double* arrayX = h->GetX();
-	  int entries = h->GetHistogram()->GetNbinsX();
+	  double* arrayY = h->GetY();
+	  int entries = h->GetN();
 	  int startNum = 0.5*(1.0-percentage)*entries;
 	  int endNum = entries-startNum;
 	  double sum = 0.0;
 	  float mean = h->GetMean(1);
 
 	  for (int i=startNum; i<endNum; i++) {
-	    sum += pow(arrayX[i]-mean,2);
+	    sum += pow(arrayY[i]-mean,2);
 	  }
 
 	  result = pow(sum/(percentage*entries),0.5);
@@ -226,16 +226,30 @@ namespace dqm4hep {
 
     float AnalysisHelper::median(MonitorElement* pMonitorElement)
     {
-      // This method works ONLY for a TH1 and must be changed to handle a TGraph
-      TH1 *h = pMonitorElement->objectTo<TH1>();
 
+      float result = 0.0;
       Double_t xq[1];
       Double_t yq[1];
       xq[0] = 0.5;
 
-      h->GetQuantiles(1, yq, xq);
-      float result = yq[0];
+      if (nullptr != pMonitorElement->objectTo<TH1>()) {
+	TH1 *h = pMonitorElement->objectTo<TH1>();
+	h->GetQuantiles(1, yq, xq);
+	return yq[0];
+      }
+      else if (nullptr != pMonitorElement->objectTo<TGraph>()) {
+	TGraph *h = pMonitorElement->objectTo<TGraph>();
+	double* arrayY = h->GetY();
+	int size = sizeof(arrayY)/sizeof(arrayY[0]);
+	std::cout << "Size of array: " << size << std::endl;
 
+	if (size % 2) {
+	  result = arrayY[size/2];
+	}
+	else {
+	  result = (arrayY[size/2] + arrayY[(size/2)-1])/2;
+	}
+      }
       return result;
     }
 
