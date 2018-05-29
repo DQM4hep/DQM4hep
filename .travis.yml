@@ -12,7 +12,10 @@ compiler:
 
 osx_image:
   - xcode8.3 # default, osx 10.12
-  - xcode9.3 # current, osx 10.13
+  - xcode9.2 # latest for root 6.10.08, osx 10.13
+
+env:
+  - ROOT_VERSION=6.10.08
 
 matrix:
   fast_finish: true
