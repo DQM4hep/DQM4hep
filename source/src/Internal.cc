@@ -313,7 +313,9 @@ namespace dqm4hep {
         stats[iname] = stat;
       }
       fclose(file);
-#endif // DQM4HEP_WITH_PROC_FS
+#else // DQM4HEP_WITH_PROC_FS
+    static void readLinuxNet(NetworkStats &/*stats*/) {
+#endif
     }
 
     //-------------------------------------------------------------------------------------------------
