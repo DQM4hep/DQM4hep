@@ -4,6 +4,7 @@ mark_as_advanced( CMAKE_INSTALL_RPATH )
 
 # add install path to the rpath list (apple)
 if( APPLE )
+  set( CMAKE_MACOSX_RPATH ON )
   set( CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
   mark_as_advanced( CMAKE_INSTALL_NAME_DIR )
 endif()
