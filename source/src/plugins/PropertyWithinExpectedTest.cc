@@ -81,17 +81,17 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     PropertyWithinExpectedTest::PropertyWithinExpectedTest(const std::string &qname)
-        : QualityTest("MeanWithinExpected", qname),
+        : QualityTest("PropertyWithinExpected", qname),
           m_expectedValue(0.f),
-	  m_deviationLower(float NAN),
-	  m_deviationUpper(float NAN),
+	  m_deviationLower(0.f),
+	  m_deviationUpper(0.f),
 	  m_percentage(1.0),
 	  m_property(),
 	  m_method("WithinRange")
 {
-      m_description = "Test if the mean of the histogram if contained in the expected user range. The quality is "
-                      "defined as the probability to be close to mean : 1 at the mean, 0 infinitely far from the mean "
-                      "(using TMath::Prob(chi2,1))";
+      m_description = "Test if a given property (mean, mean90, RMS, RMS90, median) of the histogram or graph is contained within the expected user range, "
+	              "or above or below a given threshold. For 'withing range' tests, the quality is defined as the probability to be close to mean: 1 at "
+	              "the mean, 0 infinitely far from the mean (using TMath::Prob(chi2,1)). For threshold tests, quality is 1 if it passes, 0 otherwise.";
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -107,16 +107,12 @@ namespace dqm4hep {
       if (m_method == "HigherThan") {
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "DeviationLower", m_deviationLower));
       }
-      else if (m_method == "LowerThan") {
+      if (m_method == "LowerThan") {
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "DeviationUpper", m_deviationUpper));
       }
-      else if (m_method == "WithinRange") {
+      if (m_method == "WithinRange") {
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "DeviationUpper", m_deviationUpper));
 	RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::readParameter(xmlHandle, "DeviationLower", m_deviationLower));
-      }
-      else {
-	dqm_error("Error in qtest {0} : invalid parameters!", name());
-	throw StatusCodeException(STATUS_CODE_FAILURE);
       }
 
       return STATUS_CODE_SUCCESS;
@@ -126,7 +122,7 @@ namespace dqm4hep {
 
     void PropertyWithinExpectedTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
 
-      if (nullptr == monitorElement->objectTo<TH1>() || nullptr == monitorElement->objectTo<TGraph>()) {
+      if (nullptr == monitorElement->objectTo<TH1>() && nullptr == monitorElement->objectTo<TGraph>()) {
 	report.m_message = "ROOT monitor element object is of unrecognised type!";
 	throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
@@ -143,7 +139,7 @@ namespace dqm4hep {
 
       if (m_property == "Mean")
 	{
-	  result = AnalysisHelper::mean(monitorElement,m_percentage);
+	  result = AnalysisHelper::mean(monitorElement);
 	}
       else if (m_property == "Mean90")
 	{
@@ -151,7 +147,7 @@ namespace dqm4hep {
 	}
       else if (m_property == "RMS")
 	{
-	  result = AnalysisHelper::rms(monitorElement,m_percentage);
+	  result = AnalysisHelper::rms(monitorElement);
 	}
       else if (m_property == "RMS90")
 	{
