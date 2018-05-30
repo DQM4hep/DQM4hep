@@ -31,6 +31,7 @@ dqm4hep_require_cpp_standard()
 option( DQM4HEP_USE_MASTER       "Whether to use master version of subpackages" ON )
 option( DQM4HEP_BUILD_OFFLINE    "Build offline" OFF )
 option( DQM4HEP_BUILD_MKDOCS     "Download and build mkdocs documentation" OFF )
+option( DQM4HEP_COVERITY_SCAN    "Set the coverity scan mode" OFF )
 
 # ----- Versions of DQM4HEP subpackages -----
 # Don't forget to update when releasing DQM4hep
@@ -92,6 +93,12 @@ if( DQM4HEP_TESTING )
   set( DQM4HEP_TEST_COMMAND "ctest" )
 endif()
 
+set( CUSTOM_BUILD_COMMAND make install )
+set( COVERITY_SCAN_DIR "${PROJECT_BINARY_DIR}/cov-int" )
+if( DQM4HEP_COVERITY_SCAN )
+  set( CUSTOM_BUILD_COMMAND cov-build --dir ${COVERITY_SCAN_DIR} make install )
+endif()
+
 # TODO create an example package
 # option( BUILD_EXAMPLES "Build DQM4hep examples" OFF )
 # message( STATUS "BUILD_EXAMPLES: ${BUILD_EXAMPLES}" )
@@ -118,6 +125,7 @@ ExternalProject_Add( DQMCore
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/DQMCore
     UPDATE_COMMAND ""
     TEST_COMMAND ${DQM4HEP_TEST_COMMAND}
+    BUILD_COMMAND ${CUSTOM_BUILD_COMMAND}
 )
 
 # ----- DQMNet package -----
@@ -130,6 +138,7 @@ ExternalProject_Add( DQMNet
     LIST_SEPARATOR %
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/DQMNet
     UPDATE_COMMAND ""
+    BUILD_COMMAND ${CUSTOM_BUILD_COMMAND}
 )
 
 # ----- DQMOnline package -----
@@ -143,6 +152,7 @@ ExternalProject_Add( DQMOnline
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/DQMOnline
     UPDATE_COMMAND ""
     TEST_COMMAND ${DQM4HEP_TEST_COMMAND}
+    BUILD_COMMAND ${CUSTOM_BUILD_COMMAND}
 )
 
 if( DQM4HEP_BUILD_MKDOCS )
