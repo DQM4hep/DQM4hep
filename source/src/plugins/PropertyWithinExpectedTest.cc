@@ -89,9 +89,9 @@ namespace dqm4hep {
 	  m_property(),
 	  m_method("WithinRange")
 {
-      m_description = "Test if a given property (mean, mean90, RMS, RMS90, median) of the histogram or graph is contained within the expected user range, "
-	              "or above or below a given threshold. For 'withing range' tests, the quality is defined as the probability to be close to mean: 1 at "
-	              "the mean, 0 infinitely far from the mean (using TMath::Prob(chi2,1)). For threshold tests, quality is 1 if it passes, 0 otherwise.";
+      m_description = "Test if a given property (Mean, Mean90, RMS, RMS90, Median) of a histogram or graph is contained within the expected user-defined range, "
+	              "or above or below a user-defined threshold. For 'within range' tests the quality is defined as the probability to be close to the mean: 1 at "
+	              "the mean, 0 infinitely far from the mean (using TMath::Prob(chi2,1)). For threshold tests the quality is 1 if it passes, 0 otherwise.";
     }
 
     //-------------------------------------------------------------------------------------------------
