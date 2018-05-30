@@ -15,6 +15,13 @@
 	<parameter name="Property"> Mean </parameter>
       </qtest>
 
+      <qtest type="PropertyWithinExpectedTest" name="MeanAround10Short">
+        <parameter name="ExpectedValue" value="10"/>
+        <parameter name="DeviationLower" value="9.5"/>
+        <parameter name="DeviationUpper" value="10.5"/>
+	<parameter name="Property"> Mean </parameter>
+      </qtest>
+
       <qtest type="PropertyWithinExpectedTest" name="MeanBelow12">
         <parameter name="DeviationUpper" value="12" />
 	<parameter name="Property"> Mean </parameter>
@@ -76,7 +83,7 @@
 	<parameter name="Property"> Mean </parameter>
       </qtest>
 
-      <qtest type="PropertyWithinExpectedTest" name="TGraphMeanAround3" >
+      <qtest type="PropertyWithinExpectedTest" name="TGraphMeanAround3">
 	<parameter name="ExpectedValue" value="3"/>
 	<parameter name="DeviationLower" value="1"/>
 	<parameter name="DeviationUpper" value="4"/>
@@ -97,18 +104,25 @@
 	<parameter name="Property"> Mean90 </parameter>
       </qtest>
 
-      <qtest type="PropertyWithinExpectedTest" name="TGraphRMS90Around2" >
+      <qtest type="PropertyWithinExpectedTest" name="TGraphRMS90Around2" error="0.5">
 	<parameter name="ExpectedValue" value="2"/>
 	<parameter name="DeviationLower" value="0"/>
 	<parameter name="DeviationUpper" value="4"/>
 	<parameter name="Property"> RMS90 </parameter>
       </qtest>
 
+      <qtest type="PropertyWithinExpectedTest" name="TGraphMedianAround0.1" error="0.5" >
+	<parameter name="ExpectedValue" value="0.1"/>
+	<parameter name="DeviationLower" value="0.0"/>
+	<parameter name="DeviationUpper" value="0.2"/>
+	<parameter name="Property"> Median </parameter>
+      </qtest>
+
     </qtests>
 
     <!-- All monitor elements and qtests to process -->
     <monitorElements>
-      <file name="test_samples.root">
+      <file name="/lustre/scratch/epp/ilc/tc297/DQM4HEP/dqm4hep-core/tests/test_samples.root">
         <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
           <qtest name="MeanAround10Long" />
 	  <qtest name="Mean90Around10Short" />
@@ -133,6 +147,7 @@
 	  <qtest name="TGraphMean90Around0" />
 	  <qtest name="TGraphRMSAround2" />
 	  <qtest name="TGraphRMS90Around2" />
+	  <qtest name="TGraphMedianAround0.1" />
 	</fileElement>
 	
       </file>
