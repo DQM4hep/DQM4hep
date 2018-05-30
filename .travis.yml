@@ -1,11 +1,6 @@
 language: cpp
-sudo: false
 dist: trusty
-
-compiler:
-  - gcc
-  - clang
-
+sudo: required
 os:
   - linux
 
@@ -17,25 +12,23 @@ addons:
       - libmysqlclient-dev
       - doxygen
       - g++-4.9
-      
-before_install:
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
-  - mkdir -p dependencies
-  - cd dependencies
-  - wget https://root.cern.ch/download/root_v6.10.08.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-  - tar -xf root_v6.10.08.Linux-ubuntu14-x86_64-gcc4.8.tar.gz
-  - source root/bin/thisroot.sh
-  - root-config --version
-  - cd ..
-  - mkdir -p build
-  - cd build
-  - cmake -DDQM4HEP_USE_MASTER=ON -DDQM4HEP_DOXYGEN_DOC=OFF -DDQM4HEP_TESTING=ON -DDQM4HEP_WARNING_AS_ERROR=ON -DDQM4HEP_DEV_WARNINGS=ON ..
 
 script:
-  - make install -j 4
-  
+  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
+  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${CXX}" == "g++"  ]];
+    then ./.travis-ci.d/coverity_scan.sh;
+    else ./.travis-ci.d/compile_and_test.sh;
+    fi
+
+before_install:
+  - ./.travis-ci.d/install_dependencies.sh
+
+compiler:
+  - gcc
+  - clang
+
+# Don't send e-mail notifications
 notifications:
   email:
     on_success: never
     on_failure: always
-
