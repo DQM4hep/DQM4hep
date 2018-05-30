@@ -122,7 +122,7 @@
 
     <!-- All monitor elements and qtests to process -->
     <monitorElements>
-      <file name="/lustre/scratch/epp/ilc/tc297/DQM4HEP/dqm4hep-core/tests/test_samples.root">
+      <file name="test_samples.root">
         <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
           <qtest name="MeanAround10Long" />
 	  <qtest name="Mean90Around10Short" />
