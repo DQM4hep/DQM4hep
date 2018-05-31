@@ -43,7 +43,7 @@ cd "$TRAVIS_BUILD_DIR"
 
 source dependencies/root/bin/thisroot.sh
 
-cd build
+cd dqm4hep/build
 
 # activate doxygen building target
 cmake -DDQM4HEP_DOXYGEN_DOC=ON ..
@@ -77,7 +77,7 @@ cd doxygen/${doxygenDirectory}
 rm -rf *
 
 # copy the new one in place
-cp -r $TRAVIS_BUILD_DIR/build/docbuild/DQMCore/html/* .
+cp -r $TRAVIS_BUILD_DIR/dqm4hep/doc/DQMCore/html/* .
 
 # commit the new doc
 git add ./*
