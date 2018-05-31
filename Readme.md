@@ -1,9 +1,15 @@
-<img src="https://travis-ci.org/DQM4HEP/dqm4hep-net.svg?branch=master" align="left" />
-<img src="https://scan.coverity.com/projects/15305/badge.svg" align="left" />
-<img src="https://readthedocs.org/projects/dqm4hep/badge/?version=latest" align="left" />
-<a href="https://dqm4hep.github.io/dqm4hep-doxygen/doxygen/dqm4hep-net/master/index.html">
-<img src="https://codedocs.xyz/doxygen/doxygen.svg" align="left"/>
+<a href="https://travis-ci.org/DQM4HEP/dqm4hep-net">
+  <img src="https://travis-ci.org/DQM4HEP/dqm4hep-net.svg?branch=master" align="left" /> 
+</a> &nbsp;
+<a href="https://scan.coverity.com/projects/dqm4hep-dqm4hep">
+  <img src="https://scan.coverity.com/projects/13354/badge.svg" align="left" /> &nbsp;
 </a>
+<a href="http://dqm4hep.readthedocs.io/">
+  <img src="https://readthedocs.org/projects/dqm4hep/badge/?version=latest" align="left" /> &nbsp;
+</a>
+<a href="https://dqm4hep.github.io/dqm4hep-doxygen/doxygen/dqm4hep-net/master/index.html">
+  <img src="https://codedocs.xyz/doxygen/doxygen.svg" align="left"/>
+</a> </br>
 
 # DQM4HEP Networking layer
 # A Data Quality Monitoring for High Energy Physics
