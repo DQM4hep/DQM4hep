@@ -14,10 +14,7 @@ addons:
       - g++-4.9
 
 script:
-  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${CXX}" == "g++"  ]];
-    then ./.travis-ci.d/coverity_scan.sh;
-    else ./.travis-ci.d/compile_and_test.sh;
-    fi
+  - ./.travis-ci.d/compile_and_test.sh
 
 before_install:
   - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
