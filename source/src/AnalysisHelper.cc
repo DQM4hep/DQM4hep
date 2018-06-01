@@ -36,50 +36,44 @@ namespace dqm4hep {
 
     float AnalysisHelper::mean(MonitorElement* pMonitorElement, float percentage)
     {
-      TH1 *pTH1 = new TH1F; // While this is declared as a TH1F, it doesn't seem to matter since it's overwritten below. It's left as a float as this is the most likely type.
-      TGraph *pGraph = new TGraph;
+      TH1 *pHistogram = pMonitorElement->objectTo<TH1>();
+      TGraph *pGraph = pMonitorElement->objectTo<TGraph>();
       float result = 0.0;
 
-      if (nullptr != pMonitorElement->objectTo<TH1>()){
-	pTH1 = pMonitorElement->objectTo<TH1>();
-      }
-      else if (nullptr != pMonitorElement->objectTo<TGraph>()) {
-	pGraph = pMonitorElement->objectTo<TGraph>();
-      }
-      else {
+      if (nullptr == pHistogram && nullptr == pGraph) {
 	dqm_error("The monitor element {0} of type {1} could not be recognised.", pMonitorElement->name(), pMonitorElement->type());
 	throw StatusCodeException(STATUS_CODE_FAILURE);
       }
 
       if(fabs(percentage - 1.f) < std::numeric_limits<float>::epsilon()) {
-	if (nullptr != pMonitorElement->objectTo<TH1>()) {
-	  result = pTH1->GetMean(1);
+	if (nullptr != pHistogram) {
+	  result = pHistogram->GetMean(1);
 	}
-	if (nullptr != pMonitorElement->objectTo<TGraph>()) {
+	if (nullptr != pGraph) {
 	  result = pGraph->GetMean(2);
 	}
       }
       else {
-	if (nullptr != pMonitorElement->objectTo<TH1>()) {
-	  TAxis *axis = pTH1->GetXaxis();
+	if (nullptr != pHistogram) {
+	  TAxis *axis = pHistogram->GetXaxis();
 	  int nbins = axis->GetNbins();
-	  int imean = axis->FindBin(pTH1->GetMean());
-	  float entries = percentage*pTH1->GetEntries();
-	  float w = pTH1->GetBinContent(imean);
-	  float x = pTH1->GetBinCenter(imean);
+	  int imean = axis->FindBin(pHistogram->GetMean());
+	  float entries = percentage*pHistogram->GetEntries();
+	  float w = pHistogram->GetBinContent(imean);
+	  float x = pHistogram->GetBinCenter(imean);
 	  float sumw = w;
 	  float sumwx = w*x;
 
 	  for (int i=1;i<nbins;i++) {
 	    if (i>0) {
-	      w = pTH1->GetBinContent(imean-i);
-	      x = pTH1->GetBinCenter(imean-i);
+	      w = pHistogram->GetBinContent(imean-i);
+	      x = pHistogram->GetBinCenter(imean-i);
 	      sumw += w;
 	      sumwx += w*x;
 	    }
 	    if (i<= nbins) {
-	      w = pTH1->GetBinContent(imean+i);
-	      x = pTH1->GetBinCenter(imean+i);
+	      w = pHistogram->GetBinContent(imean+i);
+	      x = pHistogram->GetBinCenter(imean+i);
 	      sumw += w;
 	      sumwx += w*x;
 	    }
@@ -87,7 +81,7 @@ namespace dqm4hep {
 	  }
 	  result = sumwx/sumw;
 	}
-	if (nullptr != pMonitorElement->objectTo<TGraph>()) {
+	if (nullptr != pGraph) {
 	  double* arrayY = pGraph->GetY();
 	  int entries = pGraph->GetN();
 	  int startNum = 0.5*(1.0-percentage)*entries;
@@ -110,52 +104,46 @@ namespace dqm4hep {
 
     float AnalysisHelper::rms(MonitorElement* pMonitorElement, float percentage)
     {
-      TH1 *pTH1 = new TH1F;
-      TGraph *pGraph = new TGraph;
+      TH1 *pHistogram = pMonitorElement->objectTo<TH1>();
+      TGraph *pGraph = pMonitorElement->objectTo<TGraph>();
       float result = 0.0;
 
-      if (nullptr != pMonitorElement->objectTo<TH1>()){
-	pTH1 = pMonitorElement->objectTo<TH1>();
-      }
-      else if (nullptr != pMonitorElement->objectTo<TGraph>()) {
-	pGraph = pMonitorElement->objectTo<TGraph>();
-      }
-      else {
+      if (nullptr == pHistogram && nullptr == pGraph) {
 	dqm_error("The monitor element {0} of type {1} could not be recognised.", pMonitorElement->name(), pMonitorElement->type());
 	throw StatusCodeException(STATUS_CODE_FAILURE);
       }
 
       if(fabs(percentage - 1.f) < std::numeric_limits<float>::epsilon()) {
-	if (nullptr != pMonitorElement->objectTo<TH1>()) {
-	  result = pTH1->GetRMS(1);
+	if (nullptr != pHistogram) {
+	  result = pHistogram->GetRMS(1);
 	}
-	if (nullptr != pMonitorElement->objectTo<TGraph>()) {
+	if (nullptr != pGraph) {
 	  result = pGraph->GetRMS(2);
 	}
       }
       else {
-	if (nullptr != pMonitorElement->objectTo<TH1>()) {
-	  TAxis *axis = pTH1->GetXaxis();
+	if (nullptr != pHistogram) {
+	  TAxis *axis = pHistogram->GetXaxis();
 	  int nbins = axis->GetNbins();
-	  int imean = axis->FindBin(pTH1->GetMean());
-	  float entries = percentage*pTH1->GetEntries();
-	  float w = pTH1->GetBinContent(imean);
-	  float x = pTH1->GetBinCenter(imean);
-	  float mean = pTH1->GetMean();
+	  int imean = axis->FindBin(pHistogram->GetMean());
+	  float entries = percentage*pHistogram->GetEntries();
+	  float w = pHistogram->GetBinContent(imean);
+	  float x = pHistogram->GetBinCenter(imean);
+	  float mean = pHistogram->GetMean();
 
 	  float sumw = w;
 	  float sumwx = w*pow(x-mean,2);
 
 	  for (int i=1;i<nbins;i++) {
 	    if (i>0) {
-	      w = pTH1->GetBinContent(imean-i);
-	      x = pTH1->GetBinCenter(imean-i);
+	      w = pHistogram->GetBinContent(imean-i);
+	      x = pHistogram->GetBinCenter(imean-i);
 	      sumw += w;
 	      sumwx += w*pow(x-mean,2);
 	    }
 	    if (i<= nbins) {
-	      w = pTH1->GetBinContent(imean+i);
-	      x = pTH1->GetBinCenter(imean+i);
+	      w = pHistogram->GetBinContent(imean+i);
+	      x = pHistogram->GetBinCenter(imean+i);
 	      sumw += w;
 	      sumwx += w*pow(x-mean,2);
 	    }
@@ -163,7 +151,7 @@ namespace dqm4hep {
 	  }
 	  result = pow(sumwx/sumw,0.5);
 	}
-	if (nullptr != pMonitorElement->objectTo<TGraph>()) {
+	if (nullptr != pGraph) {
 	  double* arrayY = pGraph->GetY();
 	  int entries = pGraph->GetN();
 	  int startNum = 0.5*(1.0-percentage)*entries;
@@ -187,20 +175,33 @@ namespace dqm4hep {
 
     float AnalysisHelper::median(MonitorElement* pMonitorElement)
     {
+      TH1 *pHistogram = pMonitorElement->objectTo<TH1>();
+      TGraph *pGraph = pMonitorElement->objectTo<TGraph>();
       float result = 0.0;
 
-      if (nullptr != pMonitorElement->objectTo<TH1>()) {
+      if (nullptr == pHistogram && nullptr == pGraph) {
+	dqm_error("The monitor element {0} of type {1} could not be recognised.", pMonitorElement->name(), pMonitorElement->type());
+	throw StatusCodeException(STATUS_CODE_FAILURE);
+      }
+
+      if (nullptr != pHistogram) {
 	Double_t xq[1];
 	Double_t yq[1];
 	xq[0] = 0.5;
-	pMonitorElement->objectTo<TH1>()->GetQuantiles(1, yq, xq);
-	return yq[0];
+	pHistogram->GetQuantiles(1, yq, xq);
+	result = yq[0];
       }
-      else if (nullptr != pMonitorElement->objectTo<TGraph>()) {
-	double* arrayY = pMonitorElement->objectTo<TGraph>()->GetY();
-	int size = pMonitorElement->objectTo<TGraph>()->GetN()+1;
+      else if (nullptr != pGraph) {
 
-	if (size % 2) {
+	if (pGraph->GetN() == 0) {
+	  dqm_error("The monitor element {0} is empty!",pMonitorElement->name());
+	  throw StatusCodeException(STATUS_CODE_FAILURE);
+	}
+
+	double* arrayY = pGraph->GetY();
+	int size = pGraph->GetN()+1;
+       
+	if (size % 2 == 0) {
 	  result = arrayY[size/2];
 	}
 	else {
