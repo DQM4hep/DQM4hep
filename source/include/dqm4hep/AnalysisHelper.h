@@ -50,15 +50,15 @@ namespace dqm4hep {
     {
     public:
 
-      static float mean(MonitorElementPtr pMonitorElement, float percentage = 1.0);
+      static float mean(MonitorElement* pMonitorElement, float percentage = 1.0);
 
-      static float mean90(MonitorElementPtr pMonitorElement);
+      static float mean90(MonitorElement* pMonitorElement);
 
-      static float rms(MonitorElementPtr pMonitorElement, float percentage = 1.0);
+      static float rms(MonitorElement* pMonitorElement, float percentage = 1.0);
 
-      static float rms90(MonitorElementPtr pMonitorElement);
+      static float rms90(MonitorElement* pMonitorElement);
 
-      static float median(MonitorElementPtr pMonitorElement);
+      static float median(MonitorElement* pMonitorElement);
 
     };
 
