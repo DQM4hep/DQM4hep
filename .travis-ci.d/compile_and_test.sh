@@ -22,3 +22,11 @@ if [ $? -ne 0 ]; then
     echo "Failed to run make"
     exit 1
 fi
+
+if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then export LDD_TOOL="ldd"; export LIB_EXT="so";
+elif [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then export LDD_TOOL="otool -L"; export LIB_EXT="dylib";
+fi
+
+$LDD_TOOL ./lib/*.$LIB_EXT
+$LDD_TOOL ./bin/*
+
