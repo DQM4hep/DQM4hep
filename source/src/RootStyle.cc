@@ -121,19 +121,19 @@ namespace dqm4hep {
         referenceStyle.m_lineColor = kRed;
         referenceStyle.m_fillColor = kRed;
         referenceStyle.m_lineStyle = 7;
-        referenceStyle.m_fillStyle = 3003;
+        referenceStyle.m_fillStyle = 3244;
         return STATUS_CODE_SUCCESS;
       }
       else if(theme == RootStyle::Theme::THICK) {
         objectStyle.m_markerSize = 2;
         objectStyle.m_lineWidth = 2;
         referenceStyle.m_markerSize = 2;
-        referenceStyle.m_lineWidth = 2;
+        referenceStyle.m_lineWidth = 1;
         referenceStyle.m_markerColor = kRed;
         referenceStyle.m_lineColor = kRed;
         referenceStyle.m_fillColor = kRed;
         referenceStyle.m_lineStyle = 7;
-        referenceStyle.m_fillStyle = 3003;
+        referenceStyle.m_fillStyle = 3244;
         return STATUS_CODE_SUCCESS;
       }
       else if(theme == RootStyle::Theme::POLAR) {
@@ -143,27 +143,27 @@ namespace dqm4hep {
         objectStyle.m_lineColor = kBlue;
         objectStyle.m_lineColor = kBlue;
         referenceStyle.m_markerSize = 2;
-        referenceStyle.m_lineWidth = 2;
+        referenceStyle.m_lineWidth = 1;
         referenceStyle.m_markerColor = kCyan+1;
         referenceStyle.m_lineColor = kCyan+1;
         referenceStyle.m_fillColor = kCyan+1;
         referenceStyle.m_lineStyle = 7;
-        referenceStyle.m_fillStyle = 3003;
+        referenceStyle.m_fillStyle = 3244;
         return STATUS_CODE_SUCCESS;
       }
       else if(theme == RootStyle::Theme::SUNRISE) {
         objectStyle.m_markerSize = 2;
         objectStyle.m_lineWidth = 2;
-        objectStyle.m_markerColor = kRed;
-        objectStyle.m_lineColor = kRed;
-        objectStyle.m_lineColor = kRed;
+        objectStyle.m_markerColor = kRed+1;
+        objectStyle.m_lineColor = kRed+1;
+        objectStyle.m_lineColor = kRed+1;
         referenceStyle.m_markerSize = 2;
-        referenceStyle.m_lineWidth = 2;
+        referenceStyle.m_lineWidth = 1;
         referenceStyle.m_markerColor = kOrange+7;
         referenceStyle.m_lineColor = kOrange+7;
         referenceStyle.m_fillColor = kOrange+7;
         referenceStyle.m_lineStyle = 7;
-        referenceStyle.m_fillStyle = 3003;
+        referenceStyle.m_fillStyle = 3244;
         return STATUS_CODE_SUCCESS;
       }
       else if(theme == RootStyle::Theme::FOREST) {
@@ -173,12 +173,12 @@ namespace dqm4hep {
         objectStyle.m_lineColor = kGreen+1;
         objectStyle.m_lineColor = kGreen+1;
         referenceStyle.m_markerSize = 2;
-        referenceStyle.m_lineWidth = 2;
-        referenceStyle.m_markerColor = kOrange+3;
-        referenceStyle.m_lineColor = kOrange+3;
-        referenceStyle.m_fillColor = kOrange+3;
+        referenceStyle.m_lineWidth = 1;
+        referenceStyle.m_markerColor = kOrange-7;
+        referenceStyle.m_lineColor = kOrange-7;
+        referenceStyle.m_fillColor = kOrange-7;
         referenceStyle.m_lineStyle = 7;
-        referenceStyle.m_fillStyle = 3003;
+        referenceStyle.m_fillStyle = 3244;
         return STATUS_CODE_SUCCESS;
       }
       return STATUS_CODE_NOT_FOUND;
