@@ -40,6 +40,7 @@
 #include <dqm4hep/AllocatorHelper.h>
 #include <dqm4hep/RootHeaders.h>
 #include <dqm4hep/Directory.h>
+#include <dqm4hep/RootStyle.h>
 
 namespace dqm4hep {
 
@@ -311,6 +312,8 @@ namespace dqm4hep {
       MonitorElementToQTestMap m_monitorElementToQTestMap = {};
       XMLAllocatorMap              m_xmlAllocatorMap = {};
       XMLAllocatorPtr              m_defaultXMLAllocator = {nullptr};
+      RootStyle                    m_objectStyle = {};
+      RootStyle                    m_referenceStyle = {};
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -366,6 +369,7 @@ namespace dqm4hep {
         return STATUS_CODE_FAILURE;
       }
       ((TNamed *)pTObject)->SetNameTitle(name.c_str(), title.c_str());
+      m_objectStyle.applyTo(pTObject);
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
@@ -385,6 +389,7 @@ namespace dqm4hep {
         dqm_warning("Couldn't allocate monitor element of type '{0}', path '{1}', name '{2}'", HistoType::Class_Name(), path, name);
         return STATUS_CODE_FAILURE;
       }
+      m_objectStyle.applyTo(pTObject);
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
@@ -405,6 +410,7 @@ namespace dqm4hep {
         return STATUS_CODE_FAILURE;
       }
       ((TNamed *)pTObject)->SetNameTitle(name.c_str(), title.c_str());
+      m_objectStyle.applyTo(pTObject);
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
@@ -473,6 +479,7 @@ namespace dqm4hep {
       if (pTObject == nullptr) {
         return STATUS_CODE_NOT_FOUND;
       }
+      m_objectStyle.applyTo(pTObject);
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
@@ -496,6 +503,7 @@ namespace dqm4hep {
         return STATUS_CODE_FAILURE;
       }
       ((TNamed *)pTObject)->SetName(name.c_str());
+      m_objectStyle.applyTo(pTObject);
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
@@ -523,6 +531,7 @@ namespace dqm4hep {
         return STATUS_CODE_FAILURE;
       }
       dynamic_cast<TNamed *>(pTObject)->SetNameTitle(name.c_str(), title.c_str());
+      m_objectStyle.applyTo(pTObject);
       return addMonitorElement<T>(path, pTObject, monitorElement);
     }
     
@@ -549,7 +558,8 @@ namespace dqm4hep {
       });
       if (pTObject == nullptr)
         return STATUS_CODE_NOT_FOUND;
-
+      
+      m_referenceStyle.applyTo(pTObject);
       monitorElement->setReferenceObject(pTObject);
 
       return STATUS_CODE_SUCCESS;
@@ -562,6 +572,24 @@ namespace dqm4hep {
       if(nullptr == pXmlElement) {
         dqm_error( "MonitorElementManager::readMonitorElements: Invalid xml element !" );
         return STATUS_CODE_INVALID_PTR;
+      }
+      auto styleElement = pXmlElement->FirstChildElement("style");
+      if(nullptr != styleElement) {
+        std::string theme = RootStyle::Theme::DEFAULT;
+        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(styleElement, 
+          "theme", theme));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RootStyle::builtinStyle(theme, m_objectStyle, m_referenceStyle));
+        auto objectStyleElement = styleElement->FirstChildElement("object");
+        if(nullptr != objectStyleElement) {
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_objectStyle.fromXml(TiXmlHandle(objectStyleElement)));
+        }
+        auto referenceStyleElement = styleElement->FirstChildElement("reference");
+        if(nullptr != referenceStyleElement) {
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_referenceStyle.fromXml(TiXmlHandle(referenceStyleElement)));
+        }
+      }
+      else {
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RootStyle::builtinStyle(RootStyle::Theme::DEFAULT, m_objectStyle, m_referenceStyle));
       }
       for (TiXmlElement *child = pXmlElement->FirstChildElement(); child != nullptr; child = child->NextSiblingElement()) {
         std::shared_ptr<T> monitorElement;
