@@ -45,6 +45,7 @@ void DrawStyleThemes() {
     
     TLegend *legend = canvas->BuildLegend(0.1, 0.7, 0.4, 0.9, ("Theme: " + theme).c_str());
     
+    canvas->SaveAs( ("Theme_" + theme + ".png").c_str() );
     canvas->SaveAs( ("Theme_" + theme + ".pdf").c_str() );
     delete canvas;
   }
