@@ -38,9 +38,45 @@ class TObject;
 namespace dqm4hep {
 
   namespace core {
-
+    
+    /**
+     *  @brief  RootStyle class
+     *          
+     * Class holding marker, line and fill attribute. </br>
+     * Provide convinience methods for settings attributes to monitor element (object or reference). </br>
+     * Some builtin themes are provided:
+     * - "default" : plain black and dashed red
+     * - "thick" : same as default with larger marker size and line width
+     * - "polar" : blue-ish colors
+     * - "sunrise" : red-ish colors
+     * - "forest" : green-ish colors
+     * 
+     * To be used as:
+     * @code
+     * RootStyle objStyle, refStyle;
+     * RootStyle::builtinStyle(RootStyle::Theme::SUNRISE, objStyle, refStyle);
+     * @endcode 
+     */
     class RootStyle {
     public:
+      /**
+       *  @brief  Theme class
+       *          Builtin themes for customizing monitor element
+       */
+      class Theme {
+      public:
+        /// Default theme : plain black and dashed red
+        static constexpr const char* DEFAULT = "default";
+        /// Same as default with larger marker size and line width
+        static constexpr const char* THICK = "thick";
+        /// Blue-ish colors
+        static constexpr const char* POLAR = "polar";
+        /// Red-ish colors
+        static constexpr const char* SUNRISE = "sunrise";
+        /// Green-ish colors
+        static constexpr const char* FOREST = "forest";
+      };
+      
       RootStyle() = default;
       RootStyle(const RootStyle&) = default;
       RootStyle& operator=(const RootStyle&) = default;
@@ -68,12 +104,13 @@ namespace dqm4hep {
       static int stringToColor(const std::string &colorStr);
       
       /**
-       *  @brief  Get the default styles for monitor object and reference
+       *  @brief  Get a builtin style for monitor object and reference from builtin themes
        *
-       *  @param  objectStyle the default object style to receive
-       *  @param  referenceStyle the default reference style to receive
+       *  @param  theme the theme among the builtins
+       *  @param  objectStyle the object style to receive
+       *  @param  referenceStyle the reference style to receive
        */
-      static void defaultStyles(RootStyle &objectStyle, RootStyle &referenceStyle);
+      static StatusCode builtinStyle(const std::string &theme, RootStyle &objectStyle, RootStyle &referenceStyle);
       
     private:
       /**
