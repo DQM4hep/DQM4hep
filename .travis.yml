@@ -1,8 +1,26 @@
 language: cpp
 dist: trusty
 sudo: required
-os:
-  - linux
+
+env:
+  - ROOT_VERSION=6.10.08
+
+os: linux
+compiler:
+  - gcc
+  - clang
+
+matrix:
+  fast_finish: true
+  allow_failures:
+  - os: osx
+  include:
+    - os: osx
+      compiler: clang
+      osx_image: xcode8.3 # default, osx 10.12
+    - os: osx
+      compiler: clang
+      osx_image: xcode9.3 # osx 10.13
 
 addons:
   apt:
@@ -14,18 +32,19 @@ addons:
       - g++-4.9
 
 script:
+  - if [[ "${TRAVIS_OS_NAME}" == "linux" && "${CXX}" == "g++"  ]];
+    then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90;
+    fi
   - ./.travis-ci.d/compile_and_test.sh
-
+  
 before_install:
-  - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90
   - ./.travis-ci.d/install_dependencies.sh
+  - if [[ "${TRAVIS_OS_NAME}" == "osx"  ]];
+    then brew install mysql;
+    fi
 
 after_success:
   - ./.travis-ci.d/deploy-doxygen.sh
-
-compiler:
-  - gcc
-  - clang
 
 # Don't send e-mail notifications
 notifications:
