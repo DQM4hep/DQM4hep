@@ -1,6 +1,7 @@
-build/
-bin/
-lib/
-include/
+/build/
+/bin/
+/lib/
+/include
+/doc
 
-.clang-format
+/.clang-format
