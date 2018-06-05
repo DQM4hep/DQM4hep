@@ -33,79 +33,86 @@ namespace dqm4hep {
   namespace core {
 
     /**
-    *  @brief SignalBase class.
-    *         Base class to store callback function
-    */
+     *  @brief  SignalBase class (internal)
+     *          Base class for emitting signals
+     */
     template <typename... Args>
     class SignalBase {
     public:
-      typedef std::vector<SignalBase<Args...> *> Vector;
-
       /**
-      *  @brief  Destructor
-      */
+       *  @brief  Destructor
+       */
       virtual ~SignalBase() {
+        /* nop */
       }
 
       /**
-      *  @brief  Process the callback
+      *  @brief  Emit the signal
       */
-      virtual void process(Args... args) = 0;
+      virtual void emit(Args... args) = 0;
     };
 
+    /**
+     *  @brief  SignalBase specialization (internal)
+     *          No argument in callback function
+     */
     template <>
     class SignalBase<void> {
     public:
-      typedef std::vector<SignalBase<void> *> Vector;
-
       /**
-      *  @brief  Destructor
-      */
+       *  @brief  Destructor
+       */
       virtual ~SignalBase() {
+        /* nop */
       }
 
       /**
-      *  @brief  Process the callback
+      *  @brief  Emit the signal
       */
-      virtual void process() = 0;
+      virtual void emit() = 0;
     };
 
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
 
     /**
-    *  @brief  SignalT class.
+    *  @brief  SignalT class (internal)
     */
     template <typename T, typename... Args>
     class SignalT : public SignalBase<Args...> {
     public:
-      typedef void (T::*Function)(Args... args);
+      typedef void (T::*Function)(Args...);
 
       /**
-      *  @brief  Constructor with
+      *  @brief  Constructor
       */
-      SignalT(T *pClass, Function function);
+      SignalT(T *object, Function function);
 
       /**
-      *  @brief  Process the callback
+      *  @brief  Emit the signal
+      *
+      * @param  args the arguments to forward
       */
-      void process(Args... args);
+      void emit(Args... args);
 
       /**
-       *
+       *  @brief  Get the class object
        */
-      const T *getClass() const;
+      const T *object() const;
 
       /**
-       *
+       *  @brief  Get the object member-function 
        */
-      Function getFunction() const;
+      Function function() const;
 
     private:
-      T *m_pClass;
-      Function m_function;
+      /// The class object
+      T              *m_object = {nullptr};
+      /// The object member-function
+      Function        m_function = {};
     };
 
+    // SPECIALIZATION - CLASS + VOID
     template <typename T>
     class SignalT<T, void> : public SignalBase<void> {
     public:
@@ -114,122 +121,251 @@ namespace dqm4hep {
       /**
       *  @brief  Constructor with
       */
-      SignalT(T *pClass, Function function);
+      SignalT(T *obj, Function func);
 
       /**
       *  @brief  Process the callback
       */
-      void process();
+      void emit();
 
       /**
-       *
+       *  @brief  Get the class object
        */
-      const T *getClass() const;
+      const T *object() const;
 
       /**
-       *
+       *  @brief  Get the object member-function 
        */
-      Function getFunction() const;
+      Function function() const;
 
     private:
-      T *m_pClass;
-      Function m_function;
+      /// The class object
+      T              *m_object = {nullptr};
+      /// The object member-function
+      Function        m_function = {};
+    };
+    
+    /// SPECIALIZATION - PURE FUNCTION + ARGS
+    template <typename... Args>
+    class SignalT<void, Args...> : public SignalBase<Args...> {
+    public:
+      typedef void (*Function)(Args...);
+
+      /**
+      *  @brief  Constructor
+      */
+      SignalT(Function function);
+
+      /**
+      *  @brief  Emit the signal
+      */
+      void emit(Args... args);
+
+      /**
+       *  @brief  Get the associated function 
+       */
+      Function function() const;
+
+    private:
+      /// The associated callback function
+      Function        m_function = {};
+    };
+    
+    // SPECIALIZATION - PURE FUNCTION + NO ARGS
+    template <>
+    class SignalT<void, void> : public SignalBase<void> {
+    public:
+      typedef void (*Function)();
+
+      /**
+      *  @brief  Constructor
+      */
+      SignalT(Function function);
+
+      /**
+      *  @brief  Emit the signal
+      */
+      void emit();
+
+      /**
+       *  @brief  Get the associated function 
+       */
+      Function function() const;
+
+    private:
+      /// The associated callback function
+      Function        m_function = {};
     };
 
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
 
+    /**
+     *  @brief Signal class
+     *
+     *  Implement the observer pattern a la Qt.
+     *  Example:
+     *  @code
+     *
+     *  void func() {
+     *    std::cout << "Hello world !" << std::endl;
+     *  }
+     *
+     *  class Toto {
+     *  public:
+     *    void hello() {
+     *      std::cout << "Toto world !" << std::endl;
+     *    }
+     *  };
+     *  
+     *  Signal<> sig;
+     *  Toto toto;
+     *  sig.connect(func);
+     *  sig.connect(&toto, &Toto::hello);
+     *  sig.emit();
+     *  @endcode
+     *
+     *  Allows nice and understandable piece of code like:
+     *  @code
+     *  // Holds a property and signal
+     *  class Property {
+     *  public:
+     *    void setProperty(int value) {
+     *      m_property = value;
+     *      m_onUpdate.emit(m_property);
+     *    }
+     *    Signal<int> &onUpdate() {
+     *      return m_onUpdate;
+     *    }
+     *  private:
+     *    int           m_property = {0};
+     *    Signal<int>   m_onUpdate = {};
+     *  };
+     *
+     *  // To print the property !
+     *  class Printer {
+     *  public:
+     *    void print(int value) {
+     *      std::cout << "Value is " << value << std::endl;
+     *    }
+     *  };
+     *  
+     *  Printer printer;
+     *  Property property;
+     *  property.onUpdate().connect(&printer, &Printer::print); // I love this line !
+     *  property.setProperty(42); // Calls 'print' method
+     *  @endcode
+     */
     template <typename... Args>
     class Signal {
     public:
       /**
-      *
-      */
+       *  @brief  Default constructor
+       */
+      Signal() = default;
+      
+      /**
+       *  @brief  Destructor
+       */
       ~Signal();
 
       /**
-      *
-      */
-      void process(Args... args);
+       *  @brief  Emit the signal. This function is deprecated
+       * 
+       *  @param  args arguments to forward
+       */      
+      DEPRECATED(void process(Args... args));
 
       /**
-      *
-      */
-      template <typename T, typename S>
-      bool connect(T *pClass, S function);
+       *  @brief  Emit the signal
+       * 
+       *  @param  args arguments to forward
+       */
+      void emit(Args... args);
 
       /**
-      *
-      */
+       *  @brief  Connect a class member-function to signal
+       *
+       *  @param  object the class object
+       *  @param  function the class member-function
+       */
       template <typename T>
-      bool disconnect(T *pClass);
+      bool connect(T *object, void (T::*function)(Args...));
+      
+      /**
+       *  @brief  Connect a function to signal
+       *  
+       *  @param  function [description]
+       */
+      bool connect(void (*function)(Args...));
 
       /**
-      *
-      */
-      void disconnectAll();
-
-      /**
-      *
-      */
+       *  @brief  Disconnect all functions of the target object 
+       *
+       *  @param  object the object target
+       */
       template <typename T>
-      bool isConnected(T *pClass) const;
+      bool disconnect(T *object);
+      
+      /**
+       *  @brief  Disconnect a specific class member-function
+       *
+       *  @param  object the target object
+       *  @param function the class member-function
+       */
+      template <typename T>
+      bool disconnect(T *object, void (T::*function)(Args...));
+      
+      /**
+       *  @brief  Disconnect a function
+       *
+       *  @param  object the target object
+       *  @param function the class member-function
+       */
+      bool disconnect(void (*function)(Args...));
 
       /**
-      *
-      */
+       *  @brief  Disconnect all functions
+       */
+      void disconnect();
+
+      /**
+       *  @brief  Whether the target object has any connected functions
+       *
+       *  @param  object the target object 
+       */
+      template <typename T>
+      bool hasConnection(T *object) const;
+      
+      /**
+       *  @brief  Whether the target object and member-function is connected
+       *
+       *  @param  object the target object 
+       *  @param  function the class member-function
+       */
+      template <typename T>
+      bool isConnected(T *object, void (T::*function)(Args...)) const;
+      
+      /**
+       *  @brief  Whether the function is connected
+       *
+       *  @param  function the target function
+       */
+      bool isConnected(void (*function)(Args...)) const;
+
+      /**
+       *  @brief  Whether the signal has at least one connection 
+       */
       bool hasConnection() const;
+      
+      /**
+       *  @brief  Get the number of connected functions
+       */
+      size_t nConnections() const;
 
     private:
-      typename SignalBase<Args...>::Vector m_callbacks;
-    };
-
-    //----------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------
-
-    template <>
-    class Signal<void> {
-    public:
-      /**
-      *
-      */
-      ~Signal();
-
-      /**
-      *
-      */
-      void process();
-
-      /**
-      *
-      */
-      template <typename T, typename S>
-      bool connect(T *pClass, S function);
-
-      /**
-      *
-      */
-      template <typename T>
-      bool disconnect(T *pClass);
-
-      /**
-      *
-      */
-      void disconnectAll();
-
-      /**
-      *
-      */
-      template <typename T>
-      bool isConnected(T *pClass) const;
-
-      /**
-      *
-      */
-      bool hasConnection() const;
-
-    private:
-      typename SignalBase<void>::Vector m_callbacks;
+      /// The list of callbacks
+      typename std::vector<SignalBase<Args...>*>   m_callbacks = {};
     };
 
     //----------------------------------------------------------------------------------
@@ -237,29 +373,45 @@ namespace dqm4hep {
 
     template <typename... Args>
     inline Signal<Args...>::~Signal() {
-      this->disconnectAll();
+      this->disconnect();
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename... Args>
     inline void Signal<Args...>::process(Args... args) {
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter)
-        (*iter)->process(args...);
+      emit(args...);
     }
 
     //----------------------------------------------------------------------------------
 
     template <typename... Args>
-    template <typename T, typename S>
-    inline bool Signal<Args...>::connect(T *pClass, S function) {
-      // check for existing connection
-      if (this->isConnected(pClass))
+    inline void Signal<Args...>::emit(Args... args) {
+      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+        (*iter)->emit(args...);
+      }
+    }
+
+    //----------------------------------------------------------------------------------
+
+    template <typename... Args>
+    template <typename T>
+    inline bool Signal<Args...>::connect(T *object, void (T::*function)(Args...)) {
+      if (this->isConnected(object, function)) {
         return false;
-
-      // add the callback
-      m_callbacks.push_back(new SignalT<T, Args...>(pClass, function));
-
+      }
+      m_callbacks.push_back(new SignalT<T, Args...>(object, function));
+      return true;
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline bool Signal<Args...>::connect(void (*function)(Args...)) {
+      if (this->isConnected(function)) {
+        return false;
+      }
+      m_callbacks.push_back(new SignalT<void, Args...>(function));
       return true;
     }
 
@@ -267,30 +419,67 @@ namespace dqm4hep {
 
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::disconnect(T *pClass) {
+    inline bool Signal<Args...>::disconnect(T *object) {
+      bool disconnected = false;
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
-        SignalT<T, Args...> *pCallBackT(dynamic_cast<SignalT<T, Args...> *>(*iter));
-
-        if (!pCallBackT)
+        auto callback = dynamic_cast<SignalT<T, Args...>*>(*iter);
+        if(nullptr == callback) {
           continue;
-
-        if (pCallBackT->getClass() == pClass) {
-          delete pCallBackT;
+        }
+        if (callback->object() == object) {
+          delete callback;
+          m_callbacks.erase(iter);
+          iter--;
+          disconnected = true;
+        }
+      }
+      return disconnected;
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    template <typename T>
+    inline bool Signal<Args...>::disconnect(T *object, void (T::*function)(Args...)) {
+      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+        auto callback = dynamic_cast<SignalT<T, Args...>*>(*iter);
+        if(nullptr == callback) {
+          continue;
+        }
+        if (callback->object() == object && callback->function() == function) {
+          delete callback;
           m_callbacks.erase(iter);
           return true;
         }
       }
-
+      return false;
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline bool Signal<Args...>::disconnect(void (*function)(Args...)) {
+      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+        auto callback = dynamic_cast<SignalT<void, Args...>*>(*iter);
+        if(nullptr == callback) {
+          continue;
+        }
+        if (callback->function() == function) {
+          delete callback;
+          m_callbacks.erase(iter);
+          return true;
+        }
+      }
       return false;
     }
 
     //----------------------------------------------------------------------------------
 
     template <typename... Args>
-    inline void Signal<Args...>::disconnectAll() {
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter)
-        delete *iter;
-
+    inline void Signal<Args...>::disconnect() {
+      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+        delete *iter;        
+      }
       m_callbacks.clear();
     }
 
@@ -298,17 +487,49 @@ namespace dqm4hep {
 
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::isConnected(T *pClass) const {
+    inline bool Signal<Args...>::hasConnection(T *object) const {
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
-        const SignalT<T, Args...> *pCallBackT(dynamic_cast<const SignalT<T, Args...> *>(*iter));
-
-        if (!pCallBackT)
-          continue;
-
-        if (pCallBackT->getClass() == pClass)
+        auto callback = dynamic_cast<const SignalT<T, Args...>*>(*iter);
+        if (nullptr == callback) {
+          continue;          
+        }
+        if (callback->object() == object) {
           return true;
+        }
       }
+      return false;
+    }
+    
+    //----------------------------------------------------------------------------------
 
+    template <typename... Args>
+    template <typename T>
+    inline bool Signal<Args...>::isConnected(T *object, void (T::*function)(Args...)) const {
+      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+        auto callback = dynamic_cast<const SignalT<T, Args...>*>(*iter);
+        if (nullptr == callback) {
+          continue;          
+        }
+        if (callback->object() == object && callback->function() == function) {
+          return true;
+        }
+      }
+      return false;
+    }
+    
+    //----------------------------------------------------------------------------------
+
+    template <typename... Args>
+    inline bool Signal<Args...>::isConnected(void (*function)(Args...)) const {
+      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+        auto callback = dynamic_cast<const SignalT<void, Args...>*>(*iter);
+        if (nullptr == callback) {
+          continue;          
+        }
+        if (callback->function() == function) {
+          return true;
+        }
+      }
       return false;
     }
 
@@ -316,144 +537,118 @@ namespace dqm4hep {
 
     template <typename... Args>
     inline bool Signal<Args...>::hasConnection() const {
-      return (!m_callbacks.empty());
+      return (not m_callbacks.empty());
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline size_t Signal<Args...>::nConnections() const {
+      return m_callbacks.size();
     }
 
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
-
-    inline Signal<void>::~Signal() {
-      this->disconnectAll();
-    }
-
-    //----------------------------------------------------------------------------------
-
-    inline void Signal<void>::process() {
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter)
-        (*iter)->process();
-    }
-
-    //----------------------------------------------------------------------------------
-
-    template <typename T, typename S>
-    inline bool Signal<void>::connect(T *pClass, S function) {
-      // check for existing connection
-      if (this->isConnected(pClass))
-        return false;
-
-      // add the callback
-      m_callbacks.push_back(new SignalT<T, void>(pClass, function));
-
-      return true;
-    }
-
-    //----------------------------------------------------------------------------------
-
-    template <typename T>
-    inline bool Signal<void>::disconnect(T *pClass) {
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
-        SignalT<T, void> *pCallBackT(dynamic_cast<SignalT<T, void> *>(*iter));
-
-        if (!pCallBackT)
-          continue;
-
-        if (pCallBackT->getClass() == pClass) {
-          delete pCallBackT;
-          m_callbacks.erase(iter);
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    //----------------------------------------------------------------------------------
-
-    inline void Signal<void>::disconnectAll() {
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter)
-        delete *iter;
-
-      m_callbacks.clear();
-    }
-
-    //----------------------------------------------------------------------------------
-
-    template <typename T>
-    inline bool Signal<void>::isConnected(T *pClass) const {
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
-        const SignalT<T, void> *pCallBackT(dynamic_cast<const SignalT<T, void> *>(*iter));
-
-        if (!pCallBackT)
-          continue;
-
-        if (pCallBackT->getClass() == pClass)
-          return true;
-      }
-
-      return false;
-    }
-
-    //----------------------------------------------------------------------------------
-
-    inline bool Signal<void>::hasConnection() const {
-      return (!m_callbacks.empty());
-    }
-
-    //----------------------------------------------------------------------------------
-    //----------------------------------------------------------------------------------
-
+    
     template <typename T, typename... Args>
-    inline SignalT<T, Args...>::SignalT(T *pClass, Function function) : m_pClass(pClass), m_function(function) {
+    inline SignalT<T, Args...>::SignalT(T *object, Function function) : 
+      m_object(object), 
+      m_function(function) {
       /* nop */
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename T, typename... Args>
-    inline void SignalT<T, Args...>::process(Args... args) {
-      (m_pClass->*m_function)(args...);
+    inline void SignalT<T, Args...>::emit(Args... args) {
+      (m_object->*m_function)(args...);
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename T, typename... Args>
-    inline const T *SignalT<T, Args...>::getClass() const {
-      return m_pClass;
+    inline const T *SignalT<T, Args...>::object() const {
+      return m_object;
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename T, typename... Args>
-    inline typename SignalT<T, Args...>::Function SignalT<T, Args...>::getFunction() const {
+    inline typename SignalT<T, Args...>::Function SignalT<T, Args...>::function() const {
       return m_function;
     }
-
+    
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
-
+    
     template <typename T>
-    inline SignalT<T, void>::SignalT(T *pClass, Function function) : m_pClass(pClass), m_function(function) {
+    inline SignalT<T, void>::SignalT(T *object, Function function) : 
+      m_object(object), 
+      m_function(function) {
       /* nop */
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename T>
-    inline void SignalT<T, void>::process() {
-      (m_pClass->*m_function)();
+    inline void SignalT<T, void>::emit() {
+      (m_object->*m_function)();
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename T>
-    inline const T *SignalT<T, void>::getClass() const {
-      return m_pClass;
+    inline const T *SignalT<T, void>::object() const {
+      return m_object;
     }
-
+    
     //----------------------------------------------------------------------------------
-
+    
     template <typename T>
-    inline typename SignalT<T, void>::Function SignalT<T, void>::getFunction() const {
+    inline typename SignalT<T, void>::Function SignalT<T, void>::function() const {
+      return m_function;
+    }
+    
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline SignalT<void, Args...>::SignalT(Function function) :
+      m_function(function) {
+      /* nop */
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline void SignalT<void, Args...>::emit(Args... args) {
+      (*m_function)(args...);
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline typename SignalT<void, Args...>::Function SignalT<void, Args...>::function() const {
+      return m_function;
+    }
+    
+    //----------------------------------------------------------------------------------
+    //----------------------------------------------------------------------------------
+    
+    inline SignalT<void, void>::SignalT(Function function) :
+      m_function(function) {
+      /* nop */
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    inline void SignalT<void, void>::emit() {
+      (*m_function)();
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    inline typename SignalT<void, void>::Function SignalT<void, void>::function() const {
       return m_function;
     }
   }
