@@ -82,6 +82,9 @@ namespace dqm4hep {
     class SignalT : public SignalBase<Args...> {
     public:
       typedef void (T::*Function)(Args...);
+      SignalT() = delete;
+      SignalT(const SignalT<T, Args...>&) = delete;
+      SignalT<T, Args...>& operator=(const SignalT<T, Args...>&) = delete;
 
       /**
       *  @brief  Constructor
@@ -117,6 +120,9 @@ namespace dqm4hep {
     class SignalT<T, void> : public SignalBase<void> {
     public:
       typedef void (T::*Function)();
+      SignalT() = delete;
+      SignalT(const SignalT<T, void>&) = delete;
+      SignalT<T, void>& operator=(const SignalT<T, void>&) = delete;
 
       /**
       *  @brief  Constructor with
