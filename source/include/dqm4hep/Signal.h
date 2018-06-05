@@ -432,17 +432,21 @@ namespace dqm4hep {
     template <typename T>
     inline bool Signal<Args...>::disconnect(T *obj) {
       bool disconnected = false;
-      for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
+      auto iter = m_callbacks.begin();
+      while(iter != m_callbacks.end()) {        
+      // for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<SignalT<T, Args...>*>(*iter);
         if(nullptr == callback) {
+          iter++;
           continue;
         }
         if (callback->object() == obj) {
           delete callback;
-          m_callbacks.erase(iter);
-          iter--;
+          iter = m_callbacks.erase(iter);
           disconnected = true;
+          continue;
         }
+        iter++;
       }
       return disconnected;
     }
