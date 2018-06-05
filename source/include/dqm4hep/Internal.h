@@ -91,6 +91,14 @@
 #define IS_INF std::isinf
 #endif
 
+#ifdef __GNUC__
+#define DEPRECATED(func) func __attribute__ ((deprecated))
+#elif defined(_MSC_VER)
+#define DEPRECATED(func) __declspec(deprecated) func
+#else
+#define DEPRECATED(func) func
+#endif
+
 // Useful macro to silent any exception
 #define DQM4HEP_NO_EXCEPTION( Code ) try { Code } catch(...) {}
 
