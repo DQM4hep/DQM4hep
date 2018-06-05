@@ -328,6 +328,11 @@ namespace dqm4hep {
        *  @brief  Disconnect all functions
        */
       void disconnect();
+      
+      /**
+       *  @brief  Disconnect all functions. Deprecated, use disconnect() instead
+       */
+      DEPRECATED(void disconnectAll());
 
       /**
        *  @brief  Whether the target object has any connected functions
@@ -481,6 +486,13 @@ namespace dqm4hep {
         delete *iter;        
       }
       m_callbacks.clear();
+    }
+    
+    //----------------------------------------------------------------------------------
+    
+    template <typename... Args>
+    inline void Signal<Args...>::disconnectAll() {
+      disconnect();
     }
 
     //----------------------------------------------------------------------------------
