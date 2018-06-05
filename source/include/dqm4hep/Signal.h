@@ -86,7 +86,7 @@ namespace dqm4hep {
       /**
       *  @brief  Constructor
       */
-      SignalT(T *object, Function function);
+      SignalT(T *obj, Function func);
 
       /**
       *  @brief  Emit the signal
@@ -154,7 +154,7 @@ namespace dqm4hep {
       /**
       *  @brief  Constructor
       */
-      SignalT(Function function);
+      SignalT(Function func);
 
       /**
       *  @brief  Emit the signal
@@ -180,7 +180,7 @@ namespace dqm4hep {
       /**
       *  @brief  Constructor
       */
-      SignalT(Function function);
+      SignalT(Function func);
 
       /**
       *  @brief  Emit the signal
@@ -287,17 +287,17 @@ namespace dqm4hep {
        *  @brief  Connect a class member-function to signal
        *
        *  @param  object the class object
-       *  @param  function the class member-function
+       *  @param  func the class member-function
        */
       template <typename T>
-      bool connect(T *object, void (T::*function)(Args...));
+      bool connect(T *object, void (T::*func)(Args...));
       
       /**
        *  @brief  Connect a function to signal
        *  
-       *  @param  function [description]
+       *  @param  func [description]
        */
-      bool connect(void (*function)(Args...));
+      bool connect(void (*func)(Args...));
 
       /**
        *  @brief  Disconnect all functions of the target object 
@@ -311,18 +311,18 @@ namespace dqm4hep {
        *  @brief  Disconnect a specific class member-function
        *
        *  @param  object the target object
-       *  @param function the class member-function
+       *  @param  func the class member-function
        */
       template <typename T>
-      bool disconnect(T *object, void (T::*function)(Args...));
+      bool disconnect(T *object, void (T::*func)(Args...));
       
       /**
        *  @brief  Disconnect a function
        *
        *  @param  object the target object
-       *  @param function the class member-function
+       *  @param  func the class member-function
        */
-      bool disconnect(void (*function)(Args...));
+      bool disconnect(void (*func)(Args...));
 
       /**
        *  @brief  Disconnect all functions
@@ -341,17 +341,17 @@ namespace dqm4hep {
        *  @brief  Whether the target object and member-function is connected
        *
        *  @param  object the target object 
-       *  @param  function the class member-function
+       *  @param  func the class member-function
        */
       template <typename T>
-      bool isConnected(T *object, void (T::*function)(Args...)) const;
+      bool isConnected(T *object, void (T::*func)(Args...)) const;
       
       /**
        *  @brief  Whether the function is connected
        *
-       *  @param  function the target function
+       *  @param  func the target function
        */
-      bool isConnected(void (*function)(Args...)) const;
+      bool isConnected(void (*func)(Args...)) const;
 
       /**
        *  @brief  Whether the signal has at least one connection 
@@ -396,22 +396,22 @@ namespace dqm4hep {
 
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::connect(T *object, void (T::*function)(Args...)) {
-      if (this->isConnected(object, function)) {
+    inline bool Signal<Args...>::connect(T *obj, void (T::*func)(Args...)) {
+      if (this->isConnected(obj, func)) {
         return false;
       }
-      m_callbacks.push_back(new SignalT<T, Args...>(object, function));
+      m_callbacks.push_back(new SignalT<T, Args...>(obj, func));
       return true;
     }
     
     //----------------------------------------------------------------------------------
     
     template <typename... Args>
-    inline bool Signal<Args...>::connect(void (*function)(Args...)) {
-      if (this->isConnected(function)) {
+    inline bool Signal<Args...>::connect(void (*func)(Args...)) {
+      if (this->isConnected(func)) {
         return false;
       }
-      m_callbacks.push_back(new SignalT<void, Args...>(function));
+      m_callbacks.push_back(new SignalT<void, Args...>(func));
       return true;
     }
 
@@ -419,14 +419,14 @@ namespace dqm4hep {
 
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::disconnect(T *object) {
+    inline bool Signal<Args...>::disconnect(T *obj) {
       bool disconnected = false;
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<SignalT<T, Args...>*>(*iter);
         if(nullptr == callback) {
           continue;
         }
-        if (callback->object() == object) {
+        if (callback->object() == obj) {
           delete callback;
           m_callbacks.erase(iter);
           iter--;
@@ -440,13 +440,13 @@ namespace dqm4hep {
     
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::disconnect(T *object, void (T::*function)(Args...)) {
+    inline bool Signal<Args...>::disconnect(T *obj, void (T::*func)(Args...)) {
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<SignalT<T, Args...>*>(*iter);
         if(nullptr == callback) {
           continue;
         }
-        if (callback->object() == object && callback->function() == function) {
+        if (callback->object() == obj && callback->function() == func) {
           delete callback;
           m_callbacks.erase(iter);
           return true;
@@ -458,13 +458,13 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
     
     template <typename... Args>
-    inline bool Signal<Args...>::disconnect(void (*function)(Args...)) {
+    inline bool Signal<Args...>::disconnect(void (*func)(Args...)) {
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<SignalT<void, Args...>*>(*iter);
         if(nullptr == callback) {
           continue;
         }
-        if (callback->function() == function) {
+        if (callback->function() == func) {
           delete callback;
           m_callbacks.erase(iter);
           return true;
@@ -487,13 +487,13 @@ namespace dqm4hep {
 
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::hasConnection(T *object) const {
+    inline bool Signal<Args...>::hasConnection(T *obj) const {
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<const SignalT<T, Args...>*>(*iter);
         if (nullptr == callback) {
           continue;          
         }
-        if (callback->object() == object) {
+        if (callback->object() == obj) {
           return true;
         }
       }
@@ -504,13 +504,13 @@ namespace dqm4hep {
 
     template <typename... Args>
     template <typename T>
-    inline bool Signal<Args...>::isConnected(T *object, void (T::*function)(Args...)) const {
+    inline bool Signal<Args...>::isConnected(T *obj, void (T::*func)(Args...)) const {
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<const SignalT<T, Args...>*>(*iter);
         if (nullptr == callback) {
           continue;          
         }
-        if (callback->object() == object && callback->function() == function) {
+        if (callback->object() == obj && callback->function() == func) {
           return true;
         }
       }
@@ -520,13 +520,13 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
 
     template <typename... Args>
-    inline bool Signal<Args...>::isConnected(void (*function)(Args...)) const {
+    inline bool Signal<Args...>::isConnected(void (*func)(Args...)) const {
       for (auto iter = m_callbacks.begin(), endIter = m_callbacks.end(); endIter != iter; ++iter) {
         auto callback = dynamic_cast<const SignalT<void, Args...>*>(*iter);
         if (nullptr == callback) {
           continue;          
         }
-        if (callback->function() == function) {
+        if (callback->function() == func) {
           return true;
         }
       }
@@ -551,9 +551,9 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
     
     template <typename T, typename... Args>
-    inline SignalT<T, Args...>::SignalT(T *object, Function function) : 
-      m_object(object), 
-      m_function(function) {
+    inline SignalT<T, Args...>::SignalT(T *obj, Function func) : 
+      m_object(obj), 
+      m_function(func) {
       /* nop */
     }
     
@@ -582,9 +582,9 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
     
     template <typename T>
-    inline SignalT<T, void>::SignalT(T *object, Function function) : 
-      m_object(object), 
-      m_function(function) {
+    inline SignalT<T, void>::SignalT(T *obj, Function func) : 
+      m_object(obj), 
+      m_function(func) {
       /* nop */
     }
     
@@ -613,8 +613,8 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
     
     template <typename... Args>
-    inline SignalT<void, Args...>::SignalT(Function function) :
-      m_function(function) {
+    inline SignalT<void, Args...>::SignalT(Function func) :
+      m_function(func) {
       /* nop */
     }
     
@@ -635,8 +635,8 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
     
-    inline SignalT<void, void>::SignalT(Function function) :
-      m_function(function) {
+    inline SignalT<void, void>::SignalT(Function func) :
+      m_function(func) {
       /* nop */
     }
     
