@@ -277,7 +277,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
+    /** Convert TimePoint to time_t
      */
     inline time_t toTime_t(const TimePoint &timePoint) {
       return TimePoint::clock::to_time_t(timePoint);
@@ -285,7 +285,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
+    /** Convert time_t to TimePoint
      */
     inline TimePoint toTimePoint(time_t t) {
       return TimePoint::clock::from_time_t(t);
