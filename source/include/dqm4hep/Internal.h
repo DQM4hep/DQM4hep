@@ -230,7 +230,28 @@ namespace dqm4hep {
 
     /** Tokenize string with delimiter.
      */
-    inline void tokenize(const std::string &inputString, StringVector &tokens, const std::string &delimiter = " ") {
+    template <typename T>
+    inline void tokenize(const std::string &inputString, std::vector<T> &tokens, const std::string &delimiter = " ") {
+      std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
+      std::string::size_type pos = inputString.find_first_of(delimiter, lastPos);
+
+      while ((std::string::npos != pos) || (std::string::npos != lastPos)) {
+        T value;
+        if(not stringToType(inputString.substr(lastPos, pos - lastPos), value)) {
+          return;
+        }
+        tokens.push_back(value);
+        lastPos = inputString.find_first_not_of(delimiter, pos);
+        pos = inputString.find_first_of(delimiter, lastPos);
+      }
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
+    /** Tokenize string with delimiter.
+     */
+    template <>
+    inline void tokenize(const std::string &inputString, StringVector &tokens, const std::string &delimiter) {
       std::string::size_type lastPos = inputString.find_first_not_of(delimiter, 0);
       std::string::size_type pos = inputString.find_first_of(delimiter, lastPos);
 
@@ -252,6 +273,22 @@ namespace dqm4hep {
       minutes = pTmTime->tm_min;
       seconds = pTmTime->tm_sec;
       delete pTmTime;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
+     */
+    inline time_t toTime_t(const TimePoint &timePoint) {
+      return TimePoint::clock::to_time_t(timePoint);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
+     */
+    inline TimePoint toTimePoint(time_t t) {
+      return TimePoint::clock::from_time_t(t);
     }
 
     //-------------------------------------------------------------------------------------------------
