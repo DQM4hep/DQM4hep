@@ -48,11 +48,11 @@ namespace dqm4hep {
       GenericEventXMLReader(const GenericEventXMLReader&) = delete;
       GenericEventXMLReader& operator=(const GenericEventXMLReader&) = delete;
 
-      core::StatusCode open(const std::string &fname);
-      core::StatusCode skipNEvents(int nEvents);
-      core::StatusCode runInfo(core::Run &run);
-      core::StatusCode readNextEvent();
-      core::StatusCode close();
+      core::StatusCode open(const std::string &fname) override;
+      core::StatusCode skipNEvents(int nEvents) override;
+      core::StatusCode runInfo(core::Run &run) override;
+      core::StatusCode readNextEvent() override;
+      core::StatusCode close() override;
       
     private:
       TiXmlDocument        m_document = {};
