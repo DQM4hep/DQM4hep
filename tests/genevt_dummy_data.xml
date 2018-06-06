@@ -4,7 +4,7 @@
     <parameter name="StartTime"> 1528291181 </parameter>
     <parameter name="EndTime"> 1528291280 </parameter>
     <parameter name="Description"> A dummy run of GenericEvent used for testing the framework </parameter>
-    <parameter name="DetectorName">  </parameter>
+    <parameter name="DetectorName"> DummyDevice </parameter>
     <parameters>
       <parameter name="DAQ"> EUDAQ </parameter>
       <parameter name="Shifter"> Perceval </parameter>
