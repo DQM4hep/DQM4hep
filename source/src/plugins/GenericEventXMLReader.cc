@@ -102,12 +102,12 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     
     core::StatusCode GenericEventXMLReader::runInfo(core::Run &run) {
-      auto runInfo = m_document.RootElement()->FirstChildElement("run");
-      if(!runInfo) {
+      auto runInfoElement = m_document.RootElement()->FirstChildElement("run");
+      if(!runInfoElement) {
         dqm_error( "No run info available in file '{0}'", m_document.ValueStr() );
         return STATUS_CODE_NOT_FOUND;
       }
-      TiXmlHandle handle(runInfo);
+      TiXmlHandle handle(runInfoElement);
       int runNumber = 0;
       int32_t startTime = 0, endTime = 0;
       std::string description, detectorName;
@@ -121,7 +121,7 @@ namespace dqm4hep {
         "Description", description));
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(handle, 
         "DetectorName", detectorName));
-      auto parameters = runInfo->FirstChildElement("parameters");
+      auto parameters = runInfoElement->FirstChildElement("parameters");
       if(nullptr != parameters) {
         for(auto child = parameters->FirstChildElement("parameter") ; nullptr != child ; child = child->NextSiblingElement("parameter")) {
           std::string name, value;
