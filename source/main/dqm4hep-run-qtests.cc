@@ -213,15 +213,12 @@ int main(int argc, char *argv[]) {
     TiXmlDocument &document(parser.document());
     StringMap constants;
     TiXmlElement *rootElement = document.RootElement();
-    TiXmlElement *qtestsElement = rootElement->FirstChildElement("qtests");
-    TiXmlElement *mesElement = rootElement->FirstChildElement("monitorElements");
-    
+    TiXmlElement *storageElement = rootElement->FirstChildElement("storage");
     std::unique_ptr<MonitorElementManager> monitorElementMgr(new MonitorElementManager());
     
     // create, configure and run quality tests
     QReportStorage reportStorage;
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->createQualityTests(qtestsElement));
-    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->readMonitorElements<MonitorElement>(mesElement, true));
+    THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->parseStorage<MonitorElement>(storageElement));
     THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->runQualityTests(reportStorage));
     
     const unsigned int qualityExit(qualityExitMap.find(qualityExitArg.getValue())->second);
