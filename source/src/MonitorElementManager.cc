@@ -179,13 +179,6 @@ namespace dqm4hep {
     StatusCode MonitorElementManager::removeMonitorElement(const std::string &path, const std::string &name) {
       MonitorElementPtr monitorElement;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->getMonitorElement(path, name, monitorElement));
-
-      // look in qtest map first
-      auto iter = m_monitorElementToQTestMap.find(monitorElement);
-
-      if (m_monitorElementToQTestMap.end() != iter)
-        m_monitorElementToQTestMap.erase(iter);
-
       // remove the element form storage. Call delete operator
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.remove(path, [&name](const MonitorElementPtr &element) {
         return (element->name() == name);
@@ -197,7 +190,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::createQualityTests(TiXmlElement *const pXmlElement) {
+    StatusCode MonitorElementManager::parseQualityTests(TiXmlElement *pXmlElement) {
       
       if (nullptr == pXmlElement) {
         dqm_error("MonitorElementManager::createQualityTests: invalid xml element!");
@@ -223,7 +216,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElementManager::createQualityTest(TiXmlElement *const pXmlElement, float warning, float error) {
+    StatusCode MonitorElementManager::createQualityTest(TiXmlElement *pXmlElement, float warning, float error) {
       std::string name, type;
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "name", name));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(pXmlElement, "type", type));
@@ -408,5 +401,72 @@ namespace dqm4hep {
       });
     }
     
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::parseReferences(TiXmlElement *const element) {
+      if(nullptr == element) {
+        return STATUS_CODE_INVALID_PTR;
+      }
+      for (TiXmlElement *fileElement = element->FirstChildElement("file"); fileElement != nullptr; fileElement = fileElement->NextSiblingElement("file")) {
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, parseReference(fileElement));
+      }
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::parseReference(TiXmlElement *const element) {
+      if(nullptr == element) {
+        return STATUS_CODE_INVALID_PTR;
+      }
+      std::string id, fileName;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(element, "id", id));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(element, "name", fileName));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, addReferenceFile(id, fileName));
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::addReferenceFile(const std::string &refId, const std::string &fname) {
+      auto findIter = m_references.find(refId);
+      if(m_references.end() != findIter) {
+        dqm_error( "The reference id '{0}' is already registered with file name '{1}'", refId, findIter->second->GetName());
+        return STATUS_CODE_ALREADY_PRESENT;
+      }
+      std::shared_ptr<TFile> filePtr(TFile::Open(fname.c_str(), "READ"));
+      if(nullptr == filePtr) {
+        dqm_error( "Couldn't open reference file '{0}'", fname );
+        return STATUS_CODE_FAILURE;
+      }
+      m_references[refId] = filePtr;
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::parseStyle(TiXmlElement *styleElement) {
+      if(nullptr != styleElement) {
+        std::string theme = RootStyle::Theme::DEFAULT;
+        RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(styleElement, 
+          "theme", theme));
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RootStyle::builtinStyle(theme, m_objectStyle, m_referenceStyle));
+        auto objectStyleElement = styleElement->FirstChildElement("object");
+        if(nullptr != objectStyleElement) {
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_objectStyle.fromXml(TiXmlHandle(objectStyleElement)));
+        }
+        auto referenceStyleElement = styleElement->FirstChildElement("reference");
+        if(nullptr != referenceStyleElement) {
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_referenceStyle.fromXml(TiXmlHandle(referenceStyleElement)));
+        }
+      }
+      else {
+        // Use default style
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, RootStyle::builtinStyle(RootStyle::Theme::DEFAULT, m_objectStyle, m_referenceStyle));
+      }
+      return STATUS_CODE_SUCCESS;
+    }
+    
   }
+  
 }
