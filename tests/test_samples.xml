@@ -5,152 +5,142 @@
     <constant name="TGraphDirectory">/TGraphs</constant>
   </constants>
 
-    <!-- PropertyWithinExpectedTest qtests -->
+  <storage>
+    <!-- Use the same root file as input file for reference -->
+    <references>
+      <file id="ref" name="test_samples.root"/>
+    </references>
+    <!-- Quality tests config  -->
     <qtests>
-
       <qtest type="PropertyWithinExpectedTest" name="MeanAround10Long">
         <parameter name="ExpectedValue" value="10"/>
         <parameter name="DeviationLower" value="8"/>
         <parameter name="DeviationUpper" value="12"/>
-	<parameter name="Property"> Mean </parameter>
+        <parameter name="Property"> Mean </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="MeanAround10Short">
         <parameter name="ExpectedValue" value="10"/>
         <parameter name="DeviationLower" value="9.5"/>
         <parameter name="DeviationUpper" value="10.5"/>
-	<parameter name="Property"> Mean </parameter>
+        <parameter name="Property"> Mean </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="MeanBelow12">
-        <parameter name="DeviationUpper" value="12" />
-	<parameter name="Property"> Mean </parameter>
-	<parameter name="Method"> LowerThan </parameter>
+        <parameter name="DeviationUpper" value="12"/>
+        <parameter name="Property"> Mean </parameter>
+        <parameter name="Method"> LowerThan </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="MeanAbove8">
-        <parameter name="DeviationLower" value="8" />
-	<parameter name="Property"> Mean </parameter>
-	<parameter name="Method"> HigherThan </parameter>
+        <parameter name="DeviationLower" value="8"/>
+        <parameter name="Property"> Mean </parameter>
+        <parameter name="Method"> HigherThan </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="Mean90Around10Short">
         <parameter name="ExpectedValue" value="10"/>
         <parameter name="DeviationLower" value="9.5"/>
         <parameter name="DeviationUpper" value="10.5"/>
-	<parameter name="Property"> Mean90 </parameter>
+        <parameter name="Property"> Mean90 </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="MeanAround15Short">
         <parameter name="ExpectedValue" value="15"/>
         <parameter name="DeviationLower" value="14.5"/>
         <parameter name="DeviationUpper" value="15.5"/>
-	<parameter name="Property"> Mean </parameter>
+        <parameter name="Property"> Mean </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="RMSAround2Long">
         <parameter name="ExpectedValue" value="2"/>
         <parameter name="DeviationLower" value="0"/>
         <parameter name="DeviationUpper" value="4"/>
-	<parameter name="Property"> RMS </parameter>
+        <parameter name="Property"> RMS </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="RMS90Around2Long">
         <parameter name="ExpectedValue" value="2"/>
         <parameter name="DeviationLower" value="0"/>
         <parameter name="DeviationUpper" value="4"/>
-	<parameter name="Property"> RMS90 </parameter>
+        <parameter name="Property"> RMS90 </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="MedianAround10Long">
         <parameter name="ExpectedValue" value="10"/>
         <parameter name="DeviationLower" value="8"/>
         <parameter name="DeviationUpper" value="12"/>
-	<parameter name="Property"> Median </parameter>
+        <parameter name="Property"> Median </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="MedianAround10Short" error="0.5" warning="0.75">
         <parameter name="ExpectedValue" value="10"/>
         <parameter name="DeviationLower" value="9"/>
         <parameter name="DeviationUpper" value="11"/>
-	<parameter name="Property"> Median  </parameter>
+        <parameter name="Property"> Median </parameter>
       </qtest>
-
-      <qtest type="PropertyWithinExpectedTest" name="TGraphMeanAround0" >
-	<parameter name="ExpectedValue" value="0"/>
-	<parameter name="DeviationLower" value="-2"/>
-	<parameter name="DeviationUpper" value="2"/>
-	<parameter name="Property"> Mean </parameter>
+      <qtest type="PropertyWithinExpectedTest" name="TGraphMeanAround0">
+        <parameter name="ExpectedValue" value="0"/>
+        <parameter name="DeviationLower" value="-2"/>
+        <parameter name="DeviationUpper" value="2"/>
+        <parameter name="Property"> Mean </parameter>
       </qtest>
-
       <qtest type="PropertyWithinExpectedTest" name="TGraphMeanAround3">
-	<parameter name="ExpectedValue" value="3"/>
-	<parameter name="DeviationLower" value="1"/>
-	<parameter name="DeviationUpper" value="4"/>
-	<parameter name="Property"> Mean </parameter>
+        <parameter name="ExpectedValue" value="3"/>
+        <parameter name="DeviationLower" value="1"/>
+        <parameter name="DeviationUpper" value="4"/>
+        <parameter name="Property"> Mean </parameter>
       </qtest>
-
-      <qtest type="PropertyWithinExpectedTest" name="TGraphRMSAround0" >
-	<parameter name="ExpectedValue" value="0"/>
-	<parameter name="DeviationLower" value="-2"/>
-	<parameter name="DeviationUpper" value="2"/>
-	<parameter name="Property"> RMS </parameter>
+      <qtest type="PropertyWithinExpectedTest" name="TGraphRMSAround0">
+        <parameter name="ExpectedValue" value="0"/>
+        <parameter name="DeviationLower" value="-2"/>
+        <parameter name="DeviationUpper" value="2"/>
+        <parameter name="Property"> RMS </parameter>
       </qtest>
-
-      <qtest type="PropertyWithinExpectedTest" name="TGraphMean90Around0" >
-	<parameter name="ExpectedValue" value="0"/>
-	<parameter name="DeviationLower" value="-2"/>
-	<parameter name="DeviationUpper" value="2"/>
-	<parameter name="Property"> Mean90 </parameter>
+      <qtest type="PropertyWithinExpectedTest" name="TGraphMean90Around0">
+        <parameter name="ExpectedValue" value="0"/>
+        <parameter name="DeviationLower" value="-2"/>
+        <parameter name="DeviationUpper" value="2"/>
+        <parameter name="Property"> Mean90 </parameter>
       </qtest>
-
-      <qtest type="PropertyWithinExpectedTest" name="TGraphRMS90Around0" >
-	<parameter name="ExpectedValue" value="0"/>
-	<parameter name="DeviationLower" value="-2"/>
-	<parameter name="DeviationUpper" value="2"/>
-	<parameter name="Property"> RMS90 </parameter>
+      <qtest type="PropertyWithinExpectedTest" name="TGraphRMS90Around0">
+        <parameter name="ExpectedValue" value="0"/>
+        <parameter name="DeviationLower" value="-2"/>
+        <parameter name="DeviationUpper" value="2"/>
+        <parameter name="Property"> RMS90 </parameter>
       </qtest>
-
-      <qtest type="PropertyWithinExpectedTest" name="TGraphMedianAround0.2" error="0.5" >
-	<parameter name="ExpectedValue" value="0.2"/>
-	<parameter name="DeviationLower" value="0.1"/>
-	<parameter name="DeviationUpper" value="0.3"/>
-	<parameter name="Property"> Median </parameter>
+      <qtest type="PropertyWithinExpectedTest" name="TGraphMedianAround0.2" error="0.5">
+        <parameter name="ExpectedValue" value="0.2"/>
+        <parameter name="DeviationLower" value="0.1"/>
+        <parameter name="DeviationUpper" value="0.3"/>
+        <parameter name="Property"> Median </parameter>
       </qtest>
-
+      <qtest type="ExactRefCompareTest" name="ExactRef"/>
     </qtests>
 
     <!-- All monitor elements and qtests to process -->
     <monitorElements>
       <file name="test_samples.root">
         <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
-          <qtest name="MeanAround10Long" />
-	  <qtest name="Mean90Around10Short" />
-	  <qtest name="RMSAround2Long" />
-	  <qtest name="MedianAround10Short" />
-	  <qtest name="MeanAbove8" />
-	  <qtest name="MeanBelow12" />
+          <qtest name="MeanAround10Long"/>
+          <qtest name="Mean90Around10Short"/>
+          <qtest name="RMSAround2Long"/>
+          <qtest name="MedianAround10Short"/>
+          <qtest name="MeanAbove8"/>
+          <qtest name="MeanBelow12"/>
         </fileElement>
         <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2_bck">
-          <qtest name="MeanAround10Short" />
+          <reference id="ref"/>
+          <qtest name="MeanAround10Short"/>
+          <qtest name="ExactRef"/>
         </fileElement>
         <fileElement path="${GaussiansDirectory}" name="DblGaus_Mean15_RMS2_RMS5">
-          <qtest name="MeanAround15Short" />
+          <qtest name="MeanAround15Short"/>
         </fileElement>
-	<fileElement path="${GaussiansDirectory}" name="Gaus_Mean8_RMS2">
-	  <qtest name="MedianAround10Short" />
-	</fileElement>
-
-	<fileElement path="${TGraphDirectory}" name="Gaus_Mean0_RMS2">
-	  <qtest name="TGraphMeanAround0" />
-	  <qtest name="TGraphMeanAround3" />
-	  <qtest name="TGraphMean90Around0" />
-	  <qtest name="TGraphRMSAround0" />
-	  <qtest name="TGraphRMS90Around0" />
-	  <qtest name="TGraphMedianAround0.2" />
-	</fileElement>
-	
+        <fileElement path="${GaussiansDirectory}" name="Gaus_Mean8_RMS2">
+          <qtest name="MedianAround10Short"/>
+        </fileElement>
+        <fileElement path="${TGraphDirectory}" name="Gaus_Mean0_RMS2">
+          <qtest name="TGraphMeanAround0"/>
+          <qtest name="TGraphMeanAround3"/>
+          <qtest name="TGraphMean90Around0"/>
+          <qtest name="TGraphRMSAround0"/>
+          <qtest name="TGraphRMS90Around0"/>
+          <qtest name="TGraphMedianAround0.2"/>
+        </fileElement>
       </file>
     </monitorElements>
+  </storage>
 
 </dqm4hep>
