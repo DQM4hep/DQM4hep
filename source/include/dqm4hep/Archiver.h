@@ -44,72 +44,123 @@ namespace dqm4hep {
     template <typename T>
     class Storage;
 
-    /** Archiver class
+    /** 
+     *  @brief  Archiver class
      */
     class Archiver {
-      friend class MonitorElementManager;
-
     public:
-      /** Constructor
-       */
       Archiver() = default;
       Archiver(const Archiver &) = delete;
       Archiver& operator=(const Archiver &) = delete;
 
-      /** Constructor with file name and opening mode
+      /** 
+       *  @brief  Constructor
+       *          See open() for argument explanation
+       *
+       *  @param  archiveFileName the root file name
+       *  @param  openingMode the ROOT file opening mode
+       *  @param  overwrite whether to allow to overwrite previous archive
        */
-      Archiver(const std::string &archiveFileName, const std::string &openingMode = "RECREATE",
-               bool allowSuffix = true);
+      Archiver(const std::string &fname, const std::string &openingMode = "RECREATE", bool overwrite = false);
 
-      /** Destructor
+      /** 
+       *  @brief  Destructor
        */
       ~Archiver();
 
-      /** Open a new archive.
-       *  Close the current file if opened. Supported opening mode are the TFile opening mode option (see TFile)
+      /** 
+       *  @brief  Open a new archive.
+       *          Close the current file if opened. Supported opening mode are the 
+       *          TFile opening mode option (see TFile). If overwrite is set to false,
+       *          an id is appended before the .root extension to ensure the file name
+       *          is unique and no archive is overwritten
+       *
+       *  @param  fname the ROOT file name to open
+       *  @param  openingMode the ROOT file opening mode
+       *  @param  overwrite whether to allow for overwrite
        */
-      StatusCode open(const std::string &archiveFileName, const std::string &openingMode = "RECREATE",
-                      bool allowSuffix = true);
+      StatusCode open(const std::string &fname, const std::string &openingMode = "RECREATE",
+                      bool overwrite = true);
 
-      /** Close the current archive
+      /** 
+       *  @brief  Close the current archive
        */
       StatusCode close();
 
-      /** Archive the current state of the storage in the root TDirectory
+      /** 
+       *  @brief  Archive the monitor element storage in the ROOT file.
+       *          The result can be written in a specific directory using the dirName argument.
+       *          By default, the content is written directly in the top-level directory
+       *
+       *  @param  storage the storage to archive
+       *  @param  dirName the directory in which to archive the storage (optional)
        */
-      StatusCode archive(MeStoragePtr storage, const std::string &dirName = "");
-
-      /** Get the file name
+      StatusCode archive(const Storage<MonitorElement> &storage, const std::string &dirName = "");
+      
+      /** 
+       *  @brief  Archive the monitor element storage in the ROOT file.
+       *          Also archive the references along with the monitor object in the same directory.
+       *          The reference is written with the same name as the object plus a suffix (default "_ref").
+       *          The result can be written in a specific directory using the dirName argument.
+       *          By default, the content is written directly in the top-level directory.
+       *
+       *  @param  storage the storage to archive
+       *  @param  dirName the directory in which to archive the storage (optional)
+       *  @param  refSuffix the reference name suffix (optional)
        */
-      const std::string &getFileName() const;
+      StatusCode archiveWithReferences(const Storage<MonitorElement> &storage, const std::string &dirName = "", const std::string &refSuffix = "_ref");
 
-      /** Whether the archive is opened
+      /** 
+       *  @brief  Get the file name
+       */
+      const std::string &fileName() const;
+
+      /** 
+       *  @brief  Whether the archive is opened
        */
       bool isOpened() const;
 
-      /** Get the opening mode of this archive
+      /** 
+       *  @brief  Get the opening mode of this archive
        */
-      const std::string &getOpeningMode() const;
+      const std::string &openingMode() const;
 
     private:
-      /** Fill recursively the TDirectory with the Directory
+      /**
+       *  @brief  Prepare the ROOT file for archiving
+       *   
+       *  @param  dirName the top-level root directory in which the elements will be archived
+       *  @param  directory the top-level directory pointer to receive
        */
-      static StatusCode recursiveFill(MonitorElementDir directory, TDirectory *pROOTDir);
+      StatusCode prepareForAchiving(const std::string &dirName, TDirectory *&directory);
+      
+      /** 
+       *  @brief  Fill recursively the TDirectory with the Directory
+       *
+       *  @param  directory the monitor element storage directory
+       *  @param  rootDirectory the corresponding ROOT directory
+       *  @param  refSuffix the suffix to add for object references
+       */
+      static StatusCode recursiveWrite(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix = "");
 
-      /** Create TDirectories as labeled in the Directory
+      /** 
+       *  @brief  Write the monitor elements contained in the Directory in the TDirectory
+       *
+       *  @param  directory the monitor element storage directory
+       *  @param  rootDirectory the corresponding ROOT directory
+       *  @param  refSuffix the suffix to add for object references
        */
-      static StatusCode createTDirectories(MonitorElementDir directory, TDirectory *pROOTDir);
-
-      /** Write the monitor elements contained in the Directory in the TDirectory
-       */
-      static StatusCode writeMonitorElements(MonitorElementDir directory, TDirectory *pROOTDir);
+      static StatusCode writeMonitorElements(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix = "");
 
     private:
-      // members
-      std::string    m_fileName = {""};              ///< The root file name
-      std::string    m_openingMode = {"RECREATE"};   ///< The root file opening mode
-      bool           m_isOpened = {false};           ///< Whether the archive is opened
-      TFile         *m_pArchiveFile = {nullptr};     ///< The actual archive implementation (root file)
+      /// The archive file name
+      std::string                    m_fileName = {""};
+      /// The root file opening mode
+      std::string                    m_openingMode = {"RECREATE"};
+      ///< Whether the archive is opened
+      bool                           m_isOpened = {false};
+      ///< The actual archive implementation (root file)
+      std::unique_ptr<TFile>         m_file = {nullptr};
     };
   }
 }

@@ -41,115 +41,97 @@ namespace dqm4hep {
 
   namespace core {
 
-    Archiver::Archiver(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix) {
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, openingMode, allowSuffix));
+    Archiver::Archiver(const std::string &archiveFileName, const std::string &openingMode, bool overwrite) {
+      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, openingMode, overwrite));
     }
 
     //-------------------------------------------------------------------------------------------------
 
     Archiver::~Archiver() {
-      if (m_isOpened)
+      if (isOpened())
         close();
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::open(const std::string &archiveFileName, const std::string &openingMode, bool allowSuffix) {
+    StatusCode Archiver::open(const std::string &fname, const std::string &openingMode, bool overwrite) {
       // if already open write the archive if not done
       // and close it before to re-open
-      if (m_isOpened)
+      if (isOpened()) {
         RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, close());
-
-      if (archiveFileName.empty())
+      }
+      if (fname.empty()) {
         return STATUS_CODE_INVALID_PARAMETER;
-
-      if (allowSuffix) {
+      }
+      if (not overwrite) {
         int fileId(0);
-
-        size_t pos = archiveFileName.rfind(".root");
-
+        size_t pos = fname.rfind(".root");
         if (std::string::npos == pos) {
-          dqm_error("Couldn't open archive '{0}' ! Must be a root file !", archiveFileName);
+          dqm_error("Couldn't open archive '{0}' ! Must be a root file !", fname);
           return STATUS_CODE_INVALID_PARAMETER;
         }
-
-        std::string baseArchiveName = archiveFileName.substr(0, pos);
-        std::string fullArchiveName = archiveFileName;
-
+        std::string baseArchiveName = fname.substr(0, pos);
+        std::string fullArchiveName = fname; 
         while (!gSystem->AccessPathName(fullArchiveName.c_str())) {
           std::stringstream ss;
           ss << baseArchiveName << "_" << fileId << ".root";
           fullArchiveName = ss.str();
           fileId++;
         }
-
         m_fileName = fullArchiveName;
-      } else {
-        m_fileName = archiveFileName;
+      } 
+      else {
+        m_fileName = fname;
       }
-
       m_openingMode = openingMode;
-
       dqm_info("Archiver::open: Opening archive {0}", m_fileName);
-
-      m_pArchiveFile = new TFile(m_fileName.c_str(), openingMode.c_str());
-
-      if (nullptr == m_pArchiveFile) {
-        dqm_error("Couldn't open archive '{0}' !", m_fileName);
+      m_file.reset(new TFile(m_fileName.c_str(), openingMode.c_str()));
+      if (nullptr == m_file) {
+        dqm_error("Archiver::open: Couldn't open archive '{0}' !", m_fileName);
         return STATUS_CODE_FAILURE;
       }
-
       m_isOpened = true;
-
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     StatusCode Archiver::close() {
-      if (!m_isOpened)
-        return STATUS_CODE_FAILURE;
-
-      m_pArchiveFile->Close();
-      delete m_pArchiveFile;
-
-      m_pArchiveFile = nullptr;
-
+      if (not isOpened()) {
+        return STATUS_CODE_SUCCESS;
+      }
+      m_file->Close();
+      m_file.reset(nullptr);
       m_isOpened = false;
       m_openingMode = "";
-
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::archive(MeStoragePtr storage, const std::string &dirName) {
-      if (!this->isOpened())
-        return STATUS_CODE_NOT_ALLOWED;
-
-      TDirectory *pDirectory(nullptr);
-
-      if (!dirName.empty()) {
-        pDirectory = m_pArchiveFile->mkdir(dirName.c_str());
-
-        if (pDirectory == nullptr)
-          return STATUS_CODE_FAILURE;
-      } else {
-        // TFile inherits from TDirectory ...
-        pDirectory = m_pArchiveFile;
-      }
-
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveFill(storage->root(), pDirectory));
-
-      m_pArchiveFile->cd();
-      m_pArchiveFile->Write();
-
+    StatusCode Archiver::archive(const Storage<MonitorElement> &storage, const std::string &dirName) {
+      TDirectory *directory = nullptr;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, prepareForAchiving(dirName, directory));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveWrite(storage.root(), directory, ""));
+      m_file->cd();
+      m_file->Write();
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode Archiver::archiveWithReferences(const Storage<MonitorElement> &storage, const std::string &dirName, const std::string &refSuffix) {
+      TDirectory *directory = nullptr;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, prepareForAchiving(dirName, directory));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveWrite(storage.root(), directory, refSuffix));
+      m_file->cd();
+      m_file->Write();
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Archiver::getFileName() const {
+    const std::string &Archiver::fileName() const {
       return m_fileName;
     }
 
@@ -161,55 +143,73 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    const std::string &Archiver::getOpeningMode() const {
+    const std::string &Archiver::openingMode() const {
       return m_openingMode;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode Archiver::prepareForAchiving(const std::string &dirName, TDirectory *&directory) {
+      if(not isOpened()) {
+        return STATUS_CODE_NOT_INITIALIZED;
+      }
+      directory = nullptr;
+      if (!dirName.empty()) {
+        directory = m_file->mkdir(dirName.c_str());
+        if (directory == nullptr) {
+          return STATUS_CODE_FAILURE;
+        }
+      } 
+      else {
+        directory = m_file.get();
+      }
+      return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::recursiveFill(MonitorElementDir directory, TDirectory *pROOTDir) {
-      if (nullptr == directory || nullptr == pROOTDir)
+    StatusCode Archiver::recursiveWrite(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix) {
+      if (nullptr == directory || nullptr == rootDirectory) {
         return STATUS_CODE_INVALID_PTR;
-
-      pROOTDir->cd();
-
+      }
+      rootDirectory->cd();
       const auto &subDirList(directory->subdirs());
+      for (auto iter = subDirList.begin(), endIter = subDirList.end(); endIter != iter; ++iter) {
+        auto subDir = *iter;
+        TDirectory *rootSubDirectory = rootDirectory->mkdir(subDir->name().c_str());
+        if (nullptr != rootSubDirectory) {
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::recursiveWrite(subDir, rootSubDirectory, refSuffix));
+        }
+      }
+      // write the monitor elements
+      if (not directory->isEmpty()) {
+        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::writeMonitorElements(directory, rootDirectory, refSuffix));
+      }
+      return STATUS_CODE_SUCCESS;
+    }
 
-      if (!subDirList.empty()) {
-        for (auto iter = subDirList.begin(), endIter = subDirList.end(); endIter != iter; ++iter) {
-          auto subDir = *iter;
-          TDirectory *pROOTSubDir = pROOTDir->mkdir(subDir->name().c_str());
+    //-------------------------------------------------------------------------------------------------
 
-          if (nullptr != pROOTSubDir) {
-            RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::recursiveFill(subDir, pROOTSubDir));
+    StatusCode Archiver::writeMonitorElements(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix) {
+      if (nullptr == directory || nullptr == rootDirectory) {
+        return STATUS_CODE_INVALID_PTR;
+      }
+      rootDirectory->cd();
+      const auto &monitorElementList(directory->contents());
+      for (auto iter = monitorElementList.begin(), endIter = monitorElementList.end(); endIter != iter; ++iter) {
+        const std::string writeName = (*iter)->name();
+        TObject *object = (*iter)->object();
+        if(nullptr != object) {
+          rootDirectory->WriteObjectAny(object, object->IsA(), writeName.c_str());
+          TObject *reference = (*iter)->reference();
+          if(not refSuffix.empty() and nullptr != reference) {
+            rootDirectory->WriteObjectAny(reference, reference->IsA(), (writeName + refSuffix).c_str());
           }
         }
       }
-
-      // write the monitor elements
-      if (!directory->isEmpty()) {
-        RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, Archiver::writeMonitorElements(directory, pROOTDir));
-      }
-
       return STATUS_CODE_SUCCESS;
     }
 
-    //-------------------------------------------------------------------------------------------------
-
-    StatusCode Archiver::writeMonitorElements(MonitorElementDir directory, TDirectory *pROOTDir) {
-      if (nullptr == directory || nullptr == pROOTDir)
-        return STATUS_CODE_INVALID_PTR;
-
-      pROOTDir->cd();
-
-      const auto &monitorElementList(directory->contents());
-
-      for (auto iter = monitorElementList.begin(), endIter = monitorElementList.end(); endIter != iter; ++iter) {
-        TObject *pObject = (*iter)->object();
-        pROOTDir->WriteObjectAny(pObject, pObject->IsA(), (*iter)->name().c_str());
-      }
-
-      return STATUS_CODE_SUCCESS;
-    }
   }
+
 }
