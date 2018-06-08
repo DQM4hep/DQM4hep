@@ -125,8 +125,7 @@ namespace dqm4hep {
       if(nullptr != parameters) {
         for(auto child = parameters->FirstChildElement("parameter") ; nullptr != child ; child = child->NextSiblingElement("parameter")) {
           std::string name, value;
-          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(child, "name", name));
-          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(child, "value", value));
+          RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::parseParameterElement(child, name, value));
           run.setParameter(name, value);
         }
       }
