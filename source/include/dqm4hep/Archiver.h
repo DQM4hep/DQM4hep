@@ -58,10 +58,10 @@ namespace dqm4hep {
        *          See open() for argument explanation
        *
        *  @param  archiveFileName the root file name
-       *  @param  openingMode the ROOT file opening mode
+       *  @param  opMode the ROOT file opening mode
        *  @param  overwrite whether to allow to overwrite previous archive
        */
-      Archiver(const std::string &fname, const std::string &openingMode = "RECREATE", bool overwrite = false);
+      Archiver(const std::string &fname, const std::string &opMode = "RECREATE", bool overwrite = false);
 
       /** 
        *  @brief  Destructor
@@ -76,10 +76,10 @@ namespace dqm4hep {
        *          is unique and no archive is overwritten
        *
        *  @param  fname the ROOT file name to open
-       *  @param  openingMode the ROOT file opening mode
+       *  @param  opMode the ROOT file opening mode
        *  @param  overwrite whether to allow for overwrite
        */
-      StatusCode open(const std::string &fname, const std::string &openingMode = "RECREATE",
+      StatusCode open(const std::string &fname, const std::string &opMode = "RECREATE",
                       bool overwrite = true);
 
       /** 

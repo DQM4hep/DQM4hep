@@ -41,8 +41,8 @@ namespace dqm4hep {
 
   namespace core {
 
-    Archiver::Archiver(const std::string &archiveFileName, const std::string &openingMode, bool overwrite) {
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, openingMode, overwrite));
+    Archiver::Archiver(const std::string &archiveFileName, const std::string &opMode, bool overwrite) {
+      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, opMode, overwrite));
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::open(const std::string &fname, const std::string &openingMode, bool overwrite) {
+    StatusCode Archiver::open(const std::string &fname, const std::string &opMode, bool overwrite) {
       // if already open write the archive if not done
       // and close it before to re-open
       if (isOpened()) {
@@ -83,9 +83,9 @@ namespace dqm4hep {
       else {
         m_fileName = fname;
       }
-      m_openingMode = openingMode;
+      m_openingMode = opMode;
       dqm_info("Archiver::open: Opening archive {0}", m_fileName);
-      m_file.reset(new TFile(m_fileName.c_str(), openingMode.c_str()));
+      m_file.reset(new TFile(m_fileName.c_str(), m_openingMode.c_str()));
       if (nullptr == m_file) {
         dqm_error("Archiver::open: Couldn't open archive '{0}' !", m_fileName);
         return STATUS_CODE_FAILURE;
