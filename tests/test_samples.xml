@@ -108,6 +108,7 @@
         <parameter name="Property"> Median </parameter>
       </qtest>
       <qtest type="ExactRefCompareTest" name="ExactRef"/>
+      <qtest type="KolmogorovTest" name="KTest"/>
     </qtests>
 
     <!-- All monitor elements and qtests to process -->
@@ -125,6 +126,7 @@
           <reference id="ref"/>
           <qtest name="MeanAround10Short"/>
           <qtest name="ExactRef"/>
+	  <qtest name="KTest"/>
         </fileElement>
         <fileElement path="${GaussiansDirectory}" name="DblGaus_Mean15_RMS2_RMS5">
           <qtest name="MeanAround15Short"/>
