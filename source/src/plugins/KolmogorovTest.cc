@@ -58,6 +58,7 @@ namespace dqm4hep {
       void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
 
     protected:
+      //std::string m_options;
       std::string m_options;
 
     };
@@ -86,11 +87,14 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     StatusCode KolmogorovTest::readSettings(const TiXmlHandle xmlHandle) {
-      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, != XmlHelper::readParameter(xmlHandle, "Options", m_options));
+      RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::readParameter(xmlHandle, "Options", m_options));
 
+      // So the last remaining problem is that the "options" argument has to be of the type Option_t*, not a std::string. Not sure how to convert these!
+
+      return STATUS_CODE_SUCCESS;
     }
 
-    void KolmogorovTest::userRun(MonitorElement* monitorElement, QualityTestReport &report) {
+    void KolmogorovTest::userRun(MonitorElement* pMonitorElement, QualityTestReport &report) {
       const bool hasObject = (pMonitorElement->object() != nullptr);
       const bool hasReference = (pMonitorElement->reference() != nullptr);
       const bool isHistogram = pMonitorElement->object()->InheritsFrom("TH1");
@@ -114,22 +118,22 @@ namespace dqm4hep {
 
 	int sizeGraph = pGraph->GetN()+1;
 	int sizeRef = pReferenceGraph->GetN()+1;
-	double arrayGraph = pGraph->GetY();
-	double arrayRef = pReferenceGraph->GetY();
+	double* arrayGraph = pGraph->GetY();
+	double* arrayRef = pReferenceGraph->GetY();
 
-	std::sort(arrayGraph[0], arrayGraph[size]);
-	std::sort(arrayRef[0], arrayRef[size]);
+	std::sort(arrayGraph[0], arrayGraph[sizeGraph]);
+	std::sort(arrayRef[0], arrayRef[sizeRef]);
 	
-	report.m_message = ("Options used: {0}", m_options);
+	report.m_message = ("Options used: " + m_options);
 	report.m_quality = TMath::KolmogorovTest(sizeGraph, arrayGraph, sizeRef, arrayRef, m_options);
       }
       else if (isHistogram) {
 	TH1* pHistogram = pMonitorElement->objectTo<TH1>();
-	TGraph* pReferenceHistogram = pMonitorElement->referenceTo<TH1>();
+	TH1* pReferenceHistogram = pMonitorElement->referenceTo<TH1>();
 	
 	if (m_options == "") m_options += "UO";
-
-	report.m_message = ("Options used: {0}. NB: the Kolmogorov test is not intended for histograms! Use caution when interepreting the quality.", m_options);
+	
+	report.m_message = ("Options used: " + m_options + ". NB: the Kolmogorov test is not intended for histograms! Use caution when interepreting the quality.");
 	report.m_quality = pHistogram->KolmogorovTest(pReferenceHistogram, m_options)
       }
       else {
