@@ -467,6 +467,12 @@ namespace dqm4hep {
       return STATUS_CODE_SUCCESS;
     }
     
+    //-------------------------------------------------------------------------------------------------
+    
+    StatusCode MonitorElementManager::archive(Archiver &archiver) {
+      return archiver.archiveWithReferences(m_storage, "", "_ref");
+    }
+    
   }
   
 }

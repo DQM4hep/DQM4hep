@@ -41,6 +41,7 @@
 #include <dqm4hep/RootHeaders.h>
 #include <dqm4hep/Directory.h>
 #include <dqm4hep/RootStyle.h>
+#include <dqm4hep/Archiver.h>
 
 namespace dqm4hep {
 
@@ -350,6 +351,13 @@ namespace dqm4hep {
        */
       template <typename T>
       StatusCode parseStorage(TiXmlElement *xmlElement);
+      
+      /**
+       *  @brief  Archive the current monitor element content in a root file
+       *
+       *  @param  archiver the archiver performing the write operation
+       */
+      StatusCode archive(Archiver &archiver);
       
     private:
       /**
