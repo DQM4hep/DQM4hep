@@ -6,6 +6,7 @@
   </constants>
 
   <storage>
+    <style theme="polar"/>
     <!-- Use the same root file as input file for reference -->
     <references>
       <file id="ref" name="test_samples.root"/>
