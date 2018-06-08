@@ -152,6 +152,16 @@ namespace dqm4hep {
       template <typename T, typename Validator>
       static StatusCode readParameters(const TiXmlHandle &xmlHandle, const std::string &parameterName,
                                        std::vector<T> &vector, Validator validator);
+
+      /**
+       *  @brief  Parse a <parameter> XML element and extract the name and value of the parameter
+       *
+       *  @param  element the XML element to parse
+       *  @param  name the parameter name to receive
+       *  @param  value the parameter value to receive 
+       */
+      template <typename T>
+      static StatusCode parseParameterElement(const TiXmlElement *const element, std::string &name, T &value);
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -403,7 +413,27 @@ namespace dqm4hep {
 
       return STATUS_CODE_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    StatusCode XmlHelper::parseParameterElement(const TiXmlElement *const element, std::string &name, T &value) {
+      if(nullptr == element) {
+        return STATUS_CODE_INVALID_PTR;
+      }
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, XmlHelper::getAttribute(element, "name", name));
+      std::string valueStr;
+      if (STATUS_CODE_SUCCESS != XmlHelper::getAttribute(element, "value", valueStr)) {
+        valueStr = element->GetText() ? element->GetText() : "";
+      }
+      if (not dqm4hep::core::stringToType(valueStr, value)) {
+        return STATUS_CODE_FAILURE;        
+      }
+      return STATUS_CODE_SUCCESS;
+    }
+    
   }
+  
 }
 
 #endif //  DQM4HEP_XMLHELPER_H
