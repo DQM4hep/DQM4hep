@@ -276,6 +276,27 @@ namespace dqm4hep {
         pos = inputString.find_first_of(delimiter, lastPos);
       }
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  Whether the test string matches the wildcard expression 
+     *  
+     *  @param  testString the string to test
+     *  @param  wildcardString the string containing wildcards
+     */
+    bool wildcardMatch(const std::string &testString, const std::string &wildcardString, bool caseSensitive = true);
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  Replaces all occurences in the spcified string
+     *  
+     *  @param  subject the string on which to perform replace
+     *  @param  search the portion of the input string to search
+     *  @param  replace the portion of string to replace with
+     */
+    std::string &replaceAll(std::string &subject, const std::string& search, const std::string& replace);
 
     //-------------------------------------------------------------------------------------------------
 

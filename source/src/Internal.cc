@@ -36,12 +36,74 @@
 
 #include <cstring>
 #include <dirent.h>
+#include <regex>
 #include <sys/resource.h> // getrusage
 #include <sys/time.h> // gettimeofday
 
 namespace dqm4hep {
 
   namespace core {
+    
+    /// Source: https://www.geeksforgeeks.org/wildcard-character-matching/
+    // bool wildcardMatchC(const char *testString, const char *wildcardString) {
+    //   // If we reach at the end of both strings, we are done
+    //   if (*wildcardString == '\0' && *testString == '\0')
+    //       return true;
+    // 
+    //   // Make sure that the characters after '*' are present
+    //   // in second string. This function assumes that the first
+    //   // string will not contain two consecutive '*'
+    //   if (*wildcardString == '*' && *(wildcardString+1) != '\0' && *testString == '\0')
+    //       return false;
+    // 
+    //   // If the first string contains '?', or current characters
+    //   // of both strings match
+    //   if (*wildcardString == '?' || *wildcardString == *testString)
+    //       return wildcardMatchC(wildcardString+1, testString+1);
+    // 
+    //   // If there is *, then there are two possibilities
+    //   // a) We consider current character of second string
+    //   // b) We ignore current character of second string.
+    //   if (*wildcardString == '*')
+    //       return wildcardMatchC(wildcardString+1, testString) || wildcardMatchC(wildcardString, testString+1);
+    //   return false;
+    // }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    bool wildcardMatch(const std::string &testString, const std::string &wildcardString, bool caseSensitive) {
+      std::string wildcardPattern = wildcardString;
+      replaceAll(wildcardPattern, "\\", "\\\\");
+      replaceAll(wildcardPattern, "^", "\\^");
+      replaceAll(wildcardPattern, ".", "\\.");
+      replaceAll(wildcardPattern, "$", "\\$");
+      replaceAll(wildcardPattern, "|", "\\|");
+      replaceAll(wildcardPattern, "(", "\\(");
+      replaceAll(wildcardPattern, ")", "\\)");
+      replaceAll(wildcardPattern, "[", "\\[");
+      replaceAll(wildcardPattern, "]", "\\]");
+      replaceAll(wildcardPattern, "*", "\\*");
+      replaceAll(wildcardPattern, "+", "\\+");
+      replaceAll(wildcardPattern, "?", "\\?");
+      replaceAll(wildcardPattern, "/", "\\/");
+      // Convert chars '*?' back to their regex equivalents
+      replaceAll(wildcardPattern, "\\?", ".");
+      replaceAll(wildcardPattern, "\\*", ".*");
+      // regex !
+      std::regex pattern(wildcardPattern, caseSensitive ? std::regex::basic : std::regex::icase);
+      return std::regex_match(testString, pattern);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    std::string &replaceAll(std::string &subject, const std::string& search, const std::string& replace) {
+      size_t pos = 0;
+      while ((pos = subject.find(search, pos)) != std::string::npos) {
+         subject.replace(pos, search.length(), replace);
+         pos += replace.length();
+      }
+      return subject; 
+    }
 
 #if defined(__linux__) || defined(__APPLE__)
 
