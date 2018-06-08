@@ -31,6 +31,7 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/Internal.h>
+#include <dqm4hep/Archiver.h>
 #include <dqm4hep/MonitorElementManager.h>
 #include <dqm4hep/PluginManager.h>
 #include <dqm4hep/StatusCodes.h>
@@ -129,23 +130,23 @@ int main(int argc, char *argv[]) {
     "string");
   pCommandLine->add(qtestFileArg);
 
-  // TCLAP::ValueArg<std::string> rootFileArg(
-  //   "r", 
-  //   "input-root-file", 
-  //   "The root input file", 
-  //   true, 
-  //   "", 
-  //   "string");
-  // pCommandLine->add(rootFileArg);
-
-  TCLAP::ValueArg<std::string> outputJsonFileArg(
+  TCLAP::ValueArg<std::string> rootFileArg(
     "o", 
-    "output-json", 
-    "The json output file to store the quality test reports", 
+    "root-output", 
+    "The root output file to store the processed monitor elements",
+    false,
+    "", 
+    "string");
+  pCommandLine->add(rootFileArg);
+
+  TCLAP::ValueArg<std::string> qreportFileArg(
+    "q", 
+    "qreport-file", 
+    "The quality test report output file (json format)", 
     false, 
     "", 
     "string");
-  pCommandLine->add(outputJsonFileArg);
+  pCommandLine->add(qreportFileArg);
 
   StringVector verbosities(Logger::logLevels());
   TCLAP::ValuesConstraint<std::string> verbosityConstraint(verbosities);
@@ -247,7 +248,7 @@ int main(int argc, char *argv[]) {
     }
     
     // Save quality reports in a json file
-    if (outputJsonFileArg.isSet()) {
+    if (qreportFileArg.isSet()) {
       json root(nullptr), qreport(nullptr), metadata(nullptr), elements(nullptr);
       std::string date;
       timeToHMS(time(nullptr), date);
@@ -263,14 +264,8 @@ int main(int argc, char *argv[]) {
       reportStorage.toJson(qreport);
       root["qreports"] = qreport;
       
-      // write monitor elements
-      if(writeMonitorElementArg.getValue()) {
-        monitorElementMgr->monitorElementsToJson(elements);
-      }
-      root["elements"] = elements;
-      
       ofstream ofile;
-      ofile.open(outputJsonFileArg.getValue());
+      ofile.open(qreportFileArg.getValue());
       
       if(compressArg.getValue()) {
         ofile << root.dump();
@@ -280,6 +275,12 @@ int main(int argc, char *argv[]) {
       }
 
       ofile.close();
+    }
+    
+    if(rootFileArg.isSet()) {
+      Archiver archiver;
+      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, archiver.open(rootFileArg.getValue(), "RECREATE", true));
+      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, monitorElementMgr->archive(archiver));
     }
   }
   catch (StatusCodeException &e) {
