@@ -71,6 +71,14 @@ namespace dqm4hep {
       template <typename T, typename... Args>
       static EventPtr create(Args... args);
       
+      /**
+       *  @brief  Create an event pointer wrapping an event of type T
+       *
+       *  @param  event an already existing event to wrap
+       */
+      template <typename T>
+      static EventPtr create(T *event);
+      
       /** Destructor
        */
       virtual ~Event() = default;
@@ -378,6 +386,7 @@ namespace dqm4hep {
     }
     
     //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
     
     template <typename T, typename... Args>
     EventPtr Event::create(Args... args) {
@@ -389,6 +398,13 @@ namespace dqm4hep {
         return nullptr;
       }
       return std::shared_ptr<Event>(new EventBase<T>(impl));
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    EventPtr Event::create(T *event) {
+      return std::shared_ptr<Event>(new EventBase<T>(event));
     }
     
   }
