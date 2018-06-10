@@ -80,7 +80,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     EventPtr GenericEventStreamer::createEvent() const {
-      return std::shared_ptr<Event>(new EventBase<GenericEvent>(new GenericEvent()));
+      return Event::create<GenericEvent>();
     }
 
     //-------------------------------------------------------------------------------------------------
