@@ -63,6 +63,14 @@ namespace dqm4hep {
     class Event {
       friend class EventStreamer;
     public:
+      /**
+       *  @brief  Create an event pointer wrapping an event of type T
+       *
+       *  @param  args the arguments to pass to the T constructor (optional)
+       */
+      template <typename T, typename... Args>
+      static EventPtr create(Args... args);
+      
       /** Destructor
        */
       virtual ~Event() = default;
@@ -368,7 +376,23 @@ namespace dqm4hep {
     inline bool EventBase<T>::isOwner() const {
       return m_isOwner;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T, typename... Args>
+    EventPtr Event::create(Args... args) {
+      T *impl = nullptr;
+      try {
+        impl = new T(args...);
+      }
+      catch(...) {
+        return nullptr;
+      }
+      return std::shared_ptr<Event>(new EventBase<T>(impl));
+    }
+    
   }
+  
 }
 
 #endif //  DQM4HEP_EVENT_H
