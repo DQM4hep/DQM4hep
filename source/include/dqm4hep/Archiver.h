@@ -49,9 +49,15 @@ namespace dqm4hep {
      */
     class Archiver {
     public:
-      Archiver() = default;
       Archiver(const Archiver &) = delete;
       Archiver& operator=(const Archiver &) = delete;
+      
+      typedef std::function<bool(MonitorElementPtr)> SelectorFunction;
+      
+      /**
+       *  @brief  Default constructor
+       */
+      Archiver();
 
       /** 
        *  @brief  Constructor
@@ -86,6 +92,15 @@ namespace dqm4hep {
        *  @brief  Close the current archive
        */
       StatusCode close();
+      
+      /**
+       *  @brief  Set the selector function to use on write operation.
+       *          The function should return true to archive the element.
+       *          By default, every monitor element is written.
+       *            
+       *  @param  func the selector function
+       */
+      void setSelectorFunction(std::function<bool(MonitorElementPtr)> func);
 
       /** 
        *  @brief  Archive the monitor element storage in the ROOT file.
@@ -132,7 +147,7 @@ namespace dqm4hep {
        *  @param  dirName the top-level root directory in which the elements will be archived
        *  @param  directory the top-level directory pointer to receive
        */
-      StatusCode prepareForAchiving(const std::string &dirName, TDirectory *&directory);
+      StatusCode prepareForArchiving(const std::string &dirName, TDirectory *&directory);
       
       /** 
        *  @brief  Fill recursively the TDirectory with the Directory
@@ -141,7 +156,7 @@ namespace dqm4hep {
        *  @param  rootDirectory the corresponding ROOT directory
        *  @param  refSuffix the suffix to add for object references
        */
-      static StatusCode recursiveWrite(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix = "");
+      StatusCode recursiveWrite(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix = "");
 
       /** 
        *  @brief  Write the monitor elements contained in the Directory in the TDirectory
@@ -150,7 +165,7 @@ namespace dqm4hep {
        *  @param  rootDirectory the corresponding ROOT directory
        *  @param  refSuffix the suffix to add for object references
        */
-      static StatusCode writeMonitorElements(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix = "");
+      StatusCode writeMonitorElements(MonitorElementDir directory, TDirectory *rootDirectory, const std::string &refSuffix = "");
 
     private:
       /// The archive file name
@@ -159,7 +174,9 @@ namespace dqm4hep {
       std::string                    m_openingMode = {"RECREATE"};
       ///< Whether the archive is opened
       bool                           m_isOpened = {false};
-      ///< The actual archive implementation (root file)
+      /// The selector function
+      SelectorFunction               m_selectorFunction = {nullptr};
+      /// The actual archive implementation (root file)
       std::unique_ptr<TFile>         m_file = {nullptr};
     };
   }

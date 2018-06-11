@@ -41,7 +41,14 @@ namespace dqm4hep {
 
   namespace core {
 
+    Archiver::Archiver() {
+      m_selectorFunction = [](MonitorElementPtr)->bool{return true;};
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+
     Archiver::Archiver(const std::string &archiveFileName, const std::string &opMode, bool overwrite) {
+      m_selectorFunction = [](MonitorElementPtr)->bool{return true;};
       THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, opMode, overwrite));
     }
 
@@ -106,12 +113,18 @@ namespace dqm4hep {
       m_openingMode = "";
       return STATUS_CODE_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void Archiver::setSelectorFunction(std::function<bool(MonitorElementPtr)> func) {
+      m_selectorFunction = func;
+    }
 
     //-------------------------------------------------------------------------------------------------
 
     StatusCode Archiver::archive(const Storage<MonitorElement> &storage, const std::string &dirName) {
       TDirectory *directory = nullptr;
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, prepareForAchiving(dirName, directory));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, prepareForArchiving(dirName, directory));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveWrite(storage.root(), directory, ""));
       m_file->cd();
       m_file->Write();
@@ -122,7 +135,7 @@ namespace dqm4hep {
     
     StatusCode Archiver::archiveWithReferences(const Storage<MonitorElement> &storage, const std::string &dirName, const std::string &refSuffix) {
       TDirectory *directory = nullptr;
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, prepareForAchiving(dirName, directory));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, prepareForArchiving(dirName, directory));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, recursiveWrite(storage.root(), directory, refSuffix));
       m_file->cd();
       m_file->Write();
@@ -149,7 +162,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    StatusCode Archiver::prepareForAchiving(const std::string &dirName, TDirectory *&directory) {
+    StatusCode Archiver::prepareForArchiving(const std::string &dirName, TDirectory *&directory) {
       if(not isOpened()) {
         return STATUS_CODE_NOT_INITIALIZED;
       }
@@ -197,6 +210,9 @@ namespace dqm4hep {
       rootDirectory->cd();
       const auto &monitorElementList(directory->contents());
       for (auto iter = monitorElementList.begin(), endIter = monitorElementList.end(); endIter != iter; ++iter) {
+        if(not m_selectorFunction(*iter)) {
+          continue;
+        }
         const std::string writeName = (*iter)->name();
         TObject *object = (*iter)->object();
         if(nullptr != object) {
