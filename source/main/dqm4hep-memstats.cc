@@ -57,7 +57,7 @@ int main(int /*argc*/, char ** /*argv[]*/) {
               << fmt_value(((procInfo.vm / 1024.) / (memInfo.vmTot * 1.)) * 100.) << std::endl;
 
     std::cout << std::endl;
-    dqm4hep::core::sleep(std::chrono::seconds(2));
+    dqm4hep::core::time::sleep(std::chrono::seconds(2));
   }
 
   return 0;

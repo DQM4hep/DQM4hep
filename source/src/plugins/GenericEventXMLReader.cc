@@ -130,8 +130,8 @@ namespace dqm4hep {
         }
       }
       run.setRunNumber(runNumber);
-      run.setStartTime(core::toTimePoint(startTime));
-      run.setEndTime(core::toTimePoint(endTime));
+      run.setStartTime(core::time::asPoint(startTime));
+      run.setEndTime(core::time::asPoint(endTime));
       run.setDescription(description);
       run.setDetectorName(detectorName);
       return STATUS_CODE_SUCCESS;
@@ -162,7 +162,7 @@ namespace dqm4hep {
         "RunNumber", runNumber));
       event->setType(static_cast<EventType>(eventType));
       event->setSource(source);
-      event->setTimeStamp(core::toTimePoint(timeStamp));
+      event->setTimeStamp(core::time::asPoint(timeStamp));
       event->setEventNumber(eventNumber);
       event->setRunNumber(runNumber);
       // loop over <field> elements

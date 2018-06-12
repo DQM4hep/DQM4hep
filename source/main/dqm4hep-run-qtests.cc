@@ -250,14 +250,12 @@ int main(int argc, char *argv[]) {
     // Save quality reports in a json file
     if (qreportFileArg.isSet()) {
       json root(nullptr), qreport(nullptr), metadata(nullptr), elements(nullptr);
-      std::string date;
-      timeToHMS(time(nullptr), date);
       StringMap hostInfos;
       fillHostInfo(hostInfos);
 
       // write metadata
       metadata["host"] = hostInfos;
-      metadata["date"] = date;
+      metadata["date"] = dqm4hep::core::time::asString(dqm4hep::core::time::now());
       root["meta"] = metadata;
       
       // write qreports

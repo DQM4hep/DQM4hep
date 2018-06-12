@@ -60,7 +60,7 @@ int main(int /*argc*/, char ** /*argv[]*/) {
                 << fmt_value(stat.second.snd_rate_kbytes) << fmt_value(stat.second.snd_rate_packets)
                 << fmt_value(stat.second.snd_rate_errs) << std::endl;
     }
-    dqm4hep::core::sleep(std::chrono::seconds(2));
+    dqm4hep::core::time::sleep(std::chrono::seconds(2));
   }
 
   return 0;
