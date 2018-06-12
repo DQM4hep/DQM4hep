@@ -165,7 +165,7 @@ namespace dqm4hep {
                                std::string &relativeFileName);
 
       // constants related functions
-      void readConstants(TiXmlNode *node);
+      void readConstants();
       void replaceAllConstants();
       void readConstantsSection(TiXmlElement *constants);
       void resolveConstantsInElement(TiXmlElement *element);

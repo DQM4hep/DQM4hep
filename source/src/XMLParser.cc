@@ -200,7 +200,7 @@ namespace dqm4hep {
     //----------------------------------------------------------------------------------------------------
 
     void XMLParser::resolveConstants() {
-      this->readConstants(&m_document);
+      this->readConstants();
       this->replaceAllConstants();
     }
 
@@ -341,13 +341,14 @@ namespace dqm4hep {
 
     //----------------------------------------------------------------------------------------------------
 
-    void XMLParser::readConstants(TiXmlNode *node) {
-      for (TiXmlElement *element = node->FirstChildElement(); element != nullptr;
-           element = element->NextSiblingElement()) {
-        if (element->Value() == std::string("constants"))
+    void XMLParser::readConstants() {
+      TiXmlElement *root = document().RootElement();
+      for (TiXmlElement *element = root->FirstChildElement(); element != nullptr; element = element->NextSiblingElement()) {
+        if (element->Value() == std::string("constants")) {
           this->readConstantsSection(element);
-        else
-          this->readConstants(element);
+        }
+        // else
+        //   this->readConstants(element);
       }
     }
 
