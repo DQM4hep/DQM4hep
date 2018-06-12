@@ -74,8 +74,14 @@ int main(int /*argc*/, char *argv[]) {
   int age = parser.constantAs<int>("age", 0);
   assert_test(age == 32);
 
+  std::string incVar1 = parser.constantAs<std::string>("incVar1", "");
+  assert_test(incVar1 == "toto");
+  
+  std::string incVar2 = parser.constantAs<std::string>("incVar2", "");
+  assert_test(incVar2 == "tata");
+
   std::string badguy = parser.constantAs<std::string>("badguy", "");
-  assert_test(badguy == "dracula");
+  assert_test(badguy.empty());
 
   std::string notFound = parser.constantAs<std::string>("bibou", "missing");
   assert_test(notFound == "missing");
