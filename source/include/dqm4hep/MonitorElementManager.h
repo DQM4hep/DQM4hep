@@ -356,8 +356,9 @@ namespace dqm4hep {
        *  @brief  Archive the current monitor element content in a root file
        *
        *  @param  archiver the archiver performing the write operation
+       *  @param  withReferences whether to write references with monitor elements
        */
-      StatusCode archive(Archiver &archiver);
+      StatusCode archive(Archiver &archiver, bool withReferences = true);
       
     private:
       /**
