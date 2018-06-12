@@ -361,8 +361,6 @@ namespace dqm4hep {
         if (element->Value() == std::string("constants")) {
           this->readConstantsSection(element);
         }
-        // else
-        //   this->readConstants(element);
       }
     }
 
