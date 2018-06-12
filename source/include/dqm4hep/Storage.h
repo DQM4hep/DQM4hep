@@ -59,6 +59,8 @@ namespace dqm4hep {
       DirectoryPtr current() const;
       StatusCode add(ObjectPtr object);
       StatusCode add(const std::string &dirName, ObjectPtr object);
+      StatusCode add(ObjectPtr object, std::string &fullPath);
+      StatusCode add(const std::string &dirName, ObjectPtr object, std::string &fullPath);
       template <typename F>
       StatusCode remove(F function);
       template <typename F>
@@ -319,6 +321,27 @@ namespace dqm4hep {
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->mkdir(dirName));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
       return directory->add(object);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Storage<T>::add(ObjectPtr object, std::string &fullPath) {
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_currentDirectory->add(object));
+      fullPath = m_currentDirectory->fullPath().getPath();
+      return STATUS_CODE_SUCCESS;
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    template <typename T>
+    inline StatusCode Storage<T>::add(const std::string &dirName, ObjectPtr object, std::string &fullPath) {
+      DirectoryPtr directory = nullptr;
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->mkdir(dirName));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->find(dirName, directory));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, directory->add(object));
+      fullPath = directory->fullPath().getPath();
+      return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
