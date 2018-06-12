@@ -38,7 +38,9 @@
 #include <Rtypes.h>
 #include <TGraph.h>
 #include <TObject.h>
-#include <TPaveText.h>
+#include <TText.h>
+#include <TBrowser.h>
+#include <TPad.h>
 
 namespace xdrstream {
   class IODevice;
@@ -359,11 +361,11 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     /** TScalarObject class.
-     *  Extension of a TObject for scalar values like int,
+     *  Extension of a TText for scalar values like int,
      *  float, double or string.
      */
     template <typename T>
-    class TScalarObject : public TNamed {
+    class TScalarObject : public TText {
     public:
       /** Default constructor
        */
@@ -383,7 +385,7 @@ namespace dqm4hep {
        */
       void Clear(Option_t *option = "") override;
 
-      /** Draw the scalar object (using a TPaveText)
+      /** Draw the scalar object
        */
       void Draw(Option_t *option = "") override;
 
@@ -406,14 +408,22 @@ namespace dqm4hep {
        *  @param  other the other scalar object
        */
       Bool_t IsEqual(const TObject *other) const override;
+      
+      /**
+       *  @brief  Browse the TScalarObject
+       * 
+       *  @param  b the ROOT browser
+       */
+      void Browse(TBrowser *b) override;
 
     private:
       /** Initialize the scalar object (called only in C'tor)
        */
       void Init();
 
-      T m_scalar = {};                     ///< The scalar value
-      TPaveText *m_pPaveText = {nullptr}; ///< The pave text on which to draw the scalar value
+    private:
+      ///< The scalar value
+      T           fScalar = {};   
 
       ClassDefOverride(TScalarObject, 1);
     };
@@ -460,8 +470,7 @@ namespace dqm4hep {
        */
       void AddPoint(Double_t x, Double_t y);
 
-      /** Draw dynamic graph. Apply dynamic range if bit set
-       */
+      // from ROOT base class
       void Draw(Option_t *option = "") override;
 
     private:
@@ -479,67 +488,60 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline TScalarObject<T>::TScalarObject() {
+    inline TScalarObject<T>::TScalarObject() : 
+      TText(0.5, 0.5, "") {
       Init();
+      SetNDC(true);
+      SetTextAlign(22);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
-    inline TScalarObject<T>::TScalarObject(const T &scalar) : m_scalar(scalar), m_pPaveText(nullptr) {
+    inline TScalarObject<T>::TScalarObject(const T &scalar) : 
+      TText(0.5, 0.5, ""),
+      fScalar(scalar) {
+      SetNDC(true);
+      SetTextAlign(22);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline TScalarObject<T>::~TScalarObject() {
-      if (nullptr != m_pPaveText) {
-        delete m_pPaveText;
-        m_pPaveText = nullptr;
-      }
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline void TScalarObject<T>::Clear(Option_t *option) {
-      if (nullptr != m_pPaveText)
-        m_pPaveText->Clear(option);
-
-      m_scalar = 0;
+      TText::Clear(option);
+      fScalar = 0;
     }
 
-    //-------------------------------------------------------------------------------------------------
-
+    // //-------------------------------------------------------------------------------------------------
+    // 
     template <typename T>
     inline void TScalarObject<T>::Draw(Option_t *option) {
-      std::string scalarStr = ToString();
-
-      if (nullptr == m_pPaveText) {
-        m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
-        m_pPaveText->SetFillColor(0);
-        m_pPaveText->SetBorderSize(0);
-        m_pPaveText->SetShadowColor(0);
-      }
-
-      m_pPaveText->Clear();
-      m_pPaveText->AddText(scalarStr.c_str());
-      m_pPaveText->SetTextAlign(11);
-      m_pPaveText->Draw(option);
+      if(gPad) gPad->Clear();
+      SetTitle(ToString().c_str());
+      AppendPad(option);
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline void TScalarObject<T>::Set(const T &value) {
-      m_scalar = value;
+      Clear();
+      fScalar = value;
+      SetTitle(ToString().c_str());
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <typename T>
     inline const T &TScalarObject<T>::Get() const {
-      return m_scalar;
+      return fScalar;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -547,7 +549,7 @@ namespace dqm4hep {
     template <typename T>
     inline std::string TScalarObject<T>::ToString() const {
       std::stringstream ss;
-      ss << m_scalar;
+      ss << fScalar;
       return ss.str();
     }
 
@@ -555,8 +557,7 @@ namespace dqm4hep {
 
     template <typename T>
     inline void TScalarObject<T>::Init() {
-      m_scalar = 0;
-      m_pPaveText = nullptr;
+      fScalar = 0;
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -567,58 +568,43 @@ namespace dqm4hep {
       if(nullptr == otherScalar)
         return false;
       const T &value = otherScalar->Get();
-      return (value == m_scalar);
+      return (value == fScalar);
     }
-
+    
+    // //-------------------------------------------------------------------------------------------------
+    // 
+    template <typename T>
+    inline void TScalarObject<T>::Browse(TBrowser *b) {
+      Draw(b->GetDrawOption() ? b->GetDrawOption() : "");
+      gPad->Update();
+    }
+ 
     //-------------------------------------------------------------------------------------------------
     // template specialization for std::string
     //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void TScalarObject<std::string>::Clear(Option_t *option) {
-      if (nullptr != m_pPaveText)
-        m_pPaveText->Clear(option);
-
-      m_scalar.clear();
+      TText::Clear(option);
+      fScalar.clear();
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
     inline std::string TScalarObject<std::string>::ToString() const {
-      return m_scalar;
+      return fScalar;
     }
 
     //-------------------------------------------------------------------------------------------------
 
     template <>
     inline void TScalarObject<std::string>::Init() {
-      m_scalar = "";
-      m_pPaveText = nullptr;
+      fScalar = "";
     }
-
-    //-------------------------------------------------------------------------------------------------
-
-    template <>
-    inline void TScalarObject<std::string>::Draw(Option_t *option) {
-      StringVector lines;
-      dqm4hep::core::tokenize(m_scalar, lines, "\n");
-
-      if (nullptr == m_pPaveText) {
-        m_pPaveText = new TPaveText(0.1, 0.1, 0.9, 0.9, "NDC");
-        m_pPaveText->SetFillColor(0);
-        m_pPaveText->SetBorderSize(0);
-        m_pPaveText->SetShadowColor(0);
-      }
-
-      m_pPaveText->Clear();
-
-      for (auto iter = lines.begin(), endIter = lines.end(); endIter != iter; ++iter)
-        m_pPaveText->AddText((*iter).c_str());
-
-      m_pPaveText->Draw(option);
-    }
+    
   }
+  
 }
 
 #endif //  DQM4HEP_MONITORELEMENT_H
