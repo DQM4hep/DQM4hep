@@ -34,7 +34,7 @@ namespace dqm4hep {
 
     Run::Run(int rn, const std::string &des, const std::string &dn) : 
       m_runNumber(rn),
-      m_startTime(dqm4hep::core::now()),
+      m_startTime(dqm4hep::core::time::now()),
       m_detectorName(dn),
       m_description(des) {
       /* nop */
