@@ -371,23 +371,14 @@ namespace dqm4hep {
       }
       // try to add it
       try {
-        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement));
-        monitorElement->setPath(path);
+        std::string fullPath;
+        THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_storage.add(path, monitorElement, fullPath));
+        monitorElement->setPath(fullPath);
       } 
       catch (StatusCodeException &e) {
-        if (nullptr == monitorElement) {
-          // TObject should have been owned by the MonitorElement
-          // but creation failed, we need to delete it manually
-          delete monitorElement->object();
-        }
         return e.getStatusCode();
       } 
       catch (...) {
-        if (nullptr == monitorElement) {
-          // TObject should have been owned by the MonitorElement
-          // but creation failed, we need to delete it manually
-          delete monitorElement->object();
-        }
         return STATUS_CODE_FAILURE;
       }
       return STATUS_CODE_SUCCESS;
@@ -469,8 +460,14 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    StatusCode MonitorElementManager::archive(Archiver &archiver) {
-      return archiver.archiveWithReferences(m_storage, "", "_ref");
+    StatusCode MonitorElementManager::archive(Archiver &archiver, bool withReferences) {
+      if(withReferences) {
+        return archiver.archiveWithReferences(m_storage, "", "_ref");
+      }
+      else {
+        return archiver.archive(m_storage, "");
+      }
+      
     }
     
   }
