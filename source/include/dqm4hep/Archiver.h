@@ -60,16 +60,6 @@ namespace dqm4hep {
       Archiver();
 
       /** 
-       *  @brief  Constructor
-       *          See open() for argument explanation
-       *
-       *  @param  archiveFileName the root file name
-       *  @param  opMode the ROOT file opening mode
-       *  @param  overwrite whether to allow to overwrite previous archive
-       */
-      Archiver(const std::string &fname, const std::string &opMode = "RECREATE", bool overwrite = false);
-
-      /** 
        *  @brief  Destructor
        */
       ~Archiver();
@@ -79,14 +69,16 @@ namespace dqm4hep {
        *          Close the current file if opened. Supported opening mode are the 
        *          TFile opening mode option (see TFile). If overwrite is set to false,
        *          an id is appended before the .root extension to ensure the file name
-       *          is unique and no archive is overwritten
+       *          is unique and no archive is overwritten. If the run number is positive
+       *          then it is appended in the file name as _IRunNumber.
        *
        *  @param  fname the ROOT file name to open
        *  @param  opMode the ROOT file opening mode
        *  @param  overwrite whether to allow for overwrite
+       *  @param  runNumber the run number to append to the archive name
        */
       StatusCode open(const std::string &fname, const std::string &opMode = "RECREATE",
-                      bool overwrite = true);
+                      bool overwrite = true, int runNumber = -1);
 
       /** 
        *  @brief  Close the current archive
@@ -178,6 +170,41 @@ namespace dqm4hep {
       SelectorFunction               m_selectorFunction = {nullptr};
       /// The actual archive implementation (root file)
       std::unique_ptr<TFile>         m_file = {nullptr};
+    };
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
+    
+    /**
+     *  @brief  ArchiverSelector class
+     *          Helper class to select monitor elements while archiving
+     *          It is a combinaison of selector functions.
+     *          Returns true if at least one function returns true, otherwise false. 
+     */
+    class ArchiverSelector {
+    public:
+      /**
+       *  @brief  Constructor
+       */
+      ArchiverSelector();
+
+      /**
+       *  @brief  Add a selector function
+       *  
+       *  @param selector [description]
+       */
+      void addSelector(Archiver::SelectorFunction selector);
+      
+      /**
+       *  @brief  Get the global function combining all selector functions
+       */
+      const Archiver::SelectorFunction &function() const;
+      
+    private:
+      /// The global selector function
+      Archiver::SelectorFunction                 m_function = {};
+      /// The list of selector functions
+      std::vector<Archiver::SelectorFunction>    m_selectorFunctions = {};
     };
   }
 }

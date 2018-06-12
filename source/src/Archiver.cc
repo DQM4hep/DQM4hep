@@ -44,13 +44,6 @@ namespace dqm4hep {
     Archiver::Archiver() {
       m_selectorFunction = [](MonitorElementPtr)->bool{return true;};
     }
-    
-    //-------------------------------------------------------------------------------------------------
-
-    Archiver::Archiver(const std::string &archiveFileName, const std::string &opMode, bool overwrite) {
-      m_selectorFunction = [](MonitorElementPtr)->bool{return true;};
-      THROW_RESULT_IF(STATUS_CODE_SUCCESS, !=, this->open(archiveFileName, opMode, overwrite));
-    }
 
     //-------------------------------------------------------------------------------------------------
 
@@ -61,7 +54,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode Archiver::open(const std::string &fname, const std::string &opMode, bool overwrite) {
+    StatusCode Archiver::open(const std::string &fname, const std::string &opMode, bool overwrite, int runNumber) {
       // if already open write the archive if not done
       // and close it before to re-open
       if (isOpened()) {
@@ -70,23 +63,32 @@ namespace dqm4hep {
       if (fname.empty()) {
         return STATUS_CODE_INVALID_PARAMETER;
       }
+      int fileId(0);
+      size_t pos = fname.rfind(".root");
+      if (std::string::npos == pos) {
+        dqm_error("Couldn't open archive '{0}' ! Must be a root file !", fname);
+        return STATUS_CODE_INVALID_PARAMETER;
+      }
+      std::string baseArchiveName = fname.substr(0, pos);
+      std::string fullArchiveName = fname;
       if (not overwrite) {
-        int fileId(0);
-        size_t pos = fname.rfind(".root");
-        if (std::string::npos == pos) {
-          dqm_error("Couldn't open archive '{0}' ! Must be a root file !", fname);
-          return STATUS_CODE_INVALID_PARAMETER;
-        }
-        std::string baseArchiveName = fname.substr(0, pos);
-        std::string fullArchiveName = fname; 
         while (!gSystem->AccessPathName(fullArchiveName.c_str())) {
           std::stringstream ss;
-          ss << baseArchiveName << "_" << fileId << ".root";
+          ss << baseArchiveName;
+          if(runNumber >= 0) {
+            ss << "_I" << runNumber;
+          }
+          ss << "_" << fileId << ".root";
           fullArchiveName = ss.str();
           fileId++;
         }
         m_fileName = fullArchiveName;
       } 
+      else if(runNumber >= 0) {
+        std::stringstream ss;
+        ss << baseArchiveName << "_I" << runNumber << ".root";
+        m_fileName = ss.str();
+      }
       else {
         m_fileName = fname;
       }
@@ -225,7 +227,35 @@ namespace dqm4hep {
       }
       return STATUS_CODE_SUCCESS;
     }
+    
+    //-------------------------------------------------------------------------------------------------
+    //-------------------------------------------------------------------------------------------------
 
+    ArchiverSelector::ArchiverSelector() {
+      m_function = [this](MonitorElementPtr element)->bool{
+        for(auto &selector : m_selectorFunctions) {
+          if(selector(element)) {
+            dqm_debug( "Archiving element path: {0}, name: {1} ...", element->path(), element->name() );
+            return true;
+          }
+        }
+        dqm_debug( "Skipping element path: {0}, name: {1} !", element->path(), element->name() );
+        return false;
+      };
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void ArchiverSelector::addSelector(Archiver::SelectorFunction selector) {
+      m_selectorFunctions.push_back(selector);
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    const Archiver::SelectorFunction &ArchiverSelector::function() const {
+      return m_function;
+    }
+    
   }
 
 }
