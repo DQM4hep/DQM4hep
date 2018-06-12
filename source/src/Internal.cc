@@ -44,33 +44,6 @@ namespace dqm4hep {
 
   namespace core {
     
-    /// Source: https://www.geeksforgeeks.org/wildcard-character-matching/
-    // bool wildcardMatchC(const char *testString, const char *wildcardString) {
-    //   // If we reach at the end of both strings, we are done
-    //   if (*wildcardString == '\0' && *testString == '\0')
-    //       return true;
-    // 
-    //   // Make sure that the characters after '*' are present
-    //   // in second string. This function assumes that the first
-    //   // string will not contain two consecutive '*'
-    //   if (*wildcardString == '*' && *(wildcardString+1) != '\0' && *testString == '\0')
-    //       return false;
-    // 
-    //   // If the first string contains '?', or current characters
-    //   // of both strings match
-    //   if (*wildcardString == '?' || *wildcardString == *testString)
-    //       return wildcardMatchC(wildcardString+1, testString+1);
-    // 
-    //   // If there is *, then there are two possibilities
-    //   // a) We consider current character of second string
-    //   // b) We ignore current character of second string.
-    //   if (*wildcardString == '*')
-    //       return wildcardMatchC(wildcardString+1, testString) || wildcardMatchC(wildcardString, testString+1);
-    //   return false;
-    // }
-    
-    //-------------------------------------------------------------------------------------------------
-    
     bool wildcardMatch(const std::string &testString, const std::string &wildcardString, bool caseSensitive) {
       std::string wildcardPattern = wildcardString;
       replaceAll(wildcardPattern, "\\", "\\\\");
@@ -90,7 +63,8 @@ namespace dqm4hep {
       replaceAll(wildcardPattern, "\\?", ".");
       replaceAll(wildcardPattern, "\\*", ".*");
       // regex !
-      std::regex pattern(wildcardPattern, caseSensitive ? std::regex::basic : std::regex::icase);
+      auto flag = caseSensitive ? std::regex::ECMAScript : std::regex::ECMAScript | std::regex::icase;
+      std::regex pattern(wildcardPattern, flag);
       return std::regex_match(testString, pattern);
     }
     
@@ -103,6 +77,25 @@ namespace dqm4hep {
          pos += replace.length();
       }
       return subject; 
+    }
+    
+    //-------------------------------------------------------------------------------------------------
+    
+    void timeToHMS(std::time_t t, std::string &timeStr) {
+      timeStr = time::asString(time::asPoint(t));
+    }
+    
+    
+    //-------------------------------------------------------------------------------------------------
+
+    TimePoint now() {
+      return time::now();
+    }
+
+    //-------------------------------------------------------------------------------------------------
+
+    void sleep(const TimeDuration &duration) {
+      std::this_thread::sleep_for(duration);
     }
 
 #if defined(__linux__) || defined(__APPLE__)

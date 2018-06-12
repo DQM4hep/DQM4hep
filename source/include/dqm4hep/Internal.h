@@ -48,6 +48,8 @@
 #include <unistd.h>
 #include <utility>
 #include <vector>
+#include <unordered_set>
+#include <unordered_map>
 
 #include <sys/stat.h>
 #include <sys/utsname.h>
@@ -123,18 +125,165 @@ namespace dqm4hep {
     class Directory;
     template <typename T>
     class Storage;
+    
+    /**
+     *  @brief  type traits class helper
+     */
+    template <typename T>
+    class type {
+    public:
+      // stl types
+      typedef std::vector<T> vector;
+      typedef std::list<T> list;
+      typedef std::set<T> set;
+      typedef std::deque<T> deque;
+      typedef std::unordered_set<T> uset;
+      // pointer types
+      typedef T* raw_ptr;
+      typedef std::shared_ptr<T> ptr;
+      typedef std::unique_ptr<T> uptr;
+      typedef std::weak_ptr<T> wptr;
+      // stl + pointers
+      typedef std::vector<ptr> ptr_vector;
+      typedef std::vector<uptr> uptr_vector;
+      typedef std::vector<wptr> wptr_vector;
+      typedef std::set<ptr> ptr_set;
+      typedef std::set<uptr> uptr_set;
+      typedef std::set<wptr> wptr_set;
+      typedef std::deque<ptr> ptr_deque;
+      typedef std::deque<uptr> uptr_deque;
+      typedef std::deque<wptr> wptr_deque;
+      typedef std::unordered_set<ptr> ptr_uset;
+      typedef std::unordered_set<uptr> uptr_uset;
+      typedef std::unordered_set<wptr> wptr_uset;
+      // miscellanous
+      typedef std::map<std::string, T> str_map;
+      typedef std::map<std::string, ptr> str_ptr_map;
+      typedef std::map<std::string, ptr_vector> str_ptr_vec_map;
+      typedef std::unordered_map<std::string, T> str_umap;
+      typedef std::unordered_map<std::string, ptr> str_ptr_umap;
+      typedef std::unordered_map<std::string, ptr_vector> str_ptr_vec_umap;
+    };
+    
+    
+    /**
+     *  @brief  time helper class
+     */
+    class time {
+    public:
+      // typedefs
+      typedef std::chrono::system_clock clock;
+      typedef clock::time_point point;
+      typedef clock::duration duration;
+      typedef clock::period period;
 
-    // time
-    typedef std::chrono::system_clock::time_point TimePoint;
-    typedef std::chrono::duration<double> TimeDuration;
+      /**
+       *  @brief  Returns the current time
+       */
+      static inline point now() {
+        return clock::now();
+      }
+      
+      /**
+       *  @brief  Sleep for a given duration
+       * 
+       *  @param  d the duration to sleep for 
+       */
+      static inline void sleep(const duration &d) {
+        std::this_thread::sleep_for(d);
+      }
+      
+      /**
+       *  @brief  Sleep for n microseconds
+       * 
+       *  @param  usec the number of micro seconds to sleep for
+       */
+      static inline void usleep(unsigned int usec) {
+        std::this_thread::sleep_for(std::chrono::microseconds(usec));
+      }
+      
+      /**
+       *  @brief  Sleep for n milliseconds
+       * 
+       *  @param  usec the number of milliseconds to sleep for
+       */
+      static inline void msleep(unsigned int msec) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(msec));
+      }
+      
+      /**
+       *  @brief  Sleep for n nanoseconds
+       * 
+       *  @param  usec the number of nanoseconds to sleep for
+       */
+      static inline void nsleep(unsigned int nsec) {
+        std::this_thread::sleep_for(std::chrono::nanoseconds(nsec));
+      }
+      
+      /**
+       *  @brief  Convert time_t to time point
+       *  
+       *  @param  t the time_t to convert
+       */
+      static inline point asPoint(std::time_t t) {
+        return clock::from_time_t(t);
+      }
+      
+      /**
+       *  @brief  Convert the time point to time_t
+       * 
+       *  @param  p the time point to convert
+       */
+      static inline std::time_t asTime(const point &p) {
+        return clock::to_time_t(p);
+      }
+
+      /**
+       *  @brief  Convert the integer to time point
+       * 
+       *  @param  integer the integer to convert
+       */
+      static inline point asPoint(int32_t integer) {
+        return asPoint(static_cast<std::time_t>(integer));
+      }
+      
+      /**
+       *  @brief  Convert the time point to integer
+       * 
+       *  @param  p the time point to convert
+       */
+      static inline int32_t asInt(const point &p) {
+        return static_cast<int32_t>(asTime(p));
+      }
+      
+      /**
+       *  @brief  Convert a time pointto string. Format is HH:MM:SS
+       * 
+       *  @param  p the time point to convert
+       */
+      static inline std::string asString(const point &p) {
+        auto timeT = asTime(p);
+        std::tm timeTm;
+        localtime_r(&timeT, &timeTm);
+        std::stringstream ss;
+        ss << timeTm.tm_hour << ":" << timeTm.tm_min << ":" << timeTm.tm_sec;
+        return ss.str();
+      }
+    };
+
+    // time - DEPRECATED DECLARATIONS !
+    typedef time::clock TimeClock;
+    typedef time::point TimePoint;
+    typedef time::duration TimeDuration;
+    // typedef std::chrono::duration<double> TimeDuration;
 
     // event
-    typedef std::shared_ptr<Event> EventPtr;
-    typedef std::queue<EventPtr> EventQueue;
-    typedef std::shared_ptr<EventStreamerPlugin> EventStreamerPluginPtr;
+    typedef type<Event>::ptr EventPtr;
+    typedef type<Event>::ptr_deque EventQueue;
+    typedef type<EventStreamerPlugin>::ptr EventStreamerPluginPtr;
 
     // plugin
-    typedef std::shared_ptr<Plugin> PluginPtr;
+    typedef type<Plugin>::ptr PluginPtr;
 
     // typedefs for streaming
     typedef char dqm_char;
@@ -167,17 +316,17 @@ namespace dqm4hep {
     typedef std::map<std::string, std::string> StringMap;
 
     // dqm4hep typedefs
-    typedef std::shared_ptr<MonitorElement> MonitorElementPtr;
-    typedef std::vector<MonitorElementPtr> MonitorElementList;
-    typedef std::map<const std::string, MonitorElementPtr> MonitorElementMap;
-    typedef std::shared_ptr<Directory<MonitorElement>> MonitorElementDir;
+    typedef type<MonitorElement>::ptr MonitorElementPtr;
+    typedef type<MonitorElement>::ptr_vector MonitorElementList;
+    typedef type<MonitorElement>::str_ptr_map MonitorElementMap;
+    typedef type<Directory<MonitorElement>>::ptr MonitorElementDir;
     typedef QualityTest QTest;
-    typedef std::shared_ptr<QualityTest> QTestPtr;
     typedef QualityTestReport QReport;
-    typedef std::map<std::string, QReport> QReportMap;
+    typedef type<QTest>::ptr QTestPtr;
+    typedef type<QReport>::str_map QReportMap;
     typedef std::map<StringPair, QReportMap> QReportContainer;
-    typedef std::map<std::string, QTestPtr> QTestMap;
-    typedef std::shared_ptr<Storage<MonitorElement>> MeStoragePtr;
+    typedef type<QTest>::str_ptr_map QTestMap;
+    typedef type<Storage<MonitorElement>>::ptr MeStoragePtr;
 
     //-------------------------------------------------------------------------------------------------
 
@@ -223,18 +372,13 @@ namespace dqm4hep {
     /** Screen splash of DQM4HEP
      */
     inline void screenSplash() {
-      time_t t;
-      time(&t);
-      char timeStr[256];
-      ctime_r(&t, &timeStr[0]);
-
       std::cout << "#######################################################" << std::endl;
       std::cout << "#" << std::endl;
       std::cout << "#                    DQM4HEP (DQMCore)" << std::endl;
       std::cout << "#   (Data Quality Monitoring For High Energy Physics)" << std::endl;
       std::cout << "#" << std::endl;
       std::cout << "#      Version    : " << DQMCore_VERSION_STR << std::endl;
-      std::cout << "#      Started at : " << timeStr;
+      std::cout << "#      Started at : " << time::asString(time::now()) << std::endl;
       std::cout << "#      Author     : R. Ete, A. Pingault" << std::endl;
       std::cout << "#      Mail       : <dqm4hep@gmail.com> " << std::endl;
       std::cout << "#" << std::endl;
@@ -302,61 +446,48 @@ namespace dqm4hep {
 
     /** Convert time_t to hour, minutes and seconds
      */
-    inline void timeToHMS(time_t t, int &hours, int &minutes, int &seconds) {
-      auto pTmTime = new tm();
-      localtime_r(&t, pTmTime);
-      hours = pTmTime->tm_hour;
-      minutes = pTmTime->tm_min;
-      seconds = pTmTime->tm_sec;
-      delete pTmTime;
-    }
+    // inline void timeToHMS(time_t t, int &hours, int &minutes, int &seconds) {
+    //   auto pTmTime = new tm();
+    //   localtime_r(&t, pTmTime);
+    //   hours = pTmTime->tm_hour;
+    //   minutes = pTmTime->tm_min;
+    //   seconds = pTmTime->tm_sec;
+    //   delete pTmTime;
+    // }
     
     //-------------------------------------------------------------------------------------------------
     
     /** Convert TimePoint to time_t
      */
-    inline time_t toTime_t(const TimePoint &timePoint) {
-      return TimePoint::clock::to_time_t(timePoint);
-    }
+    // inline time_t toTime_t(const TimePoint &timePoint) {
+    //   return TimeClock::to_time_t(timePoint);
+    // }
     
     //-------------------------------------------------------------------------------------------------
     
     /** Convert time_t to TimePoint
      */
-    inline TimePoint toTimePoint(time_t t) {
-      return TimePoint::clock::from_time_t(t);
-    }
+    // inline TimePoint toTimePoint(time_t t) {
+    //   return TimeClock::from_time_t(t);
+    // }
 
     //-------------------------------------------------------------------------------------------------
 
     /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
      */
-    inline void timeToHMS(time_t t, std::string &timeStr) {
-      // get h m and s
-      int hours, minutes, seconds;
-      dqm4hep::core::timeToHMS(t, hours, minutes, seconds);
-
-      // convert to str
-      std::stringstream ss;
-      ss << hours << "h " << minutes << "m " << seconds << "s";
-      timeStr = ss.str();
-    }
+    DEPRECATED(void timeToHMS(std::time_t t, std::string &timeStr));
 
     //-------------------------------------------------------------------------------------------------
 
     /** Get the current time (unit seconds)
      */
-    inline TimePoint now() {
-      return std::chrono::system_clock::now();
-    }
+    DEPRECATED(TimePoint now());
 
     //-------------------------------------------------------------------------------------------------
 
     /** Sleep for the specified time duration
      */
-    inline void sleep(const TimeDuration &duration) {
-      std::this_thread::sleep_for(duration);
-    }
+    DEPRECATED(void sleep(const TimeDuration &duration));
 
     //-------------------------------------------------------------------------------------------------
 
