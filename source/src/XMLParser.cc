@@ -79,11 +79,13 @@ namespace dqm4hep {
         }
       }
       
-      try {
-        this->resolveForLoops();
-      } catch (StatusCodeException &exception) {
-        dqm_error("XMLParser::parse(): fail to resolve for loops, {0}", exception.toString());
-        throw exception;
+      if(this->processForLoops()) {
+        try {
+          this->resolveForLoops();
+        } catch (StatusCodeException &exception) {
+          dqm_error("XMLParser::parse(): fail to resolve for loops, {0}", exception.toString());
+          throw exception;
+        }        
       }
     }
 
@@ -178,6 +180,18 @@ namespace dqm4hep {
 
     bool XMLParser::allowEnvVariables() const {
       return m_allowEnvVariables;
+    }
+    
+    //----------------------------------------------------------------------------------------------------
+    
+    void XMLParser::setProcessForLoops(bool process) {
+      m_processForLoops = process;
+    }
+
+    //----------------------------------------------------------------------------------------------------
+
+    bool XMLParser::processForLoops() const {
+      return m_processForLoops;
     }
 
     //----------------------------------------------------------------------------------------------------

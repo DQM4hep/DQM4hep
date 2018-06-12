@@ -149,6 +149,18 @@ namespace dqm4hep {
        *  @brief  Whether to allow the use of environment variable while resolving constants
        */
       bool allowEnvVariables() const;
+      
+      /**
+       *  @brief  Set whether to process XML for loop elements
+       *
+       *  @param  process whether to process for loops
+       */
+      void setProcessForLoops(bool process);
+
+      /**
+       *  @brief  Whether to process XML for loop elements
+       */
+      bool processForLoops() const;
 
     private:
       // parsing functions
@@ -188,6 +200,7 @@ namespace dqm4hep {
       bool m_processConstants = {true};    ///< Whether to process constants elements
       bool m_processDatabase = {true};     ///< Whether to process database elements
       bool m_allowEnvVariables = {true};   ///< Whether to allow the use of environment variables
+      bool m_processForLoops = {true};     ///< Whether to process for loops
       std::string m_fileName = {""};       ///< The file name of the last parsed file
       TiXmlDocument m_document = {};       ///< The xml document
       StringMap m_constants = {};          ///< The constants map
