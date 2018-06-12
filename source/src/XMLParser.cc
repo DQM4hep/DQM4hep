@@ -126,6 +126,9 @@ namespace dqm4hep {
 
     void XMLParser::setProcessIncludes(bool process) {
       m_processIncludes = process;
+      if(not m_processIncludes) {
+        dqm_warning( "XMLParser: <include> elements will not be processed !" );
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -138,6 +141,9 @@ namespace dqm4hep {
 
     void XMLParser::setAllowNestedIncludes(bool allow) {
       m_allowNestedIncludes = allow;
+      if(not m_allowNestedIncludes) {
+        dqm_warning( "XMLParser: nested <include> elements will not be processed !" );
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -150,6 +156,9 @@ namespace dqm4hep {
 
     void XMLParser::setProcessConstants(bool process) {
       m_processConstants = process;
+      if(not m_processConstants) {
+        dqm_warning( "XMLParser: constants will not be parsed !" );
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -162,6 +171,9 @@ namespace dqm4hep {
 
     void XMLParser::setProcessDatabase(bool process) {
       m_processDatabase = process;
+      if(not m_processDatabase) {
+        dqm_warning( "XMLParser: no database will be used for parsing !" );
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -174,6 +186,9 @@ namespace dqm4hep {
 
     void XMLParser::setAllowEnvVariables(bool allow) {
       m_allowEnvVariables = allow;
+      if(not m_allowEnvVariables) {
+        dqm_warning( "XMLParser: environment variables will not be replaced !" );
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
@@ -186,6 +201,9 @@ namespace dqm4hep {
     
     void XMLParser::setProcessForLoops(bool process) {
       m_processForLoops = process;
+      if(not m_processForLoops) {
+        dqm_warning( "XMLParser: <for> for loop elements will not be processed !" );
+      }
     }
 
     //----------------------------------------------------------------------------------------------------
