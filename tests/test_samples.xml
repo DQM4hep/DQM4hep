@@ -108,7 +108,15 @@
         <parameter name="Property"> Median </parameter>
       </qtest>
       <qtest type="ExactRefCompareTest" name="ExactRef"/>
-      <qtest type="KolmogorovTest" name="KTest"/>
+      <qtest type="KolmogorovTest" name="KTest">
+	<parameter name="UseUnderflow" value="false"/>
+	<parameter name="UseOverflow" value="false"/>
+      </qtest>
+      <qtest type="Chi2Test" name="C2Test">
+	<parameter name="ComparisonType" value="UU"/>
+	<parameter name="UseUnderflow" value="false"/>
+	<parameter name="UseOverflow" value="false"/>
+      </qtest>
     </qtests>
 
     <!-- All monitor elements and qtests to process -->
@@ -127,6 +135,7 @@
           <qtest name="MeanAround10Short"/>
           <qtest name="ExactRef"/>
 	  <qtest name="KTest"/>
+	  <qtest name="C2Test"/>
         </fileElement>
         <fileElement path="${GaussiansDirectory}" name="DblGaus_Mean15_RMS2_RMS5">
           <qtest name="MeanAround15Short"/>
