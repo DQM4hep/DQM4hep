@@ -175,6 +175,20 @@ endif()
 # ----- Generate DQM4hep package config files -----
 dqm4hep_generate_master_config()
 
+# ----- Install DQM4hep cmake macros in lib/cmake -----
+file( 
+  GLOB DQM4HEP_CMAKE_INSTALL_FILES 
+  ${PROJECT_SOURCE_DIR}/cmake/*.cmake 
+)
+set(
+  DQM4HEP_CMAKE_INSTALL_FILES 
+  ${DQM4HEP_CMAKE_INSTALL_FILES}
+  ${PROJECT_SOURCE_DIR}/cmake/Doxyfile
+  ${PROJECT_SOURCE_DIR}/cmake/dqm4hep_clang_format_config.yml
+  ${PROJECT_SOURCE_DIR}/cmake/run-clang-tidy.py
+)
+install( FILES ${DQM4HEP_CMAKE_INSTALL_FILES} DESTINATION lib/cmake )
+
 # ----- display some variables and write them to cache -----
 display_std_variables()
 message( STATUS "The following packages will be installed :" )
