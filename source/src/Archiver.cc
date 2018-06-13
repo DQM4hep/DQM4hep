@@ -233,6 +233,9 @@ namespace dqm4hep {
 
     ArchiverSelector::ArchiverSelector() {
       m_function = [this](MonitorElementPtr element)->bool{
+        if(m_selectorFunctions.empty()) {
+          return true;
+        }
         for(auto &selector : m_selectorFunctions) {
           if(selector(element)) {
             dqm_debug( "Archiving element path: {0}, name: {1} ...", element->path(), element->name() );
