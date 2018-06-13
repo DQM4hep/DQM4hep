@@ -117,14 +117,14 @@ namespace dqm4hep {
 
 	int sizeGraph = pGraph->GetN();
 	int sizeRef = pReferenceGraph->GetN()  ;
-	double* p_arrayGraph = pGraph->GetY();
-	double* p_arrayRef = pReferenceGraph->GetY();
+	double* pArrayGraph = pGraph->GetY();
+	double* pArrayRef = pReferenceGraph->GetY();
 
-	std::sort(&p_arrayGraph[0], &p_arrayGraph[sizeGraph]);
-	std::sort(&p_arrayRef[0], &p_arrayRef[sizeRef]);
+	std::sort(&pArrayGraph[0], &pArrayGraph[sizeGraph]);
+	std::sort(&pArrayRef[0], &pArrayRef[sizeRef]);
        
 	report.m_message = ("Options used: " + m_options);
-	report.m_quality = TMath::KolmogorovTest(sizeGraph, p_arrayGraph, sizeRef, p_arrayRef, pOptions);
+	report.m_quality = TMath::KolmogorovTest(sizeGraph, pArrayGraph, sizeRef, pArrayRef, pOptions);
       }
       else if (isHistogram) {
 	TH1* pHistogram = pMonitorElement->objectTo<TH1>();
