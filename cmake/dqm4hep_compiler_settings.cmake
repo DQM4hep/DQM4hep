@@ -18,7 +18,7 @@ macro( DQM4HEP_SET_CXX_FLAGS )
   set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wreturn-type -Wuseless-cast -Wlogical-op -Wredundant-decls -Weffc++ -Wno-unsequenced -Wno-deprecated-declarations -fdiagnostics-color=auto  )
   
   if( DQM4HEP_DEV_WARNINGS )
-    set( COMPILER_FLAGS ${COMPILER_FLAGS} -Wsuggest-final-types -Wsuggest-override -Wno-comments -Wparentheses )
+    set( COMPILER_FLAGS ${COMPILER_FLAGS} -Wsuggest-override -Wno-comments -Wparentheses )
   endif()
   
   if( DQM4HEP_WARNING_AS_ERROR )
