@@ -93,7 +93,6 @@ if( DQM4HEP_TESTING )
   set( DQM4HEP_TEST_COMMAND "ctest" )
 endif()
 
-set( CUSTOM_BUILD_COMMAND make install )
 set( COVERITY_SCAN_DIR "${PROJECT_BINARY_DIR}/cov-int" )
 if( DQM4HEP_COVERITY_SCAN )
   set( CUSTOM_BUILD_COMMAND cov-build --dir ${COVERITY_SCAN_DIR} make install )
