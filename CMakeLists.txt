@@ -9,7 +9,7 @@ cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
 # project name
 project( DQMNet )
 
-set( ${PROJECT_NAME}_VERSION_MAJOR 0 )
+set( ${PROJECT_NAME}_VERSION_MAJOR 1 )
 set( ${PROJECT_NAME}_VERSION_MINOR 0 )
 set( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
