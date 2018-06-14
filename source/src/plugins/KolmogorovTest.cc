@@ -152,7 +152,7 @@ namespace dqm4hep {
 	TH1* pReferenceHistogram = pMonitorElement->referenceTo<TH1>();
 	std::string options = KolmogorovTest::getTestOptions(isObjHistogram);
 
-	report.m_extraInfos = "Options used: " + options;
+	report.m_extraInfos["options"] = options;
 	report.m_message = "The Kolmogorov test isn't intended for histograms! Use caution when interepreting the quality.";
 	report.m_quality = pHistogram->KolmogorovTest(pReferenceHistogram, options.c_str());
       }
