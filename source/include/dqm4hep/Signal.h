@@ -211,7 +211,7 @@ namespace dqm4hep {
      *
      *  Implement the observer pattern a la Qt.
      *  Example:
-     *  @code
+     *  @code{.cpp}
      *
      *  void func() {
      *    std::cout << "Hello world !" << std::endl;
@@ -232,7 +232,7 @@ namespace dqm4hep {
      *  @endcode
      *
      *  Allows nice and understandable piece of code like:
-     *  @code
+     *  @code{.cpp}
      *  // Holds a property and signal
      *  class Property {
      *  public:

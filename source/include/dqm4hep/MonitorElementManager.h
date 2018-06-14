@@ -213,7 +213,7 @@ namespace dqm4hep {
        *          method instead. For scalar types (int, double, ...) use the bookScalar() method instead.
        *
        *  Example:
-       *  @code
+       *  @code{.cpp}
        *  // Without arguments. Use the TGraph::TGraph() constructor
        *  MonitorElement graphElement = nullptr;
        *  mgr->bookObject<TGraph>("/MyDirectory", "SuperGraph", "A supeeeeer graph !", graphElement);
@@ -240,7 +240,7 @@ namespace dqm4hep {
       *          the histogram constructor after the "name" and "title" arguments.
       *
       *  Example:
-      *  @code
+      *  @code{.cpp}
       *  // Use the constructor TH1F::TH1F(const char *name, const char *title, Int_t nBins, Double_t min, Double_t max)
       *  MonitorElement histo1DElement = nullptr;
       *  mgr->bookHisto<TH1F>("/MyDirectory", "SuperHisto", "A supeeeeer histo !", histo1DElement, 10, 0., 9.);
@@ -264,7 +264,7 @@ namespace dqm4hep {
       *          args are the arguments passed to the TScalarObject<ScalarType> constructor.
       *
       *  Example:
-      *  @code
+      *  @code{.cpp}
       *  // Use the constructor TScalarObject<int>::TScalarObject<int>(int value)
       *  MonitorElement intScalarElement = nullptr;
       *  mgr->bookScalar<int>("/MyDirectory", "SuperScalar", "A supeeeeer scalar !", intScalarElement, 42);
@@ -321,7 +321,7 @@ namespace dqm4hep {
        *          monitor element type, i.e MonitorElement.
        *
        *  Example:
-       *  @code
+       *  @code{.cpp}
        *  // Use a lambda function
        *  mgr->iterate<MonitorElement>([](std::shared_ptr<MonitorElement> ptr){
        *    std::cout << "Got element: type: " << ptr->type() << ", name: " << ptr->name() << std::endl;

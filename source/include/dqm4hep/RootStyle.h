@@ -52,7 +52,7 @@ namespace dqm4hep {
      * - "forest" : green-ish colors
      * 
      * To be used as:
-     * @code
+     * @code{.cpp}
      * RootStyle objStyle, refStyle;
      * RootStyle::builtinStyle(RootStyle::Theme::SUNRISE, objStyle, refStyle);
      * @endcode 

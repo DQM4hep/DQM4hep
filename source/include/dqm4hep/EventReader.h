@@ -48,7 +48,7 @@ namespace dqm4hep {
      *  available signal for notifying new events.
      *
      *  Typical use of event reader:
-     *  @code
+     *  @code{.cpp}
      *  // user custom class that cosume the data
      *  MyConsumer consumer;
      *  EventReader *reader = new MyFileReader();
