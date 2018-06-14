@@ -55,7 +55,7 @@ namespace dqm4hep {
       KolmogorovTest(const std::string &name);
       ~KolmogorovTest() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      std::string getTestOptions(const bool isHistogram, bool m_useUnderflow, bool m_useOverflow);
+      std::string getTestOptions(const bool isHistogram);
       void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
 
     protected:
@@ -77,9 +77,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     KolmogorovTest::KolmogorovTest(const std::string &qname)
-        : QualityTest("Kolmogorov", qname),
-	  m_useUnderflow(""),
-	  m_useOverflow("")
+        : QualityTest("Kolmogorov", qname)
 {
       m_description = "Performs the Kolmogorov-Smirnov test on a monitor element and a reference, outputting the p-value. In general this should only "
 	              "be used for TGraphs. While this test can take TH1s, the Kolmogorov test is intended for use on unbinned data, not histograms. "
@@ -95,13 +93,13 @@ namespace dqm4hep {
       return STATUS_CODE_SUCCESS;
     }
 
-    std::string KolmogorovTest::getTestOptions(const bool isHistogram, bool useUnderflow, bool useOverflow) {
+    std::string KolmogorovTest::getTestOptions(const bool isHistogram) {
       std::string optionsString = "";
 
-      if (useUnderflow and isHistogram) {
+      if (m_useUnderflow and isHistogram) {
 	optionsString += "U";
       }
-      if (useOverflow and isHistogram) {
+      if (m_useOverflow and isHistogram) {
 	optionsString += "O";
       }
       return optionsString;
@@ -136,7 +134,7 @@ namespace dqm4hep {
       if (isObjGraph) {
 	TGraph* pGraph = pMonitorElement->objectTo<TGraph>();
 	TGraph* pReferenceGraph = pMonitorElement->referenceTo<TGraph>();
-	std::string m_options = KolmogorovTest::getTestOptions(isObjHistogram, m_useUnderflow, m_useOverflow);
+	std::string options = KolmogorovTest::getTestOptions(isObjHistogram);
 
 	int sizeGraph = pGraph->GetN();
 	int sizeRef = pReferenceGraph->GetN()  ;
@@ -146,17 +144,17 @@ namespace dqm4hep {
 	std::sort(&pArrayGraph[0], &pArrayGraph[sizeGraph]);
 	std::sort(&pArrayRef[0], &pArrayRef[sizeRef]);
        
-	report.m_extraInfos = ("Options used: " + m_options);
-	report.m_quality = TMath::KolmogorovTest(sizeGraph, pArrayGraph, sizeRef, pArrayRef, m_options.c_str());
+	report.m_extraInfos["options"] = options;
+	report.m_quality = TMath::KolmogorovTest(sizeGraph, pArrayGraph, sizeRef, pArrayRef, options.c_str());
       }
       else if (isObjHistogram) {
 	TH1* pHistogram = pMonitorElement->objectTo<TH1>();
 	TH1* pReferenceHistogram = pMonitorElement->referenceTo<TH1>();
-	std::string m_options = KolmogorovTest::getTestOptions(isObjHistogram, m_useUnderflow, m_useOverflow);
+	std::string options = KolmogorovTest::getTestOptions(isObjHistogram);
 
-	report.m_extraInfos = "Options used: " + m_options;
+	report.m_extraInfos = "Options used: " + options;
 	report.m_message = "The Kolmogorov test isn't intended for histograms! Use caution when interepreting the quality.";
-	report.m_quality = pHistogram->KolmogorovTest(pReferenceHistogram, m_options.c_str());
+	report.m_quality = pHistogram->KolmogorovTest(pReferenceHistogram, options.c_str());
       }
       else {
 	report.m_message = "ROOT monitor element object is of unrecognised type!";

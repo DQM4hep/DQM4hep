@@ -55,7 +55,7 @@ namespace dqm4hep {
       Chi2Test(const std::string &name);
       ~Chi2Test() override = default;
       StatusCode readSettings(const dqm4hep::core::TiXmlHandle xmlHandle) override;
-      std::string getTestOptions(std::string comparisonType, bool useUnderflow, bool useOverflow);
+      std::string getTestOptions(std::string comparisonType);
       void userRun(MonitorElement* monitorElement, QualityTestReport &report) override;
 
     protected:
@@ -79,9 +79,7 @@ namespace dqm4hep {
 
     Chi2Test::Chi2Test(const std::string &qname)
         : QualityTest("Chi2", qname),
-	  m_comparisonType("UU"),
-	  m_useUnderflow(),
-	  m_useOverflow()
+	  m_comparisonType("UU")
 {
       m_description = "Performs the chi-squared test on a TH1 and a reference, outputting the p-value. This is analogous to the Kolmogorov-Smirnov "
 	              "test but is appropriate for use on binned data like histograms, which the Kolmogorov test is not.";
@@ -97,14 +95,27 @@ namespace dqm4hep {
       return STATUS_CODE_SUCCESS;
     }
 
-    std::string Chi2Test::getTestOptions(std::string comparisonType, bool useUnderflow, bool useOverflow) {
+    std::string Chi2Test::getTestOptions(std::string comparisonType) {
 
-      std::string optionsString = comparisonType;
+      std::string optionsString;
 
-      if (useUnderflow) {
+      if (comparisonType == "UU") {
+	optionsString = "UU";
+      }
+      else if (comparisonType == "UW") {
+	optionsString = "UW";	
+      }
+      else if (comparisonType == "WW") {
+	optionsString = "WW";
+      }
+      else if (comparisonType == "NORM") {
+	optionsString = "NORM";
+      }
+
+      if (m_useUnderflow) {
 	optionsString += "UF";
       }
-      if (useOverflow) {
+      if (m_useOverflow) {
 	optionsString += "OF";
       }
 
@@ -137,9 +148,9 @@ namespace dqm4hep {
 
       TH1* pHistogram = pMonitorElement->objectTo<TH1>();
       TH1* pReferenceHistogram = pMonitorElement->referenceTo<TH1>();
-      std::string m_options = Chi2Test::getTestOptions(m_comparisonType, m_useUnderflow, m_useOverflow);
+      std::string options = Chi2Test::getTestOptions(m_comparisonType);
 
-      report.m_quality = pHistogram->Chi2Test(pReferenceHistogram, m_options.c_str());
+      report.m_quality = pHistogram->Chi2Test(pReferenceHistogram, options.c_str());
     }
     
     DQM_PLUGIN_DECL(Chi2TestFactory, "Chi2Test");
