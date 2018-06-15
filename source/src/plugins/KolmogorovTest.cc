@@ -137,13 +137,19 @@ namespace dqm4hep {
 	std::string options = KolmogorovTest::getTestOptions(isObjHistogram);
 
 	int sizeGraph = pGraph->GetN();
-	int sizeRef = pReferenceGraph->GetN()  ;
+	int sizeRef = pReferenceGraph->GetN();
+
+	if ( (sizeGraph == 0) or (sizeRef == 0) ) {
+	  report.m_message = "One or more of the graphs are empty!";
+	  report.m_quality = 0.0;
+	  throw StatusCodeException(STATUS_CODE_INVALID_PARAMETER);
+	}
+
+	pGraph->Sort();
+	pReferenceGraph->Sort();
 	double* pArrayGraph = pGraph->GetY();
 	double* pArrayRef = pReferenceGraph->GetY();
 
-	std::sort(&pArrayGraph[0], &pArrayGraph[sizeGraph]);
-	std::sort(&pArrayRef[0], &pArrayRef[sizeRef]);
-       
 	report.m_extraInfos["options"] = options;
 	report.m_quality = TMath::KolmogorovTest(sizeGraph, pArrayGraph, sizeRef, pArrayRef, options.c_str());
       }
