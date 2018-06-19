@@ -111,10 +111,10 @@ namespace dqm4hep {
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       } else {
 
-        dqm_float prevCpuTimeUser = stats.cpuTimeUser;
-        dqm_float prevCpuTimeSys = stats.cpuTimeSys;
-        stats.cpuTimeUser = (dqm_float)(ru.ru_utime.tv_sec) + ((dqm_float)(ru.ru_utime.tv_usec) / 1000000.);
-        stats.cpuTimeSys = (dqm_float)(ru.ru_stime.tv_sec) + ((dqm_float)(ru.ru_stime.tv_usec) / 1000000.);
+        dqm_double prevCpuTimeUser = stats.cpuTimeUser;
+        dqm_double prevCpuTimeSys = stats.cpuTimeSys;
+        stats.cpuTimeUser = ru.ru_utime.tv_sec + ru.ru_utime.tv_usec / 1000000.;
+        stats.cpuTimeSys = ru.ru_stime.tv_sec + ru.ru_stime.tv_usec / 1000000.;
 
         struct timeval timeNow;
         gettimeofday(&timeNow, NULL);
