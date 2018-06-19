@@ -125,8 +125,6 @@ namespace dqm4hep {
     void Chi2Test::userRun(MonitorElement* pMonitorElement, QualityTestReport &report) {
       const bool hasObject = (pMonitorElement->object() != nullptr);
       const bool hasReference = (pMonitorElement->reference() != nullptr);
-      const bool isObjHistogram = pMonitorElement->object()->InheritsFrom("TH1");
-      const bool isRefHistogram = pMonitorElement->reference()->InheritsFrom("TH1");
 
       if (!hasObject) {
         report.m_message = "No object attached to monitor element";
@@ -139,6 +137,9 @@ namespace dqm4hep {
         report.m_quality = 0.f;
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
+
+      const bool isObjHistogram = pMonitorElement->object()->InheritsFrom("TH1");
+      const bool isRefHistogram = pMonitorElement->reference()->InheritsFrom("TH1");
 
       if (!isObjHistogram or !isRefHistogram) {
         report.m_message = "Both the object and the reference must be a TH1";
