@@ -108,10 +108,6 @@ namespace dqm4hep {
     void KolmogorovTest::userRun(MonitorElement* pMonitorElement, QualityTestReport &report) {
       const bool hasObject = (pMonitorElement->object() != nullptr);
       const bool hasReference = (pMonitorElement->reference() != nullptr);
-      const bool isObjHistogram = pMonitorElement->object()->InheritsFrom("TH1");
-      const bool isObjGraph = pMonitorElement->object()->InheritsFrom("TGraph");
-      const bool isRefHistogram = pMonitorElement->reference()->InheritsFrom("TH1");
-      const bool isRefGraph = pMonitorElement->reference()->InheritsFrom("TGraph");
 
       if (!hasObject) {
         report.m_message = "No object attached to monitor element";
@@ -124,6 +120,11 @@ namespace dqm4hep {
         report.m_quality = 0.f;
         throw StatusCodeException(STATUS_CODE_INVALID_PTR);
       }
+
+      const bool isObjHistogram = pMonitorElement->object()->InheritsFrom("TH1");
+      const bool isObjGraph = pMonitorElement->object()->InheritsFrom("TGraph");
+      const bool isRefHistogram = pMonitorElement->reference()->InheritsFrom("TH1");
+      const bool isRefGraph = pMonitorElement->reference()->InheritsFrom("TGraph");
 
       if ( (isObjGraph and !isRefGraph) or (isObjHistogram and !isRefHistogram) ) {
         report.m_message = "The object and reference must be of the same type";
