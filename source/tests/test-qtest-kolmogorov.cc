@@ -71,8 +71,8 @@ void fillTest(TGraph *graph) {
 
 int main(int /*argc*/, char ** /*argv*/) {
   
-  DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-qtest-property-within-exp", {Logger::coloredConsole()}); );
-  Logger::setMainLogger("test-qtest-property-within-exp");
+  DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-qtest-kolmogorv", {Logger::coloredConsole()}); );
+  Logger::setMainLogger("test-qtest-kolmogorv");
   Logger::setLogLevel(spdlog::level::debug);
   
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
