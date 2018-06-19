@@ -147,7 +147,7 @@ namespace dqm4hep {
      *  @brief  Compute network rate and fill NetworkStats struct for osx and linux
      *  @param  stats the NetworkStats struct to fill
      *  @param  tempStats the NetworkStats struct to compare with
-     *  @param  sampleTime time between the two NetworkStats reading
+     *  @param  sampleTime time between the two NetworkStats reading in \b seconds
      */
     static void fillNetRate(NetworkStats &stats, NetworkStats &tempStats, dqm_int sampleTime) {
       for (const auto &ifcIter : tempStats) {
@@ -228,7 +228,7 @@ namespace dqm4hep {
     /**
      *  @brief  Get cpu stats for linux
      *  @param  stats the CpuStats struct to store the data
-     *  @param  sampleTime the time between two cpu reading to compute the load
+     *  @param  sampleTime the time between two cpu reading to compute the load in \b seconds
      */
     static void linuxCpuStats(CpuStats &stats, dqm_int sampleTime) {
       dqm_double avg[3] = {-1.};
@@ -404,7 +404,7 @@ namespace dqm4hep {
     /**
      *  @brief  Get network stats for linux
      *  @param  stats the NetworkStats struct to store the data
-     *  @param  sampleTime the time between two network i/o reading to compute the rate
+     *  @param  sampleTime the time between two network i/o reading to compute the rate in \b seconds
      */
     static void linuxNetStats(NetworkStats &stats, dqm_int sampleTime) {
       NetworkStats tempStats;
@@ -454,7 +454,7 @@ namespace dqm4hep {
     /**
      *  @brief  Get cpu stats for osx
      *  @param  stats the CpuStats struct to store the data
-     *  @param  sampleTime the time between two cpu reading to compute the load
+     *  @param  sampleTime the time between two cpu reading to compute the load in \b seconds
      */
     static void darwinCpuStats(CpuStats &stats, dqm_int sampleTime) {
       dqm_double avg[3] = {-1.};
@@ -733,7 +733,7 @@ namespace dqm4hep {
     /**
      *  @brief  Get network stats for osx
      *  @param  stats the NetworkStats struct to store the data
-     *  @param  sampleTime the time between two network i/o reading to compute the rate
+     *  @param  sampleTime the time between two network i/o reading to compute the rate in \b seconds
      */
     static void darwinNetStats(NetworkStats &stats, dqm_int sampleTime) {
 

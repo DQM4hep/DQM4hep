@@ -591,15 +591,16 @@ namespace dqm4hep {
     
     /**
      *  @brief  CpuStats struct
+     *          Store system wide cpu usage in percentage
      */
     struct CpuStats {
-      dqm_float load1m = {0.};  // cpu load average over 1 m
-      dqm_float load5m = {0.};  // cpu load average over 5 m
-      dqm_float load15m = {0.}; // cpu load average over 15 m
-      dqm_float user = {0.};    // cpu user load in percentage
-      dqm_float sys = {0.};     // cpu sys load in percentage
-      dqm_float tot = {0.};     // cpu user+sys load in percentage
-      dqm_float idle = {0.};    // cpu idle percentage
+      dqm_float load1m = {0.};  //!< cpu load average over 1 m
+      dqm_float load5m = {0.};  //!< cpu load average over 5 m
+      dqm_float load15m = {0.}; //!< cpu load average over 15 m
+      dqm_float user = {0.};    //!< cpu user load in \b percentage
+      dqm_float sys = {0.};     //!< cpu sys load in \b percentage
+      dqm_float tot = {0.};     //!< cpu user+sys load in \b percentage
+      dqm_float idle = {0.};    //!< cpu idle in \b percentage
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -607,21 +608,23 @@ namespace dqm4hep {
     /**
      *  @brief  Get some memory stats
      *
-     *  @param  object the CpuStats object to receive
+     *  @param  stats the CpuStats object to receive
+     *  @param  sampleTime time between two sampling to compute load, in \b seconds 
      */
     void cpuStats(CpuStats &stats, dqm_int sampleTime = 1 /*s*/);
     //-------------------------------------------------------------------------------------------------
 
     /**
      *  @brief  MemoryStats struct
-     *          All units in Mb
+     *          Store system wide memory usage
+     *          All units in \b Mb
      */
     struct MemoryStats {
-      dqm_int vmTot = {0};   // total virtual RAM (physical RAM + swap) in MB
-      dqm_int vmUsed = {0};  // used virtual RAM (physical RAM + swap) in MB
-      dqm_int vmFree = {0};  // free virtual RAM (physical RAM + swap) in MB
-      dqm_int rssTot = {0};  // total physical RAM in MB
-      dqm_int rssUsed = {0}; // used  physical RAM in MB
+      dqm_int vmTot = {0};   //!< total virtual RAM (physical RAM + swap) in \b MB
+      dqm_int vmUsed = {0};  //!< used virtual RAM (physical RAM + swap) in \b MB
+      dqm_int vmFree = {0};  //!< free virtual RAM (physical RAM + swap) in \b MB
+      dqm_int rssTot = {0};  //!< total physical RAM in \b MB
+      dqm_int rssUsed = {0}; //!< used  physical RAM in \b MB
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -629,7 +632,7 @@ namespace dqm4hep {
     /**
      *  @brief  Get some memory stats
      *
-     *  @param  object the MemoryStats object to receive
+     *  @param  stats the MemoryStats object to receive
      */
     void memStats(MemoryStats &stats);
 
@@ -637,18 +640,19 @@ namespace dqm4hep {
 
     /**
      *  @brief  ProcessStats struct
-     *          All memory units in Mb
+     *          Store cpu (time/percentage) and memory usage from current process  
+     *          All memory units in \b kb !
      */
     struct ProcessStats {
-      dqm_float cpuTimeUser = {0.}; // user time used by this process in seconds
-      dqm_float cpuTimeSys = {0.};  // system time used by this process in seconds
-      dqm_float cpuTimeTot = {0.};  // total time used by this process in seconds
-      dqm_float cpuUser = {0.};     // cpu user load used by this process in percentage
-      dqm_float cpuSys = {0.};      // cpu sys load used by this process in percentage
-      dqm_float cpuTot = {0.};      // total (sys+user) cpu load used by this process in percentage
-      dqm_long vm = {0L};           // virtual memory used by this process in KB
-      dqm_long rss = {0L};          // resident memory used by this process in KB
-      timeval lastPollTime {0, 0}; // last time process stats were polled
+      dqm_float cpuTimeUser = {0.}; //!< user time used by this process in \b seconds
+      dqm_float cpuTimeSys = {0.};  //!< system time used by this process in \b seconds
+      dqm_float cpuTimeTot = {0.};  //!< total time used by this process in \b seconds
+      dqm_float cpuUser = {0.};     //!< cpu user load used by this process in \b percentage
+      dqm_float cpuSys = {0.};      //!< cpu sys load used by this process in \b percentage
+      dqm_float cpuTot = {0.};      //!< total (sys+user) cpu load used by this process in \b percentage
+      dqm_long vm = {0L};           //!< virtual memory used by this process in \b KB
+      dqm_long rss = {0L};          //!< resident memory used by this process in \b KB
+      timeval lastPollTime {0, 0};  //!< last time process stats were polled
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -656,27 +660,29 @@ namespace dqm4hep {
     /**
      *  @brief  Get stats from current process
      *
-     *  @param  object the ProcessStats object to receive
+     *  @param  stats the ProcessStats object to receive
      */
     void procStats(ProcessStats &stats);
     //-------------------------------------------------------------------------------------------------
 
     /**
      *  @brief  INetworkStats struct
+     *          Store system wide network stats
+     *          Units in \b packets or \b kb 
      */
     struct INetworkStats {
-      dqm_stat tot_rcv_kbytes = {0L};
-      dqm_stat tot_rcv_packets = {0L};
-      dqm_stat tot_rcv_errs = {0L};
-      dqm_stat tot_snd_kbytes = {0L};
-      dqm_stat tot_snd_packets = {0L};
-      dqm_stat tot_snd_errs = {0L};
-      dqm_stat rcv_rate_kbytes = {0L};
-      dqm_stat rcv_rate_packets = {0L};
-      dqm_stat rcv_rate_errs = {0L};
-      dqm_stat snd_rate_kbytes = {0L};
-      dqm_stat snd_rate_packets = {0L};
-      dqm_stat snd_rate_errs = {0L};
+      dqm_stat tot_rcv_kbytes = {0L};   //!< total data received in \b kb
+      dqm_stat tot_rcv_packets = {0L};  //!< total packets received
+      dqm_stat tot_rcv_errs = {0L};     //!< total errors received
+      dqm_stat tot_snd_kbytes = {0L};   //!< total data sent in \b kb
+      dqm_stat tot_snd_packets = {0L};  //!< total packets sent
+      dqm_stat tot_snd_errs = {0L};     //!< total errors sent
+      dqm_stat rcv_rate_kbytes = {0L};  //!< rate of data received in \b kb
+      dqm_stat rcv_rate_packets = {0L}; //!< rate of packets received
+      dqm_stat rcv_rate_errs = {0L};    //!< rate of errors received
+      dqm_stat snd_rate_kbytes = {0L};  //!< rate of data sent in \b kb
+      dqm_stat snd_rate_packets = {0L}; //!< rate of packets sent
+      dqm_stat snd_rate_errs = {0L};    //!< rate of errors sent
     };
 
     typedef std::map<std::string, INetworkStats> NetworkStats;
@@ -686,7 +692,8 @@ namespace dqm4hep {
     /**
      *  @brief  Get some network stats
      *
-     *  @param  object the NetworkStats object to receive
+     *  @param  stats the NetworkStats object to receive
+     *  @param  sampleTime time between two sampling to compute rates, in \b seconds 
      */
     void netStats(NetworkStats &stats, dqm_int sampleTime = 1 /*s*/);
   } // namespace core
