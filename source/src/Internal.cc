@@ -118,8 +118,8 @@ namespace dqm4hep {
 
         struct timeval timeNow;
         gettimeofday(&timeNow, NULL);
-        dqm_double start = stats.lastPollTime.tv_sec + stats.lastPollTime.tv_usec / 1000000;
-        dqm_double stop = timeNow.tv_sec + timeNow.tv_usec / 1000000;
+        dqm_double start = stats.lastPollTime.tv_sec + stats.lastPollTime.tv_usec / 1000000.;
+        dqm_double stop = timeNow.tv_sec + timeNow.tv_usec / 1000000.;
         stats.lastPollTime = timeNow;
         if (stop > start) {
           dqm_double timeDif = stop - start;
