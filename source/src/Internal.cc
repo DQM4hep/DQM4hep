@@ -359,7 +359,7 @@ namespace dqm4hep {
       while (1) {
         // get interface name
         std::string iname;
-        char c;
+        int c;
         do {
           c = fgetc(file);
           if (c == ':')
