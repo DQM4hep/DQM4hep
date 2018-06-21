@@ -214,7 +214,6 @@ namespace dqm4hep {
 
       if (!f) {
         dqm_error("[{0}] - Failed to open '/proc/stat'", __FUNCTION__);
-        fclose(f);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       }
 
