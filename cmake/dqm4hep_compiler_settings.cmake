@@ -17,6 +17,12 @@ macro( DQM4HEP_SET_CXX_FLAGS )
   
   set( COMPILER_FLAGS -Wunused-value -Wall -pedantic -Wshadow -Wformat-security -Wno-long-long -Wreturn-type -Wuseless-cast -Wlogical-op -Wredundant-decls -Weffc++ -Wno-unsequenced -Wno-deprecated-declarations -fdiagnostics-color=auto  )
   
+  # APPLECLANG 9.1.0 add new warning for hardcoded include nonportable-include-path
+  # This is not compatible with the way root generate its dictionary. So we disable it
+  if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+    set(COMPILER_FLAGS ${COMPILER_FLAGS} -Wno-error=nonportable-include-path)
+  endif()
+  
   if( DQM4HEP_DEV_WARNINGS )
     set( COMPILER_FLAGS ${COMPILER_FLAGS} -Wsuggest-override -Wno-comments -Wparentheses )
   endif()
