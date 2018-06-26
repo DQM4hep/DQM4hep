@@ -4,6 +4,9 @@ set( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE ) # default in cmake 2.6
 set( DQM4HEP_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
 set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
+# Automatically tell CMake where to find DQM4HEPConfig.cmake
+set( CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} ${CMAKE_CURRENT_LIST_DIR} )
+
 include( CMakeParseArguments )
 
 # include helper macros
