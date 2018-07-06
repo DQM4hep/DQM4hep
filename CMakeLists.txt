@@ -90,7 +90,7 @@ if( DQM4HEP_BUILD_OFFLINE )
 endif()
 
 if( DQM4HEP_TESTING )
-  set( DQM4HEP_TEST_COMMAND "ctest" )
+  set( DQM4HEP_TEST_COMMAND "ctest --output-on-failure" )
 endif()
 
 set( COVERITY_SCAN_DIR "${PROJECT_BINARY_DIR}/cov-int" )
