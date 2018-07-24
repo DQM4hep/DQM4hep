@@ -40,13 +40,10 @@ namespace dqm4hep {
 
   namespace core {
 
-    class BufferEventStreamer;
-
     /** 
      *  @brief  BufferEvent class
      */
     class BufferEvent {
-      friend class BufferEventStreamer;
     private:
       /**
        *  @brief  Buffer struct. Internal buffer handler for the BufferEvent class
