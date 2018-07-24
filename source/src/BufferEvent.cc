@@ -42,7 +42,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void BufferEvent::copyBuffer(const char *const buffer, std::size_t len) {
+    void BufferEvent::copyBuffer(const char *const b, std::size_t len) {
       if(nullptr == buffer) {
         return;
       }
@@ -55,7 +55,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
 
-    void BufferEvent::moveBuffer(char *buffer, std::size_t len) {
+    void BufferEvent::moveBuffer(char *b, std::size_t len) {
       if(nullptr == buffer) {
         return;
       }
@@ -67,7 +67,7 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
 
-    void BufferEvent::handleBuffer(char *buffer, std::size_t len) {
+    void BufferEvent::handleBuffer(char *b, std::size_t len) {
       if(nullptr == buffer) {
         return;
       }

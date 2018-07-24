@@ -73,19 +73,19 @@ namespace dqm4hep {
        *  @brief  Copy the target buffer in the event structure using memcpy.
        *          The input buffer is still owned by the user after calling this method.
        *           
-       * @param  buffer the buffer to copy
+       * @param  b the buffer to copy
        * @param  len the buffer length
        */
-      void copyBuffer(const char *const buffer, std::size_t len);
+      void copyBuffer(const char *const b, std::size_t len);
       
       /**
        *  @brief  Move the user buffer to the event structure.
        *          The buffer is not copied and is owned by the event after calling this method.
        *          
-       * @param buffer the buffer to move
+       * @param b the buffer to move
        * @param len the buffer length
        */
-      void moveBuffer(char *buffer, std::size_t len);
+      void moveBuffer(char *b, std::size_t len);
       
       /**
        *  @brief  Let the event structure handle the buffer.
@@ -96,10 +96,10 @@ namespace dqm4hep {
        *          buffer. To make sure the event is not in an invalid state after buffer deletion 
        *          in this case, use the method clear() right after the buffer deletion.
        *                
-       * @param buffer the buffer to handle
+       * @param b the buffer to handle
        * @param len the buffer length
        */
-      void handleBuffer(char *buffer, std::size_t len);
+      void handleBuffer(char *b, std::size_t len);
       
       /**
        *  @brief  Access the event internal buffer 
