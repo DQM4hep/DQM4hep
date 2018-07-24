@@ -88,8 +88,8 @@ namespace dqm4hep {
       BufferEvent *bufferEvent = event->getEvent<BufferEvent>();
       
       char *buffer = nullptr;
-      std::size_t size = 0;
-      if (!XDR_TESTBIT( device->readDynamicArray(buffer, size), xdrstream::XDR_SUCCESS )) {
+      xdrstream::xdr_size_t size = 0;
+      if (!XDR_TESTBIT( device->readDynamicArray<char>(buffer, size), xdrstream::XDR_SUCCESS )) {
         return STATUS_CODE_FAILURE;
       }
       bufferEvent->moveBuffer(buffer, size);
