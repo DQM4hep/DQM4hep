@@ -33,6 +33,12 @@
 namespace dqm4hep {
 
   namespace core {
+    
+    BufferEvent::~BufferEvent() {
+      clear();
+    }
+    
+    //-------------------------------------------------------------------------------------------------
 
     EventPtr BufferEvent::make_shared() {
       auto ptr = std::shared_ptr<Event>(new EventBase<BufferEvent>(new BufferEvent()));
@@ -43,37 +49,37 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void BufferEvent::copyBuffer(const char *const b, std::size_t len) {
-      if(nullptr == buffer) {
+      if(nullptr == b) {
         return;
       }
       clear();
       m_buffer.m_size = len;
       m_buffer.m_buffer = new char[len];
       m_buffer.m_isOwner = true;
-      memcpy(m_buffer.m_buffer, buffer, len);
+      memcpy(m_buffer.m_buffer, b, len);
     }
     
     //-------------------------------------------------------------------------------------------------
 
     void BufferEvent::moveBuffer(char *b, std::size_t len) {
-      if(nullptr == buffer) {
+      if(nullptr == b) {
         return;
       }
       clear();
       m_buffer.m_size = len;
-      m_buffer.m_buffer = buffer;
+      m_buffer.m_buffer = b;
       m_buffer.m_isOwner = true;
     }
     
     //-------------------------------------------------------------------------------------------------
 
     void BufferEvent::handleBuffer(char *b, std::size_t len) {
-      if(nullptr == buffer) {
+      if(nullptr == b) {
         return;
       }
       clear();
       m_buffer.m_size = len;
-      m_buffer.m_buffer = buffer;
+      m_buffer.m_buffer = b;
       m_buffer.m_isOwner = false;
     }
     

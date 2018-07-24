@@ -67,7 +67,11 @@ namespace dqm4hep {
       static EventPtr make_shared();
       
       BufferEvent() = default;
-      ~BufferEvent() = default;
+      
+      /**
+       *  @brief  Destructor
+       */
+      ~BufferEvent();
 
       /**
        *  @brief  Copy the target buffer in the event structure using memcpy.
