@@ -62,10 +62,10 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
-    
+
     /// TXMLDefaultAllocator class for all ROOT class with default constructor 
     class DefaultXMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ namespace dqm4hep {
     
     /// TH1XMLAllocator class for all TH1 types 
     class TH1XMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -81,7 +81,7 @@ namespace dqm4hep {
     
     /// TH2XMLAllocator class for all TH2 types 
     class TH2XMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -89,7 +89,7 @@ namespace dqm4hep {
     
     /// TH3XMLAllocator class for all TH3 types 
     class TH3XMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -97,7 +97,7 @@ namespace dqm4hep {
     
     /// THStackXMLAllocator class for all THStack type
     class THStackXMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -105,7 +105,7 @@ namespace dqm4hep {
     
     /// THStackXMLAllocator class for all TH2Poly type
     class TH2PolyXMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ namespace dqm4hep {
     
     /// TProfileXMLAllocator class for all TProfile type
     class TProfileXMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -121,7 +121,7 @@ namespace dqm4hep {
     
     /// TProfile2DXMLAllocator class for all TProfile2D type
     class TProfile2DXMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -129,7 +129,7 @@ namespace dqm4hep {
     
     /// TScalarXMLAllocator class for all scalar types
     class TScalarXMLAllocator final : public TObjectXMLAllocator {
-      TObject* create(TiXmlElement *element) const;
+      TObject* create(TiXmlElement *element) const override;
     };
     
   }
