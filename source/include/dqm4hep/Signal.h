@@ -96,7 +96,7 @@ namespace dqm4hep {
       *
       * @param  args the arguments to forward
       */
-      void emit(Args... args);
+      void emit(Args... args) override;
 
       /**
        *  @brief  Get the class object
@@ -132,7 +132,7 @@ namespace dqm4hep {
       /**
       *  @brief  Process the callback
       */
-      void emit();
+      void emit() override;
 
       /**
        *  @brief  Get the class object
@@ -165,7 +165,7 @@ namespace dqm4hep {
       /**
       *  @brief  Emit the signal
       */
-      void emit(Args... args);
+      void emit(Args... args) override;
 
       /**
        *  @brief  Get the associated function 
@@ -191,7 +191,7 @@ namespace dqm4hep {
       /**
       *  @brief  Emit the signal
       */
-      void emit();
+      void emit() override;
 
       /**
        *  @brief  Get the associated function 
