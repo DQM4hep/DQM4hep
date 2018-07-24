@@ -44,10 +44,10 @@
         THROW_RESULT_IF(dqm4hep::core::STATUS_CODE_SUCCESS, !=, this->registerMe());                                   \
     }                                                                                                                  \
     ~DQMPlugin_##ClassName() = default;                                                                                \
-    dqm4hep::core::Plugin *create() const {                                                                            \
+    dqm4hep::core::Plugin *create() const override {                                                                            \
       return new DQMPlugin_##ClassName(false);                                                                         \
     }                                                                                                                  \
-    std::string className() const {                                                                                    \
+    std::string className() const override {                                                                                    \
       return std::string(#ClassName);                                                                                  \
     }                                                                                                                  \
   };                                                                                                                   \
