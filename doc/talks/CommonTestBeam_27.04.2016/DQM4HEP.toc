@@ -1,5 +1,0 @@
-\beamer@endinputifotherversion {3.36pt}
-\select@language {french}
-\beamer@sectionintoc {1}{Overview and packaging}{3}{0}{1}
-\beamer@sectionintoc {2}{Architecture and API}{6}{0}{2}
-\beamer@sectionintoc {3}{Conclusion and plans}{31}{0}{3}
