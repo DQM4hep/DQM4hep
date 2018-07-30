@@ -1,0 +1,11 @@
+#!/bin/bash
+
+cd @PROJECT_SOURCE_DIR@/tests
+
+qTestFile="test_samples.xml"
+
+#export LD_LIBRARY_PATH for osx
+export LD_LIBRARY_PATH=@CUSTOM_TEST_LIBRARY_DIR@:$LD_LIBRARY_PATH
+
+# the qtest runner
+@PROJECT_BINARY_DIR@/bin/dqm4hep-run-qtests --exit-on failure --input-qtest-file ${qTestFile}

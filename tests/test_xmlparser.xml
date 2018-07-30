@@ -1,0 +1,21 @@
+<dqm4hep>
+  
+  <counters>
+    <for id="count" begin="0" end="10" increment="1">
+      <!-- This counter value is set to $FOR{count} -->
+      <counter name="${user}" value="$FOR{count}" />
+    </for>
+  </counters>
+  
+  <constants>
+    <constant name="user" value="superman"/>
+    <constant name="planet" value="krypton"/>
+    <constant name="age" value="32"/>
+  </constants>
+  
+  <hero name="${user}" planet="${planet}">
+  </hero>
+  
+  <include ref="test_xmlparser_include.xml" />
+  
+</dqm4hep>

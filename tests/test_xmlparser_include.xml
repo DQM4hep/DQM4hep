@@ -1,0 +1,15 @@
+<dqm4hep>
+
+  <constants>
+    <constant name="incVar1" value="toto"/>
+    <constant name="incVar2" value="tata"/>
+  </constants>
+  
+  <nested>
+    <constants>
+      <constant name="badguy" value="dracula"/>
+      <constant name="database" value="LocalTB"/>
+    </constants>
+  </nested>
+  
+</dqm4hep>
