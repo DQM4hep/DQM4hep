@@ -1,0 +1,10 @@
+/bin
+/build
+/lib
+/include
+/DQMNetConfig.cmake
+/DQMNetConfigVersion.cmake
+.gitignore
+/doc/html
+/doc/latex
+/doc/docs
