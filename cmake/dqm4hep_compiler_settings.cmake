@@ -4,11 +4,12 @@ option( DQM4HEP_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" O
 option( DQM4HEP_DEV_WARNINGS        "Whether to add extra warning for developpers to cxx flags" OFF )
 
 macro( DQM4HEP_REQUIRE_CPP_STANDARD )
-  include( CheckCXXCompilerFlag )
-  check_cxx_compiler_flag( "-std=c++11" COMPILER_SUPPORTS_CXX11 )  
-  if( NOT COMPILER_SUPPORTS_CXX11 )
-    message( SEND_ERROR "${PROJECT_NAME} requires C++11 support. Please upgrade your compiler !" )
-  endif()
+  enable_language( CXX )
+
+  # Set C++ standard
+  set( CMAKE_CXX_STANDARD 11 CACHE STRING "C++ standard used for compiling" )
+  set( CMAKE_CXX_STANDARD_REQUIRED ON )
+  set( CMAKE_CXX_EXTENSIONS OFF )
 endmacro()
 
 macro( DQM4HEP_SET_CXX_FLAGS )
