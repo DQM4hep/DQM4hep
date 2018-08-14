@@ -1,0 +1,45 @@
+<dqm4hep>
+  
+  <!-- Application settings -->
+  <settings mode="EventReader">
+    <parameter name="EnableStatistics"> true </parameter>
+    <parameter name="EventReader"> GenericEventXMLReader </parameter>
+    <parameter name="EventFileName"> /home/$ENV{USER}/soft/dqm4hep-core/tests/genevt_dummy_data.xml </parameter>
+    <parameter name="CyclePeriod"> 1 </parameter>
+    <parameter name="CycleCounter"> 0 </parameter>
+    <parameter name="CycleTimeout"> 0 </parameter>
+    <parameter name="RunControl"> TestRC </parameter>
+    <parameter name="EventCollector"> TestEventCollector </parameter>
+    <parameter name="EventSource"> TestSource </parameter>
+    <parameter name="MonitorElementCollector"> TestMeCollector </parameter>
+  </settings>
+  
+  <!-- Archiver settings -->
+  <archiver enable="true">
+    <parameter name="FileName" value="Archive.root"/>
+    <parameter name="OpenMode" value="RECREATE"/>
+    <parameter name="AllowOverwrite" value="false"/>
+    <parameter name="AppendRunNumber" value="true"/>
+    <parameter name="WriteReferences" value="true"/>
+    <selectors>
+      <selector regex=".*" select="true"/>
+    </selectors>    
+  </archiver>
+  
+  <storage>
+    <style theme="polar"/>
+    <!-- Quality tests to configure -->
+    <qtests/>
+    <!-- Monitor element to book -->
+    <monitorElements>
+      <bookElement type="TH1D" path="/" name="TotalEnergy" title="The total reconstructed energy" nBinsX="151" minX="0" maxX="150">
+      </bookElement>
+    </monitorElements>
+  </storage>
+  
+  <!-- User module settings -->
+  <module type="TestAnalysisModule" name="TestModule">
+    <parameter name="RandomSeed"> 123456789 </parameter>
+  </module>
+  
+</dqm4hep>

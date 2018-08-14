@@ -1,0 +1,9 @@
+/build
+/include
+/lib
+/bin
+/DQMOnlineConfig.cmake
+/DQMOnlineConfigVersion.cmake
+/backup/
+/.project
+/TODO.txt

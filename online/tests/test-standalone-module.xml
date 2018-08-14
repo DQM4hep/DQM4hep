@@ -1,0 +1,37 @@
+<dqm4hep>
+  
+  <!-- Application settings -->
+  <settings>
+    <parameter name="CyclePeriod"> 5 </parameter>
+    <parameter name="CycleCounter"> 0 </parameter>
+    <parameter name="CycleTimeout"> 2 </parameter>
+    <parameter name="RunControl"> TestRC </parameter>
+    <parameter name="MonitorElementCollector"> TestMeCollector </parameter>
+    <parameter name="StandaloneSleepTime"> 1000 </parameter>
+  </settings>
+  
+  <!-- Quality tests to configure -->
+  <!-- <qtests>
+    <qtest type="MeanWithinExpectedTest" name="Test1" error="0.3" warning="0.9">
+      <parameter name="ExpectedMean" value="10"/>
+      <parameter name="MeanDeviationLower" value="8"/>
+      <parameter name="MeanDeviationUpper" value="12"/>
+    </qtest>
+  </qtests> -->
+  
+  <!-- Monitor element to book -->
+  <!-- <monitorElements>
+    <bookElement type="TH1D" path="/" name="TotalEnergy" nBins="151" min="0" max="150">
+      <qtest name="Test1"/>
+    </bookElement>
+  </monitorElements> -->
+  
+  <!-- User module settings -->
+  <module type="TestStandaloneModule" name="TestModule">
+    <parameter name="TMean"> 24 </parameter>
+    <parameter name="TRms"> 1 </parameter>
+    <parameter name="PMean"> 1024 </parameter>
+    <parameter name="PRms"> 2 </parameter>
+  </module>
+  
+</dqm4hep>
