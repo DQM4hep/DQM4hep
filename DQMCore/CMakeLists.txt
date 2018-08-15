@@ -1,46 +1,54 @@
 #################################################
-# cmake file for building DQMCore package
+# cmake file for building DQMCore component
 # @author Ete Remi, DESY
-# Copyright (c)
-cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
 #################################################
 
-###############################
-# project name
-project( DQMCore )
-
-set( ${PROJECT_NAME}_VERSION_MAJOR 2 )
-set( ${PROJECT_NAME}_VERSION_MINOR 3 )
-set( ${PROJECT_NAME}_VERSION_PATCH 0 )
-
-###############################
-# Central settings
-include( dqm4hep_settings )
-
-# ----- Find ROOT package -----
-dqm4hep_find_package(
-  PACKAGE ROOT
-  COMPONENTS Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree
-  REQUIRED ADD_DEPENDS  
+dqm4hep_package( DQMCore
+  USES [ROOT COMPONENTS Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree REQUIRED]
+  xdrstream MySQL spdlog tclap json 
+  INCLUDE_DIRS include
+  INSTALL_INCLUDES include/dqm4hep
 )
 
-# ----- Find MySQL and xdrstream packages -----
-dqm4hep_find_packages(
-  PACKAGES MySQL xdrstream
-  REQUIRED ADD_DEPENDS
+# -------------------------------------------------
+# build the DQMCore dictionary
+dqm4hep_add_dictionary( G__DQMCore
+  SOURCES include/dqm4hep/MonitorElement.h
+  LINKDEF include/dqm4hep/LinkDef.h
+  INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include
+  OPTIONS -Wno-unsequenced
 )
 
-# ----- Install doc -----
-dqm4hep_build_doxygen()
+# -------------------------------------------------
+# build the DQMCore library
+dqm4hep_add_package_library( DQMCore
+  SOURCES src/*.cc src/plugins/*.cc ${DQMCore_DICTIONARY}
+  GENERATED G__DQMCore
+)
 
-###############################
-# Add source directory
-add_subdirectory( source )
+# -------------------------------------------------
+# build the DQMCore binaries
+dqm4hep_add_executable( dqm4hep-cpustats              SOURCES main/dqm4hep-cpustats.cc )
+dqm4hep_add_executable( dqm4hep-dump-plugins          SOURCES main/dqm4hep-dump-plugins.cc )
+dqm4hep_add_executable( dqm4hep-generate-qtest-file   SOURCES main/dqm4hep-generate-qtest-file.cc )
+dqm4hep_add_executable( dqm4hep-memstats              SOURCES main/dqm4hep-memstats.cc )
+dqm4hep_add_executable( dqm4hep-mysql-create-db       SOURCES main/dqm4hep-mysql-create-db.cc )
+dqm4hep_add_executable( dqm4hep-mysql-create-user     SOURCES main/dqm4hep-mysql-create-user.cc )
+dqm4hep_add_executable( dqm4hep-mysql-dump-parameters SOURCES main/dqm4hep-mysql-dump-parameters.cc )
+dqm4hep_add_executable( dqm4hep-mysql-push-parameters SOURCES main/dqm4hep-mysql-push-parameters.cc )
+dqm4hep_add_executable( dqm4hep-mysql-rm-user         SOURCES main/dqm4hep-mysql-rm-user.cc )
+dqm4hep_add_executable( dqm4hep-mysql-set-parameter   SOURCES main/dqm4hep-mysql-set-parameter.cc )
+dqm4hep_add_executable( dqm4hep-netstats              SOURCES main/dqm4hep-netstats.cc )
+dqm4hep_add_executable( dqm4hep-run-qtests            SOURCES main/dqm4hep-run-qtests.cc )
 
-###############################
-# display some variables and write them to cache
-display_std_variables()
+# -------------------------------------------------
+# generate config headers and config files
+# TODO remove this and replace by:
+# - a single header DQM4hepConfig.h
+# - single configuration files DQM4hepConfig.cmake and DQM4hepConfigVersion.cmake
+dqm4hep_generate_package_configuration( 
+  PACKAGE_NAME DQMCore
+  HEADER_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-###############################
-# generate and install following configuration files
-dqm4hep_generate_package_configuration( PACKAGE_NAME ${PROJECT_NAME} )
+
