@@ -1,0 +1,123 @@
+
+<html>
+
+<head>
+
+  <!-- <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"> -->
+
+  <title>Test DIM Client</title>
+  <script type="text/javascript" src="dic.js"></script>
+</head>
+
+<body>
+
+  <h1>All services : </h1>
+  <div id="services"></div><br/>
+  <h1>All servers : </h1>
+  <div id="servers"></div> <br/>
+  <h1>Server services ( DIS_DNS ) : </h1>
+  <div id="serverServices"></div><br/>
+  <h1>Server clients ( DIS_DNS ) : </h1>
+  <div id="serverClients"></div><br/>
+
+  <h1>Unique IDs : </h1>
+  <div id="uid"></div><br/>
+
+  <script type="text/javascript">
+
+  try {
+
+    var client = new dim.DimClient("localhost", 2511);
+    // var browser = new dim.DimBrowser(client);
+    //
+    //
+    // /* Get all services */
+    // browser.getServices("*", function(services) {
+    //   console.log("nServices = " + services.length);
+    //
+    //   var jsonServices = { services : services };
+    //   var json = JSON.stringify(jsonServices, null, "\t");
+    //
+    //   console.log(json);
+    //   document.getElementById("services").innerHTML = json;
+    // });
+    //
+    // /* Get all servers */
+    // browser.getServers(function(servers) {
+    //   console.log("nServers = " + servers.length);
+    //
+    //   var jsonServers = { servers : servers };
+    //   var json = JSON.stringify(jsonServers, null, "\t");
+    //
+    //   console.log(json);
+    //   document.getElementById("servers").innerHTML = json;
+    // });
+    //
+    // /* Get DIS_DNS services */
+    // browser.getServerServices("DIS_DNS", function(services) {
+    //   console.log("nServices = " + services.length);
+    //
+    //   var jsonServices = { serverServices : services };
+    //   var json = JSON.stringify(jsonServices, null, "\t");
+    //
+    //   console.log(json);
+    //   document.getElementById("serverServices").innerHTML = json;
+    // });
+    //
+    // /* Get DIS_DNS clients */
+    // browser.getServerClients("DIS_DNS", function(clients) {
+    //   console.log("nClients = " + clients.length);
+    //
+    //   var jsonClients = { serverClients : clients };
+    //   var json = JSON.stringify(jsonClients, null, "\t");
+    //
+    //   console.log(json);
+    //   document.getElementById("serverClients").innerHTML = json;
+    // });
+    //
+    // client.sendStringCommand("TEST/CMND", "127");
+    //
+    // client.sendRequest(
+    //   {
+    //     rpcName : "/dqm4hep/runcontrol/rc/runinfo",
+    //     intype : dim.types.string,
+    //     outtype : dim.types.string,
+    //     data : "",
+    //     nolink : "{}"
+    //   },
+    //   function(data) {
+    //   console.log("Received from /dqm4hep/runcontrol/rc/runinfo : " + JSON.stringify(JSON.parse(data), null, "\t"));
+    // });
+    //
+    // client.sendRequest(
+    //   {
+    //     rpcName : "/rc/info",
+    //     intype : dim.types.string,
+    //     outtype : dim.types.string,
+    //     data : "",
+    //     nolink : "{}"
+    //   },
+    //   function(data) {
+    //   console.log("Received from /rc/info : " + JSON.parse(JSON.parse(data), null, "\t"));
+    // });
+
+    var uid = new dim.UID();
+    var uidContents = uid.getUID().toString() + " ";
+    uidContents += uid.getUID().toString() + " ";
+    uidContents += uid.getUID().toString() + " ";
+    uidContents += uid.getUID().toString() + " ";
+    uid.reUse(2);
+    uidContents += uid.getUID().toString() + " ";
+    uidContents += uid.getUID().toString();
+    document.getElementById("uid").innerHTML = uidContents;
+
+  }
+  catch(e)
+  {
+    console.log(e);
+  }
+  </script>
+
+</body>
+
+</html>

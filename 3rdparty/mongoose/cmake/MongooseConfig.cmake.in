@@ -1,0 +1,85 @@
+##############################################################################
+# cmake configuration file for Mongoose
+#
+# requires:
+#   MacroCheckPackageLibs.cmake for checking package libraries
+#   MacroExportPackageDeps.cmake for exporting package dependencies
+#
+# returns following variables:
+#
+#   Mongoose_FOUND      : set to TRUE if Mongoose found
+#       if FIND_PACKAGE called with REQUIRED and COMPONENTS arguments
+#       Mongoose_FOUND is only set to TRUE if ALL components are also found
+#       if REQUIRED is NOT set components may or may not be available
+#
+#   Mongoose_ROOT       : path to this Mongoose installation
+#   Mongoose_VERSION    : package version
+#   Mongoose_LIBRARIES  : list of Mongoose libraries (NOT including COMPONENTS)
+#   Mongoose_INCLUDE_DIRS  : list of paths to be used with INCLUDE_DIRECTORIES
+#   Mongoose_LIBRARY_DIRS  : list of paths to be used with LINK_DIRECTORIES
+#   Mongoose_COMPONENT_LIBRARIES      : list of Mongoose component libraries
+#   Mongoose_${COMPONENT}_FOUND       : set to TRUE or FALSE for each library
+#   Mongoose_${COMPONENT}_LIBRARY     : path to individual libraries
+#   Mongoose_${COMPONENT}_LIB_DEPENDS : individual library dependencies
+#
+# @author Jan Engels, Desy
+# Modified for Mongoose use by : Remi Ete, IPNL
+##############################################################################
+
+SET( Mongoose_ROOT "@CMAKE_INSTALL_PREFIX@" )
+SET( Mongoose_VERSION "@Mongoose_VERSION@" )
+
+
+# ---------- include dirs -----------------------------------------------------
+# do not store find results in cache
+SET( Mongoose_INCLUDE_DIRS Mongoose_INCLUDE_DIRS-NOTFOUND )
+MARK_AS_ADVANCED( Mongoose_INCLUDE_DIRS )
+
+FIND_PATH( Mongoose_INCLUDE_DIRS
+	NAMES mongoose.h
+	PATHS @CMAKE_INSTALL_PREFIX@/include/
+	NO_DEFAULT_PATH
+)
+
+
+
+# ---------- libraries --------------------------------------------------------
+INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroCheckPackageLibs.cmake" )
+
+# only standard libraries should be passed as arguments to CHECK_PACKAGE_LIBS
+# additional components are set by cmake in variable PKG_FIND_COMPONENTS
+# first argument should be the package name
+CHECK_PACKAGE_LIBS( Mongoose Mongoose )
+
+
+# ---------- dependencies -----------------------------------------------------
+INCLUDE( "@CMAKE_INSTALL_PREFIX@/cmake/MacroExportPackageDeps.cmake" )
+# exports following package dependencies (if set)
+# first argument of macro should be the package name
+SET( Mongoose_DEPENDS_INCLUDE_DIRS  @Mongoose_DEPENDS_INCLUDE_DIRS@ )
+SET( Mongoose_DEPENDS_LIBRARY_DIRS  @Mongoose_DEPENDS_LIBRARY_DIRS@ )
+SET( Mongoose_DEPENDS_LIBRARIES  @Mongoose_DEPENDS_LIBRARIES@ )
+EXPORT_PACKAGE_DEPENDENCIES( Mongoose )
+
+
+
+# ---------- final checking ---------------------------------------------------
+INCLUDE( FindPackageHandleStandardArgs )
+# set Mongoose_FOUND to TRUE if all listed variables are TRUE and not empty
+# Mongoose_COMPONENT_VARIABLES will be set if FIND_PACKAGE is called with REQUIRED argument
+FIND_PACKAGE_HANDLE_STANDARD_ARGS( Mongoose DEFAULT_MSG Mongoose_ROOT Mongoose_INCLUDE_DIRS Mongoose_LIBRARIES ${Mongoose_COMPONENT_VARIABLES} )
+
+SET( Mongoose_FOUND ${Mongoose_FOUND} )
+
+
+
+# ---------- definitions ------------------------------------------------------
+IF( Mongoose_FOUND )
+
+    IF( CMAKE_BUILD_TYPE STREQUAL "Debug" OR
+        CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+        MARK_AS_ADVANCED( Mongoose_DEFINITIONS )
+    ENDIF()
+
+ENDIF()
+
