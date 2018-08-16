@@ -1,7 +1,7 @@
-/// \file test-qtest-exact-ref-comp.cc
+/// \file test-qtest-kolmogorov.cc
 /*
  *
- * test-qtest-exact-ref-comp.cc main source file template automatically generated
+ * test-qtest-kolmogorov.cc main source file template automatically generated
  * Creation date : mer. nov. 5 2014
  *
  * This file is part of DQM4HEP libraries.
@@ -31,6 +31,7 @@
 #include <dqm4hep/MonitorElementManager.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/PluginManager.h>
+#include <dqm4hep/UnitTesting.h>
 
 #include <TH1.h>
 #include <TGraph.h>
@@ -42,12 +43,7 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)						\
-  if (!(Command)) {							\
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);								\
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 void fillTest(TH1 *histogram) {
   histogram->Fill(1);
@@ -70,10 +66,7 @@ void fillTest(TGraph *graph) {
 }
 
 int main(int /*argc*/, char ** /*argv*/) {
-  
-  DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-qtest-kolmogorv", {Logger::coloredConsole()}); );
-  Logger::setMainLogger("test-qtest-kolmogorv");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-qtest-kolmogorov");
   
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
   
@@ -81,7 +74,7 @@ int main(int /*argc*/, char ** /*argv*/) {
   MonitorElementPtr testElement;
   meMgr->bookObject<TGraph>("/", "TestGraph", "A test graph", testElement);
   TGraph *graph = testElement->objectTo<TGraph>();
-  assert_test(nullptr != graph);
+  unitTest.test("BOOK_GRAPH", nullptr != graph);
   fillTest(graph);
   
   // create reference TH1
@@ -104,32 +97,32 @@ int main(int /*argc*/, char ** /*argv*/) {
   qtestElement->SetAttribute("name", qtestName);
 
   // configuring the qtest
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQtest.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  unitTest.test("CREATE_QTEST1", STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQtest.get()));
+  unitTest.test("ADD_QTEST1", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
 
   // invalid test - no reference
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST1", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT__QTEST1", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID);
+  unitTest.test("FLAG_QTEST1", report.m_qualityFlag == INVALID);
 
   // valid test - same graph
   storage.clear();
   testElement->setReferenceObject(referenceGraph);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST2", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST2", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  unitTest.test("FLAG_QTEST2", report.m_qualityFlag == SUCCESS);
 
   // invalid test - object and reference types do not match
   storage.clear();
   testElement->setReferenceObject(referenceHistogram);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST3", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST3", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID);
+  unitTest.test("FLAG_QTEST3", report.m_qualityFlag == INVALID);
   
 }

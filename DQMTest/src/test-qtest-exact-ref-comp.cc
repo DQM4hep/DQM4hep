@@ -31,6 +31,7 @@
 #include <dqm4hep/MonitorElementManager.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/PluginManager.h>
+#include <dqm4hep/UnitTesting.h>
 
 #include <TH1.h>
 #include <TGraph.h>
@@ -42,12 +43,7 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
   
 void fillExact(TH1 *histogram) {
   histogram->Fill(1);
@@ -99,10 +95,7 @@ void fillDifferentNPoints(TGraph *graph) {
 }
 
 int main(int /*argc*/, char ** /*argv*/) {
-  
-  DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-qtest-exact-ref-comp", {Logger::coloredConsole()}); );
-  Logger::setMainLogger("test-qtest-exact-ref-comp");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-qtest-exact-ref-comp");
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
@@ -110,7 +103,7 @@ int main(int /*argc*/, char ** /*argv*/) {
   MonitorElementPtr testElement;
   meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElement, 100, 0.f, 99.f);
   TH1F *histogram = testElement->objectTo<TH1F>();
-  assert_test(nullptr != histogram);
+  unitTest.test("BOOK_HISTO", nullptr != histogram);
   fillExact(histogram);
 
   // create different references
@@ -132,56 +125,56 @@ int main(int /*argc*/, char ** /*argv*/) {
   qtestElement->SetAttribute("type", qtestType);
 
   // configure the qtest
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(qtestElement));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  unitTest.test("CREATE_QTEST1", STATUS_CODE_SUCCESS == meMgr->createQualityTest(qtestElement));
+  unitTest.test("ADD_QTEST1", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
   
   // run it !
   QReportStorage storage; QReport report; json jsonReport;
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST1", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST1", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID); // no reference assigned yet
+  unitTest.test("FLAG_QTEST1", report.m_qualityFlag == INVALID); // no reference assigned yet
   
   storage.clear();
   testElement->setReferenceObject(reference);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST2", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST2", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS); // same histograms
+  unitTest.test("FLAG_QTEST2", report.m_qualityFlag == SUCCESS); // same histograms
   
   storage.clear();
   testElement->setReferenceObject(badReferenceBining);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST3", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST3", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID); // reference has a different binning
+  unitTest.test("FLAG_QTEST3", report.m_qualityFlag == INVALID); // reference has a different binning
   
   storage.clear();
   testElement->setReferenceObject(badReferenceType);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST4", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST4", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID); // wrong reference type
+  unitTest.test("FLAG_QTEST4", report.m_qualityFlag == INVALID); // wrong reference type
   
   storage.clear();
   testElement->setReferenceObject(badReferenceContent);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST5", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST5", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == ERROR); // valid test but reference is different
+  unitTest.test("FLAG_QTEST5", report.m_qualityFlag == ERROR); // valid test but reference is different
   
-  assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
+  unitTest.test("RM_ME", STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
   
   // create our test element - TScalar
   meMgr->bookScalar<int>("/", "TestScalar", "A test int", testElement, 42);
   TScalarInt *integer = testElement->objectTo<TScalarInt>();
-  assert_test(nullptr != integer);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  unitTest.test("BOOK_SCALAR", nullptr != integer);
+  unitTest.test("ADD_QTEST6", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
   
   reference.set(new TScalarInt(42), true);
   badReferenceContent.set(new TScalarInt(45), true);
@@ -189,35 +182,35 @@ int main(int /*argc*/, char ** /*argv*/) {
   
   storage.clear();
   testElement->setReferenceObject(reference);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST6", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST6", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS); // same scalar values
+  unitTest.test("FLAG_QTEST6", report.m_qualityFlag == SUCCESS); // same scalar values
   
   storage.clear();
   testElement->setReferenceObject(badReferenceContent);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST7", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST7", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == ERROR); // different scalar values
+  unitTest.test("FLAG_QTEST7", report.m_qualityFlag == ERROR); // different scalar values
   
   storage.clear();
   testElement->setReferenceObject(badReferenceType);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST8", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST8", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID); // wrong reference type
+  unitTest.test("FLAG_QTEST8", report.m_qualityFlag == INVALID); // wrong reference type
 
-  assert_test(STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
+  unitTest.test("RM_ME2", STATUS_CODE_SUCCESS == meMgr->removeMonitorElement(testElement->path(), testElement->name()));
   
   // create our test element - TGraph (1D)
   meMgr->bookObject<TGraph>("/", "TestGraph", "A test graph", testElement);
   TGraph *graph = testElement->objectTo<TGraph>();
-  assert_test(nullptr != graph);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
+  unitTest.test("BOOK_GRAPH", nullptr != graph);
+  unitTest.test("ADD_QTEST9", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), qtestName));
   fillExact(graph);
   
   reference.set(new TGraph(), true);
@@ -231,35 +224,35 @@ int main(int /*argc*/, char ** /*argv*/) {
   
   storage.clear();
   testElement->setReferenceObject(reference);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST9", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST9", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS); // same graphs
+  unitTest.test("FLAG_QTEST9", report.m_qualityFlag == SUCCESS); // same graphs
 
   storage.clear();
   testElement->setReferenceObject(badReferenceBining);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST10", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST10", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID); // reference has a different n points
+  unitTest.test("FLAG_QTEST10", report.m_qualityFlag == INVALID); // reference has a different n points
   
   storage.clear();
   testElement->setReferenceObject(badReferenceType);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST11", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST11", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == INVALID); // wrong reference type
+  unitTest.test("FLAG_QTEST11", report.m_qualityFlag == INVALID); // wrong reference type
   
   storage.clear();
   testElement->setReferenceObject(badReferenceContent);
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
+  unitTest.test("RUN_QTEST12", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), qtestName, storage));
+  unitTest.test("GET_REPORT_QTEST12", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), qtestName, report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == ERROR); // valid test but reference is different
+  unitTest.test("FLAG_QTEST12", report.m_qualityFlag == ERROR); // valid test but reference is different
   
   return 0;
 }

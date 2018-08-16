@@ -31,6 +31,7 @@
 #include <dqm4hep/MonitorElementManager.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/json.h>
+#include <dqm4hep/UnitTesting.h>
 
 // -- std headers
 #include <iostream>
@@ -38,34 +39,27 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 int main(int /*argc*/, char ** /*argv*/) {
-  Logger::createLogger("test-me-json", {Logger::coloredConsole()});
-  Logger::setMainLogger("test-me-json");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-me-json");
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
   MonitorElementPtr graphElement;
-  assert_test(STATUS_CODE_SUCCESS == meMgr->bookMonitorElement("TGraph", "/", "TestGraph", graphElement));
+  unitTest.test("BOOK_GRAPH", STATUS_CODE_SUCCESS == meMgr->bookMonitorElement("TGraph", "/", "TestGraph", graphElement));
 
   TGraph *graph = graphElement->objectTo<TGraph>();
-  assert_test(nullptr != graph);
+  unitTest.test("VALID_GRAPH", nullptr != graph);
   graph->SetPoint(0, 12, 45);
   graph->SetPoint(1, 14, 75);
   
   json graphJson = nullptr;
   graphElement->toJson(graphJson);
-  assert_test(nullptr != graphJson);
-  assert_test(nullptr != graphJson.value("object", json(nullptr)));
-  assert_test(nullptr == graphJson.value("reference", json(nullptr)));
-  assert_test(0 != graphJson.count("path"));
+  unitTest.test("VALID_GRAPH_JSON", nullptr != graphJson);
+  unitTest.test("GRAPH_JSON_OBJECT", nullptr != graphJson.value("object", json(nullptr)));
+  unitTest.test("GRAPH_JSON_NO_REF", nullptr == graphJson.value("reference", json(nullptr)));
+  unitTest.test("GRAPH_JSON_PATH", 0 != graphJson.count("path"));
   
   DQM4HEP_NO_EXCEPTION( dqm_debug(graphJson.dump(2)); );
 

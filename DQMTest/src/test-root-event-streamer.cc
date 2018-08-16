@@ -32,6 +32,7 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Event.h>
 #include <dqm4hep/EventStreamer.h>
+#include <dqm4hep/UnitTesting.h>
 
 // -- root headers
 #include <TObject.h>
@@ -46,12 +47,7 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 EventPtr createEvent() {
   auto event = std::shared_ptr<Event>(new EventBase<TObject>());
@@ -60,9 +56,7 @@ EventPtr createEvent() {
 }
 
 int main(int /*argc*/, char ** /*argv*/) {
-  Logger::createLogger("test-root-event-streamer", {Logger::coloredConsole()});
-  Logger::setMainLogger("test-root-event-streamer");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-root-event-streamer");
 
   // Input event
   EventPtr outEvent = createEvent();
@@ -75,7 +69,7 @@ int main(int /*argc*/, char ** /*argv*/) {
   EventStreamer streamer;
   
   // Test writing out
-  assert_test(STATUS_CODE_SUCCESS == streamer.writeEvent(outEvent, &outDevice));
+  unitTest.test("WRITE_EVENT", STATUS_CODE_SUCCESS == streamer.writeEvent(outEvent, &outDevice));
   
   // dqm_debug("outDevice.getPosition() is {0}", outDevice.getPosition());
   // dqm_debug("outDevice.size() is {0}", outDevice.size());
@@ -88,20 +82,20 @@ int main(int /*argc*/, char ** /*argv*/) {
   // dqm_debug("inDevice.size() is {0}", inDevice.size());
   
   // Test reading in
-  assert_test(STATUS_CODE_SUCCESS == streamer.readEvent(inEvent, &inDevice));
+  unitTest.test("READ_EVENT", STATUS_CODE_SUCCESS == streamer.readEvent(inEvent, &inDevice));
   TObject *inTObject = inEvent->getEvent<TObject>();
   
   // Check TObject pointer
-  assert_test(nullptr != inTObject);
+  unitTest.test("VALID_OBJECT", nullptr != inTObject);
   
   TH1I *inHistogram = (TH1I*)inTObject;
   
   // Check histogram pointer
-  assert_test(nullptr != inHistogram);
+  unitTest.test("VALID_HISTO", nullptr != inHistogram);
   
   // Check histogram content
-  assert_test(inHistogram->GetBinContent(1) == 3);
-  assert_test(inHistogram->GetBinContent(5) == 17);
+  unitTest.test("VALID_BIN_CONTENT1", inHistogram->GetBinContent(1) == 3);
+  unitTest.test("VALID_BIN_CONTENT2", inHistogram->GetBinContent(5) == 17);
 
   return 0;
 }

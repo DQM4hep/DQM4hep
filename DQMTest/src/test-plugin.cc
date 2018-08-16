@@ -30,6 +30,7 @@
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/PluginManager.h>
 #include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/UnitTesting.h>
 
 // -- std headers
 #include <iostream>
@@ -37,12 +38,7 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 class TestPlugin {
 public:
@@ -56,12 +52,10 @@ public:
 DQM_PLUGIN_DECL(TestPlugin, "TestPlugin");
 
 int main(int /*argc*/, char ** /*argv*/) {
-  Logger::createLogger("test-plugin", {Logger::coloredConsole()});
-  Logger::setMainLogger("test-plugin");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-plugin");
 
   auto plugin = PluginManager::instance()->create<TestPlugin>("TestPlugin");
-  assert_test(nullptr != plugin);
+  unitTest.test("FOUND_PLUGIN", nullptr != plugin);
   plugin->print();
 
   return 0;

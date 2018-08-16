@@ -27,7 +27,11 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/DQMCore.h>
+#include <dqm4hep/UnitTesting.h>
+
+using UnitTest = dqm4hep::test::UnitTest;
 
 int main() {
+  UnitTest unitTest("test-global-header");
   return 0;
 }

@@ -30,6 +30,7 @@
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/UnitTesting.h>
 
 // -- std headers
 #include <iostream>
@@ -37,12 +38,7 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}", #Command);                                                                     \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 class Object {
 public:
@@ -59,9 +55,7 @@ private:
 typedef Directory<Object> Directory_t;
 
 int main(int /*argc*/, char ** /*argv*/) {
-  Logger::createLogger("test-directory", {Logger::coloredConsole()});
-  Logger::setMainLogger("test-directory");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-directory");
 
   auto root = Directory_t::make_shared("root");
   auto heroes = root->mkdir("heroes");
@@ -73,35 +67,35 @@ int main(int /*argc*/, char ** /*argv*/) {
   heroes->add(object);
   object = std::make_shared<Object>("batman");
   heroes->add(object);
-  assert_test(heroes->contents().size() == 3);
+  unitTest.test("ADD_TEST", heroes->contents().size() == 3);
 
   heroes->remove(object);
-  assert_test(heroes->contents().size() == 2);
+  unitTest.test("RM", heroes->contents().size() == 2);
 
   root->clear();
-  assert_test(root->isEmpty());
+  unitTest.test("CLEAR", root->isEmpty());
 
   auto pBibouDir = root->mkdir("bibou");
   pBibouDir->add(std::make_shared<Object>("toto"));
   pBibouDir->add(std::make_shared<Object>("tata"));
   pBibouDir->add(std::make_shared<Object>("tutu"));
-  assert_test(pBibouDir->contents().size() == 3);
+  unitTest.test("ADD2", pBibouDir->contents().size() == 3);
 
   pBibouDir->remove([](std::shared_ptr<Object> o) { return o->name() == "toto"; });
-  assert_test(pBibouDir->contents().size() == 2);
+  unitTest.test("RM2", pBibouDir->contents().size() == 2);
   Path bibouPath = pBibouDir->fullPath();
-  assert_test(bibouPath.getPath() == "/root/bibou");
-  assert_test(!pBibouDir->isRoot());
-  assert_test(root->isRoot());
-  assert_test(!root->isEmpty());
-  assert_test(!pBibouDir->isEmpty());
-  assert_test(pBibouDir->contains([](std::shared_ptr<Object> o) { return o->name() == "tata"; }));
-  assert_test(!pBibouDir->contains([](std::shared_ptr<Object> o) { return o->name() == "teufteuf"; }));
-  assert_test(pBibouDir->find([](std::shared_ptr<Object> o) { return o->name() == "tata"; }) != nullptr);
-  assert_test(pBibouDir->find([](std::shared_ptr<Object> o) { return o->name() == "teufteuf"; }) == nullptr);
-  assert_test(root->hasChild("bibou"));
-  assert_test(root->mkdir("bibou") == pBibouDir);
-  assert_test(pBibouDir->parent() == root);
+  unitTest.test("PATH", bibouPath.getPath() == "/root/bibou");
+  unitTest.test("NOT_ROOT", !pBibouDir->isRoot());
+  unitTest.test("IS_ROOT", root->isRoot());
+  unitTest.test("NOT_EMPTY_ROOT", !root->isEmpty());
+  unitTest.test("NOT_EMPTY_DIR", !pBibouDir->isEmpty());
+  unitTest.test("CONTAINS", pBibouDir->contains([](std::shared_ptr<Object> o) { return o->name() == "tata"; }));
+  unitTest.test("NOT_CONTAINS", !pBibouDir->contains([](std::shared_ptr<Object> o) { return o->name() == "teufteuf"; }));
+  unitTest.test("FIND", pBibouDir->find([](std::shared_ptr<Object> o) { return o->name() == "tata"; }) != nullptr);
+  unitTest.test("FIND2", pBibouDir->find([](std::shared_ptr<Object> o) { return o->name() == "teufteuf"; }) == nullptr);
+  unitTest.test("HAS_CHILD", root->hasChild("bibou"));
+  unitTest.test("MKDIR", root->mkdir("bibou") == pBibouDir);
+  unitTest.test("PARENT_IS_ROOT", pBibouDir->parent() == root);
 
   return 0;
 }

@@ -30,6 +30,7 @@
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XMLParser.h>
+#include <dqm4hep/UnitTesting.h>
 
 // -- std headers
 #include <iostream>
@@ -37,17 +38,10 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 int main(int /*argc*/, char *argv[]) {
-  Logger::createLogger("test-xmlparser", {Logger::coloredConsole()});
-  Logger::setMainLogger("test-xmlparser");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-xmlparser");
 
   XMLParser parser;
   bool parseOkay = true;
@@ -58,7 +52,7 @@ int main(int /*argc*/, char *argv[]) {
     parseOkay = false;
   }
 
-  assert_test(parseOkay);
+  unitTest.test("PARSE_OKAY", parseOkay);
   
   auto document = parser.document();
   TiXmlPrinter printer;
@@ -66,35 +60,35 @@ int main(int /*argc*/, char *argv[]) {
   std::cout << printer.Str() << std::endl;
 
   TiXmlElement *root = parser.document().RootElement();
-  assert_test(root != nullptr);
+  unitTest.test("ROOT_VALID", root != nullptr);
 
   std::string user = parser.constantAs<std::string>("user");
-  assert_test(user == "superman");
+  unitTest.test("SUPERMAN_CST", user == "superman");
 
   int age = parser.constantAs<int>("age", 0);
-  assert_test(age == 32);
+  unitTest.test("AGE_CST", age == 32);
 
   std::string incVar1 = parser.constantAs<std::string>("incVar1", "");
-  assert_test(incVar1 == "toto");
+  unitTest.test("TOTO_CST", incVar1 == "toto");
   
   std::string incVar2 = parser.constantAs<std::string>("incVar2", "");
-  assert_test(incVar2 == "tata");
+  unitTest.test("TATA_CST", incVar2 == "tata");
 
   std::string badguy = parser.constantAs<std::string>("badguy", "");
-  assert_test(badguy.empty());
+  unitTest.test("BADGUY_CST", badguy.empty());
 
   std::string notFound = parser.constantAs<std::string>("bibou", "missing");
-  assert_test(notFound == "missing");
+  unitTest.test("BIBOU_CST", notFound == "missing");
 
   TiXmlElement *heroElement = root->FirstChildElement("hero");
 
   std::string heroName;
   heroElement->QueryStringAttribute("name", &heroName);
-  assert_test(heroName == "superman");
+  unitTest.test("CHILD_SUPERMAN", heroName == "superman");
 
   std::string heroPlanet;
   heroElement->QueryStringAttribute("planet", &heroPlanet);
-  assert_test(heroPlanet == "krypton");
+  unitTest.test("CHILD_KRYPTON", heroPlanet == "krypton");
 
   return 0;
 }

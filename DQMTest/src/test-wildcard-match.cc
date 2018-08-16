@@ -29,38 +29,32 @@
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/UnitTesting.h>
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 int main(int /*argc*/, char ** /*argv*/) {
-  Logger::createLogger("test-wildcard-match", {Logger::coloredConsole()});
-  Logger::setMainLogger("test-wildcard-match");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-wildcard-match");
 
   // matching ones
-  assert_test(wildcardMatch("tototatatutu", "tototatatutu"));
-  assert_test(wildcardMatch("tototatatutu", "toto*"));
-  assert_test(wildcardMatch("tototatatutu", "toto*tutu"));
-  assert_test(wildcardMatch("tototatatutu", "toto?atatutu"));
-  assert_test(wildcardMatch("tototatatutu", "toto?ata*u"));
-  assert_test(wildcardMatch("tototatatutu", "*o*a*u"));
-  assert_test(wildcardMatch("tototatatutu", "t?t?t?t?t?t?"));
+  unitTest.test("WILDCARD_MATCH1", wildcardMatch("tototatatutu", "tototatatutu"));
+  unitTest.test("WILDCARD_MATCH2", wildcardMatch("tototatatutu", "toto*"));
+  unitTest.test("WILDCARD_MATCH3", wildcardMatch("tototatatutu", "toto*tutu"));
+  unitTest.test("WILDCARD_MATCH4", wildcardMatch("tototatatutu", "toto?atatutu"));
+  unitTest.test("WILDCARD_MATCH5", wildcardMatch("tototatatutu", "toto?ata*u"));
+  unitTest.test("WILDCARD_MATCH6", wildcardMatch("tototatatutu", "*o*a*u"));
+  unitTest.test("WILDCARD_MATCH7", wildcardMatch("tototatatutu", "t?t?t?t?t?t?"));
 
   // not matching ones
-  assert_test(not wildcardMatch("tototatatutu", "toto*tututut"));
-  assert_test(not wildcardMatch("tototatatutu", "toto?tatatutu"));
-  assert_test(not wildcardMatch("tototatatutu", "?o?o?o?ua?a?u*"));
-  assert_test(not wildcardMatch("tototatatutu", "a different string"));
-  assert_test(not wildcardMatch("tototatatutu", "?tototatatutu"));
-  assert_test(not wildcardMatch("tototatatutu", "tototatatutu?"));
-  assert_test(not wildcardMatch("tototatatutu", "tototatat??tu"));
+  unitTest.test("WILDCARD_UNMATCH1", not wildcardMatch("tototatatutu", "toto*tututut"));
+  unitTest.test("WILDCARD_UNMATCH2", not wildcardMatch("tototatatutu", "toto?tatatutu"));
+  unitTest.test("WILDCARD_UNMATCH3", not wildcardMatch("tototatatutu", "?o?o?o?ua?a?u*"));
+  unitTest.test("WILDCARD_UNMATCH4", not wildcardMatch("tototatatutu", "a different string"));
+  unitTest.test("WILDCARD_UNMATCH5", not wildcardMatch("tototatatutu", "?tototatatutu"));
+  unitTest.test("WILDCARD_UNMATCH6", not wildcardMatch("tototatatutu", "tototatatutu?"));
+  unitTest.test("WILDCARD_UNMATCH7", not wildcardMatch("tototatatutu", "tototatat??tu"));
   
   return 0;
 }

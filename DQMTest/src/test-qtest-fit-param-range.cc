@@ -31,6 +31,7 @@
 #include <dqm4hep/MonitorElementManager.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/PluginManager.h>
+#include <dqm4hep/UnitTesting.h>
 
 #include <TH1.h>
 #include <TGraph.h>
@@ -43,12 +44,7 @@
 
 using namespace std;
 using namespace dqm4hep::core;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 template <typename T>
 TiXmlElement *createParameter(const std::string &name, const T &value) {
@@ -97,10 +93,7 @@ TiXmlElement *createQTestXml(
 }
 
 int main(int /*argc*/, char ** /*argv*/) {
-  
-  DQM4HEP_NO_EXCEPTION( Logger::createLogger("test-qtest-fit-parameter", {Logger::coloredConsole()}); );
-  Logger::setMainLogger("test-qtest-fit-parameter");
-  Logger::setLogLevel(spdlog::level::debug);
+  UnitTest unitTest("test-qtest-fit-parameter");
 
   std::unique_ptr<MonitorElementManager> meMgr = std::unique_ptr<MonitorElementManager>(new MonitorElementManager());
 
@@ -108,13 +101,13 @@ int main(int /*argc*/, char ** /*argv*/) {
   MonitorElementPtr testElement;
   meMgr->bookHisto<TH1F>("/", "TestHisto", "A test histogram", testElement, 101, -10.f, 10.f);
   TH1F *histogram = testElement->objectTo<TH1F>();
-  assert_test(nullptr != histogram);
+  unitTest.test("BOOK_HISTO", nullptr != histogram);
   histogram->FillRandom("gaus", 10000);
   
   MonitorElementPtr testElement2;
   meMgr->bookObject<TGraph>("/", "TestGraph", "A test graph", testElement2);
   TGraph *graph = testElement2->objectTo<TGraph>();
-  assert_test(nullptr != graph);
+  unitTest.test("BOOK_GRAPH", nullptr != graph);
   Double_t errors[100] = {0};
   gRandom->RndmArray(100, errors);
   for(unsigned int i=0 ; i<100 ; i++) {
@@ -126,7 +119,7 @@ int main(int /*argc*/, char ** /*argv*/) {
   MonitorElementPtr testElement3;
   meMgr->bookObject<TGraph2D>("/", "TestGraph2D", "A test graph 2D", testElement3);
   TGraph2D *graph2D = testElement3->objectTo<TGraph2D>();
-  assert_test(nullptr != graph2D);
+  unitTest.test("BOOK_GRAPH2D", nullptr != graph2D);
   Double_t errors2[100] = {0};
   Double_t errors3[100] = {0};
   gRandom->RndmArray(100, errors3);
@@ -149,15 +142,15 @@ int main(int /*argc*/, char ** /*argv*/) {
     -0.5,
     0.5
   ));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest1.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test1"));
+  unitTest.test("CREATE_QTEST1", STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest1.get()));
+  unitTest.test("ADD_QTEST1", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test1"));
   
   QReportStorage storage; QReport report; json jsonReport;
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test1", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test1", report));
+  unitTest.test("RUN_QTEST1", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test1", storage));
+  unitTest.test("GET_REPORT_QTEST1", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test1", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  unitTest.test("FLAG_QTEST1", report.m_qualityFlag == SUCCESS);
   
   std::shared_ptr<TiXmlElement> sharedQTest2(createQTestXml(
     "test2", 
@@ -167,8 +160,8 @@ int main(int /*argc*/, char ** /*argv*/) {
     0.5
   ));
   // Can't configure it: Formula is wrong
-  assert_test(STATUS_CODE_SUCCESS != meMgr->createQualityTest(sharedQTest2.get()));
-  assert_test(STATUS_CODE_SUCCESS != meMgr->addQualityTest(testElement->path(), testElement->name(), "test2"));
+  unitTest.test("CREATE_QTEST2", STATUS_CODE_SUCCESS != meMgr->createQualityTest(sharedQTest2.get()));
+  unitTest.test("ADD_QTEST2", STATUS_CODE_SUCCESS != meMgr->addQualityTest(testElement->path(), testElement->name(), "test2"));
   
   std::shared_ptr<TiXmlElement> sharedQTest3(createQTestXml(
     "test3", 
@@ -178,8 +171,8 @@ int main(int /*argc*/, char ** /*argv*/) {
     0.5
   ));
   // Can't configure it: Number of parameter greater than test parameter id
-  assert_test(STATUS_CODE_SUCCESS != meMgr->createQualityTest(sharedQTest3.get()));
-  assert_test(STATUS_CODE_SUCCESS != meMgr->addQualityTest(testElement->path(), testElement->name(), "test3"));
+  unitTest.test("CREATE_QTEST3", STATUS_CODE_SUCCESS != meMgr->createQualityTest(sharedQTest3.get()));
+  unitTest.test("ADD_QTEST3", STATUS_CODE_SUCCESS != meMgr->addQualityTest(testElement->path(), testElement->name(), "test3"));
   
   std::shared_ptr<TiXmlElement> sharedQTest4(createQTestXml(
     "test4",
@@ -188,15 +181,15 @@ int main(int /*argc*/, char ** /*argv*/) {
     0.9,
     1.1
   ));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest4.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test4"));
+  unitTest.test("CREATE_QTEST4", STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest4.get()));
+  unitTest.test("ADD_QTEST4", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement->path(), testElement->name(), "test4"));
   
   storage.clear();
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test4", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test4", report));
+  unitTest.test("RUN_QTEST4", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement->path(), testElement->name(), "test4", storage));
+  unitTest.test("GET_REPORT_QTEST4", STATUS_CODE_SUCCESS == storage.report(testElement->path(), testElement->name(), "test4", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  unitTest.test("TEST", report.m_qualityFlag == SUCCESS);
   
   std::shared_ptr<TiXmlElement> sharedQTest5(createQTestXml(
     "test5",
@@ -205,8 +198,8 @@ int main(int /*argc*/, char ** /*argv*/) {
     0.6,
     0.8
   ));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest5.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement2->path(), testElement2->name(), "test5"));
+  unitTest.test("CREATE_QTEST5", STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest5.get()));
+  unitTest.test("ADD_QTEST5", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement2->path(), testElement2->name(), "test5"));
   
   std::shared_ptr<TiXmlElement> sharedQTest6(createQTestXml(
     "test6",
@@ -215,15 +208,15 @@ int main(int /*argc*/, char ** /*argv*/) {
     -0.1,
     0.1
   ));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest6.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement2->path(), testElement2->name(), "test6"));
+  unitTest.test("CREATE_QTEST6", STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest6.get()));
+  unitTest.test("ADD_QTEST6", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement2->path(), testElement2->name(), "test6"));
   
   storage.clear();
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement2->path(), testElement2->name(), "test6", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement2->path(), testElement2->name(), "test6", report));
+  unitTest.test("RUN_QTEST6", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement2->path(), testElement2->name(), "test6", storage));
+  unitTest.test("GET_REPORT_QTEST6", STATUS_CODE_SUCCESS == storage.report(testElement2->path(), testElement2->name(), "test6", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  unitTest.test("FLAG_QTEST6", report.m_qualityFlag == SUCCESS);
   
   std::shared_ptr<TiXmlElement> sharedQTest7(createQTestXml(
     "test7",
@@ -232,15 +225,15 @@ int main(int /*argc*/, char ** /*argv*/) {
     0.6,
     0.8
   ));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest7.get()));
-  assert_test(STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement3->path(), testElement3->name(), "test7"));
+  unitTest.test("CREATE_QTEST7", STATUS_CODE_SUCCESS == meMgr->createQualityTest(sharedQTest7.get()));
+  unitTest.test("ADD_QTEST7", STATUS_CODE_SUCCESS == meMgr->addQualityTest(testElement3->path(), testElement3->name(), "test7"));
   
   storage.clear();
-  assert_test(STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement3->path(), testElement3->name(), "test7", storage));
-  assert_test(STATUS_CODE_SUCCESS == storage.report(testElement3->path(), testElement3->name(), "test7", report));
+  unitTest.test("RUN_QTEST7", STATUS_CODE_SUCCESS == meMgr->runQualityTest(testElement3->path(), testElement3->name(), "test7", storage));
+  unitTest.test("GET_REPORT_QTEST7", STATUS_CODE_SUCCESS == storage.report(testElement3->path(), testElement3->name(), "test7", report));
   report.toJson(jsonReport);
   DQM4HEP_NO_EXCEPTION( std::cout << jsonReport.dump(2) << std::endl; );
-  assert_test(report.m_qualityFlag == SUCCESS);
+  unitTest.test("FLAG_QTEST7", report.m_qualityFlag == SUCCESS);
   
   
   return 0;
