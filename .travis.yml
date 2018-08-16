@@ -4,6 +4,8 @@ sudo: required
 
 env:
   - ROOT_VERSION=6.10.08
+  - ROOT_VERSION=6.12.06
+  - ROOT_VERSION=6.14.02
 
 os: linux
 compiler:
