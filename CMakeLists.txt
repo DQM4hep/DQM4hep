@@ -30,6 +30,9 @@ find_package( MySQL REQUIRED )
 
 add_subdirectory( 3rdparty )
 add_subdirectory( DQMCore )
+if( DQM4hep_TESTING )
+  add_subdirectory( DQMTest )
+endif()
 
 # ----- Generate DQM4hep package config files -----
 dqm4hep_generate_master_config()
