@@ -3,6 +3,7 @@
 ls -la
 
 source dependencies/root/bin/thisroot.sh
+export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/dependencies/xdrstream/lib:$LD_LIBRARY_PATH
 
 mkdir -p build
 cd build
