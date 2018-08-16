@@ -18,9 +18,15 @@ export PATH=$PWD/cov-analysis-Linux/bin:$PATH
 # run cmake and build with coverity
 source dependencies/root/bin/thisroot.sh
 mkdir -p build && cd build
-cmake -DDQM4HEP_USE_MASTER=ON -DDQM4HEP_DOXYGEN_DOC=OFF -DDQM4HEP_TESTING=ON -DDQM4HEP_WARNING_AS_ERROR=ON -DDQM4HEP_DEV_WARNINGS=ON -DDQM4HEP_COVERITY_SCAN=ON ..
 
-make install
+cmake \
+  -DDQM4hep_DOXYGEN_DOC=OFF \
+  -DDQM4hep_TESTING=ON \
+  -DDQM4hep_WARNING_AS_ERROR=ON \
+  -DDQM4hep_DEV_WARNINGS=ON \
+  ..
+
+cov-build --dir cov-int make install
 tar czvf myproject.tgz cov-int
 
 # post coverity scan report
