@@ -12,7 +12,12 @@ cd build
 # else export DQM4HEP_TESTING="ON";
 # fi
 
-cmake -DDQM4hep_DOXYGEN_DOC=OFF -DDQM4hep_TESTING=ON -DDQM4hep_WARNING_AS_ERROR=ON -DDQM4hep_DEV_WARNINGS=ON ..
+cmake -DDQM4hep_DOXYGEN_DOC=OFF\
+ -DDQM4hep_TESTING=ON \
+ -DDQM4hep_WARNING_AS_ERROR=ON \
+ -DDQM4hep_DEV_WARNINGS=ON \
+ -Dxdrstream_DIR=$TRAVIS_BUILD_DIR/dependencies/xdrstream/lib/cmake \
+ ..
 
 if [ $? -ne 0 ]; then
     echo "Failed to run cmake"
