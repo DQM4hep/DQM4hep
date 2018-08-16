@@ -36,6 +36,7 @@ dqm4hep_set_cxx_flags()
 
 # ----- Compile our software -----
 add_subdirectory( DQMCore )
+add_subdirectory( DQMNet )
 if( DQM4hep_TESTING )
   add_subdirectory( DQMTest )
 endif()
