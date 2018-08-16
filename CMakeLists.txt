@@ -28,7 +28,13 @@ find_package( ROOT COMPONENTS Core Hist Rint HistPainter Graf Graf3d MathCore Ne
 include( ${ROOT_USE_FILE} )
 find_package( MySQL REQUIRED )
 
+# ----- Compile third party libraries -----
 add_subdirectory( 3rdparty )
+
+# ----- Set global cxx flags -----
+dqm4hep_set_cxx_flags()
+
+# ----- Compile our software -----
 add_subdirectory( DQMCore )
 if( DQM4hep_TESTING )
   add_subdirectory( DQMTest )
