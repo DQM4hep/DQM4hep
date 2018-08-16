@@ -4,10 +4,7 @@
 #################################################
 
 dqm4hep_package( DQMNet
-  USES DQMCore 
-  #[ROOT COMPONENTS Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree REQUIRED]
-  #xdrstream MySQL spdlog tclap json 
-  dim asio websocketpp mongoose
+  USES DQMCore dim asio websocketpp
   INCLUDE_DIRS include
   INSTALL_INCLUDES include/dqm4hep
 )
