@@ -1,91 +1,41 @@
 
+set ( DQM4hepBuild_included ON )
 
-
-mark_as_advanced( CMAKE_BACKWARDS_COMPATIBILITY )
 set( DQM4hep_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
-set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 include( CMakeParseArguments )
-
-# set default install prefix to project root directory
-# instead of the cmake default /usr/local
-if( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
-  set( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
-endif()
-
-# write this variable to cache
-set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install ${PROJECT_NAME}" FORCE )
-
-
-# set default cmake build type to RelWithDebInfo
-# possible options are: None Debug Release RelWithDebInfo MinSizeRel
-if( NOT CMAKE_BUILD_TYPE )
-  set( CMAKE_BUILD_TYPE "RelWithDebInfo" )
-endif()
-
-# write this variable to cache
-set( 
-  CMAKE_BUILD_TYPE 
-  "${CMAKE_BUILD_TYPE}" 
-  CACHE STRING "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel." 
-  FORCE
-)
-
-# enable ctest
-if( DQM4hep_TESTING )
-  set( BUILD_TESTING ON )
-  enable_testing()
-  include( CTest )
-  mark_as_advanced( DART_TESTING_TIMEOUT )
-endif()
-
-# output directories
-set( EXECUTABLE_OUTPUT_PATH "${PROJECT_BINARY_DIR}/bin" )
-set( LIBRARY_OUTPUT_PATH "${PROJECT_BINARY_DIR}/lib" )
-mark_as_advanced( EXECUTABLE_OUTPUT_PATH )
-mark_as_advanced( LIBRARY_OUTPUT_PATH )
-
-# add library install path to the rpath list
-set( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
-mark_as_advanced( CMAKE_INSTALL_RPATH )
-
-# add install path to the rpath list (apple)
-if( APPLE )
-  set( CMAKE_MACOSX_RPATH ON )
-  set( CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib" )
-  mark_as_advanced( CMAKE_INSTALL_NAME_DIR )
-endif()
-
-# append link pathes to rpath list
-set( CMAKE_INSTALL_RPATH_USE_LINK_PATH 1 )
-mark_as_advanced( CMAKE_INSTALL_RPATH_USE_LINK_PATH )
-
-# look for /proc directory
-set( DQM4hep_WITH_PROC_FS 0 )
-message( STATUS "Check for proc fs directory" )
-
-if( EXISTS "/proc" )
-  set( DQM4hep_WITH_PROC_FS 1 )
-  add_definitions( -DDQM4HEP_WITH_PROC_FS )
-  message( STATUS "Check for proc fs directory: found" )
-else()
-  message( STATUS "Check for proc fs directory: not found" )
-endif()
-
-add_definitions( -DASIO_STANDALONE )
 
 macro( dqm4hep_to_parent_scope val )
   set ( ${val} ${${val}} PARENT_SCOPE )
 endmacro()
 
-function( dqm4hep_require_cxx_standard )
-  enable_language( CXX )
+#---------------------------------------------------------------------------------------------------
+macro ( dqm4hep_configure_output )
+  cmake_parse_arguments ( ARG "" "OUTPUT;INSTALL" "" ${ARGN} )
 
-  # Set C++ standard
-  set( CMAKE_CXX_STANDARD 11 CACHE STRING "C++ standard used for compiling" )
-  set( CMAKE_CXX_STANDARD_REQUIRED ON )
-  set( CMAKE_CXX_EXTENSIONS OFF )
-endfunction()
+  if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set (CMAKE_BUILD_TYPE RelWithDebInfo CACHE STRING "One of: None Debug Release RelWithDebInfo MinSizeRel." FORCE)
+  endif()
 
+  if ( NOT "${ARG_OUTPUT}" STREQUAL "" )
+    set ( LIBRARY_OUTPUT_PATH    ${ARG_OUTPUT}/lib )
+    set ( EXECUTABLE_OUTPUT_PATH ${ARG_OUTPUT}/bin )
+  else()
+    set ( LIBRARY_OUTPUT_PATH    ${CMAKE_CURRENT_BINARY_DIR}/lib )
+    set ( EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin )
+  endif()
+  #------------- set the default installation directory to be the source directory
+  if ( NOT "${ARG_INSTALL}" STREQUAL "" )
+    set ( CMAKE_INSTALL_PREFIX ${ARG_INSTALL} CACHE PATH "Set install prefix path." FORCE )
+    message( "dqm4hep_configure_output: set CMAKE_INSTALL_PREFIX to ${ARG_INSTALL}" )
+  elseif ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+    set( CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR} CACHE PATH  
+      "install prefix path  - overwrite with -D CMAKE_INSTALL_PREFIX = ..."  FORCE )
+    message ( "|++> dqm4hep_configure_output: CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX} - overwrite with -D CMAKE_INSTALL_PREFIX" )
+  elseif ( CMAKE_INSTALL_PREFIX )
+    message( "|++> dqm4hep_configure_output: set CMAKE_INSTALL_PREFIX to ${CMAKE_INSTALL_PREFIX}" )
+    set ( CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+  endif()
+endmacro ()
 
 function( dqm4hep_set_cxx_flags )
   
@@ -134,6 +84,41 @@ function( dqm4hep_set_cxx_flags )
     set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11" )
   else()
     message( SEND_ERROR "${PROJECT_NAME} requires C++11 support. Please upgrade your compiler !" )
+  endif()
+  
+  # look for /proc directory
+  set( DQM4hep_WITH_PROC_FS 0 )
+  message( STATUS "Check for /proc fs directory" )
+
+  if( EXISTS "/proc" )
+    set( DQM4hep_WITH_PROC_FS 1 )
+    add_definitions( -DDQM4HEP_WITH_PROC_FS )
+    message( STATUS "Check for proc fs directory: found" )
+  else()
+    message( STATUS "Check for proc fs directory: not found" )
+  endif()
+
+  add_definitions( -DASIO_STANDALONE )
+  
+  if( APPLE )
+    # use, i.e. don't skip the full RPATH for the build tree
+    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+    # when building, don't use the install RPATH already
+    # (but later on when installing)
+    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
+    # add the automatically determined parts of the RPATH
+    # which point to directories outside the build tree to the install RPATH
+    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+    # the RPATH to be used when installing, but only if it's not a system directory
+    LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+    IF("${isSystemDir}" STREQUAL "-1")
+      SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+    ENDIF("${isSystemDir}" STREQUAL "-1")
   endif()
 endfunction()
 
