@@ -67,4 +67,16 @@ dqm4hep_add_test_reg ( test-xmlparser
   REGEX_FAIL "TEST_FAILED" 
   EXEC_ARGS ${CMAKE_CURRENT_SOURCE_DIR}/resources/test_xmlparser.xml
 )
+# TODO This test relies on the possibility to 
+# modify constants by command line, but it needs to be implemented first
+# dqm4hep_add_test_reg ( test-qtest 
+#   COMMAND ${CMAKE_INSTALL_PREFIX}/bin/dqm4hep-run-qtests
+#   REGEX_FAIL "TEST_FAILED" 
+#   EXEC_ARGS 
+#     --exit-on failure 
+#     --input-qtest-file ${CMAKE_CURRENT_SOURCE_DIR}/resources/test_samples.xml
+#     --constant InputRootFile=${CMAKE_CURRENT_SOURCE_DIR}/resources/test_samples.root
+#     --constant ReferenceRootFile=${CMAKE_CURRENT_SOURCE_DIR}/resources/test_samples.root
+# )
+
 

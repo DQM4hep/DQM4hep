@@ -3,13 +3,15 @@
   <constants>
     <constant name="GaussiansDirectory">/Gaussians</constant>
     <constant name="TGraphDirectory">/TGraphs</constant>
+    <constant name="InputRootFile">test_samples.root</constant>
+    <constant name="ReferenceRootFile">test_samples.root</constant>
   </constants>
 
   <storage>
     <style theme="polar"/>
     <!-- Use the same root file as input file for reference -->
     <references>
-      <file id="ref" name="test_samples.root"/>
+      <file id="ref" name="${ReferenceRootFile}"/>
     </references>
     <!-- Quality tests config  -->
     <qtests>
@@ -121,7 +123,7 @@
 
     <!-- All monitor elements and qtests to process -->
     <monitorElements>
-      <file name="test_samples.root">
+      <file name="${InputRootFile}">
         <fileElement path="${GaussiansDirectory}" name="Gaus_Mean10_RMS2">
           <qtest name="MeanAround10Long"/>
           <qtest name="Mean90Around10Short"/>
