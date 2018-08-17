@@ -59,4 +59,4 @@ set(
 install( FILES ${DQM4hep_CMAKE_INSTALL_FILES} DESTINATION lib/cmake )
 
 # ----- display some variables and write them to cache -----
-display_std_variables()
+dqm4hep_display_std_variables()
