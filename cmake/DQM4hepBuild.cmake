@@ -116,77 +116,6 @@ function( dqm4hep_set_cxx_flags )
   add_definitions( -DASIO_STANDALONE )
 endfunction()
 
-# Standard macro to export a DQM4hep package as a CMake project
-macro( dqm4hep_generate_package_configuration )
-  
-  # parse the macro arguments
-  set( FLAG_OPTIONS "" )
-  set( SINGLE_OPTIONS PACKAGE_NAME HEADER_OUTPUT_PATH )
-  set( MULTI_OPTIONS LIBRARIES )
-  cmake_parse_arguments( PACKAGE_CONFIG "${FLAG_OPTIONS}" "${SINGLE_OPTIONS}" "${MULTI_OPTIONS}" ${ARGN} )
-
-  if( NOT PACKAGE_CONFIG_PACKAGE_NAME )
-    set( PACKAGE_CONFIG_PACKAGE_NAME ${PROJECT_NAME} )
-    message( STATUS "Package config: package name set to ${PACKAGE_CONFIG_PACKAGE_NAME}" )
-  endif()
-  
-  if( NOT PACKAGE_CONFIG_HEADER_OUTPUT_PATH )
-    set( PACKAGE_CONFIG_HEADER_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/source/include )
-    message( STATUS "Package config: package config header output path set to ${PACKAGE_CONFIG_HEADER_OUTPUT_PATH}" )
-  endif()
-  
-  if( NOT PACKAGE_CONFIG_LIBRARIES )
-    set( PACKAGE_CONFIG_PACKAGE_LIBRARIES ${PROJECT_NAME} )
-  else()
-    foreach( lib ${PACKAGE_CONFIG_LIBRARIES} )
-      set( PACKAGE_CONFIG_PACKAGE_LIBRARIES "${PACKAGE_CONFIG_PACKAGE_LIBRARIES} ${lib}" )      
-    endforeach()
-  endif()
-  
-  # package dependencies
-  set( PACKAGE_CONFIG_DEPENDS_INCLUDE_DIRS ${${PROJECT_NAME}_DEPENDS_INCLUDE_DIRS} )
-  set( PACKAGE_CONFIG_DEPENDS_LIBRARY_DIRS ${${PROJECT_NAME}_DEPENDS_LIBRARY_DIRS} )
-  set( PACKAGE_CONFIG_DEPENDS_LIBRARIES ${${PROJECT_NAME}_DEPENDS_LIBRARIES} )
-  
-  # package version
-  set( PACKAGE_CONFIG_PACKAGE_VERSION_MAJOR ${${PROJECT_NAME}_VERSION_MAJOR} )
-  set( PACKAGE_CONFIG_PACKAGE_VERSION_MINOR ${${PROJECT_NAME}_VERSION_MINOR} )
-  set( PACKAGE_CONFIG_PACKAGE_VERSION_PATCH ${${PROJECT_NAME}_VERSION_PATCH} )
-  set( PACKAGE_CONFIG_PACKAGE_VERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}" )
-  
-  # package definitions
-  set( PACKAGE_CONFIG_PACKAGE_DEFINITIONS "" )
-  if( ${PROJECT_NAME}_DEFINITIONS )
-    set( PACKAGE_CONFIG_PACKAGE_DEFINITIONS ${${PROJECT_NAME}_DEFINITIONS} )
-  endif()
-      
-  # generate config header
-  configure_file( 
-    "${DQM4hep_CMAKE_MODULES_ROOT}/PackageConfig.h.cmake.in"
-    "${PACKAGE_CONFIG_HEADER_OUTPUT_PATH}/${PACKAGE_CONFIG_PACKAGE_NAME}Config.h" 
-    @ONLY
-  )
-  
-  # generate Config.cmake file
-  configure_file( 
-    "${DQM4hep_CMAKE_MODULES_ROOT}/PackageConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}Config.cmake" 
-    @ONLY
-  )
-  
-  # generate ConfigVersion.cmake file
-  configure_file( 
-    "${DQM4hep_CMAKE_MODULES_ROOT}/PackageConfigVersion.cmake.in"
-    "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}ConfigVersion.cmake" 
-    @ONLY
-  )
-  
-  # install all generate config cmake files
-  install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}ConfigVersion.cmake" DESTINATION lib/cmake )
-  install( FILES "${PROJECT_BINARY_DIR}/${PACKAGE_CONFIG_PACKAGE_NAME}Config.cmake" DESTINATION lib/cmake )
-  
-endmacro()
-
 
 function ( dqm4hep_set_version packageName )
   cmake_parse_arguments ( ARG "" "MAJOR;MINOR;PATCH" "" ${ARGN} )
@@ -726,24 +655,6 @@ function( dqm4hep_package packageName )
 endfunction()
 
 
-function( dqm4hep_generate_master_config )
-  # generate DQM4hepConfig.cmake file
-  configure_file( 
-    "${DQM4hep_CMAKE_MODULES_ROOT}/DQM4hepConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/DQM4hepConfig.cmake" 
-    @ONLY
-  )
-  # generate DQM4hepConfigVersion.cmake file
-  configure_file( 
-    "${DQM4hep_CMAKE_MODULES_ROOT}/DQM4hepConfigVersion.cmake.in"
-    "${PROJECT_BINARY_DIR}/DQM4hepConfigVersion.cmake" 
-    @ONLY
-  )
-  install( FILES "${PROJECT_BINARY_DIR}/DQM4hepConfigVersion.cmake" DESTINATION lib/cmake )
-  install( FILES "${PROJECT_BINARY_DIR}/DQM4hepConfig.cmake" DESTINATION lib/cmake )
-endfunction()
-
-
 function ( dqm4hep_handle_optional_sources tag optionals missing uses sources )
   get_property ( pkg DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY PACKAGE_NAME)
   set (miss)
@@ -903,63 +814,7 @@ function ( dqm4hep_add_executable binary )
     endif()
   endif()
 endfunction()
-  
-# Create a root dictionary using rootcint. The command is 
-# attached to a target and run before the target is built
-function( dqm4hep_create_dictionary )
-  
-  if( NOT ROOT_CINT_EXECUTABLE )
-    message( SEND_ERROR "Create dictionary: ROOT cint executable not defined (ROOT_CINT_EXECUTABLE) !" )
-  endif()
 
-  # parse the macro arguments
-  set( FLAG_OPTIONS "" )
-  set( SINGLE_OPTIONS DICTIONARY LINK_DEF DICT_FILE )
-  set( MULTI_OPTIONS HEADERS INCLUDES FLAGS DEPENDS )
-  cmake_parse_arguments( ROOT_DICT "${FLAG_OPTIONS}" "${SINGLE_OPTIONS}" "${MULTI_OPTIONS}" ${ARGN} )
-
-  if( NOT ROOT_DICT_DICTIONARY )
-    message( SEND_ERROR "Create dictionary: no ROOT dict name specified !" )
-  endif()
-  
-  if( NOT ROOT_DICT_HEADERS )
-    message( SEND_ERROR "Create dictionary: no header specified !" )
-  endif()
-  
-  if( NOT ROOT_DICT_LINK_DEF )
-    message( SEND_ERROR "Create dictionary: no LinkDef file specified !" )
-  endif()
-
-  if( NOT ROOT_DICT_INCLUDES )
-    set( ROOT_DICT_INCLUDES "" )
-
-    get_directory_property( IncludeDirs INCLUDE_DIRECTORIES )
-
-    foreach( dir ${IncludeDirs} )
-       set( ROOT_DICT_INCLUDES ${ROOT_DICT_INCLUDES}\t-I${dir} )
-    endforeach(dir)
-  endif()
-  
-  set( ROOT_DICT_OUTPUT_DIR ${PROJECT_BINARY_DIR}/dict )
-  set( ROOT_DICT_DICT_SRC ${ROOT_DICT_OUTPUT_DIR}/${ROOT_DICT_DICTIONARY}Dict.cc )
-  set( ROOT_DICT_PCM_FILE ${ROOT_DICT_OUTPUT_DIR}/${ROOT_DICT_DICTIONARY}Dict_rdict.pcm )
-  
-  add_custom_command(
-    OUTPUT ${ROOT_DICT_DICT_SRC} ${ROOT_DICT_PCM_FILE}
-    COMMAND mkdir -p ${ROOT_DICT_OUTPUT_DIR}
-    COMMAND ${ROOT_CINT_EXECUTABLE} -f ${ROOT_DICT_DICT_SRC} ${ROOT_DICT_FLAGS} ${ROOT_DICT_INCLUDES} ${ROOT_DICT_HEADERS} ${ROOT_DICT_LINK_DEF}
-    COMMENT "Generating ROOT dictionary ${ROOT_DICT_DICTIONARY} ..."
-    DEPENDS ${ROOT_DICT_HEADERS} ${ROOT_DICT_DEPENDS}
-  )
-  
-  # Return the name of created file
-  if( ROOT_DICT_DICT_FILE )
-    set( ${ROOT_DICT_DICT_FILE} ${ROOT_DICT_DICT_SRC} )
-  endif()
-  
-  install( FILES ${ROOT_DICT_PCM_FILE} DESTINATION lib )
-  
-endfunction()
 
 function ( dqm4hep_add_test_reg test_name )
   cmake_parse_arguments(ARG "BUILD_EXEC" "" "COMMAND;DEPENDS;EXEC_ARGS;REGEX_PASS;REGEX_PASSED;REGEX_FAIL;REGEX_FAILED;REQUIRES" ${ARGN} )
