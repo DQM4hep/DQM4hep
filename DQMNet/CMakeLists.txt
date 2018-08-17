@@ -24,6 +24,7 @@ dqm4hep_add_executable( dqm4hep-server-info             SOURCES main/dqm4hep-ser
 dqm4hep_add_executable( dqm4hep-server-list             SOURCES main/dqm4hep-server-list.cc )
 dqm4hep_add_executable( dqm4hep-server-running          SOURCES main/dqm4hep-server-running.cc )
 dqm4hep_add_executable( dqm4hep-subscribe-service       SOURCES main/dqm4hep-subscribe-service.cc )
+dqm4hep_add_executable( dqm4hep-test-ws-server          SOURCES main/test-ws-server.cc )
 dqm4hep_add_executable( dqm4hep-test-server             SOURCES main/test-server.cc )
 
 # -------------------------------------------------
