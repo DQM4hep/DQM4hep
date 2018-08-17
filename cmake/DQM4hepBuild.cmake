@@ -4,6 +4,20 @@ set ( DQM4hepBuild_included ON )
 set( DQM4hep_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
 include( CMakeParseArguments )
 
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+mark_as_advanced( CMAKE_INSTALL_RPATH )
+
+# set default install prefix to project root directory
+# instead of the cmake default /usr/local
+if( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+  set( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
+endif()
+
+# write this variable to cache
+set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install ${PROJECT_NAME}" FORCE )
+
 macro( dqm4hep_to_parent_scope val )
   set ( ${val} ${${val}} PARENT_SCOPE )
 endmacro()
@@ -24,13 +38,14 @@ macro ( dqm4hep_configure_output )
     set ( EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_BINARY_DIR}/bin )
   endif()
   #------------- set the default installation directory to be the source directory
-  if ( NOT "${ARG_INSTALL}" STREQUAL "" )
+  if ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+    set( CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR} CACHE PATH  
+    "install prefix path  - overwrite with -D CMAKE_INSTALL_PREFIX = ..."  FORCE )
+    message ( "|++> dqm4hep_configure_output: CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX} - overwrite with -D CMAKE_INSTALL_PREFIX" )
+  elseif ( NOT "${ARG_INSTALL}" STREQUAL "" )
     set ( CMAKE_INSTALL_PREFIX ${ARG_INSTALL} CACHE PATH "Set install prefix path." FORCE )
     message( "dqm4hep_configure_output: set CMAKE_INSTALL_PREFIX to ${ARG_INSTALL}" )
-  elseif ( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
-    set( CMAKE_INSTALL_PREFIX ${CMAKE_SOURCE_DIR} CACHE PATH  
-      "install prefix path  - overwrite with -D CMAKE_INSTALL_PREFIX = ..."  FORCE )
-    message ( "|++> dqm4hep_configure_output: CMAKE_INSTALL_PREFIX is ${CMAKE_INSTALL_PREFIX} - overwrite with -D CMAKE_INSTALL_PREFIX" )
+
   elseif ( CMAKE_INSTALL_PREFIX )
     message( "|++> dqm4hep_configure_output: set CMAKE_INSTALL_PREFIX to ${CMAKE_INSTALL_PREFIX}" )
     set ( CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
@@ -99,27 +114,6 @@ function( dqm4hep_set_cxx_flags )
   endif()
 
   add_definitions( -DASIO_STANDALONE )
-  
-  if( APPLE )
-    # use, i.e. don't skip the full RPATH for the build tree
-    SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-    # when building, don't use the install RPATH already
-    # (but later on when installing)
-    SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-
-    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-
-    # add the automatically determined parts of the RPATH
-    # which point to directories outside the build tree to the install RPATH
-    SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
-
-    # the RPATH to be used when installing, but only if it's not a system directory
-    LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
-    IF("${isSystemDir}" STREQUAL "-1")
-      SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-    ENDIF("${isSystemDir}" STREQUAL "-1")
-  endif()
 endfunction()
 
 # Standard macro to export a DQM4hep package as a CMake project
@@ -1014,46 +1008,3 @@ function ( dqm4hep_add_test_reg test_name )
   endforeach()
 endfunction()
 
-
-# helper macro to display standard cmake variables and force write to cache
-# otherwise outdated values may appear in ccmake gui
-macro( dqm4hep_display_std_variables )
-    message( STATUS )
-    message( STATUS "-------------------------------------------------------------------------------" )
-    message( STATUS "Change values with: cmake -D<Variable>=<Value>" )
-
-    if( DEFINED CMAKE_INSTALL_PREFIX )
-        message( STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
-    endif()
-
-    if( DEFINED CMAKE_BUILD_TYPE )
-        message( STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}" )
-    endif()
-
-    message( STATUS "DQM4hep_TESTING = ${DQM4hep_TESTING}" )
-    message( STATUS "DQM4hep_WARNING_AS_ERROR = ${DQM4hep_WARNING_AS_ERROR}" )
-    message( STATUS "DQM4hep_EXTRA_WARNINGS = ${DQM4hep_EXTRA_WARNINGS}" )
-    message( STATUS "DQM4hep_DEV_WARNINGS = ${DQM4hep_DEV_WARNINGS}" )
-
-    if( DEFINED CMAKE_PREFIX_PATH )
-        list( REMOVE_DUPLICATES CMAKE_PREFIX_PATH )
-        message( STATUS "CMAKE_PREFIX_PATH =" )
-        foreach( _path ${CMAKE_PREFIX_PATH} )
-            message( STATUS "   ${_path};" )
-        endforeach()
-        #SET( CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" CACHE PATH "CMAKE_PREFIX_PATH" FORCE )
-    endif()
-
-    if( DEFINED CMAKE_MODULE_PATH )
-        list( REMOVE_DUPLICATES CMAKE_MODULE_PATH )
-        message( STATUS "CMAKE_MODULE_PATH =" )
-        foreach( _path ${CMAKE_MODULE_PATH} )
-            message( STATUS "   ${_path};" )
-        endforeach()
-        set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" CACHE PATH "CMAKE_MODULE_PATH" FORCE )
-    endif()
-
-    message( STATUS "-------------------------------------------------------------------------------" )
-    message( STATUS )
-
-endmacro( dqm4hep_display_std_variables )

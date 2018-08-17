@@ -1,0 +1,19 @@
+#ifndef DQM4hepConfig_H
+#define DQM4hepConfig_H
+
+// version
+#define DQM4hep_VERSION_MAJOR @DQM4hep_VERSION_MAJOR@
+#define DQM4hep_VERSION_MINOR @DQM4hep_VERSION_MINOR@
+#define DQM4hep_VERSION_PATCH @DQM4hep_VERSION_PATCH@
+
+#define DQM4hep_VERSION_STR "@DQM4hep_VERSION@"
+
+#define DQM4hep_VERSION_GE( MAJV , MINV , PLEV )  \
+     ( (DQM4hep_VERSION_MAJOR > MAJV) || ( (DQM4hep_VERSION_MAJOR == MAJV) && (DQM4hep_VERSION_MINOR > MINV) ) \
+  || ( (DQM4hep_VERSION_MAJOR == MAJV) && (DQM4hep_VERSION_MINOR == MINV) && (DQM4hep_VERSION_PATCH >= PLEV) ) )
+
+// paths
+#define DQM4hep_DIR "@CMAKE_INSTALL_PREFIX@"
+#define DQM4hep_ICONS_DIR "@CMAKE_INSTALL_PREFIX@/icons"
+
+#endif // DQM4hepConfig_H
