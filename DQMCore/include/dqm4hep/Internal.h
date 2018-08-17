@@ -74,7 +74,7 @@
 #endif
 
 // -- dqm4hep headers
-#include <DQMCoreConfig.h>
+#include <dqm4hep/DQM4hepConfig.h>
 
 //-------------------------------------------------------------------------------------------------
 
@@ -374,10 +374,10 @@ namespace dqm4hep {
     inline void screenSplash() {
       std::cout << "#######################################################" << std::endl;
       std::cout << "#" << std::endl;
-      std::cout << "#                    DQM4HEP (DQMCore)" << std::endl;
+      std::cout << "#                    DQM4HEP" << std::endl;
       std::cout << "#   (Data Quality Monitoring For High Energy Physics)" << std::endl;
       std::cout << "#" << std::endl;
-      std::cout << "#      Version    : " << DQMCore_VERSION_STR << std::endl;
+      std::cout << "#      Version    : " << DQM4hep_VERSION_STR << std::endl;
       std::cout << "#      Started at : " << time::asString(time::now()) << std::endl;
       std::cout << "#      Author     : R. Ete, A. Pingault" << std::endl;
       std::cout << "#      Mail       : <dqm4hep@gmail.com> " << std::endl;

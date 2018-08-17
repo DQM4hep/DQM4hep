@@ -37,6 +37,7 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XMLParser.h>
 #include <dqm4hep/json.h>
+#include <dqm4hep/DQM4hepConfig.h>
 
 // -- tclap headers
 #include <tclap/Arg.h>
@@ -119,7 +120,7 @@ void printQReport(const QReport &report) {
 
 int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
-  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
+  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4hep_VERSION_STR);
 
   TCLAP::ValueArg<std::string> qtestFileArg(
     "i", 

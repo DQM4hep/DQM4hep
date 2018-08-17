@@ -35,6 +35,7 @@
 #include <dqm4hep/Path.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XmlHelper.h>
+#include <dqm4hep/DQM4hepConfig.h>
 
 // -- tclap headers
 #include <tclap/Arg.h>
@@ -87,7 +88,7 @@ void CreateElementsFromDirectory(const std::string &fileName, TDirectory *pDirec
 
 int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
-  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR);
+  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4hep_VERSION_STR);
 
   TCLAP::ValueArg<std::string> rootFileArg("i", "input-root-file", "The root input file", true, "", "string");
   pCommandLine->add(rootFileArg);

@@ -33,6 +33,7 @@
 #include <dqm4hep/DBInterface.h>
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/StatusCodes.h>
+#include <dqm4hep/DQM4hepConfig.h>
 
 // -- tclap headers
 #include "tclap/Arg.h"
@@ -43,7 +44,7 @@ using namespace dqm4hep::core;
 
 int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
-  std::unique_ptr<TCLAP::CmdLine> pCommandLine(new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR));
+  std::unique_ptr<TCLAP::CmdLine> pCommandLine(new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4hep_VERSION_STR));
 
   TCLAP::ValueArg<std::string> dbHostArg("k", "host", "The database host", false, "localhost", "string");
   pCommandLine->add(dbHostArg);

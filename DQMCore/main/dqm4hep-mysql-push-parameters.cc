@@ -34,6 +34,7 @@
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/XMLParser.h>
+#include <dqm4hep/DQM4hepConfig.h>
 
 // -- tclap headers
 #include "tclap/Arg.h"
@@ -54,7 +55,7 @@ typedef std::map<std::string, DBInterfaceMetadata> DBInterfaceMetadataMap;
 
 int main(int argc, char *argv[]) {
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
-  std::unique_ptr<TCLAP::CmdLine> pCommandLine(new TCLAP::CmdLine(cmdLineFooter, ' ', DQMCore_VERSION_STR));
+  std::unique_ptr<TCLAP::CmdLine> pCommandLine(new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4hep_VERSION_STR));
 
   TCLAP::ValueArg<std::string> xmlInputFileArg(
       "f", "parameter-file", "The xml input file describing the parameters and databases to feed", true, "", "string");
