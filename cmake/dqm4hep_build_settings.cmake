@@ -6,13 +6,6 @@ set( DQM4hep_CMAKE_MODULES_ROOT ${CMAKE_CURRENT_LIST_DIR} )
 set( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 include( CMakeParseArguments )
 
-# include helper macros
-include( MacroAddSharedLibrary )
-include( MacroInstallSharedLibrary )
-include( MacroInstallDirectory )
-include( MacroDisplayStandardVariables )
-include( MacroGeneratePackageConfigFiles )
-
 # set default install prefix to project root directory
 # instead of the cmake default /usr/local
 if( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
@@ -1035,3 +1028,47 @@ function ( dqm4hep_add_test_reg test_name )
     set_tests_properties( t_${test_name} PROPERTIES DEPENDS t_${_dep} )
   endforeach()
 endfunction()
+
+
+# helper macro to display standard cmake variables and force write to cache
+# otherwise outdated values may appear in ccmake gui
+macro( dqm4hep_display_std_variables )
+    message( STATUS )
+    message( STATUS "-------------------------------------------------------------------------------" )
+    message( STATUS "Change values with: cmake -D<Variable>=<Value>" )
+
+    if( DEFINED CMAKE_INSTALL_PREFIX )
+        message( STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}" )
+    endif()
+
+    if( DEFINED CMAKE_BUILD_TYPE )
+        message( STATUS "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}" )
+    endif()
+
+    message( STATUS "DQM4hep_TESTING = ${DQM4hep_TESTING}" )
+    message( STATUS "DQM4hep_WARNING_AS_ERROR = ${DQM4hep_WARNING_AS_ERROR}" )
+    message( STATUS "DQM4hep_EXTRA_WARNINGS = ${DQM4hep_EXTRA_WARNINGS}" )
+    message( STATUS "DQM4hep_DEV_WARNINGS = ${DQM4hep_DEV_WARNINGS}" )
+
+    if( DEFINED CMAKE_PREFIX_PATH )
+        list( REMOVE_DUPLICATES CMAKE_PREFIX_PATH )
+        message( STATUS "CMAKE_PREFIX_PATH =" )
+        foreach( _path ${CMAKE_PREFIX_PATH} )
+            message( STATUS "   ${_path};" )
+        endforeach()
+        #SET( CMAKE_PREFIX_PATH "${CMAKE_PREFIX_PATH}" CACHE PATH "CMAKE_PREFIX_PATH" FORCE )
+    endif()
+
+    if( DEFINED CMAKE_MODULE_PATH )
+        list( REMOVE_DUPLICATES CMAKE_MODULE_PATH )
+        message( STATUS "CMAKE_MODULE_PATH =" )
+        foreach( _path ${CMAKE_MODULE_PATH} )
+            message( STATUS "   ${_path};" )
+        endforeach()
+        set( CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH}" CACHE PATH "CMAKE_MODULE_PATH" FORCE )
+    endif()
+
+    message( STATUS "-------------------------------------------------------------------------------" )
+    message( STATUS )
+
+endmacro( dqm4hep_display_std_variables )
