@@ -3,7 +3,7 @@
 [![DOI](https://zenodo.org/badge/49281419.svg)](https://zenodo.org/badge/latestdoi/49281419)
 
 
-<img src="icons/logo/dqm4hep-logo_dark.png" height="80" width="370" /> 
+<img src="icons/logo/png/dqm4hep-logo_dark.png" height="80" width="370" /> 
 
 A Data Quality Monitoring for High Energy Physics
 
