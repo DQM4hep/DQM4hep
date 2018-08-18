@@ -31,6 +31,7 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Cycle.h>
 #include <dqm4hep/Application.h>
+#include <dqm4hep/UnitTesting.h>
 
 // -- std headers
 #include <iostream>
@@ -38,12 +39,7 @@
 
 using namespace dqm4hep::core;
 using namespace dqm4hep::online;
-
-#define assert_test(Command)                                                                                           \
-  if (!(Command)) {                                                                                                    \
-    dqm_error("Assertion failed : {0}, line {1}", #Command, __LINE__);                                                 \
-    ::exit(1);                                                                                                           \
-  }
+using UnitTest = dqm4hep::test::UnitTest;
 
 //-------------------------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
@@ -56,9 +52,10 @@ public:
   virtual void onStop() override {}
   virtual void onEvent(AppEvent *pAppEvent) override = 0;
   
-  TestApplication(const std::string &appName, unsigned int period, unsigned int timeout, unsigned int counterLimit) :
+  TestApplication(UnitTest& unitTest, const std::string &appName, unsigned int period, unsigned int timeout, unsigned int counterLimit) :
     Application(),
-    m_cycle(m_eventLoop) {
+    m_cycle(m_eventLoop),
+    m_unitTest(unitTest) {
     m_cycle.setTimerPeriod(period);
     m_cycle.setTimeout(timeout);
     m_cycle.setCounterLimit(counterLimit);
@@ -75,6 +72,7 @@ public:
   
 protected:
   Cycle             m_cycle;
+  UnitTest&         m_unitTest;
 };
 
 //-------------------------------------------------------------------------------------------------
@@ -82,8 +80,8 @@ protected:
 
 class TimeoutTestApp : public TestApplication {
 public:
-  TimeoutTestApp() :
-    TestApplication("timeout", 3, 2, 10) {  
+  TimeoutTestApp(UnitTest &test) :
+    TestApplication(test, "timeout", 3, 2, 10) {  
     setNoServer(true);
   }
   
@@ -91,8 +89,8 @@ public:
     auto* eocEvent = dynamic_cast<StoreEvent<EOCCondition>*>(pAppEvent);
     if(eocEvent) {
       dqm_debug("Got an end of cycle: {0}", typeToString(eocEvent->data()));
-      assert_test(eocEvent->data().m_timeoutReached);
-      assert_test(not eocEvent->data().m_forcedEnd);
+      m_unitTest.test("CHECK_TIMEOUT", eocEvent->data().m_timeoutReached);
+      m_unitTest.test("EOC_NOT_FORCED", not eocEvent->data().m_forcedEnd);
       m_nCycles++;
       if(m_nCycles == 3) {
         exit(0);
@@ -111,8 +109,8 @@ public:
 
 class NormalTestApp : public TestApplication {
 public:
-  NormalTestApp() :
-    TestApplication("normal", 2, 0, 10) {  
+  NormalTestApp(UnitTest &test) :
+    TestApplication(test, "normal", 2, 0, 10) {  
     setNoServer(true);
   }
   
@@ -120,8 +118,8 @@ public:
     auto* eocEvent = dynamic_cast<StoreEvent<EOCCondition>*>(pAppEvent);
     if(eocEvent) {
       dqm_debug("Got an end of cycle: {0}", typeToString(eocEvent->data()));
-      assert_test(not eocEvent->data().m_timeoutReached);
-      assert_test(not eocEvent->data().m_forcedEnd);
+      m_unitTest.test("CHECK_TIMEOUT2", not eocEvent->data().m_timeoutReached);
+      m_unitTest.test("EOC_NOT_FORCED2", not eocEvent->data().m_forcedEnd);
       m_nCycles++;
       if(m_nCycles == 3) {
         exit(0);
@@ -140,8 +138,8 @@ public:
 
 class NoTimeoutTestApp : public TestApplication {
 public:
-  NoTimeoutTestApp() :
-    TestApplication("notimeout", 3, 2, 10) { 
+  NoTimeoutTestApp(UnitTest &test) :
+    TestApplication(test, "notimeout", 3, 2, 10) { 
     setNoServer(true);
   }
   NoTimeoutTestApp(const NoTimeoutTestApp&) = delete;
@@ -167,9 +165,9 @@ public:
     auto* eocEvent = dynamic_cast<StoreEvent<EOCCondition>*>(pAppEvent);
     if(eocEvent) {
       dqm_debug("Got an end of cycle: {0}", typeToString(eocEvent->data()));
-      assert_test(not eocEvent->data().m_timeoutReached);
-      assert_test(not eocEvent->data().m_forcedEnd);
-      assert_test(eocEvent->data().m_counter == 3);
+      m_unitTest.test("CHECK_TIMEOUT3", not eocEvent->data().m_timeoutReached);
+      m_unitTest.test("EOC_NOT_FORCED3", not eocEvent->data().m_forcedEnd);
+      m_unitTest.test("CHECK_COUNTER", eocEvent->data().m_counter == 3);
       m_nCycles++;
       if(m_nCycles == 3) {
         m_incrementTimer->stop();
@@ -189,20 +187,23 @@ public:
 //-------------------------------------------------------------------------------------------------
 
 int main(int argc, char **argv) {
-  TimeoutTestApp timeoutApp;
+  
+  UnitTest unitTest("test-cycle");
+  
+  TimeoutTestApp timeoutApp(unitTest);
   timeoutApp.init(argc, argv);
   timeoutApp.exec();
-  assert_test(timeoutApp.m_nCycles == 3);
+  unitTest.test("CHECK_COUNTER2", timeoutApp.m_nCycles == 3);
   
-  NormalTestApp normalApp;
+  NormalTestApp normalApp(unitTest);
   normalApp.init(argc, argv);
   normalApp.exec();
-  assert_test(normalApp.m_nCycles == 3);
+  unitTest.test("CHECK_COUNTER3", normalApp.m_nCycles == 3);
   
-  NoTimeoutTestApp notimeoutApp;
+  NoTimeoutTestApp notimeoutApp(unitTest);
   notimeoutApp.init(argc, argv);
   notimeoutApp.exec();
-  assert_test(notimeoutApp.m_nCycles == 3);
+  unitTest.test("CHECK_COUNTER4", notimeoutApp.m_nCycles == 3);
   
   return 0;
 }

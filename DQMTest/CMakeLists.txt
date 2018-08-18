@@ -1,7 +1,7 @@
 
 
 dqm4hep_package( DQMTest
-  USES DQMCore xdrstream
+  USES DQMCore DQMOnline xdrstream
   INCLUDE_DIRS include
 )
 
@@ -79,4 +79,12 @@ dqm4hep_add_test_reg ( test-xmlparser
 #     --constant ReferenceRootFile=${CMAKE_CURRENT_SOURCE_DIR}/resources/test_samples.root
 # )
 
-
+# DQMOnline tests
+dqm4hep_add_test_reg ( test-cycle
+  BUILD_EXEC 
+  REGEX_FAIL "TEST_FAILED" 
+)
+dqm4hep_add_test_reg ( test-online-element
+  BUILD_EXEC 
+  REGEX_FAIL "TEST_FAILED" 
+)
