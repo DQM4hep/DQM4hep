@@ -38,8 +38,8 @@
 #include <fstream>
 
 // -- mongoose headers
-#include <mongoose/WebController.h>
-#include <mongoose/Server.h>
+#include <WebController.h>
+#include <Server.h>
 
 using namespace Mongoose;
 
