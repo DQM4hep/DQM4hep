@@ -1,43 +1,26 @@
 #################################################
-# cmake file for building DQMOnline package
-# @author Eté Rémi
-# Copyright (c)
-cmake_minimum_required( VERSION 2.6 FATAL_ERROR )
+# cmake file for building DQMOnline component
+# @author Ete Remi, DESY
 #################################################
 
-###############################
-# project name
-project( DQMOnline )
-
-set( ${PROJECT_NAME}_VERSION_MAJOR 1 )
-set( ${PROJECT_NAME}_VERSION_MINOR 2 )
-set( ${PROJECT_NAME}_VERSION_PATCH 3 )
-
-###############################
-# Central settings
-include( dqm4hep_settings )
-
-###############################
-# Define options
-option( BUILD_HTTP_RC  "Set to OFF to skip build/install http run control plugin" OFF )
-
-# ----- Find DQMCore package -----
-dqm4hep_find_packages( 
-  PACKAGES DQMCore DQMNet
-  REQUIRED ADD_DEPENDS
+dqm4hep_package( DQMOnline
+  USES DQMCore DQMNet mongoose
+  INCLUDE_DIRS include
+  INSTALL_INCLUDES include/dqm4hep
 )
 
-# ----- Install doc -----
-dqm4hep_build_doxygen()
+# -------------------------------------------------
+# build the DQMOnline library
+dqm4hep_add_package_library( DQMOnline
+  SOURCES src/*.cc src/plugins/*.cc
+)
 
-###############################
-# Add source directory
-add_subdirectory( source )
-
-###############################
-# display some variables and write them to cache
-display_std_variables()
-
-###############################
-# generate and install following configuration files
-dqm4hep_generate_package_configuration( PACKAGE ${PROJECT_NAME} )
+# -------------------------------------------------
+# build the DQMOnline binaries
+dqm4hep_add_executable( dqm4hep-dump-event                  SOURCES main/dqm4hep-dump-event.cc )
+dqm4hep_add_executable( dqm4hep-online-logger               SOURCES main/dqm4hep-online-logger.cc )
+dqm4hep_add_executable( dqm4hep-start-event-collector       SOURCES main/dqm4hep-start-event-collector.cc )
+dqm4hep_add_executable( dqm4hep-start-module                SOURCES main/dqm4hep-start-module.cc )
+dqm4hep_add_executable( dqm4hep-start-online-mgr            SOURCES main/dqm4hep-start-online-mgr.cc )
+dqm4hep_add_executable( dqm4hep-start-random-event-source   SOURCES main/dqm4hep-start-random-event-source.cc )
+dqm4hep_add_executable( dqm4hep-start-rc-server             SOURCES main/dqm4hep-start-rc-server.cc )
