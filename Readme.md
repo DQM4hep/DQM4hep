@@ -7,7 +7,7 @@
 
 A Data Quality Monitoring for High Energy Physics
 
-## Install:
+## Install
 
 ### Dependencies
 
