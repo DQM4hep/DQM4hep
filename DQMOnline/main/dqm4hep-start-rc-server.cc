@@ -32,7 +32,7 @@
 #include "dqm4hep/Logging.h"
 #include "dqm4hep/RemoteLogger.h"
 #include "dqm4hep/RunControlServer.h"
-#include "DQMOnlineConfig.h"
+#include "dqm4hep/DQM4hepConfig.h"
 
 // -- tclap headers
 #include "tclap/CmdLine.h"
@@ -66,7 +66,7 @@ int main(int argc, char* argv[]) {
   dqm4hep::core::screenSplash();
 
   std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
-  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQMOnline_VERSION_STR);
+  TCLAP::CmdLine *pCommandLine = new TCLAP::CmdLine(cmdLineFooter, ' ', DQM4hep_VERSION_STR);
 
   TCLAP::ValueArg<std::string> runControlNameArg(
       "n"
