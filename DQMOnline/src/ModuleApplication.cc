@@ -31,7 +31,7 @@
 #include "dqm4hep/OnlineElement.h"
 #include "dqm4hep/OnlineRoutes.h"
 #include "dqm4hep/XmlHelper.h"
-#include "DQMOnlineConfig.h"
+#include "dqm4hep/DQM4hepConfig.h"
 
 // -- std headers
 #include <regex>
@@ -55,7 +55,7 @@ namespace dqm4hep {
     
     void ModuleApplication::parseCmdLine(int argc, char **argv) {
       std::string cmdLineFooter = "Please report bug to <dqm4hep@desy.de>";
-      m_cmdLine = std::make_shared<CmdLine::element_type>(cmdLineFooter, ' ', DQMOnline_VERSION_STR);
+      m_cmdLine = std::make_shared<CmdLine::element_type>(cmdLineFooter, ' ', DQM4hep_VERSION_STR);
 
       TCLAP::ValueArg<std::string> steeringFileNameArg(
           "f"
