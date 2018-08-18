@@ -10,8 +10,8 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 mark_as_advanced( CMAKE_INSTALL_RPATH )
 
 # set default install prefix to project root directory
-# instead of the cmake default /usr/local
-if( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
+# instead of the cmake default
+if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
   set( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
 endif()
 
