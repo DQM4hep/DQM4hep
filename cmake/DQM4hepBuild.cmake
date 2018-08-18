@@ -6,9 +6,6 @@ include( CMakeParseArguments )
 
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
-mark_as_advanced( CMAKE_INSTALL_RPATH )
-
 # set default install prefix to project root directory
 # instead of the cmake default
 if( CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT )
@@ -17,6 +14,9 @@ endif()
 
 # write this variable to cache
 set( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install ${PROJECT_NAME}" FORCE )
+
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+mark_as_advanced( CMAKE_INSTALL_RPATH )
 
 macro( dqm4hep_to_parent_scope val )
   set ( ${val} ${${val}} PARENT_SCOPE )
