@@ -26,7 +26,7 @@
 
 // -- dqm4hep headers
 #include "dqm4hep/EventCollector.h"
-#include "DQMOnlineConfig.h"
+#include "dqm4hep/DQM4hepConfig.h"
 #include "dqm4hep/Logging.h"
 #include "dqm4hep/OnlineRoutes.h"
 
@@ -49,7 +49,7 @@ namespace dqm4hep {
 
     void EventCollector::parseCmdLine(int argc, char **argv) {
       std::string cmdLineFooter = "Please report bug to <dqm4hep@gmail.com>";
-      m_cmdLine = std::make_shared<TCLAP::CmdLine>(cmdLineFooter, ' ', DQMOnline_VERSION_STR);
+      m_cmdLine = std::make_shared<TCLAP::CmdLine>(cmdLineFooter, ' ', DQM4hep_VERSION_STR);
       
       TCLAP::ValueArg<std::string> collectorNameArg(
           "c"
