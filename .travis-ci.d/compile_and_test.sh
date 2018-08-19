@@ -8,10 +8,10 @@ export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/dependencies/xdrstream/lib:$LD_LIBRARY_
 mkdir -p build
 cd build
 
-cmake -DDQM4hep_DOXYGEN_DOC=OFF\
- -DDQM4hep_TESTING=ON \
+cmake -DDQM4hep_TESTING=ON \
  -DDQM4hep_WARNING_AS_ERROR=ON \
  -DDQM4hep_DEV_WARNINGS=ON \
+ -DDQM4hep_DOXYGEN_DOC=${DQM4hep_DOXYGEN_DOC} \
  -Dxdrstream_DIR=$TRAVIS_BUILD_DIR/dependencies/xdrstream/lib/cmake \
  ..
 
