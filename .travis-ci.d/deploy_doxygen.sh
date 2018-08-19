@@ -12,7 +12,7 @@ then
 fi
 
 # check correct user name
-if [ ! "${username}" = "DQM4hep" ]
+if [ ! "${username}" = "dqm4hep" ]
 then
   echo "Invalid username for pushing doxygen !"
   echo "Username: ${username}, repository: ${repository}"
