@@ -30,14 +30,10 @@
 #include <dqm4hep/EventStreamer.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/PluginManager.h>
-#include <dqm4hep/StreamingHelper.h>
-
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
 
 // -- root header
 #include <TObject.h>
-#include <TBufferFile.h>
+#include <TBuffer.h>
 
 namespace dqm4hep {
 
@@ -70,7 +66,7 @@ namespace dqm4hep {
        *  @param  event the event to write out
        *  @param  device the xdrstream device to write with
        */
-      StatusCode write(EventPtr event, xdrstream::IODevice *device) override;
+      StatusCode write(EventPtr event, TBuffer &buffer) override;
 
       /** 
        *  @brief  De-serialize the event.
@@ -78,11 +74,11 @@ namespace dqm4hep {
        *  @param  event the event to read in
        *  @param  device the xdrstream device to read from
        */
-      StatusCode read(EventPtr event, xdrstream::IODevice *pDevice) override;
+      StatusCode read(EventPtr event, TBuffer &buffer) override;
       
     private:
       ///< The ROOT streamer to read/write TObject objects
-      TBufferFile                m_buffer = {TBuffer::kRead};  
+      // TBufferFile                m_buffer = {TBuffer::kRead};  
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -106,50 +102,24 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode RootEventStreamer::write(EventPtr event, xdrstream::IODevice *device) {
+    StatusCode RootEventStreamer::write(EventPtr event, TBuffer &buffer) {
       const TObject *pTObject = event->getEvent<TObject>();
-
-      if (nullptr == pTObject)
+      if (nullptr == pTObject) {
         return STATUS_CODE_INVALID_PARAMETER;
-      
-      m_buffer.SetWriteMode();
-      m_buffer.Reset();
-      m_buffer.WriteObject(pTObject);
-      char *buffer = m_buffer.Buffer();
-      Int_t size = m_buffer.Length();
-      
-      if(nullptr == buffer || 0 == size) {
-        dqm_error( "RootEventStreamer::write: Couldn't write TObject (class {0}) to root buffer !", pTObject->ClassName() );
-        return STATUS_CODE_FAILURE;
       }
-      
-      if (!XDR_TESTBIT(device->writeArray((const void*)buffer, size, 1), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-      
+      buffer.WriteObject(pTObject);
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode RootEventStreamer::read(EventPtr event, xdrstream::IODevice *device) {
-      TObject *pTObject = nullptr;
-      void *buffer = nullptr;
-      xdrstream::xdr_size_t size = 0;
-
-      if (!XDR_TESTBIT(device->readDynamicArray(buffer, size, 1, xdrstream::xdr_allocator_helper<char>::alloc), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      m_buffer.SetReadMode();
-      m_buffer.SetBuffer(buffer, size, kTRUE);
-      pTObject = m_buffer.ReadObject(0);
-  
+    StatusCode RootEventStreamer::read(EventPtr event, TBuffer &buffer) {
+      TObject *pTObject = buffer.ReadObject(0);
       if(nullptr == pTObject) {
         dqm_error( "RootEventStreamer::read: Couldn't read TObject, got nullptr" );
         return STATUS_CODE_FAILURE;
-      }
-  
+      }  
       event->setEvent<TObject>(pTObject, true);
-
       return STATUS_CODE_SUCCESS;
     }
     

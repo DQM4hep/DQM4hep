@@ -31,7 +31,9 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/GenericEvent.h>
 #include <dqm4hep/PluginManager.h>
-#include <dqm4hep/StreamingHelper.h>
+
+// -- root headers
+#include <TBuffer.h>
 
 namespace dqm4hep {
 
@@ -57,12 +59,76 @@ namespace dqm4hep {
 
       /** Serialize the event and store it into a data stream.
        */
-      StatusCode write(EventPtr event, xdrstream::IODevice *pDevice) override;
+      StatusCode write(EventPtr event, TBuffer &buffer) override;
 
       /** De-serialize the event.
        */
-      StatusCode read(EventPtr event, xdrstream::IODevice *pDevice) override;
+      StatusCode read(EventPtr event, TBuffer &buffer) override;
+      
+    private:
+      template <typename T>
+      void writeMap(TBuffer &buffer, const std::map<std::string, std::vector<T>> &values);
+      
+      template <typename T>
+      void readMap(TBuffer &buffer, std::map<std::string, std::vector<T>> &values);
     };
+    
+    
+    template <typename T>
+    inline void GenericEventStreamer::writeMap(TBuffer &buffer, const std::map<std::string, std::vector<T>> &values) {
+      buffer.WriteInt(values.size());
+      for(auto elt : values) {
+        buffer.WriteStdString(&elt.first);
+        buffer.WriteArray(&elt.second[0], elt.second.size());
+      }
+    }
+    
+    template <typename T>
+    inline void GenericEventStreamer::readMap(TBuffer &buffer, std::map<std::string, std::vector<T>> &values) {
+      Int_t size = 0;
+      buffer.ReadInt(size);
+      for(Int_t s=0 ; s<size ; s++) {
+        std::string key;
+        buffer.ReadStdString(&key);
+        T *array = nullptr;
+        Int_t size = buffer.ReadArray(array);
+        std::vector<T> vecValues(array, array + sizeof(array) / sizeof(T));
+        delete [] array;
+        values[key] = vecValues;
+      }
+    }
+    
+    template <>
+    inline void GenericEventStreamer::writeMap(TBuffer &buffer, const std::map<std::string, std::vector<std::string>> &values) {
+      buffer.WriteInt(values.size());
+      for(auto elt : values) {
+        buffer.WriteStdString(&elt.first);
+        buffer.WriteInt(elt.second.size());
+        for(auto elt2 : elt.second) {
+          buffer.WriteStdString(&elt2);
+        }
+      }
+    }
+    
+    template <>
+    inline void GenericEventStreamer::readMap(TBuffer &buffer, std::map<std::string, std::vector<std::string>> &values) {
+      Int_t size = 0;
+      buffer.ReadInt(size);
+      for(Int_t s=0 ; s<size ; s++) {
+        std::string key;
+        buffer.ReadStdString(&key);
+        Int_t vecSize = 0;
+        buffer.ReadInt(vecSize);
+        std::vector<std::string> vecValues;
+        vecValues.reserve(vecSize);
+        for(Int_t s2=0 ; s2<vecSize ; s2++) {
+          std::string value;
+          buffer.ReadStdString(&value);
+          vecValues.push_back(value);
+        }
+        values[key] = vecValues;
+      }
+    }
     
     //-------------------------------------------------------------------------------------------------
     //-------------------------------------------------------------------------------------------------
@@ -85,44 +151,31 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::write(EventPtr event, xdrstream::IODevice *pDevice) {
+    StatusCode GenericEventStreamer::write(EventPtr event, TBuffer &buffer) {
       const GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
-
-      if (nullptr == pGenericEvent)
+      if (nullptr == pGenericEvent) {
         return STATUS_CODE_INVALID_PARAMETER;
-
+      }
       // write event contents
-      const GenericEvent::IntVectorMap &intVals(pGenericEvent->m_intValues);
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, intVals), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_floatValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_doubleValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::write(pDevice, pGenericEvent->m_stringValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
+      writeMap(buffer, pGenericEvent->m_intValues);
+      writeMap(buffer, pGenericEvent->m_floatValues);
+      writeMap(buffer, pGenericEvent->m_doubleValues);
+      writeMap(buffer, pGenericEvent->m_stringValues);
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode GenericEventStreamer::read(EventPtr event, xdrstream::IODevice *pDevice) {
+    StatusCode GenericEventStreamer::read(EventPtr event, TBuffer &buffer) {
       GenericEvent *pGenericEvent = event->getEvent<GenericEvent>();
-
+      if (nullptr == pGenericEvent) {
+        return STATUS_CODE_INVALID_PARAMETER;
+      }
       // write event contents
-      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_intValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_floatValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
-      if (!XDR_TESTBIT(StreamingHelper::read(pDevice, pGenericEvent->m_doubleValues), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-
+      readMap(buffer, pGenericEvent->m_intValues);
+      readMap(buffer, pGenericEvent->m_floatValues);
+      readMap(buffer, pGenericEvent->m_doubleValues);
+      readMap(buffer, pGenericEvent->m_stringValues);
       return STATUS_CODE_SUCCESS;
     }
     

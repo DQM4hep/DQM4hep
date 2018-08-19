@@ -42,9 +42,7 @@
 #include <TBrowser.h>
 #include <TPad.h>
 
-namespace xdrstream {
-  class IODevice;
-}
+class TBuffer;
 
 namespace dqm4hep {
 
@@ -238,19 +236,20 @@ namespace dqm4hep {
        */
       virtual void fromJson(const json &value);
 #endif
+
       /**
        *  @brief  Write monitor element to device
        *  
        *  @param  device the device to write to
        */
-      virtual StatusCode toDevice(xdrstream::IODevice *device) const;
+      virtual StatusCode write(TBuffer &buffer) const;
       
       /**
        *  @brief  Read the monitor element from device
        * 
        *  @param  device the device to read from
        */
-      virtual StatusCode fromDevice(xdrstream::IODevice *device);
+      virtual StatusCode read(TBuffer &buffer);
 
     protected:
       /** 

@@ -31,7 +31,9 @@
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/BufferEvent.h>
 #include <dqm4hep/PluginManager.h>
-#include <dqm4hep/StreamingHelper.h>
+
+// -- root headers
+#include <TBuffer.h>
 
 namespace dqm4hep {
 
@@ -52,11 +54,11 @@ namespace dqm4hep {
 
       /** Serialize the event and store it into a data stream.
        */
-      StatusCode write(EventPtr event, xdrstream::IODevice *device) override;
+      StatusCode write(EventPtr event, TBuffer &buffer) override;
 
       /** De-serialize the event.
        */
-      StatusCode read(EventPtr event, xdrstream::IODevice *device) override;
+      StatusCode read(EventPtr event, TBuffer &buffer) override;
     };
     
     //-------------------------------------------------------------------------------------------------
@@ -68,32 +70,22 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode BufferEventStreamer::write(EventPtr event, xdrstream::IODevice *device) {
+    StatusCode BufferEventStreamer::write(EventPtr event, TBuffer &buffer) {
       const BufferEvent *bufferEvent = event->getEvent<BufferEvent>();
-
       if (nullptr == bufferEvent) {
         return STATUS_CODE_INVALID_PARAMETER;
       }
-      
-      if (!XDR_TESTBIT( device->writeArray(bufferEvent->buffer(), bufferEvent->bufferSize()), xdrstream::XDR_SUCCESS )) {
-        return STATUS_CODE_FAILURE;
-      }
-
+      buffer.WriteArray(bufferEvent->buffer(), bufferEvent->bufferSize());
       return STATUS_CODE_SUCCESS;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode BufferEventStreamer::read(EventPtr event, xdrstream::IODevice *device) {
-      BufferEvent *bufferEvent = event->getEvent<BufferEvent>();
-      
-      char *buffer = nullptr;
-      xdrstream::xdr_size_t size = 0;
-      if (!XDR_TESTBIT( device->readDynamicArray<char>(buffer, size), xdrstream::XDR_SUCCESS )) {
-        return STATUS_CODE_FAILURE;
-      }
-      bufferEvent->moveBuffer(buffer, size);
-      
+    StatusCode BufferEventStreamer::read(EventPtr event, TBuffer &buffer) {
+      BufferEvent *bufferEvent = event->getEvent<BufferEvent>();      
+      Char_t *rawBuffer = nullptr;
+      Int_t size = buffer.ReadArray(rawBuffer);
+      bufferEvent->moveBuffer(rawBuffer, size);
       return STATUS_CODE_SUCCESS;
     }
     

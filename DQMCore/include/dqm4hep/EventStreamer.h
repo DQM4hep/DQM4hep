@@ -32,9 +32,7 @@
 #include <dqm4hep/Event.h>
 #include <dqm4hep/StatusCodes.h>
 
-namespace xdrstream {
-  class IODevice;
-}
+class TBuffer;
 
 namespace dqm4hep {
 
@@ -60,9 +58,9 @@ namespace dqm4hep {
        *          and from the plugin manager.
        *          
        *  @param  event the event to write
-       *  @param  device the xdrstream device to write with
+       *  @param  buffer the buffer to write with
        */
-      StatusCode writeEvent(EventPtr event, xdrstream::IODevice *device);
+      StatusCode writeEvent(EventPtr event, TBuffer &buffer);
       
       /**
        *  @brief  Read an event using an xdrstream device.
@@ -70,9 +68,9 @@ namespace dqm4hep {
        *          and the streamer if allocated from the plugin manager.
        *          
        *  @param  event the event to read
-       *  @param  device the xdrstream device to read with
+       *  @param  buffer the buffer to read with
        */
-      StatusCode readEvent(EventPtr &event, xdrstream::IODevice *pDevice);
+      StatusCode readEvent(EventPtr &event, TBuffer &buffer);
       
     private:
       std::string                  m_streamerName = {""};     ///< The current event streamer name in use
@@ -97,11 +95,11 @@ namespace dqm4hep {
 
       /** Serialize an event object and store it in the data stream
        */
-      virtual StatusCode write(EventPtr event, xdrstream::IODevice *pDevice) = 0;
+      virtual StatusCode write(EventPtr event, TBuffer &buffer) = 0;
 
       /** De-serialize an event given from the data stream
        */
-      virtual StatusCode read(EventPtr event, xdrstream::IODevice *pDevice) = 0;
+      virtual StatusCode read(EventPtr event, TBuffer &buffer) = 0;
     };
 
   }

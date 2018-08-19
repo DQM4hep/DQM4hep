@@ -26,7 +26,6 @@
  */
 
 #include <dqm4hep/Run.h>
-#include <dqm4hep/StreamingHelper.h>
 
 namespace dqm4hep {
 

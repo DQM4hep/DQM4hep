@@ -28,7 +28,6 @@
 // -- dqm4hep headers
 #include "dqm4hep/BufferEvent.h"
 #include "dqm4hep/PluginManager.h"
-#include "dqm4hep/StreamingHelper.h"
 
 namespace dqm4hep {
 
