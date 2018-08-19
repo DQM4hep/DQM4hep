@@ -219,21 +219,21 @@ namespace dqm4hep {
     }
     
     //-------------------------------------------------------------------------------------------------
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
-    void OnlineElement::fromJson(const core::json &value) {
-      clear();
-      core::MonitorElement::fromJson(value);
-      m_runNumber = object.value<std::string>("run", 0);
-      m_collectorName = object.value<std::string>("collector", "");
-      m_moduleName = object.value<std::string>("module", "");
-      m_description = object.value<std::string>("description", "");
-      auto reports = object.value("reports", core::json(nullptr));
-      for(auto it = reports.begin() ; it != reports.end() ; it++) {
-        core::QReport report; report.fromJson(it.value());
-        m_reports[it.key()] = report;
-      }
-    }
-#endif
+// #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
+//     void OnlineElement::fromJson(const core::json &value) {
+//       clear();
+//       core::MonitorElement::fromJson(value);
+//       m_runNumber = object.value<std::string>("run", 0);
+//       m_collectorName = object.value<std::string>("collector", "");
+//       m_moduleName = object.value<std::string>("module", "");
+//       m_description = object.value<std::string>("description", "");
+//       auto reports = object.value("reports", core::json(nullptr));
+//       for(auto it = reports.begin() ; it != reports.end() ; it++) {
+//         core::QReport report; report.fromJson(it.value());
+//         m_reports[it.key()] = report;
+//       }
+//     }
+// #endif
     //-------------------------------------------------------------------------------------------------
 
     core::StatusCode OnlineElement::toDevice(xdrstream::IODevice *device) const {

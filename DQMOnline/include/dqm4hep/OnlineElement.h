@@ -155,14 +155,14 @@ namespace dqm4hep {
        */
       virtual void toJson(core::json &object) const;
       
-#if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
-      /**
-       *  @brief  Parse the json object and set monitor element properties
-       *  
-       *  @param  object the json object to parse
-       */
-      virtual void fromJson(const core::json &value);
-#endif
+// #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
+//       /**
+//        *  @brief  Parse the json object and set monitor element properties
+//        *  
+//        *  @param  object the json object to parse
+//        */
+//       virtual void fromJson(const core::json &value);
+// #endif
       
       /**
        *  @brief  Write monitor element to device
