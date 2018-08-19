@@ -55,7 +55,7 @@ before_install:
     fi
 
 after_success:
-- ./.travis-ci.d/deploy_doxygen.sh
+  - ./.travis-ci.d/deploy_doxygen.sh
 
 # Don't send e-mail notifications
 notifications:
