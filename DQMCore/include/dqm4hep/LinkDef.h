@@ -10,6 +10,11 @@
 #pragma link C++ nestedclass;
 #pragma link C++ nestedtypedef;
 
+#pragma link C++ class std::map<std::string, std::vector<int>>+;
+#pragma link C++ class std::map<std::string, std::vector<double>>+;
+#pragma link C++ class std::map<std::string, std::vector<float>>+;
+#pragma link C++ class std::map<std::string, std::vector<std::string>>+;
+
 #pragma link C++ class dqm4hep::core::TScalarInt + ;
 #pragma link C++ class dqm4hep::core::TScalarReal + ;
 #pragma link C++ class dqm4hep::core::TScalarFloat + ;

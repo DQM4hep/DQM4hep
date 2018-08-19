@@ -35,11 +35,9 @@
 #include <TH1.h>
 #include <TPad.h>
 #include <TClass.h>
+#include <TBuffer.h>
 #include <TBufferJSON.h>
 #include <TBufferFile.h>
-
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
 
 templateClassImp(dqm4hep::core::TScalarObject) 
 ClassImp(dqm4hep::core::TDynamicGraph)
@@ -307,76 +305,56 @@ namespace dqm4hep {
 #endif
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElement::toDevice(xdrstream::IODevice *device) const {
-      // get initial device state
-      auto pos = device->getPosition();
+    StatusCode MonitorElement::write(TBuffer &buffer) const {
+      if(not buffer.IsWriting()) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
       // write path
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&m_path), pos);
-      TBufferFile buffer(TBuffer::kWrite);
+      buffer.WriteStdString(&m_path);
       // write object
       const bool hasObjectWrite = hasObject();
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasObjectWrite), pos);
+      buffer.WriteBool(hasObjectWrite);
       if(hasObjectWrite) {
         TClass *objClass = TClass::GetClass(object()->ClassName());
         if(not buffer.WriteObjectAny((void*)object(), objClass)) {
-          device->seek(pos);
           return STATUS_CODE_FAILURE;
         }
-        auto rawBuffer = buffer.Buffer();
-        auto length = buffer.Length();
-        XDRSTREAM_SUCCESS_RESTORE(device->writeArray(rawBuffer, length), pos);
       }
       // write reference
       const bool hasReferenceWrite = hasReference();
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&hasReferenceWrite), pos);
+      buffer.WriteBool(hasReferenceWrite);
       if(hasReferenceWrite) {
-        buffer.Reset();
         TClass *refClass = TClass::GetClass(reference()->ClassName());
         if(not buffer.WriteObjectAny((void*)reference(), refClass)) {
-          device->seek(pos);
           return STATUS_CODE_FAILURE;
         }
-        auto rawBuffer = buffer.Buffer();
-        auto length = buffer.Length();
-        XDRSTREAM_SUCCESS_RESTORE(device->writeArray(rawBuffer, length), pos);
       }
       return STATUS_CODE_SUCCESS;
     }
     
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode MonitorElement::fromDevice(xdrstream::IODevice *device) {
+    StatusCode MonitorElement::read(TBuffer &buffer) {
+      if(not buffer.IsReading()) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
       reset(false);
-      // get initial device state
-      auto pos = device->getPosition();
       // write path
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&m_path), pos);
+      buffer.ReadStdString(&m_path);
       bool hasObjectRead(false);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasObjectRead), pos);
-      TBufferFile buffer(TBuffer::kRead);
+      buffer.ReadBool(hasObjectRead);
       if(hasObjectRead) {
-        char *rawBuffer = nullptr;
-        xdrstream::xdr_size_t length = 0;
-        XDRSTREAM_SUCCESS_RESTORE(device->readDynamicArray(rawBuffer, length), pos);
-        buffer.SetBuffer(rawBuffer, length, kTRUE);
         TObject *obj = buffer.ReadObject(nullptr);
         if(nullptr == obj) {
-          device->seek(pos);
           return STATUS_CODE_FAILURE;
         }
         m_monitorObject.set(obj, true);
       }
       bool hasReferenceRead(false);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&hasReferenceRead), pos);
-      buffer.Reset();
+      buffer.ReadBool(hasReferenceRead);
       if(hasReferenceRead) {
-        char *rawBuffer = nullptr;
-        xdrstream::xdr_size_t length = 0;
-        XDRSTREAM_SUCCESS_RESTORE(device->readDynamicArray(rawBuffer, length), pos);
-        buffer.SetBuffer(rawBuffer, length, kTRUE);
         TObject *ref = buffer.ReadObject(nullptr);
         if(nullptr == ref) {
-          device->seek(pos);
           return STATUS_CODE_FAILURE;
         }
         m_referenceObject.set(ref, true);

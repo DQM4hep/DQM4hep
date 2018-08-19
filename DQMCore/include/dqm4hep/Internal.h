@@ -104,12 +104,6 @@
 // Useful macro to silent any exception
 #define DQM4HEP_NO_EXCEPTION( Code ) try { Code } catch(...) {}
 
-// xdrstream useful macros
-#define XDRSTREAM_SUCCESS(code) \
-  if (!XDR_TESTBIT(code, xdrstream::XDR_SUCCESS)) {return dqm4hep::core::STATUS_CODE_FAILURE;}
-#define XDRSTREAM_SUCCESS_RESTORE(code, position) \
-  if (!XDR_TESTBIT(code, xdrstream::XDR_SUCCESS)) {device->seek(position); return dqm4hep::core::STATUS_CODE_FAILURE;}
-
 namespace dqm4hep {
 
   namespace core {

@@ -32,16 +32,13 @@
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/StatusCodes.h>
 
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
-
 namespace dqm4hep {
 
   namespace core {
 
     /** Version class
      */
-    class Version : public xdrstream::Streamable {
+    class Version {
     public:
       /** Constructor
        */
@@ -53,7 +50,7 @@ namespace dqm4hep {
 
       /** Destructor
        */
-      ~Version() override;
+      ~Version();
 
       /** Get the major version number
        */
@@ -78,10 +75,6 @@ namespace dqm4hep {
       /** Assignment operator
        */
       Version &operator=(const Version &version);
-
-      // from xdrstreamm::Streamable
-      xdrstream::Status stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-                               xdrstream::xdr_version_t version = 0) override;
 
     private:
       unsigned int m_major = {0};

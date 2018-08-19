@@ -145,24 +145,6 @@ namespace dqm4hep {
       return !(lhs == rhs);
     }
 
-    //-------------------------------------------------------------------------------------------------
-
-    xdrstream::Status Version::stream(xdrstream::StreamingMode mode, xdrstream::IODevice *pDevice,
-                                      xdrstream::xdr_version_t /*version*/) {
-      if (xdrstream::XDR_READ_STREAM == mode) {
-        uint32_t major, minor, patch;
-        XDR_STREAM(pDevice->read(&major));
-        XDR_STREAM(pDevice->read(&minor));
-        XDR_STREAM(pDevice->read(&patch));
-
-        this->set(major, minor, patch);
-      } else {
-        XDR_STREAM(pDevice->write<uint32_t>(&m_major));
-        XDR_STREAM(pDevice->write<uint32_t>(&m_minor));
-        XDR_STREAM(pDevice->write<uint32_t>(&m_patch));
-      }
-
-      return xdrstream::XDR_SUCCESS;
-    }
   }
+  
 }

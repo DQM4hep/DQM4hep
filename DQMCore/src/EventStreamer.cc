@@ -30,14 +30,21 @@
 #include <dqm4hep/Event.h>
 #include <dqm4hep/PluginManager.h>
 
+// -- root headers
+#include <TBuffer.h>
+
 namespace dqm4hep {
 
   namespace core {
     
-    StatusCode EventStreamer::writeEvent(EventPtr event, xdrstream::IODevice *device) {
+    StatusCode EventStreamer::writeEvent(EventPtr event, TBuffer &buffer) {
       // consistency check
-      if (nullptr == event or nullptr == device)
+      if (nullptr == event) {
         return STATUS_CODE_INVALID_PARAMETER;
+      }
+      if(not buffer.IsWriting()) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
       // setup event streamer
       std::string streamerName = event->getStreamerName();
       if(not m_streamer or m_streamerName != streamerName) {
@@ -50,26 +57,24 @@ namespace dqm4hep {
         m_streamerName = streamerName;
       }
       // write streamer name
-      if (!XDR_TESTBIT(device->write(&m_streamerName), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
+      buffer.WriteStdString(&m_streamerName);
       // write base event data
-      if (!XDR_TESTBIT(event->writeBase(device), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;  
+      event->writeBase(buffer);
       // write user event data
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_streamer->write(event, device));
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_streamer->write(event, buffer));
       return STATUS_CODE_SUCCESS;
     }
     
     //-------------------------------------------------------------------------------------------------
     
-    StatusCode EventStreamer::readEvent(EventPtr &event, xdrstream::IODevice *device) {
+    StatusCode EventStreamer::readEvent(EventPtr &event, TBuffer &buffer) {
       // consistency check
-      if (nullptr == device)
-        return STATUS_CODE_INVALID_PARAMETER;
+      if (not buffer.IsReading()) {
+        return STATUS_CODE_NOT_ALLOWED;
+      }
       // read streamer name
       std::string streamerName;
-      if (!XDR_TESTBIT(device->read(&streamerName), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
+      buffer.ReadStdString(&streamerName);
       // setup event streamer
       if(not m_streamer or m_streamerName != streamerName) {
         m_streamer = nullptr;
@@ -83,13 +88,12 @@ namespace dqm4hep {
       // read user event data
       event = m_streamer->createEvent();
       event->setStreamerName(m_streamerName);
-      
+      Int_t eventSize = buffer.Length();
       // write base event data
-      if (!XDR_TESTBIT(event->readBase(device), xdrstream::XDR_SUCCESS))
-        return STATUS_CODE_FAILURE;
-      
-      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_streamer->read(event, device));
-      event->setEventSize(device->getPosition());
+      event->readBase(buffer);
+      RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, m_streamer->read(event, buffer));
+      eventSize = buffer.Length() - eventSize;
+      event->setEventSize(eventSize);
       return STATUS_CODE_SUCCESS;
     }
     

@@ -32,8 +32,7 @@
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/StatusCodes.h>
 
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
+class TBuffer;
 
 namespace dqm4hep {
 
@@ -165,11 +164,11 @@ namespace dqm4hep {
       
       /** Write the base event information in the xdrstream device
        */
-      xdrstream::Status writeBase(xdrstream::IODevice *pDevice) const;
+      void writeBase(TBuffer &buffer) const;
 
       /** Read the base event information from the xdrstream device
        */
-      xdrstream::Status readBase(xdrstream::IODevice *pDevice);
+      void readBase(TBuffer &buffer);
 
     protected:
       EventType              m_type = {UNKNOWN_EVENT};       ///< The event type

@@ -33,9 +33,6 @@
 #include <dqm4hep/EventStreamer.h>
 #include <dqm4hep/StatusCodes.h>
 
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
-
 namespace dqm4hep {
 
   namespace core {

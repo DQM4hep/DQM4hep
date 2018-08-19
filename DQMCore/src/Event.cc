@@ -27,7 +27,9 @@
 
 // -- dqm4hep headers
 #include <dqm4hep/Event.h>
-#include <dqm4hep/StreamingHelper.h>
+
+// -- root headers
+#include <TBuffer.h>
 
 namespace dqm4hep {
 
@@ -56,37 +58,36 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    xdrstream::Status Event::writeBase(xdrstream::IODevice *pDevice) const {
-      uint8_t type(static_cast<uint8_t>(m_type));
-      int64_t timeStamp = std::chrono::system_clock::to_time_t(m_timeStamp);
-      
-      XDR_STREAM(pDevice->write(&type));
-      XDR_STREAM(pDevice->write(&m_source));
-      XDR_STREAM(pDevice->write(&timeStamp));
-      XDR_STREAM(pDevice->write(&m_eventSize));
-      XDR_STREAM(pDevice->write(&m_eventNumber));
-      XDR_STREAM(pDevice->write(&m_runNumber));
-
-      return xdrstream::XDR_SUCCESS;
+    void Event::writeBase(TBuffer &buffer) const {
+      Int_t type(static_cast<Int_t>(m_type));
+      Long64_t timeStamp = std::chrono::system_clock::to_time_t(m_timeStamp);
+      buffer.WriteInt(type);
+      buffer.WriteStdString(&m_source);
+      buffer.WriteLong64(timeStamp);
+      buffer.WriteLong64(m_eventSize);
+      buffer.WriteInt(m_eventNumber);
+      buffer.WriteInt(m_runNumber);
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    xdrstream::Status Event::readBase(xdrstream::IODevice *pDevice) {
-      uint8_t type(0);
-      int64_t timeStamp(0);
-      
-      XDR_STREAM(pDevice->read(&type));
-      XDR_STREAM(pDevice->read(&m_source));
-      XDR_STREAM(pDevice->read(&timeStamp));
-      XDR_STREAM(pDevice->read(&m_eventSize));
-      XDR_STREAM(pDevice->read(&m_eventNumber));
-      XDR_STREAM(pDevice->read(&m_runNumber));
-
-      this->setType(static_cast<EventType>(type));
-      this->setTimeStamp(std::chrono::system_clock::from_time_t(timeStamp));
-
-      return xdrstream::XDR_SUCCESS;
+    void Event::readBase(TBuffer &buffer) {
+      Int_t type(0);
+      Long64_t timeStamp(0);
+      Long64_t eventSize(0);
+      Int_t eventNumber(0);
+      Int_t runNumber(0);
+      buffer.ReadInt(type);
+      buffer.ReadStdString(&m_source);
+      buffer.ReadLong64(timeStamp);
+      buffer.ReadLong64(eventSize);
+      buffer.ReadInt(eventNumber);
+      buffer.ReadInt(runNumber);
+      setType(static_cast<EventType>(type));
+      setTimeStamp(std::chrono::system_clock::from_time_t(timeStamp));
+      m_eventSize = eventSize;
+      m_eventNumber = eventNumber;
+      m_runNumber = runNumber;
     }
   }
 }
