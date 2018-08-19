@@ -25,7 +25,6 @@ IF( MySQL_CONFIG_EXECUTABLE )
     # ==============================================
     # ===          MySQL_VERSION                   ===
     # ==============================================
-    INCLUDE( MacroCheckPackageVersion )
 
     EXECUTE_PROCESS( COMMAND "${MySQL_CONFIG_EXECUTABLE}" --version
         OUTPUT_VARIABLE MySQL_VERSION
@@ -33,7 +32,7 @@ IF( MySQL_CONFIG_EXECUTABLE )
         OUTPUT_STRIP_TRAILING_WHITESPACE
     )
     IF( _exit_code EQUAL 0 )
-        CHECK_PACKAGE_VERSION( MySQL ${MySQL_VERSION} )
+        SET( MySQL_VERSION ${MySQL_VERSION} )
     ELSE()
         SET( MySQL_VERSION )
     ENDIF()
@@ -49,7 +48,12 @@ MARK_AS_ADVANCED( MySQL_INCLUDE_DIRS )
 #           the following FIND_PATH commando finds the wrong mysql installation because PATH_SUFFIXES is used ... !?
 #           if PATHS are expanded or CMAKE_PREFIX_PATH is used instead of CMAKE_FIND_ROOT_PATH the problem goes away
 #FIND_PATH( MySQL_INCLUDE_DIRS NAMES mysql.h PATHS ${MySQL_DIR} PATH_SUFFIXES include include/mysql include/mysql5/mysql NO_DEFAULT_PATH )
-FIND_PATH( MySQL_INCLUDE_DIRS NAMES mysql.h PATHS ${MySQL_DIR}/include ${MySQL_DIR}/include/mysql ${MySQL_DIR}/include/mysql5/mysql NO_DEFAULT_PATH )
+FIND_PATH( MySQL_INCLUDE_DIRS NAMES mysql.h PATHS 
+  ${MySQL_DIR}/include 
+  ${MySQL_DIR}/include/mysql 
+  ${MySQL_DIR}/include/mysql5/mysql 
+  NO_DEFAULT_PATH 
+)
 
 # if not found in MySQL_DIR / CMAKE_PREFIX_PATH / CMAKE_INCLUDE_PATH or CMAKE_FIND_ROOT_PATH ...
 # look into the following locations
