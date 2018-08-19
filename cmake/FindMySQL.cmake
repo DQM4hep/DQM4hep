@@ -112,6 +112,7 @@ ENDIF( MySQL_LIBRARIES )
 
 # ---------- final checking ---------------------------------------------------
 INCLUDE( FindPackageHandleStandardArgs )
+SET( PACKAGE_VERSION_COMPATIBLE TRUE )
 # set MySQL_FOUND to TRUE if all listed variables are TRUE and not empty
 FIND_PACKAGE_HANDLE_STANDARD_ARGS( MySQL DEFAULT_MSG MySQL_INCLUDE_DIRS MySQL_LIBRARIES PACKAGE_VERSION_COMPATIBLE )
 
