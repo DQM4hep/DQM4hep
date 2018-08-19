@@ -24,3 +24,9 @@ dqm4hep_add_executable( dqm4hep-start-module                SOURCES main/dqm4hep
 dqm4hep_add_executable( dqm4hep-start-online-mgr            SOURCES main/dqm4hep-start-online-mgr.cc )
 dqm4hep_add_executable( dqm4hep-start-random-event-source   SOURCES main/dqm4hep-start-random-event-source.cc )
 dqm4hep_add_executable( dqm4hep-start-rc-server             SOURCES main/dqm4hep-start-rc-server.cc )
+
+# -------------------------------------------------
+# build the DQMOnline doxygen documentation
+dqm4hep_package_doxygen_sources( 
+  SOURCES include/dqm4hep/*.h src/*.cc
+)

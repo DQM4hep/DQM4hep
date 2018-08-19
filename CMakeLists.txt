@@ -29,6 +29,7 @@ option( DQM4hep_TESTING             "Whether to build unit tests (ctest)" ON )
 option( DQM4hep_WARNING_AS_ERROR    "Whether to add -Werror flag to cxx flags" OFF )
 option( DQM4hep_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" ON )
 option( DQM4hep_DEV_WARNINGS        "Whether to add extra warning for developpers to cxx flags" OFF )
+option( DQM4hep_DOXYGEN_DOC         "Set to OFF to skip build/install Documentation" OFF )
 
 include( DQM4hepBuild )
 dqm4hep_set_version( DQM4hep
@@ -71,6 +72,9 @@ if( DQM4hep_TESTING )
   mark_as_advanced( DART_TESTING_TIMEOUT )
   add_subdirectory( DQMTest )
 endif()
+
+# ----- Build and install doxygen documentation -----
+dqm4hep_build_doxygen( OUTPUT doc/Doxygen )
 
 # ----- Install DQM4hep cmake macros in lib/cmake -----
 install(DIRECTORY cmake

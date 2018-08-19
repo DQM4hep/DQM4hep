@@ -41,4 +41,8 @@ dqm4hep_add_executable( dqm4hep-mysql-set-parameter   SOURCES main/dqm4hep-mysql
 dqm4hep_add_executable( dqm4hep-netstats              SOURCES main/dqm4hep-netstats.cc )
 dqm4hep_add_executable( dqm4hep-run-qtests            SOURCES main/dqm4hep-run-qtests.cc )
 
-
+# -------------------------------------------------
+# build the DQMCore doxygen documentation
+dqm4hep_package_doxygen_sources( 
+  SOURCES include/dqm4hep/*.h src/*.cc
+)

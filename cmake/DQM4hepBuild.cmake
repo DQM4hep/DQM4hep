@@ -863,3 +863,68 @@ function ( dqm4hep_add_test_reg test_name )
   endforeach()
 endfunction()
 
+
+function( dqm4hep_package_doxygen_sources )
+  if( DQM4hep_DOXYGEN_DOC )
+    dqm4hep_package_properties( pkg PKG enabled )
+    cmake_parse_arguments ( ARG "" "" "SOURCES" ${ARGN} )
+    file( GLOB_RECURSE DOX_SOURCE_FILES ${ARG_SOURCES} )
+    get_property ( dox_srcs GLOBAL PROPERTY ${PKG}_DOXYGEN_SOURCES )
+    dqm4hep_make_unique_list ( new_dox_srcs VALUES ${dox_srcs} ${DOX_SOURCE_FILES} )
+    set_property ( GLOBAL PROPERTY ${PKG}_DOXYGEN_SOURCES ${new_dox_srcs} )
+  endif()
+endfunction()
+
+function( dqm4hep_build_doxygen )
+  if( DQM4hep_DOXYGEN_DOC )
+    find_package( Doxygen )
+    if( NOT DOXYGEN_FOUND )
+      message( SEND_ERROR "Could not find doxygen required to build documentation" )
+      message( "Please install doxygen or set DQM4hep_DOXYGEN_DOC to OFF" )
+      message( "" )
+      return()
+    endif()
+    cmake_parse_arguments( ARG "" "OUTPUT" "" ${ARGN} )
+    set( DOC_BIN_DIR "${PROJECT_BINARY_DIR}/docbuild" )
+    set( ALL_DOXYGEN_SOURCES )
+    get_property ( all_packages GLOBAL PROPERTY DQM4hep_ALL_PACKAGES )
+    foreach( pkg ${all_packages} )
+      string ( TOUPPER "${pkg}" PKG )
+      get_property ( pkg_dox_srcs GLOBAL PROPERTY ${PKG}_DOXYGEN_SOURCES )
+      if( DEFINED pkg_dox_srcs )
+        dqm4hep_make_unique_list ( ALL_DOXYGEN_SOURCES VALUES ${ALL_DOXYGEN_SOURCES} ${pkg_dox_srcs} )
+      endif()
+    endforeach()
+    if( NOT ALL_DOXYGEN_SOURCES )
+      message( WARNING "No doxygen sources found. Skipping doxygen build ..." )
+      return()
+    endif()
+    set( DOX_INPUT ${ALL_DOXYGEN_SOURCES} )
+    set( DOXYFILE ${DQM4hep_CMAKE_MODULES_ROOT}/Doxyfile )
+    set( DOX_DEPEND ${DOXYFILE} ${DOX_INPUT} )
+    
+    # custom command to build documentation
+    add_custom_command(
+        OUTPUT  "${DOC_BIN_DIR}/html/index.html"
+        COMMAND mkdir -p ${DOC_BIN_DIR}
+        COMMAND DOX_PROJECT_NAME=DQM4hep
+                DOX_PROJECT_NUMBER="${DQM4hep_VERSION}"
+                DOX_OUTPUT_DIRECTORY="${DOC_BIN_DIR}"
+                DOX_INPUT="${DOX_INPUT}"
+                DOX_EXLUDE_PATTERNS=""
+                ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
+        WORKING_DIRECTORY "${DQM4hep_CMAKE_MODULES_ROOT}"
+        COMMENT "Building DQM4hep API Documentation..."
+        DEPENDS ${DOX_DEPEND}
+    )
+    # add doc target
+    add_custom_target( doc DEPENDS "${DOC_BIN_DIR}/html/index.html" )
+    if( NOT ARG_OUTPUT )
+      set( ARG_OUTPUT doc/Doxygen )
+    endif()
+    # install documentation
+    install( CODE "EXECUTE_PROCESS( COMMAND ${CMAKE_BUILD_TOOL} doc)" )
+    install( DIRECTORY "${DOC_BIN_DIR}/html" DESTINATION ${ARG_OUTPUT} )
+    install( DIRECTORY "${DOC_BIN_DIR}/latex" DESTINATION ${ARG_OUTPUT} )
+  endif()
+endfunction()

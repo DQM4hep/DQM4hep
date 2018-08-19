@@ -10,7 +10,7 @@ dqm4hep_package( DQMNet
 )
 
 # -------------------------------------------------
-# build the DQMCore library
+# build the DQMNet library
 dqm4hep_add_package_library( DQMNet
   SOURCES src/*.cc
 )
@@ -27,4 +27,8 @@ dqm4hep_add_executable( dqm4hep-subscribe-service       SOURCES main/dqm4hep-sub
 dqm4hep_add_executable( dqm4hep-test-ws-server          SOURCES main/test-ws-server.cc )
 dqm4hep_add_executable( dqm4hep-test-server             SOURCES main/test-server.cc )
 
-
+# -------------------------------------------------
+# build the DQMNet doxygen documentation
+dqm4hep_package_doxygen_sources( 
+  SOURCES include/dqm4hep/*.h src/*.cc
+)
