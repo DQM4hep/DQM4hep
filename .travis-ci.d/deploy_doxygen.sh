@@ -5,7 +5,7 @@ pkgVersion=""
 repository=$(basename $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 username=$(dirname $TRAVIS_REPO_SLUG | tr '[:upper:]' '[:lower:]')
 
-if [ "${DQM4hep_DOXYGEN_DOC}" = "ON" ]
+if [ "${DQM4hep_DOXYGEN_DOC}" = "OFF" ]
 then
   echo "Build and push doxygen only one per push"
   exit 0
