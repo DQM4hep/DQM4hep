@@ -18,3 +18,4 @@
 /cmake/DQM4hepConfig.cmake
 /cmake/DQM4hepConfigVersion.cmake
 /DQMCore/include/dqm4hep/DQM4hepConfig.h
+/doc/Doxygen
