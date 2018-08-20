@@ -169,14 +169,14 @@ namespace dqm4hep {
        *  
        *  @param  device the device to write to
        */
-      virtual core::StatusCode toDevice(xdrstream::IODevice *device) const;
+      virtual core::StatusCode write(TBuffer &buffer) const override;
       
       /**
        *  @brief  Read the monitor element from device
        * 
        *  @param  device the device to read from
        */
-      virtual core::StatusCode fromDevice(xdrstream::IODevice *device);
+      virtual core::StatusCode read(TBuffer &buffer) override;
      
     protected:
       OnlineElement();

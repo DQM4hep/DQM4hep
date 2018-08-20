@@ -1,7 +1,7 @@
 
 
 dqm4hep_package( DQMTest
-  USES DQMCore DQMOnline xdrstream
+  USES DQMCore DQMOnline
   INCLUDE_DIRS include
 )
 
