@@ -95,9 +95,7 @@ dqm4hep_display_std_variables()
 dqm4hep_generate_package_configuration_files( DQM4hepConfig.cmake )
 
 get_property( DQM4hep_PLUGIN_DLL GLOBAL PROPERTY DQM4hep_PLUGIN_DLL )
-message( "DQM4hep_PLUGIN_DLL: ${DQM4hep_PLUGIN_DLL}" )
 string( REPLACE ";" ":" DQM4hep_PLUGIN_DLL "${DQM4hep_PLUGIN_DLL}" )
-message( "DQM4hep_PLUGIN_DLL: ${DQM4hep_PLUGIN_DLL}" )
 configure_file(
   "${DQM4hep_CMAKE_MODULES_ROOT}/thisdqm4hep.sh.in"
   "${DQM4hep_CMAKE_MODULES_ROOT}/thisdqm4hep.sh" 
