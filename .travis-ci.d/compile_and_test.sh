@@ -3,7 +3,6 @@
 ls -la
 
 source dependencies/root/bin/thisroot.sh
-export LD_LIBRARY_PATH=$TRAVIS_BUILD_DIR/dependencies/xdrstream/lib:$LD_LIBRARY_PATH
 
 mkdir -p build
 cd build
@@ -12,7 +11,6 @@ cmake -DDQM4hep_TESTING=ON \
  -DDQM4hep_WARNING_AS_ERROR=ON \
  -DDQM4hep_DEV_WARNINGS=ON \
  -DDQM4hep_DOXYGEN_DOC=${DQM4hep_DOXYGEN_DOC} \
- -Dxdrstream_DIR=$TRAVIS_BUILD_DIR/dependencies/xdrstream/lib/cmake \
  ..
 
 if [ $? -ne 0 ]; then
