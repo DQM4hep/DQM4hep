@@ -16,12 +16,4 @@ tar -xf ${ROOT_BIN}
 source root/bin/thisroot.sh
 root-config --version
 
-git clone https://github.com/dqm4hep/xdrstream.git
-cd xdrstream
-mkdir build
-cd build
-cmake ..
-make install
-cd ..
-
 cd ..
