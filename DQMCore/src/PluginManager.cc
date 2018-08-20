@@ -50,12 +50,12 @@ namespace dqm4hep {
 
     StatusCode PluginManager::loadLibraries() {
       // get the environment plug-in dll variable
-      char *pPluginDllEnv = getenv("DQM4HEP_PLUGIN_DLL");
+      char *pPluginDllEnv = getenv("DQM4hep_PLUGIN_DLL");
 
       if (pPluginDllEnv == nullptr) {
-        dqm_debug("Environment variable DQM4HEP_PLUGIN_DLL not found ! \n"
+        dqm_debug("Environment variable DQM4hep_PLUGIN_DLL not found ! \n"
                   "Set it before loading shared libraries. \n"
-                  "Example : export DQM4HEP_PLUGIN_DLL=libPlugin1.so:libPlugin2.so");
+                  "Example : export DQM4hep_PLUGIN_DLL=libPlugin1.so:libPlugin2.so");
 
         return STATUS_CODE_SUCCESS;
       }
