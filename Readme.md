@@ -12,7 +12,6 @@ A Data Quality Monitoring for High Energy Physics
 ### Dependencies
 
 * [ROOT](http://root.cern.ch) version >= 6.08
-* [xdrstream](https://github.com/dqm4hep/xdrstream) version >= 1.1
 
 ### Install commands
 
@@ -29,6 +28,7 @@ where OPTIONS can be :
 - DQM4hep_WARNING_AS_ERROR: Whether to compile with -Werror (default is OFF)
 - DQM4hep_EXTRA_WARNINGS: Whether to compile with -Wextra (default is ON)
 - DQM4hep_DEV_WARNINGS: Additional developer warnings (default is OFF)
+- DQM4hep_DOXYGEN_DOC: Generate Doxygen (default is OFF)
 
 ## Licensing
 
@@ -38,4 +38,4 @@ DQM4hep is distributed under the [GPLv3 License](http://www.gnu.org/licenses/gpl
 
 ## Bug report
 
-Use the [github issues interface](https://github.Com/DQM4hep/DQM4hep/issues)
+Use the [github issues interface](https://github.com/DQM4hep/DQM4hep/issues)
