@@ -1,0 +1,23 @@
+#!/bin/bash
+# Source this script to set up the DQM4Hep installation that this script is part of.
+# Author: R. Ete
+#-------------------------------------------------------------------------------
+
+# ROOT settings
+if [ -z $ROOTSYS ]; then
+    export ROOTSYS=`dirname @ROOT_DIR@`
+fi;
+source ${ROOTSYS}/bin/thisroot.sh;
+#-----------------------------------------------------------------------------
+
+# DQM4hep settings
+export DQM4hep_DIR=@CMAKE_INSTALL_PREFIX@;
+export DQM4hep_ROOT=${DQM4hep_DIR}/cmake;
+export LD_LIBRARY_PATH=${DQM4hep_DIR}/lib:${LD_LIBRARY_PATH};
+export PATH=${DQM4hep_DIR}/bin:${PATH};
+export DQM4hep_PLUGIN_DLL=@DQM4hep_PLUGIN_DLL@
+#-----------------------------------------------------------------------------
+
+echo "DQM4hep_DIR set to ${DQM4hep_DIR}";
+echo "DQM4hep_PLUGIN_DLL set to ${DQM4hep_PLUGIN_DLL}";
+#-----------------------------------------------------------------------------
