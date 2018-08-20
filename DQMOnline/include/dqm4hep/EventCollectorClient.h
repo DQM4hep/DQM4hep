@@ -34,8 +34,8 @@
 #include "dqm4hep/EventStreamer.h"
 #include "dqm4hep/Client.h"
 
-// -- xdrstream headers
-#include <xdrstream/BufferDevice.h>
+// -- root headers
+#include <TBufferFile.h>
 
 // -- std headers
 #include <mutex>
@@ -101,8 +101,6 @@ namespace dqm4hep {
       core::EventPtr readEvent(const net::Buffer &buffer);
 
     private:
-      
-      using BufferDevicePtr = std::shared_ptr<xdrstream::BufferDevice>;
       using EventUpdateSignal = core::Signal<core::EventPtr>;
       
       /**
@@ -122,7 +120,7 @@ namespace dqm4hep {
       net::Client                         m_client = {};
       mutable std::recursive_mutex        m_mutex = {};
       core::EventStreamer                 m_eventStreamer = {};
-      BufferDevicePtr                     m_bufferDevice = {nullptr};
+      TBufferFile                         m_buffer = {TBuffer::kRead};
     };
     
     //-------------------------------------------------------------------------------------------------

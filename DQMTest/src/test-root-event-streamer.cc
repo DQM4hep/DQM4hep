@@ -37,9 +37,7 @@
 // -- root headers
 #include <TObject.h>
 #include <TH1.h>
-
-// -- xdrstream headers
-#include <xdrstream/xdrstream.h>
+#include <TBufferFile.h>
 
 // -- std headers
 #include <iostream>
@@ -65,24 +63,19 @@ int main(int /*argc*/, char ** /*argv*/) {
   histogram->SetBinContent(1, 3);
   histogram->SetBinContent(5, 17);
   
-  xdrstream::BufferDevice outDevice;
+  TBufferFile outBuffer(TBuffer::kWrite);
   EventStreamer streamer;
   
   // Test writing out
-  unitTest.test("WRITE_EVENT", STATUS_CODE_SUCCESS == streamer.writeEvent(outEvent, &outDevice));
-  
-  // dqm_debug("outDevice.getPosition() is {0}", outDevice.getPosition());
-  // dqm_debug("outDevice.size() is {0}", outDevice.size());
+  unitTest.test("WRITE_EVENT", STATUS_CODE_SUCCESS == streamer.writeEvent(outEvent, outBuffer));
   
   // prepare for reading in
   EventPtr inEvent = createEvent();
-  xdrstream::BufferDevice inDevice(outDevice.getBuffer(), outDevice.getPosition(), false);
-  inDevice.setOwner(false);
-  // dqm_debug("inDevice.getPosition() is {0}", inDevice.getPosition());
-  // dqm_debug("inDevice.size() is {0}", inDevice.size());
+  TBufferFile inBuffer(TBuffer::kRead);
+  inBuffer.SetBuffer(outBuffer.Buffer(), outBuffer.Length(), false);
   
   // Test reading in
-  unitTest.test("READ_EVENT", STATUS_CODE_SUCCESS == streamer.readEvent(inEvent, &inDevice));
+  unitTest.test("READ_EVENT", STATUS_CODE_SUCCESS == streamer.readEvent(inEvent, inBuffer));
   TObject *inTObject = inEvent->getEvent<TObject>();
   
   // Check TObject pointer

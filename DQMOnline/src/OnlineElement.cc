@@ -30,8 +30,8 @@
 #include <dqm4hep/Logging.h>
 #include <dqm4hep/QualityTest.h>
 
-// -- xdrstream header
-#include <xdrstream/xdrstream.h>
+// -- root headers
+#include <TBuffer.h>
 
 namespace dqm4hep {
   
@@ -236,16 +236,14 @@ namespace dqm4hep {
 // #endif
     //-------------------------------------------------------------------------------------------------
 
-    core::StatusCode OnlineElement::toDevice(xdrstream::IODevice *device) const {
-      // get initial device state
-      auto pos = device->getPosition();
+    core::StatusCode OnlineElement::write(TBuffer &buffer) const {
       // write base
-      RETURN_RESULT_IF(core::STATUS_CODE_SUCCESS, !=, core::MonitorElement::toDevice(device));
+      RETURN_RESULT_IF(core::STATUS_CODE_SUCCESS, !=, core::MonitorElement::write(buffer));
       // write properties
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&m_runNumber), pos);
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&m_collectorName), pos);
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&m_moduleName), pos);
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&m_description), pos);
+      buffer.WriteInt(m_runNumber);
+      buffer.WriteStdString(&m_collectorName);
+      buffer.WriteStdString(&m_moduleName);
+      buffer.WriteStdString(&m_description);
       core::json reports = {};
       for(auto report : m_reports) {
         core::json jreport;
@@ -253,25 +251,23 @@ namespace dqm4hep {
         reports[report.first] = jreport;
       }
       const std::string qreportStr = reports.dump();
-      XDRSTREAM_SUCCESS_RESTORE(device->write(&qreportStr), pos);
+      buffer.WriteStdString(&qreportStr);
       return core::STATUS_CODE_SUCCESS;
     }
     
     //-------------------------------------------------------------------------------------------------
 
-    core::StatusCode OnlineElement::fromDevice(xdrstream::IODevice *device) {
+    core::StatusCode OnlineElement::read(TBuffer &buffer) {
       reset(false);
-      // get initial device state
-      auto pos = device->getPosition();
       // read base
-      RETURN_RESULT_IF(core::STATUS_CODE_SUCCESS, !=, core::MonitorElement::fromDevice(device));
+      RETURN_RESULT_IF(core::STATUS_CODE_SUCCESS, !=, core::MonitorElement::read(buffer));
       // read properties
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&m_runNumber), pos);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&m_collectorName), pos);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&m_moduleName), pos);
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&m_description), pos);
       std::string qreportStr;
-      XDRSTREAM_SUCCESS_RESTORE(device->read(&qreportStr), pos);
+      buffer.ReadInt(m_runNumber);
+      buffer.ReadStdString(&m_collectorName);
+      buffer.ReadStdString(&m_moduleName);
+      buffer.ReadStdString(&m_description);
+      buffer.ReadStdString(&qreportStr);
       auto reports = core::json::parse(qreportStr);
       for(auto it = reports.begin() ; it != reports.end() ; it++) {
         core::QReport report; report.fromJson(it.value());

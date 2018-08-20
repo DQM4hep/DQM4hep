@@ -49,7 +49,6 @@
 #include <dqm4hep/Singleton.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Storage.h>
-#include <dqm4hep/StreamingHelper.h>
 #include <dqm4hep/Version.h>
 #include <dqm4hep/XMLParser.h>
 #include <dqm4hep/XmlHelper.h>

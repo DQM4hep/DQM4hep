@@ -149,7 +149,7 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode MonitorElementStreamer::readMonitorElements(std::vector<std::shared_ptr<T>> &elements, TBuffer &buffer) {
       Int_t nElements = 0;
-      buffer.ReadInt(&nElements);
+      buffer.ReadInt(nElements);
       for(unsigned int i=0 ; i<nElements ; ++i) {
         std::shared_ptr<T> element;
         RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, readMonitorElement(element, buffer));
@@ -175,7 +175,7 @@ namespace dqm4hep {
     template <typename T>
     inline StatusCode MonitorElementStreamer::readMonitorElements(std::map<std::string,std::vector<std::shared_ptr<T>>> &elementMap, TBuffer &buffer) {
       Int_t nElements = 0;
-      buffer.ReadInt(&nElements);
+      buffer.ReadInt(nElements);
       for(unsigned int i=0 ; i<nElements ; ++i) {
         std::string key;
         buffer.ReadStdString(&key);

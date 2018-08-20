@@ -36,8 +36,8 @@
 #include <dqm4hep/EventStreamer.h>
 #include <dqm4hep/Client.h>
 
-// -- xdrstream headers
-#include <xdrstream/BufferDevice.h>
+// -- root headers
+#include <TBufferFile.h>
 
 namespace dqm4hep {
 
@@ -63,8 +63,7 @@ namespace dqm4hep {
      *          source->sendEvent(event); // send to all collectors
      *          @endcode
      */
-    class EventSource
-    {
+    class EventSource {
     public:
       /**
        *  @brief  Factory method to create a shared pointer of event source
@@ -162,7 +161,6 @@ namespace dqm4hep {
       };
       
     private:
-      typedef std::shared_ptr<xdrstream::BufferDevice> BufferDevicePtr;
       typedef std::map<std::string, CollectorInfo> CollectorInfoMap;
       
       bool                                m_started = {false};               ///< Whether the event source was started
@@ -170,7 +168,7 @@ namespace dqm4hep {
       core::EventStreamer                 m_eventStreamer = {};              ///< The event streamer
       CollectorInfoMap                    m_collectorInfos = {};             ///< The map of event collector infos
       net::Client                         m_client = {};                     ///< The networking client interface 
-      BufferDevicePtr                     m_bufferDevice = {nullptr};        ///< The serialized event raw buffer (from xdrstream)
+      TBufferFile                         m_buffer = {TBuffer::kWrite, 2*1024*1024};  ///< The serialized event raw buffer
     };
 
   }

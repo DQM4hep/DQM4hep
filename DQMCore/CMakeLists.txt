@@ -5,7 +5,7 @@
 
 dqm4hep_package( DQMCore
   USES [ROOT COMPONENTS Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree REQUIRED]
-  xdrstream MySQL spdlog tclap json 
+  MySQL spdlog tclap json 
   INCLUDE_DIRS include
   INSTALL_INCLUDES include/dqm4hep
 )

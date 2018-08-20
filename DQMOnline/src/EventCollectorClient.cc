@@ -144,13 +144,7 @@ namespace dqm4hep {
       std::lock_guard<std::recursive_mutex> lock(m_mutex);
       
       try {
-        if(not m_bufferDevice) {
-          m_bufferDevice = std::make_shared<xdrstream::BufferDevice>((char*)buffer.begin(), buffer.size(), false);
-          m_bufferDevice->setOwner(false);
-        }
-        else {
-          m_bufferDevice->setBuffer((char*)buffer.begin(), buffer.size(), false);
-        }        
+        m_buffer.SetBuffer((void*)buffer.begin(), buffer.size(), false);      
       }
       catch(...) {
         dqm_error( "EventCollectorClient::readEvent: couldn't setup buffer device !" );
@@ -158,7 +152,7 @@ namespace dqm4hep {
       }
       // read event using event streamer
       core::EventPtr event(nullptr);
-      core::StatusCode statusCode = m_eventStreamer.readEvent(event, m_bufferDevice.get());
+      core::StatusCode statusCode = m_eventStreamer.readEvent(event, m_buffer);
       
       if(core::STATUS_CODE_SUCCESS != statusCode) {
         dqm_error( "EventCollectorClient::readEvent: streamer couldn't read event: {0}", core::statusCodeToString(statusCode) );

@@ -90,8 +90,6 @@ namespace dqm4hep {
         throw core::StatusCodeException(core::STATUS_CODE_NOT_INITIALIZED);
       }
       
-      m_bufferDevice = std::make_shared<xdrstream::BufferDevice>(2*1024*1024);
-      
       core::json sourceInfo;
       this->getSourceInfo(sourceInfo);
       
@@ -136,14 +134,14 @@ namespace dqm4hep {
         throw core::StatusCodeException(core::STATUS_CODE_INVALID_PTR);
       }
       
-      (void)m_bufferDevice->reset();
-      THROW_RESULT_IF(core::STATUS_CODE_SUCCESS, !=, m_eventStreamer.writeEvent(event, m_bufferDevice.get()));
+      m_buffer.Reset();
+      THROW_RESULT_IF(core::STATUS_CODE_SUCCESS, !=, m_eventStreamer.writeEvent(event, m_buffer));
       
       core::json sourceInfo;
       net::Buffer collectBuffer;
       auto model = collectBuffer.createModel();
       collectBuffer.setModel(model);
-      model->handle(m_bufferDevice->getBuffer(), m_bufferDevice->getPosition());
+      model->handle(m_buffer.Buffer(), m_buffer.Length());
       
       // send serialized event to all collectors 
       for(auto collector : collectors) {
