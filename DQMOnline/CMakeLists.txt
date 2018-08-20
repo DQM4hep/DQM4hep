@@ -13,6 +13,7 @@ dqm4hep_package( DQMOnline
 # build the DQMOnline library
 dqm4hep_add_package_library( DQMOnline
   SOURCES src/*.cc src/plugins/*.cc
+  PLUGIN_DLL
 )
 
 # -------------------------------------------------
