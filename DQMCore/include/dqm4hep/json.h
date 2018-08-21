@@ -1,3 +1,13 @@
+//==========================================================================
+//  DQM4hep a data quality monitoring software for high energy physics 
+//--------------------------------------------------------------------------
+//
+// For the licensing terms see $DQM4hep_DIR/LICENSE.
+// For the list of contributors see $DQM4hep_DIR/AUTHORS.
+//
+// Author     : R.Ete
+//====================================================================
+
 #ifndef DQM4HEP_JSON_H
 #define DQM4HEP_JSON_H
 
@@ -8,8 +18,6 @@ namespace dqm4hep {
   namespace core {
 
     using json = nlohmann::json;
-    // using json_pointer = nlohmann::json_pointer;
-    // using adl_serializer = nlohmann::adl_serializer;
   }
 }
 

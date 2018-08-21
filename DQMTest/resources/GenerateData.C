@@ -1,16 +1,22 @@
-/**
- * ROOT macro to generate test samples.
- *
- * Run with :
- *   root -l
- *   [0] .x GenerateData.C
- *   [1] TBrowser b # to browse histograms
- *
- * To generate the file only :
- *   root -l -q GenerateData.C
- *
- * @author Remi Ete, DESY
- */
+//==========================================================================
+//  DQM4hep a data quality monitoring software for high energy physics 
+//--------------------------------------------------------------------------
+//
+// For the licensing terms see $DQM4hep_DIR/LICENSE.
+// For the list of contributors see $DQM4hep_DIR/AUTHORS.
+// 
+//  * ROOT macro to generate test samples.
+//
+// Run with :
+//  root -l
+//    [0] .x GenerateData.C
+//    [1] TBrowser b # to browse histograms
+//
+// To generate the file only :
+//  root -l -q GenerateData.C
+//
+// Author     : R.Ete
+//====================================================================
 
 void GenerateData()
 {
