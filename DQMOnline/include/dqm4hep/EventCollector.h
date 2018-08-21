@@ -80,8 +80,8 @@ namespace dqm4hep {
       
       std::shared_ptr<TCLAP::CmdLine>     m_cmdLine = nullptr;
       SourceInfoMap                       m_sourceInfoMap = {};
-      core::TimePoint                     m_lastStatCall10 = {};
-      core::TimePoint                     m_lastStatCall60 = {};
+      core::time::point                   m_lastStatCall10 = {};
+      core::time::point                   m_lastStatCall60 = {};
       unsigned int                        m_nCollectedEvents10 = {0};
       unsigned int                        m_nCollectedEvents60 = {0};
       unsigned int                        m_nCollectedBytes10 = {0};

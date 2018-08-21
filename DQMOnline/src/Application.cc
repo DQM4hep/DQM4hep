@@ -348,8 +348,8 @@ namespace dqm4hep {
       core::memStats(memInfo);
       core::procStats(m_stats);
 
-      core::dqm_long procVm = m_stats.vm/1024.;   // in MB
-      core::dqm_long procRss = m_stats.rss/1024.; // in MB
+      long procVm = m_stats.vm/1024.;   // in MB
+      long procRss = m_stats.rss/1024.; // in MB
 
       dqm_debug("Sending internal app stats ..." );
       sendStat("VmProc", procVm);

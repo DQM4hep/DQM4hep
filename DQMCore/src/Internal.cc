@@ -65,22 +65,22 @@ namespace dqm4hep {
     
     //-------------------------------------------------------------------------------------------------
     
-    void timeToHMS(std::time_t t, std::string &timeStr) {
-      timeStr = time::asString(time::asPoint(t));
-    }
+    // void timeToHMS(std::time_t t, std::string &timeStr) {
+    //   timeStr = time::asString(time::asPoint(t));
+    // }
     
     
     //-------------------------------------------------------------------------------------------------
 
-    TimePoint now() {
-      return time::now();
-    }
+    // TimePoint now() {
+    //   return time::now();
+    // }
 
     //-------------------------------------------------------------------------------------------------
 
-    void sleep(const TimeDuration &duration) {
-      std::this_thread::sleep_for(duration);
-    }
+    // void sleep(const TimeDuration &duration) {
+    //   std::this_thread::sleep_for(duration);
+    // }
 
 #if defined(__linux__) || defined(__APPLE__)
 
@@ -95,18 +95,18 @@ namespace dqm4hep {
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       } else {
 
-        dqm_double prevCpuTimeUser = stats.cpuTimeUser;
-        dqm_double prevCpuTimeSys = stats.cpuTimeSys;
+        double prevCpuTimeUser = stats.cpuTimeUser;
+        double prevCpuTimeSys = stats.cpuTimeSys;
         stats.cpuTimeUser = ru.ru_utime.tv_sec + ru.ru_utime.tv_usec / 1000000.;
         stats.cpuTimeSys = ru.ru_stime.tv_sec + ru.ru_stime.tv_usec / 1000000.;
 
         struct timeval timeNow;
         gettimeofday(&timeNow, NULL);
-        dqm_double start = stats.lastPollTime.tv_sec + stats.lastPollTime.tv_usec / 1000000.;
-        dqm_double stop = timeNow.tv_sec + timeNow.tv_usec / 1000000.;
+        double start = stats.lastPollTime.tv_sec + stats.lastPollTime.tv_usec / 1000000.;
+        double stop = timeNow.tv_sec + timeNow.tv_usec / 1000000.;
         stats.lastPollTime = timeNow;
         if (stop > start) {
-          dqm_double timeDif = stop - start;
+          double timeDif = stop - start;
           // Don't compute percentage for the first call
           if (0 != prevCpuTimeUser || 0 != prevCpuTimeSys) {
             stats.cpuUser = (stats.cpuTimeUser - prevCpuTimeUser) / timeDif;
@@ -133,7 +133,7 @@ namespace dqm4hep {
      *  @param  tempStats the NetworkStats struct to compare with
      *  @param  sampleTime time between the two NetworkStats reading in \b seconds
      */
-    static void fillNetRate(NetworkStats &stats, NetworkStats &tempStats, dqm_int sampleTime) {
+    static void fillNetRate(NetworkStats &stats, NetworkStats &tempStats, int sampleTime) {
       for (const auto &ifcIter : tempStats) {
         auto ifcIter2 = stats.find(ifcIter.first);
 
@@ -214,8 +214,8 @@ namespace dqm4hep {
      *  @param  stats the CpuStats struct to store the data
      *  @param  sampleTime the time between two cpu reading to compute the load in \b seconds
      */
-    static void linuxCpuStats(CpuStats &stats, dqm_int sampleTime) {
-      dqm_double avg[3] = {-1.};
+    static void linuxCpuStats(CpuStats &stats, int sampleTime) {
+      double avg[3] = {-1.};
 #ifndef R__WINGCC
       if (getloadavg(avg, sizeof(avg)) < 0) {
         // ::Error("getLinuxCpuInfo", "getloadavg failed");
@@ -224,32 +224,32 @@ namespace dqm4hep {
       } else
 #endif // R__WINGCC
       {
-        stats.load1m = (dqm_float)avg[0];
-        stats.load5m = (dqm_float)avg[1];
-        stats.load15m = (dqm_float)avg[2];
+        stats.load1m = (float)avg[0];
+        stats.load5m = (float)avg[1];
+        stats.load15m = (float)avg[2];
       }
 
-      dqm_long cpu_ticks1[4] = {0L};
-      dqm_long cpu_ticks2[4] = {0L};
+      long cpu_ticks1[4] = {0L};
+      long cpu_ticks2[4] = {0L};
       readLinuxCpu(cpu_ticks1);
       ::sleep(sampleTime);
       readLinuxCpu(cpu_ticks2);
 
-      dqm_long userticks = (cpu_ticks2[0] + cpu_ticks2[3]) - (cpu_ticks1[0] + cpu_ticks1[3]);
-      dqm_long systicks = cpu_ticks2[1] - cpu_ticks1[1];
-      dqm_long idleticks = cpu_ticks2[2] - cpu_ticks1[2];
+      long userticks = (cpu_ticks2[0] + cpu_ticks2[3]) - (cpu_ticks1[0] + cpu_ticks1[3]);
+      long systicks = cpu_ticks2[1] - cpu_ticks1[1];
+      long idleticks = cpu_ticks2[2] - cpu_ticks1[2];
       if (userticks < 0)
         userticks = 0;
       if (systicks < 0)
         systicks = 0;
       if (idleticks < 0)
         idleticks = 0;
-      dqm_long totalticks = userticks + systicks + idleticks;
+      long totalticks = userticks + systicks + idleticks;
       if (totalticks) {
-        stats.user = ((dqm_float)(100 * userticks)) / ((dqm_float)totalticks);
-        stats.sys = ((dqm_float)(100 * systicks)) / ((dqm_float)totalticks);
+        stats.user = ((float)(100 * userticks)) / ((float)totalticks);
+        stats.sys = ((float)(100 * systicks)) / ((float)totalticks);
         stats.tot = stats.user + stats.sys;
-        stats.idle = ((dqm_float)(100 * idleticks)) / ((dqm_float)totalticks);
+        stats.idle = ((float)(100 * idleticks)) / ((float)totalticks);
       }
     }
 
@@ -266,11 +266,11 @@ namespace dqm4hep {
         dqm_error("[{0}] - Failed to open '/proc/meminfo'", __FUNCTION__);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       }
-      dqm_long_long memFree = {0LL};
-      dqm_long_long memTotal = {0LL};
+      uint64_t memFree = {0LL};
+      uint64_t memTotal = {0LL};
 
-      dqm_long_long swap_total = {0LL};
-      dqm_long_long swap_free = {0LL};
+      uint64_t swap_total = {0LL};
+      uint64_t swap_free = {0LL};
 
       while (s.Gets(f)) {
         if (s.BeginsWith("MemTotal")) {
@@ -292,11 +292,11 @@ namespace dqm4hep {
       }
       fclose(f);
 
-      stats.vmTot = (dqm_int)(memTotal + swap_total);
-      stats.vmUsed = (dqm_int)(memTotal - memFree);
-      stats.vmFree = (dqm_int)(memFree + swap_free);
-      stats.rssTot = (dqm_int)(memTotal);
-      stats.rssUsed = (dqm_int)(memTotal - memFree);
+      stats.vmTot = (int)(memTotal + swap_total);
+      stats.vmUsed = (int)(memTotal - memFree);
+      stats.vmFree = (int)(memFree + swap_free);
+      stats.rssTot = (int)(memTotal);
+      stats.rssUsed = (int)(memTotal - memFree);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -316,8 +316,8 @@ namespace dqm4hep {
       if (f) {
         s.Gets(f);
         fclose(f);
-        dqm_long total = {0L};
-        dqm_long rss = {0L};
+        long total = {0L};
+        long rss = {0L};
         sscanf(s.Data(), "%ld %ld", &total, &rss);
         stats.vm = total * (getpagesize() / 1024);
         stats.rss = rss * (getpagesize() / 1024);
@@ -357,19 +357,19 @@ namespace dqm4hep {
 
         // read received stats
         if (fscanf(file, "%lu %lu %lu", &stat.tot_rcv_kbytes, &stat.tot_rcv_packets, &stat.tot_rcv_errs) == EOF) {
-          stat.tot_rcv_kbytes = (dqm_int) ((stat.tot_rcv_kbytes) >> 10); // divide by 1024
+          stat.tot_rcv_kbytes = (int) ((stat.tot_rcv_kbytes) >> 10); // divide by 1024
           fclose(file);
           return;
         }
 
         // skip uneeded fields
-        dqm_stat dummy;
+        long unsigned int dummy;
         if (EOF == fscanf(file, "%lu %lu %lu %lu %lu", &dummy, &dummy, &dummy, &dummy, &dummy))
           break;
 
         // read send stats
         if (fscanf(file, "%lu %lu %lu", &stat.tot_snd_kbytes, &stat.tot_snd_packets, &stat.tot_snd_errs) == EOF) {
-          stat.tot_snd_kbytes = (dqm_int) ((stat.tot_snd_kbytes) >> 10); // divide by 1024
+          stat.tot_snd_kbytes = (int) ((stat.tot_snd_kbytes) >> 10); // divide by 1024
           fclose(file);
           return;
         }
@@ -392,7 +392,7 @@ namespace dqm4hep {
      *  @param  stats the NetworkStats struct to store the data
      *  @param  sampleTime the time between two network i/o reading to compute the rate in \b seconds
      */
-    static void linuxNetStats(NetworkStats &stats, dqm_int sampleTime) {
+    static void linuxNetStats(NetworkStats &stats, int sampleTime) {
       NetworkStats tempStats;
       readLinuxNet(tempStats);
       ::sleep(sampleTime);
@@ -442,38 +442,38 @@ namespace dqm4hep {
      *  @param  stats the CpuStats struct to store the data
      *  @param  sampleTime the time between two cpu reading to compute the load in \b seconds
      */
-    static void darwinCpuStats(CpuStats &stats, dqm_int sampleTime) {
-      dqm_double avg[3] = {-1.};
+    static void darwinCpuStats(CpuStats &stats, int sampleTime) {
+      double avg[3] = {-1.};
       if (getloadavg(avg, sizeof(avg)) < 0) {
         dqm_error("[{0}] - Failed to getloadavg", __FUNCTION__);
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       } else {
-        stats.load1m = (dqm_float)avg[0];
-        stats.load5m = (dqm_float)avg[1];
-        stats.load15m = (dqm_float)avg[2];
+        stats.load1m = (float)avg[0];
+        stats.load5m = (float)avg[1];
+        stats.load15m = (float)avg[2];
       }
 
-      dqm_long cpu_ticks1[4] = {0L};
-      dqm_long cpu_ticks2[4] = {0L};
+      long cpu_ticks1[4] = {0L};
+      long cpu_ticks2[4] = {0L};
       readDarwinCpu(cpu_ticks1);
       ::sleep(sampleTime);
       readDarwinCpu(cpu_ticks2);
 
-      dqm_long userticks = (cpu_ticks2[0] + cpu_ticks2[3]) - (cpu_ticks1[0] + cpu_ticks1[3]);
-      dqm_long systicks = cpu_ticks2[1] - cpu_ticks1[1];
-      dqm_long idleticks = cpu_ticks2[2] - cpu_ticks1[2];
+      long userticks = (cpu_ticks2[0] + cpu_ticks2[3]) - (cpu_ticks1[0] + cpu_ticks1[3]);
+      long systicks = cpu_ticks2[1] - cpu_ticks1[1];
+      long idleticks = cpu_ticks2[2] - cpu_ticks1[2];
       if (userticks < 0)
         userticks = 0;
       if (systicks < 0)
         systicks = 0;
       if (idleticks < 0)
         idleticks = 0;
-      dqm_long totalticks = userticks + systicks + idleticks;
+      long totalticks = userticks + systicks + idleticks;
       if (totalticks) {
-        stats.user = ((dqm_float)(100 * userticks)) / ((dqm_float)totalticks);
-        stats.sys = ((dqm_float)(100 * systicks)) / ((dqm_float)totalticks);
+        stats.user = ((float)(100 * userticks)) / ((float)totalticks);
+        stats.sys = ((float)(100 * systicks)) / ((float)totalticks);
         stats.tot = stats.user + stats.sys;
-        stats.idle = ((dqm_float)(100 * idleticks)) / ((dqm_float)totalticks);
+        stats.idle = ((float)(100 * idleticks)) / ((float)totalticks);
       }
     }
 
@@ -492,21 +492,21 @@ namespace dqm4hep {
         dqm_error("[{0}] - Failed to get host_statistics: {1}", __FUNCTION__, mach_error_string(kr));
         throw core::StatusCodeException(STATUS_CODE_FAILURE);
       }
-      static dqm_int pshift = 0;
+      static int pshift = 0;
       if (pshift == 0) {
         for (int psize = getpagesize(); psize > 1; psize >>= 1) {
           pshift++;
         }
       }
 
-      dqm_long_long used = (dqm_long_long)(vm_info.active_count + vm_info.inactive_count + vm_info.wire_count) << pshift;
-      dqm_long_long free = (dqm_long_long)(vm_info.free_count) << pshift;
-      dqm_long_long total =
-          (dqm_long_long)(vm_info.active_count + vm_info.inactive_count + vm_info.free_count + vm_info.wire_count)
+      long long used = (long long)(vm_info.active_count + vm_info.inactive_count + vm_info.wire_count) << pshift;
+      long long free = (long long)(vm_info.free_count) << pshift;
+      long long total =
+          (long long)(vm_info.active_count + vm_info.inactive_count + vm_info.free_count + vm_info.wire_count)
           << pshift;
 
       // Swap is available at same time as mem, so grab values here.
-      dqm_long_long swap_used = vm_info.pageouts << pshift;
+      long long swap_used = vm_info.pageouts << pshift;
 
       // Figure out total swap. This adds up the size of the swapfiles */
       static DIR *dirp = nullptr;
@@ -517,7 +517,7 @@ namespace dqm4hep {
         // return;
       }
 
-      dqm_long_long swap_total = 0;
+      long long swap_total = 0;
       struct dirent *dp = nullptr;
 
       while ((dp = readdir(dirp)) != 0) {
@@ -533,11 +533,11 @@ namespace dqm4hep {
       }
       closedir(dirp);
 
-      stats.vmTot = (dqm_int)((total + swap_total) >> 20); // divide by 1024 * 1024
-      stats.vmUsed = (dqm_int)((used + swap_used) >> 20);
-      stats.vmFree = (dqm_int)((free + swap_total - swap_used) >> 20);
-      stats.rssTot = (dqm_int)(total >> 20);
-      stats.rssUsed = (dqm_int)(used >> 20);
+      stats.vmTot = (int)((total + swap_total) >> 20); // divide by 1024 * 1024
+      stats.vmUsed = (int)((used + swap_used) >> 20);
+      stats.vmFree = (int)((free + swap_total - swap_used) >> 20);
+      stats.rssTot = (int)(total >> 20);
+      stats.rssUsed = (int)(used >> 20);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -633,8 +633,8 @@ namespace dqm4hep {
           }
         }
 
-        stats.vm = (dqm_long)(rsize / 1024.);
-        stats.rss = (dqm_long)(vprvt / 1024.);
+        stats.vm = (long)(rsize / 1024.);
+        stats.rss = (long)(vprvt / 1024.);
       }
     }
 
@@ -721,7 +721,7 @@ namespace dqm4hep {
      *  @param  stats the NetworkStats struct to store the data
      *  @param  sampleTime the time between two network i/o reading to compute the rate in \b seconds
      */
-    static void darwinNetStats(NetworkStats &stats, dqm_int sampleTime) {
+    static void darwinNetStats(NetworkStats &stats, int sampleTime) {
 
       NetworkStats tempStats;
       readDarwinNet(tempStats);
@@ -734,7 +734,7 @@ namespace dqm4hep {
 #endif // __APPLE__
 
 #if defined(_WIN32)
-    static void winCpuStats(CpuStats &stats, dqm_int sampleTime){
+    static void winCpuStats(CpuStats &stats, int sampleTime){
       /* WINDOWS implementation: TBD */
       dqm_warning("[{0}] - has not been implemented!", __FUNCTION__);
       throw core::StatusCodeException(STATUS_CODE_NOT_FOUND);
@@ -758,7 +758,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    static void winNetStats(NetworkStats &stats, dqm_int sampleTime) {
+    static void winNetStats(NetworkStats &stats, int sampleTime) {
       /* WINDOWS implementation: TBD */
       dqm_warning("[{0}] - has not been implemented!", __FUNCTION__);
       throw core::StatusCodeException(STATUS_CODE_NOT_FOUND);
@@ -769,7 +769,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void cpuStats(CpuStats &stats, dqm_int sampleTime) {
+    void cpuStats(CpuStats &stats, int sampleTime) {
 #if defined(__APPLE__)
       darwinCpuStats(stats, sampleTime);
 #elif defined(__linux__)
@@ -811,7 +811,7 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    void netStats(NetworkStats &stats, dqm_int sampleTime) {
+    void netStats(NetworkStats &stats, int sampleTime) {
 #if defined(__APPLE__)
       darwinNetStats(stats, sampleTime);
 #elif defined(__linux__)

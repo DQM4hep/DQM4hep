@@ -83,11 +83,11 @@ namespace dqm4hep {
 
       /** Set the event time stamp
        */
-      void setTimeStamp(const TimePoint &timeStamp);
+      void setTimeStamp(const core::time::point &timeStamp);
 
       /** Get the event time stamp
        */
-      const TimePoint &getTimeStamp() const;
+      const core::time::point &getTimeStamp() const;
 
       /** Get the real event implementation size,
        *  as extracted after its deserialization (unit bytes)
@@ -156,7 +156,7 @@ namespace dqm4hep {
     protected:
       EventType              m_type = {UNKNOWN_EVENT};       ///< The event type
       std::string            m_source = {""};                ///< The event source
-      TimePoint              m_timeStamp = {};               ///< The event time stamp
+      core::time::point      m_timeStamp = {};               ///< The event time stamp
       uint64_t               m_eventSize = {0};              ///< The serialized event size (unit bytes)
       uint32_t               m_eventNumber = {0};            ///< The event number
       uint32_t               m_runNumber = {0};              ///< The run number
@@ -261,13 +261,13 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Event::setTimeStamp(const TimePoint &timeStamp) {
+    inline void Event::setTimeStamp(const core::time::point &timeStamp) {
       m_timeStamp = timeStamp;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline const TimePoint &Event::getTimeStamp() const {
+    inline const core::time::point &Event::getTimeStamp() const {
       return m_timeStamp;
     }
 

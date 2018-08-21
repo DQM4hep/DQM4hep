@@ -248,12 +248,6 @@ namespace dqm4hep {
       }
     };
 
-    // time - DEPRECATED DECLARATIONS !
-    typedef time::clock TimeClock;
-    typedef time::point TimePoint;
-    typedef time::duration TimeDuration;
-    // typedef std::chrono::duration<double> TimeDuration;
-
     // event
     typedef type<Event>::ptr EventPtr;
     typedef type<Event>::ptr_deque EventQueue;
@@ -261,25 +255,6 @@ namespace dqm4hep {
 
     // plugin
     typedef type<Plugin>::ptr PluginPtr;
-
-    // typedefs for streaming
-    typedef char dqm_char;
-    typedef uint8_t dqm_uchar;
-    typedef int16_t dqm_short;
-    typedef uint16_t dqm_ushort;
-    typedef int16_t dqm_short_int;
-    typedef uint16_t dqm_ushort_int;
-    typedef int64_t dqm_lint;
-    typedef uint64_t dqm_ulint;
-    typedef float dqm_real;
-    typedef float dqm_float;
-    typedef double dqm_double;
-    typedef long dqm_long;
-    typedef long long dqm_long_long;
-    typedef bool dqm_bool;
-    typedef int64_t dqm_int;
-    typedef uint64_t dqm_uint;
-    typedef long unsigned int dqm_stat;
 
     // basic typedefs
     typedef std::vector<int> IntVector;
@@ -357,7 +332,7 @@ namespace dqm4hep {
       std::cout << "#      Version    : " << DQM4hep_VERSION_STR << std::endl;
       std::cout << "#      Started at : " << time::asString(time::now()) << std::endl;
       std::cout << "#      Author     : R. Ete, A. Pingault" << std::endl;
-      std::cout << "#      Mail       : <dqm4hep@gmail.com> " << std::endl;
+      std::cout << "#      Mail       : <dqm4hep@desy.de> " << std::endl;
       std::cout << "#" << std::endl;
       std::cout << "#######################################################" << std::endl;
     }
@@ -418,53 +393,6 @@ namespace dqm4hep {
      *  @param  replace the portion of string to replace with
      */
     std::string &replaceAll(std::string &subject, const std::string& search, const std::string& replace);
-
-    //-------------------------------------------------------------------------------------------------
-
-    /** Convert time_t to hour, minutes and seconds
-     */
-    // inline void timeToHMS(time_t t, int &hours, int &minutes, int &seconds) {
-    //   auto pTmTime = new tm();
-    //   localtime_r(&t, pTmTime);
-    //   hours = pTmTime->tm_hour;
-    //   minutes = pTmTime->tm_min;
-    //   seconds = pTmTime->tm_sec;
-    //   delete pTmTime;
-    // }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    /** Convert TimePoint to time_t
-     */
-    // inline time_t toTime_t(const TimePoint &timePoint) {
-    //   return TimeClock::to_time_t(timePoint);
-    // }
-    
-    //-------------------------------------------------------------------------------------------------
-    
-    /** Convert time_t to TimePoint
-     */
-    // inline TimePoint toTimePoint(time_t t) {
-    //   return TimeClock::from_time_t(t);
-    // }
-
-    //-------------------------------------------------------------------------------------------------
-
-    /** Convert time_t to string format as "HOURSh MINUTESm SECONDSs"
-     */
-    DEPRECATED(void timeToHMS(std::time_t t, std::string &timeStr));
-
-    //-------------------------------------------------------------------------------------------------
-
-    /** Get the current time (unit seconds)
-     */
-    DEPRECATED(TimePoint now());
-
-    //-------------------------------------------------------------------------------------------------
-
-    /** Sleep for the specified time duration
-     */
-    DEPRECATED(void sleep(const TimeDuration &duration));
 
     //-------------------------------------------------------------------------------------------------
 
@@ -571,13 +499,13 @@ namespace dqm4hep {
      *          Store system wide cpu usage in percentage
      */
     struct CpuStats {
-      dqm_float load1m = {0.};  //!< cpu load average over 1 m
-      dqm_float load5m = {0.};  //!< cpu load average over 5 m
-      dqm_float load15m = {0.}; //!< cpu load average over 15 m
-      dqm_float user = {0.};    //!< cpu user load in \b percentage
-      dqm_float sys = {0.};     //!< cpu sys load in \b percentage
-      dqm_float tot = {0.};     //!< cpu user+sys load in \b percentage
-      dqm_float idle = {0.};    //!< cpu idle in \b percentage
+      float load1m = {0.};  //!< cpu load average over 1 m
+      float load5m = {0.};  //!< cpu load average over 5 m
+      float load15m = {0.}; //!< cpu load average over 15 m
+      float user = {0.};    //!< cpu user load in \b percentage
+      float sys = {0.};     //!< cpu sys load in \b percentage
+      float tot = {0.};     //!< cpu user+sys load in \b percentage
+      float idle = {0.};    //!< cpu idle in \b percentage
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -588,7 +516,7 @@ namespace dqm4hep {
      *  @param  stats the CpuStats object to receive
      *  @param  sampleTime time between two sampling to compute load, in \b seconds 
      */
-    void cpuStats(CpuStats &stats, dqm_int sampleTime = 1 /*s*/);
+    void cpuStats(CpuStats &stats, int sampleTime = 1 /*s*/);
     //-------------------------------------------------------------------------------------------------
 
     /**
@@ -597,11 +525,11 @@ namespace dqm4hep {
      *          All units in \b Mb
      */
     struct MemoryStats {
-      dqm_int vmTot = {0};   //!< total virtual RAM (physical RAM + swap) in \b MB
-      dqm_int vmUsed = {0};  //!< used virtual RAM (physical RAM + swap) in \b MB
-      dqm_int vmFree = {0};  //!< free virtual RAM (physical RAM + swap) in \b MB
-      dqm_int rssTot = {0};  //!< total physical RAM in \b MB
-      dqm_int rssUsed = {0}; //!< used  physical RAM in \b MB
+      int32_t vmTot = {0};   //!< total virtual RAM (physical RAM + swap) in \b MB
+      int32_t vmUsed = {0};  //!< used virtual RAM (physical RAM + swap) in \b MB
+      int32_t vmFree = {0};  //!< free virtual RAM (physical RAM + swap) in \b MB
+      int32_t rssTot = {0};  //!< total physical RAM in \b MB
+      int32_t rssUsed = {0}; //!< used  physical RAM in \b MB
     };
 
     //-------------------------------------------------------------------------------------------------
@@ -621,14 +549,14 @@ namespace dqm4hep {
      *          All memory units in \b kb !
      */
     struct ProcessStats {
-      dqm_float cpuTimeUser = {0.}; //!< user time used by this process in \b seconds
-      dqm_float cpuTimeSys = {0.};  //!< system time used by this process in \b seconds
-      dqm_float cpuTimeTot = {0.};  //!< total time used by this process in \b seconds
-      dqm_float cpuUser = {0.};     //!< cpu user load used by this process in \b percentage
-      dqm_float cpuSys = {0.};      //!< cpu sys load used by this process in \b percentage
-      dqm_float cpuTot = {0.};      //!< total (sys+user) cpu load used by this process in \b percentage
-      dqm_long vm = {0L};           //!< virtual memory used by this process in \b KB
-      dqm_long rss = {0L};          //!< resident memory used by this process in \b KB
+      float cpuTimeUser = {0.}; //!< user time used by this process in \b seconds
+      float cpuTimeSys = {0.};  //!< system time used by this process in \b seconds
+      float cpuTimeTot = {0.};  //!< total time used by this process in \b seconds
+      float cpuUser = {0.};     //!< cpu user load used by this process in \b percentage
+      float cpuSys = {0.};      //!< cpu sys load used by this process in \b percentage
+      float cpuTot = {0.};      //!< total (sys+user) cpu load used by this process in \b percentage
+      long vm = {0L};           //!< virtual memory used by this process in \b KB
+      long rss = {0L};          //!< resident memory used by this process in \b KB
       timeval lastPollTime {0, 0};  //!< last time process stats were polled
     };
 
@@ -648,18 +576,18 @@ namespace dqm4hep {
      *          Units in \b packets or \b kb 
      */
     struct INetworkStats {
-      dqm_stat tot_rcv_kbytes = {0L};   //!< total data received in \b kb
-      dqm_stat tot_rcv_packets = {0L};  //!< total packets received
-      dqm_stat tot_rcv_errs = {0L};     //!< total errors received
-      dqm_stat tot_snd_kbytes = {0L};   //!< total data sent in \b kb
-      dqm_stat tot_snd_packets = {0L};  //!< total packets sent
-      dqm_stat tot_snd_errs = {0L};     //!< total errors sent
-      dqm_stat rcv_rate_kbytes = {0L};  //!< rate of data received in \b kb
-      dqm_stat rcv_rate_packets = {0L}; //!< rate of packets received
-      dqm_stat rcv_rate_errs = {0L};    //!< rate of errors received
-      dqm_stat snd_rate_kbytes = {0L};  //!< rate of data sent in \b kb
-      dqm_stat snd_rate_packets = {0L}; //!< rate of packets sent
-      dqm_stat snd_rate_errs = {0L};    //!< rate of errors sent
+      uint64_t tot_rcv_kbytes = {0L};   //!< total data received in \b kb
+      uint64_t tot_rcv_packets = {0L};  //!< total packets received
+      uint64_t tot_rcv_errs = {0L};     //!< total errors received
+      uint64_t tot_snd_kbytes = {0L};   //!< total data sent in \b kb
+      uint64_t tot_snd_packets = {0L};  //!< total packets sent
+      uint64_t tot_snd_errs = {0L};     //!< total errors sent
+      uint64_t rcv_rate_kbytes = {0L};  //!< rate of data received in \b kb
+      uint64_t rcv_rate_packets = {0L}; //!< rate of packets received
+      uint64_t rcv_rate_errs = {0L};    //!< rate of errors received
+      uint64_t snd_rate_kbytes = {0L};  //!< rate of data sent in \b kb
+      uint64_t snd_rate_packets = {0L}; //!< rate of packets sent
+      uint64_t snd_rate_errs = {0L};    //!< rate of errors sent
     };
 
     typedef std::map<std::string, INetworkStats> NetworkStats;
@@ -672,8 +600,8 @@ namespace dqm4hep {
      *  @param  stats the NetworkStats object to receive
      *  @param  sampleTime time between two sampling to compute rates, in \b seconds 
      */
-    void netStats(NetworkStats &stats, dqm_int sampleTime = 1 /*s*/);
+    void netStats(NetworkStats &stats, int sampleTime = 1 /*s*/);
   } // namespace core
 } // namespace dqm4hep
 
-#endif //  DQM4HEP_ENUMERATORS_H
+#endif //  DQM4HEP_INTERNAL_H
