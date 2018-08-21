@@ -97,7 +97,7 @@ namespace dqm4hep {
       /// Whether the timer is active
       std::atomic_bool             m_active = {false};
       /// The time point when the timer was started
-      core::TimePoint              m_startTime = {};
+      core::time::point            m_startTime = {};
     };
   
   }

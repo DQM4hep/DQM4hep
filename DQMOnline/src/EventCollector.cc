@@ -109,8 +109,8 @@ namespace dqm4hep {
       m_statsTimer60->setSingleShot(false);
       m_statsTimer60->onTimeout().connect(this, &EventCollector::sendStatsTimer60);
       
-      m_lastStatCall10 = core::now();
-      m_lastStatCall60 = core::now();
+      m_lastStatCall10 = core::time::now();
+      m_lastStatCall60 = core::time::now();
       
       m_statsTimer10->start();
       m_statsTimer60->start();
@@ -262,7 +262,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     
     void EventCollector::sendStatsTimer10() {
-      auto timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(core::now()-m_lastStatCall10).count();
+      auto timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(core::time::now()-m_lastStatCall10).count();
       // send stats
       sendStat("NEvents_10sec", m_nCollectedEvents10);
       sendStat("NBytes_10sec", m_nCollectedBytes10);
@@ -270,13 +270,13 @@ namespace dqm4hep {
       // reset counters
       m_nCollectedEvents10 = 0;
       m_nCollectedBytes10 = 0;
-      m_lastStatCall10 = core::now();
+      m_lastStatCall10 = core::time::now();
     }
     
     //-------------------------------------------------------------------------------------------------
     
     void EventCollector::sendStatsTimer60() {
-      auto timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(core::now()-m_lastStatCall60).count();
+      auto timeDifference = std::chrono::duration_cast<std::chrono::milliseconds>(core::time::now()-m_lastStatCall60).count();
       // send stats
       sendStat("NEvents_60sec", m_nCollectedEvents60);
       sendStat("NBytes_60sec", m_nCollectedBytes60);
@@ -284,7 +284,7 @@ namespace dqm4hep {
       // reset counters
       m_nCollectedEvents60 = 0;
       m_nCollectedBytes60 = 0;
-      m_lastStatCall60 = core::now();
+      m_lastStatCall60 = core::time::now();
     }
     
     //-------------------------------------------------------------------------------------------------

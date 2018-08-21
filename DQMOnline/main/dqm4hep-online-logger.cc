@@ -190,7 +190,7 @@ int main(int argc, char* argv[]) {
     client.subscribe(OnlineRoutes::OnlineManager::logs(), &printer, &LogPrinter::printLog);
     
     while(not stopFlag.load())
-      dqm4hep::core::sleep(std::chrono::seconds(1));
+      dqm4hep::core::time::msleep(1000);
   }
   catch(StatusCodeException &exception) {
     dqm_error( "Caught exception while running: {0}", exception.toString() );
