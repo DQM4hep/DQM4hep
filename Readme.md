@@ -32,9 +32,9 @@ where OPTIONS can be :
 
 ## Licensing
 
-[![License](https://www.gnu.org/graphics/gplv3-127x51.png)](https://www.gnu.org/licenses/gpl-3.0.en.html)
+[![License](https://www.gnu.org/graphics/lgplv3-147x51.png)](https://www.gnu.org/licenses/lgpl-3.0.en.html)
 
-DQM4hep is distributed under the [GPLv3 License](http://www.gnu.org/licenses/gpl-3.0.en.html) 
+DQM4hep is distributed under the [LGPLv3 License](https://www.gnu.org/licenses/lgpl-3.0.en.html) 
 
 ## Bug report
 
