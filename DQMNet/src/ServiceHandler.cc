@@ -40,7 +40,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void ServiceHandler::receiveServiceUpdated(const Buffer &data) {
-      m_updateSignal.process(data);
+      m_updateSignal.emit(data);
     }
 
     //-------------------------------------------------------------------------------------------------
