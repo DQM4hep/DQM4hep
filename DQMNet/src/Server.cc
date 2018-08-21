@@ -439,7 +439,7 @@ namespace dqm4hep {
     void Server::clientExitHandler() {
       int clientID(DimServer::getClientId());
       std::cout << "Client " << clientID << " exits" << std::endl;
-      m_clientExitSignal.process(clientID);
+      m_clientExitSignal.emit(clientID);
     }
 
   }

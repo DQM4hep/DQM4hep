@@ -62,7 +62,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void RequestHandler::handleRequest(const Buffer &request, Buffer &response) {
-      m_requestSignal.process(request, response);
+      m_requestSignal.emit(request, response);
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -145,7 +145,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void CommandHandler::handleCommand(const Buffer &command) {
-      m_commandSignal.process(command);
+      m_commandSignal.emit(command);
     }
 
     //------------------------------------------------------------------------------------------------
