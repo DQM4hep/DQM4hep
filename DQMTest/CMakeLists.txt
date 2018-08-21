@@ -1,4 +1,7 @@
-
+#################################################
+# cmake file for building DQMOnline component
+# @author Ete Remi, DESY
+#################################################
 
 dqm4hep_package( DQMTest
   USES DQMCore DQMOnline
