@@ -509,7 +509,7 @@ namespace dqm4hep {
       object["value"] = stats;
       object["appType"] = this->type();
       object["appName"] = this->name();
-      object["time"] = core::TimePoint::clock::to_time_t(core::now());
+      object["time"] = core::time::asTime(core::time::now());
       dqm_debug( "Sending app stat : \n'{0}'", object.dump() );
       m_client.sendCommand(OnlineRoutes::OnlineManager::appStats(), object.dump());
     }

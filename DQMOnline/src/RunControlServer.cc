@@ -92,7 +92,7 @@ namespace dqm4hep {
         m_interface->run();
         
         while( ! m_stopFlag )
-          dqm4hep::core::sleep(dqm4hep::core::TimeDuration(1));
+          core::time::msleep(1000);
       }
       
       m_server->stop();

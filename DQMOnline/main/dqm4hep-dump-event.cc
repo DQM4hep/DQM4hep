@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
   client.startEventUpdates();
   
   while(running) {
-    dqm4hep::core::sleep(std::chrono::milliseconds(100));
+    dqm4hep::core::time::msleep(100);
   }
   
   delete pCommandLine;
@@ -129,11 +129,9 @@ void EventPrinter::printEvent(EventPtr event) {
     dqm_info( "==== Event is nullptr ! ====" );
     return;
   }
-  std::string timeHMS;  
-  timeToHMS(std::chrono::system_clock::to_time_t(event->getTimeStamp()), timeHMS);
   dqm_info(  "==== Event: run {0}, event {1} ====", event->getRunNumber(), event->getEventNumber() );
   dqm_debug( "====    Source:         {0}", event->getSource() );
-  dqm_info(  "====    Time stamp:     {0}", timeHMS );
+  dqm_info(  "====    Time stamp:     {0}", dqm4hep::core::time::asString(event->getTimeStamp()) );
   dqm_info(  "====    Size:           {0} bytes", event->getEventSize() );
   dqm_info(  "" );
 }

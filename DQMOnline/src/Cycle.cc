@@ -92,7 +92,7 @@ namespace dqm4hep {
     
     void Cycle::incrementCounter(unsigned int increment) {
       m_currentCounter += increment;
-      m_lastCounterIncrement = core::now();
+      m_lastCounterIncrement = core::time::now();
     }
     
     //-------------------------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ namespace dqm4hep {
         m_forceStopFlag = false;
         m_eocEmit = true;
         EOCCondition condition;
-        condition.m_startTime = core::now();
+        condition.m_startTime = core::time::now();
         condition.m_forcedEnd = false;
         m_lastCounterIncrement = condition.m_startTime;
         m_currentCounter = 0;
@@ -155,7 +155,7 @@ namespace dqm4hep {
               break;
             }
           }
-          const core::TimePoint now = core::now();
+          const core::time::point now = core::time::now();
           const float timeoutEllapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now-m_lastCounterIncrement).count() / 1000.f;
           const bool timeoutReached = (0 == m_timeout) ? false : (timeoutEllapsed >= m_timeout.load());
           // check timeout first
@@ -186,7 +186,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     
     void Cycle::endOfCycle(EOCCondition &condition) {
-      condition.m_endTime = core::now();
+      condition.m_endTime = core::time::now();
       condition.m_counter = m_currentCounter.load();
       condition.m_totalTime = std::chrono::duration_cast<std::chrono::milliseconds>(condition.m_endTime - condition.m_startTime).count() / 1000.f;
       condition.m_rate = (condition.m_startTime == condition.m_endTime) ? 0 : (condition.m_counter / condition.m_totalTime);

@@ -40,7 +40,7 @@ namespace dqm4hep {
       m_server->start();
       
       while(not m_stopFlag.load())
-        core::sleep(std::chrono::seconds(1));
+        core::time::msleep(1000);
     }
     
     //-------------------------------------------------------------------------------------------------

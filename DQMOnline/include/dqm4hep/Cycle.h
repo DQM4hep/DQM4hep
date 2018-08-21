@@ -28,9 +28,9 @@ namespace dqm4hep {
      */
     struct EOCCondition {
       /// The start time of the cycle
-      core::TimePoint     m_startTime = {};
+      core::time::point   m_startTime = {};
       /// The end time of the cycle
-      core::TimePoint     m_endTime = {};
+      core::time::point   m_endTime = {};
       /// The total cycle time (unit seconds)
       float               m_totalTime = {0.f};
       /// The counter value when the cycle ended
@@ -192,7 +192,7 @@ namespace dqm4hep {
       /// The end of cycle event priority in the event loop 
       std::atomic_int                  m_eventPriority = {60};
       /// The last time point when the increement method was called
-      core::TimePoint                  m_lastCounterIncrement = {};
+      core::time::point                m_lastCounterIncrement = {};
     };
 
   }

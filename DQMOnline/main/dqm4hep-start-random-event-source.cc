@@ -111,7 +111,7 @@ int main(int argc, char* argv[])
   while(running)
   {
     EventPtr event = GenericEvent::make_shared();
-    event->setTimeStamp(dqm4hep::core::now());
+    event->setTimeStamp(dqm4hep::core::time::now());
     event->setType(CUSTOM_EVENT);
     event->setSource(sourceNameArg.getValue());
     event->setRunNumber(runNumber);

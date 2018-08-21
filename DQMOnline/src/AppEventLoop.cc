@@ -202,7 +202,7 @@ namespace dqm4hep {
         // initialize start time point of all timers
         std::lock_guard<std::recursive_mutex> lock(m_timerMutex);
         for(auto timer : m_timers) {
-          timer->m_startTime = core::now();
+          timer->m_startTime = core::time::now();
         }
       }
       while(not m_timerStopFlag.load()) {
@@ -210,7 +210,7 @@ namespace dqm4hep {
           std::lock_guard<std::recursive_mutex> lock(m_timerMutex);
           for(auto timer : m_timers) {
             if(timer->active()) {
-              const unsigned int timeoutEllapsed = std::chrono::duration_cast<std::chrono::milliseconds>(core::now()-timer->m_startTime).count();
+              const unsigned int timeoutEllapsed = std::chrono::duration_cast<std::chrono::milliseconds>(core::time::now()-timer->m_startTime).count();
               const bool timeoutReached = (timeoutEllapsed >= timer->interval());
               if(timeoutReached) {
                 // process timer timeout in event loop
@@ -222,7 +222,7 @@ namespace dqm4hep {
                   timer->m_active = false;
                 }
                 else {
-                  timer->m_startTime = core::now();
+                  timer->m_startTime = core::time::now();
                 }
               }
             }
@@ -247,7 +247,7 @@ namespace dqm4hep {
     
     void AppEventLoop::startTimer(AppTimer *timer) {
       std::lock_guard<std::recursive_mutex> lock(m_timerMutex);
-      timer->m_startTime = core::now();
+      timer->m_startTime = core::time::now();
       timer->m_active = true;
     }
     
