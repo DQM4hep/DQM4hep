@@ -41,8 +41,8 @@ namespace dqm4hep {
 
     void Run::reset() {
       m_runNumber = 0;
-      m_startTime = TimePoint();
-      m_endTime = TimePoint();
+      m_startTime = core::time::point();
+      m_endTime = core::time::point();
       m_detectorName.clear();
       m_description.clear();
       m_parametersMap.clear();
@@ -51,8 +51,8 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     void Run::toJson(json &value) const {
-      auto st = std::chrono::system_clock::to_time_t(m_startTime);
-      auto et = std::chrono::system_clock::to_time_t(m_endTime);
+      auto st = core::time::asTime(m_startTime);
+      auto et = core::time::asTime(m_endTime);
       value = {
         {"runNumber", m_runNumber},
         {"startTime", st},
@@ -67,10 +67,10 @@ namespace dqm4hep {
 
     void Run::fromJson(const json &value) {
       m_runNumber = value.value<int>("runNumber", 0);
-      auto st = value.value<int64_t>("startTime", 0);
-      auto et = value.value<int64_t>("endTime", 0);
-      m_startTime = std::chrono::system_clock::from_time_t(st);
-      m_endTime = std::chrono::system_clock::from_time_t(et);
+      auto st = value.value<int32_t>("startTime", 0);
+      auto et = value.value<int32_t>("endTime", 0);
+      m_startTime = core::time::asPoint(st);
+      m_endTime = core::time::asPoint(et);
       m_detectorName = value.value<std::string>("detector", "");
       m_description = value.value<std::string>("description", "");
       m_parametersMap = value.value<StringMap>("parameters", StringMap());

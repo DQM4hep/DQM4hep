@@ -636,7 +636,7 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
     
     void ModuleApplication::postStandaloneProcess() {
-      auto *processEvent = new StoreEvent<core::TimePoint>(AppEvent::PROCESS_EVENT, core::time::now());
+      auto *processEvent = new StoreEvent<core::time::point>(AppEvent::PROCESS_EVENT, core::time::now());
       processEvent->setPriority(ModuleApplication::PROCESS_CALL);
       m_eventLoop.postEvent(processEvent);
     }

@@ -51,12 +51,12 @@ namespace dqm4hep {
       /** 
        *  @brief  Get the run start time
        */
-      TimePoint startTime() const;
+      core::time::point startTime() const;
 
       /** 
        *  @brief  Get the run end time
        */
-      TimePoint endTime() const;
+      core::time::point endTime() const;
 
       /** 
        *  @brief  Get the run description
@@ -80,14 +80,14 @@ namespace dqm4hep {
        *
        *  @param  startTime the run start time
        */
-      void setStartTime(const TimePoint &startTime);
+      void setStartTime(const core::time::point &startTime);
 
       /** 
        *  @brief  Set the run end tim
        *
        *  @param  endTime the run end time
        */
-      void setEndTime(const TimePoint &endTime);
+      void setEndTime(const core::time::point &endTime);
 
       /** 
        *  @brief  Set the run description
@@ -174,9 +174,9 @@ namespace dqm4hep {
       /// The run number
       int                     m_runNumber = {0};
       /// The run start time
-      TimePoint               m_startTime = {};
+      core::time::point       m_startTime = {};
       /// The run end time
-      TimePoint               m_endTime = {};
+      core::time::point       m_endTime = {};
       /// The detector name
       std::string             m_detectorName = {""};
       /// The run description 
@@ -198,13 +198,13 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline TimePoint Run::startTime() const {
+    inline core::time::point Run::startTime() const {
       return m_startTime;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline TimePoint Run::endTime() const {
+    inline core::time::point Run::endTime() const {
       return m_endTime;
     }
 
@@ -228,13 +228,13 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setStartTime(const TimePoint &st) {
+    inline void Run::setStartTime(const core::time::point &st) {
       m_startTime = st;
     }
 
     //-------------------------------------------------------------------------------------------------
 
-    inline void Run::setEndTime(const TimePoint &et) {
+    inline void Run::setEndTime(const core::time::point &et) {
       m_endTime = et;
     }
 

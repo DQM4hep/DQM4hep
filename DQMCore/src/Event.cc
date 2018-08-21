@@ -21,7 +21,7 @@ namespace dqm4hep {
     void Event::clear() {
       m_type = UNKNOWN_EVENT;
       m_source = "unknwon";
-      m_timeStamp = TimePoint();
+      m_timeStamp = core::time::point();
       m_eventSize = 0;
       m_eventNumber = 0;
       m_runNumber = 0;
@@ -43,10 +43,10 @@ namespace dqm4hep {
 
     void Event::writeBase(TBuffer &buffer) const {
       Int_t type(static_cast<Int_t>(m_type));
-      Long64_t timeStamp = std::chrono::system_clock::to_time_t(m_timeStamp);
+      int32_t timeStamp = core::time::asTime(m_timeStamp);
       buffer.WriteInt(type);
       buffer.WriteStdString(&m_source);
-      buffer.WriteLong64(timeStamp);
+      buffer.WriteInt(timeStamp);
       buffer.WriteLong64(m_eventSize);
       buffer.WriteInt(m_eventNumber);
       buffer.WriteInt(m_runNumber);
@@ -56,18 +56,18 @@ namespace dqm4hep {
 
     void Event::readBase(TBuffer &buffer) {
       Int_t type(0);
-      Long64_t timeStamp(0);
+      int32_t timeStamp(0);
       Long64_t eventSize(0);
       Int_t eventNumber(0);
       Int_t runNumber(0);
       buffer.ReadInt(type);
       buffer.ReadStdString(&m_source);
-      buffer.ReadLong64(timeStamp);
+      buffer.ReadInt(timeStamp);
       buffer.ReadLong64(eventSize);
       buffer.ReadInt(eventNumber);
       buffer.ReadInt(runNumber);
       setType(static_cast<EventType>(type));
-      setTimeStamp(std::chrono::system_clock::from_time_t(timeStamp));
+      setTimeStamp(core::time::asPoint(timeStamp));
       m_eventSize = eventSize;
       m_eventNumber = eventNumber;
       m_runNumber = runNumber;
