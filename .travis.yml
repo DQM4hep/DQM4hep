@@ -5,6 +5,7 @@ sudo: required
 env:
   global:
     - DQM4hep_DOXYGEN_DOC=OFF
+    - DQM4hep_COVERITY_SCAN=OFF
   matrix:
     - ROOT_VERSION=6.10.08
     - ROOT_VERSION=6.12.06
@@ -29,6 +30,9 @@ matrix:
     - os: linux
       compiler: gcc
       env: ROOT_VERSION=6.10.08 DQM4hep_DOXYGEN_DOC=ON
+    - os: linux
+      compiler: gcc
+      env: ROOT_VERSION=6.10.08 DQM4hep_DOXYGEN_DOC=OFF DQM4hep_COVERITY_SCAN=ON
 
 addons:
   apt:
@@ -43,9 +47,9 @@ script:
   - if [[ "${TRAVIS_OS_NAME}" == "linux" && "${CXX}" == "g++"  ]];
     then sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 90;
     fi
-  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${CXX}" == "g++" && "${TRAVIS_OS_NAME}" == "linux" ]];
+  - if [[ "${TRAVIS_EVENT_TYPE}" == "cron" && "${DQM4hep_COVERITY_SCAN}" == "ON" ]];
     then ./.travis-ci.d/coverity_scan.sh;
-    else ./.travis-ci.d/compile_and_test.sh;
+    elif [[ "${DQM4hep_COVERITY_SCAN}" == "OFF" ]] ./.travis-ci.d/compile_and_test.sh;
     fi
 
 before_install:
