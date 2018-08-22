@@ -15,11 +15,11 @@ A Data Quality Monitoring for High Energy Physics
 
 ### Install commands
 
-```bash
+```shell
 source /path/to/root/bin/thisroot.sh
 mkdir build
 cd build
-cmake -Dxdrstream_DIR=/path/to/xdrstream/lib/cmake [-DOPTIONS=...] ..
+cmake [-DOPTIONS=...] ..
 make install
 ```
 
@@ -29,6 +29,13 @@ where OPTIONS can be :
 - DQM4hep_EXTRA_WARNINGS: Whether to compile with -Wextra (default is ON)
 - DQM4hep_DEV_WARNINGS: Additional developer warnings (default is OFF)
 - DQM4hep_DOXYGEN_DOC: Generate Doxygen (default is OFF)
+
+Then before using:
+
+```shell
+# This setup ROOT and DQM4hep
+source /path/to/dqm4hep/bin/thisdqm4hep.sh
+```
 
 ## Licensing
 

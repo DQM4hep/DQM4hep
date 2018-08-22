@@ -17,5 +17,6 @@
 /DQM4hepConfigVersion.cmake
 /cmake/DQM4hepConfig.cmake
 /cmake/DQM4hepConfigVersion.cmake
+/cmake/thisdqm4hep.sh
 /DQMCore/include/dqm4hep/DQM4hepConfig.h
 /doc/Doxygen
