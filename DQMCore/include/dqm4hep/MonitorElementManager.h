@@ -572,8 +572,6 @@ namespace dqm4hep {
 
       /// The internal monitor element storage
       Storage<MonitorElement>      m_storage = {};
-      /// The quality test factory map (plugins)
-      QualityTestFactoryMap        m_qualityTestFactoryMap = {};
       /// The actual allocated quality test map
       QualityTestMap               m_qualityTestMap = {};
       /// The XML allocator map to create monitor elements from XML description
