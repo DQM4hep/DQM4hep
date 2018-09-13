@@ -19,6 +19,29 @@
 namespace dqm4hep {
 
   namespace core {
+    
+    PluginManager* PluginManager::m_instance = nullptr;
+    
+    //--------------------------------------------------------------------------------------------
+
+    PluginManager *PluginManager::instance() {
+      if (nullptr == m_instance) {
+        m_instance = new PluginManager();
+      }
+      return m_instance;
+    }
+
+    //--------------------------------------------------------------------------------------------
+
+    void PluginManager::kill() {
+      if (nullptr == m_instance) {
+        return;
+      }
+      delete m_instance;
+      m_instance = nullptr;
+    }
+    
+    //--------------------------------------------------------------------------------------------
 
     PluginManager::~PluginManager() {
       // No memory clean here, as the plugin instances are static

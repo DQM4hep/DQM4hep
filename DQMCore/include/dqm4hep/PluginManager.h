@@ -14,8 +14,6 @@
 // -- dqm4hep headers
 #include <dqm4hep/Internal.h>
 #include <dqm4hep/Logging.h>
-#include <dqm4hep/Plugin.h>
-#include <dqm4hep/Singleton.h>
 #include <dqm4hep/StatusCodes.h>
 
 // -- std headers
@@ -41,12 +39,19 @@ namespace dqm4hep {
      *  Responsible for loading shared libraries
      *  that contains Plugin instances
      */
-    class PluginManager : public Singleton<PluginManager> {
-      friend class Singleton<PluginManager>;
+    class PluginManager {
       friend class Plugin;
       typedef std::map<const std::string, const Plugin *> PluginMap;
 
     public:
+      /** Return a unique instance of the class
+       */
+      static PluginManager *instance();
+
+      /** Kill the unique instance of the class
+       */
+      static void kill();
+      
       /** 
        *  @brief  Load shared libraries from the environment variable DQM4HEP_PLUGIN_DLL
        */
@@ -121,6 +126,8 @@ namespace dqm4hep {
       PluginMap               m_pluginMap = {};
       ///< The list of loaded libraries
       std::vector<void*>      m_dlLibraries = {};
+      ///
+      static PluginManager*   m_instance;
     };
     
     //-------------------------------------------------------------------------------------------------
