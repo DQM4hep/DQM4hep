@@ -23,13 +23,11 @@
 #include <dqm4hep/MonitorElement.h>
 #include <dqm4hep/MonitorElementManager.h>
 #include <dqm4hep/Path.h>
-#include <dqm4hep/Plugin.h>
 #include <dqm4hep/PluginManager.h>
 #include <dqm4hep/PtrHandler.h>
 #include <dqm4hep/QualityTest.h>
 #include <dqm4hep/Run.h>
 #include <dqm4hep/Signal.h>
-#include <dqm4hep/Singleton.h>
 #include <dqm4hep/StatusCodes.h>
 #include <dqm4hep/Storage.h>
 #include <dqm4hep/Version.h>
