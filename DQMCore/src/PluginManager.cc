@@ -100,7 +100,7 @@ namespace dqm4hep {
     const Plugin *PluginManager::getPlugin(const std::string &pluginName) const {
       if (!isPluginRegistered(pluginName))
         return nullptr;
-
+      dqm_info("Returning a valid plugin pointer");
       return m_pluginMap.find(pluginName)->second;
     }
 
@@ -124,27 +124,20 @@ namespace dqm4hep {
 
     //-------------------------------------------------------------------------------------------------
 
-    StatusCode PluginManager::registerPlugin(Plugin *pPlugin) {
+    void PluginManager::registerPlugin(const Plugin *const plugin) {
       // null ptr case
-      if (nullptr == pPlugin)
-        return STATUS_CODE_INVALID_PTR;
-
+      if (nullptr == plugin) {
+        throw StatusCodeException(STATUS_CODE_INVALID_PTR);
+      }
       // check if the plug is already registered
-      if (isPluginRegistered(pPlugin->pluginName())) {
-        delete pPlugin;
-        pPlugin = nullptr;
-        return STATUS_CODE_ALREADY_PRESENT;
+      if (isPluginRegistered(plugin->name())) {
+        throw StatusCodeException(STATUS_CODE_ALREADY_PRESENT);
       }
-
       // try to register it
-      if (!m_pluginMap.insert(PluginMap::value_type(pPlugin->pluginName(), pPlugin)).second) {
-        delete pPlugin;
-        pPlugin = nullptr;
-
-        return STATUS_CODE_FAILURE;
+      if (!m_pluginMap.insert(PluginMap::value_type(plugin->name(), plugin)).second) {
+        throw StatusCodeException(STATUS_CODE_FAILURE);
       }
-
-      return STATUS_CODE_SUCCESS;
+      dqm_info("Registered new plugin {0}", plugin->name());
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -153,7 +146,7 @@ namespace dqm4hep {
       dqm_info("******************************************************");
       dqm_info("******** Plugin manager -- Registered plugins ********");
       for (auto plugin : m_pluginMap) {
-        dqm_info("** Plugin [class={0}] : {1}", plugin.second->pluginName(), plugin.second->className());
+        dqm_info("** Plugin [class={0}] : {1}", plugin.second->type().name(), plugin.second->name());
       }
       dqm_info("******************************************************");
     }

@@ -24,21 +24,6 @@ namespace dqm4hep {
   namespace core {
 
     MonitorElementManager::MonitorElementManager() {
-      PluginManager *pPluginMgr(PluginManager::instance());
-      StringVector factoryNames(pPluginMgr->pluginNamesMatchingType<QualityTestFactory>());
-
-      for (auto factoryName : factoryNames) {
-        auto factory(pPluginMgr->create<QualityTestFactory>(factoryName));
-
-        if (nullptr == factory) {
-          dqm_error("MonitorElementManager::MonitorElementManager: Couldn't create qtest factory '{0}'. This is "
-                    "normally not possible !",
-                    factoryName);
-          continue;
-        }
-
-        m_qualityTestFactoryMap.insert(QualityTestFactoryMap::value_type(factoryName, factory));
-      }
       // the default one
       m_defaultXMLAllocator = std::make_shared<DefaultXMLAllocator>();
       // TH1
@@ -77,7 +62,6 @@ namespace dqm4hep {
     //-------------------------------------------------------------------------------------------------
 
     MonitorElementManager::~MonitorElementManager() {
-      m_qualityTestFactoryMap.clear();
       m_qualityTestMap.clear();
     }
 
@@ -213,26 +197,26 @@ namespace dqm4hep {
       RETURN_RESULT_IF_AND_IF(STATUS_CODE_SUCCESS, STATUS_CODE_NOT_FOUND, !=, XmlHelper::getAttribute(pXmlElement, "warning", warningLimit, [&errorLimit](const float &value){
         return (value >=0.f && value > errorLimit && value <= 1.f);
       }));
-
+      // quality test already there ?
       auto findIter = m_qualityTestMap.find(name);
-
-      if (m_qualityTestMap.end() != findIter)
+      if (m_qualityTestMap.end() != findIter) {
         return STATUS_CODE_ALREADY_PRESENT;
-
-      auto findFactoryIter = m_qualityTestFactoryMap.find(type);
-
-      if (m_qualityTestFactoryMap.end() == findFactoryIter)
+      }
+      // create our quality test from plugins
+      auto mgr = PluginManager::instance();
+      auto factory = mgr->create<QualityTestFactory>(type);      
+      if(nullptr == factory) {
         return STATUS_CODE_NOT_FOUND;
-
-      QualityTestPtr qualityTest = findFactoryIter->second->createQualityTest(name);
-
+      }
+      auto qualityTest = factory->createQualityTest(name);
+      // configure our quality test
       qualityTest->setLimits(warningLimit, errorLimit);
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qualityTest->readSettings(TiXmlHandle(pXmlElement)));
       RETURN_RESULT_IF(STATUS_CODE_SUCCESS, !=, qualityTest->init());
-
-      if (!m_qualityTestMap.insert(QualityTestMap::value_type(name, qualityTest)).second)
+      // add it !
+      if (!m_qualityTestMap.insert(QualityTestMap::value_type(name, qualityTest)).second) {
         return STATUS_CODE_FAILURE;
-
+      }
       return STATUS_CODE_SUCCESS;
     }
 
