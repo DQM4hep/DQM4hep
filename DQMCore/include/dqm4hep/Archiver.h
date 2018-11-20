@@ -11,6 +11,9 @@
 #ifndef DQM4HEP_ARCHIVER_H
 #define DQM4HEP_ARCHIVER_H
 
+// -- stl headers
+#include <functional>
+
 // -- dqm4hep headers
 #include "dqm4hep/Internal.h"
 #include "dqm4hep/StatusCodes.h"

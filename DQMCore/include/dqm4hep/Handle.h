@@ -18,6 +18,7 @@
 #include <typeinfo>
 #include <typeindex>
 #include <memory>
+#include <functional>
 
 namespace dqm4hep {
   
