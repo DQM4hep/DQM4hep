@@ -128,14 +128,14 @@ namespace dqm4hep {
        *
        *  @param  resetQtests whether to also reset the quality tests 
        */
-      virtual void reset(bool resetQtests = true);
-      
+      virtual void reset(bool resetQtests = true) override;
+
       /**
        *  @brief  Convert the monitor element to json
        *  
        *  @param  object the json object to receive
        */
-      virtual void toJson(core::json &object) const;
+      virtual void toJson(core::json &object) const override;
       
 // #if ROOT_VERSION_CODE >= ROOT_VERSION(6, 14, 0)
 //       /**
@@ -195,7 +195,7 @@ namespace dqm4hep {
        *
        *  @param  reports the list of quality test reports to receive
        */
-      core::StatusCode runQualityTests(core::QReportMap &reports);
+      core::StatusCode runQualityTests(core::QReportMap &reports) override;
 
       /** 
        *  @brief  Run a specific quality test
@@ -203,7 +203,7 @@ namespace dqm4hep {
        *  @param  name the quality test name to run
        *  @param  report the quality test report to receive
        */
-      core::StatusCode runQualityTest(const std::string &name, core::QReport &report);
+      core::StatusCode runQualityTest(const std::string &name, core::QReport &report) override;
 
     private:
       /// The run number
