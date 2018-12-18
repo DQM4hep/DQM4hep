@@ -19,7 +19,6 @@ list( APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake )
 
 ENABLE_LANGUAGE(CXX)
 
-# Set C++ standard
 set(CMAKE_CXX_STANDARD 11 CACHE STRING "C++ standard used for compiling")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -30,6 +29,15 @@ option( DQM4hep_WARNING_AS_ERROR    "Whether to add -Werror flag to cxx flags" O
 option( DQM4hep_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" ON )
 option( DQM4hep_DEV_WARNINGS        "Whether to add extra warning for developpers to cxx flags" OFF )
 option( DQM4hep_DOXYGEN_DOC         "Set to OFF to skip build/install Documentation" OFF )
+option( DQM4hep_CXX14   	    "Build using C++14 standard (requires gcc >= 4.9 or clang)" OFF)
+option( DQM4hep_CXX17               "Build using C++17 standard (requires gcc >= 7.2 or clang)" OFF)
+
+# Set C++ standard
+if(${DQM4hep_CXX14})
+	set(CMAKE_CXX_STANDARD 14)
+elseif(${DQM4hep_CXX17})
+	set(CMAKE_CXX_STANDARD 17)
+endif()
 
 include( DQM4hepBuild )
 dqm4hep_set_version( DQM4hep
@@ -50,6 +58,17 @@ dqm4hep_configure_output( OUTPUT "${PROJECT_BINARY_DIR}" INSTALL "${CMAKE_INSTAL
 find_package( Threads REQUIRED )
 find_package( ROOT 6.08 REQUIRED COMPONENTS Core Hist Rint HistPainter Graf Graf3d MathCore Net RIO Tree  )
 include( ${ROOT_USE_FILE} )
+
+if(ROOT_cxx17_FOUND AND "${CMAKE_CXX_STANDARD}" STREQUAL "11" OR "${CMAKE_CXX_STANDARD}" STREQUAL "14")
+	message(WARNING "DQM4hep will be compiled with CXX17")
+	set(CMAKE_CXX_STANDARD 17)
+elseif(ROOT_cxx14_FOUND AND "${CMAKE_CXX_STANDARD}" STREQUAL "11")
+	message(WARNING "DQM4hep will be compiled with CXX14")
+	set(CMAKE_CXX_STANDARD 14)
+endif()
+
+
+
 find_package( MySQL REQUIRED )
 
 # ----- Compile third party libraries -----
