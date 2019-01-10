@@ -30,7 +30,13 @@ option( DQM4hep_WARNING_AS_ERROR    "Whether to add -Werror flag to cxx flags" O
 option( DQM4hep_EXTRA_WARNINGS      "Whether to add -Wextra flag to cxx flags" ON )
 option( DQM4hep_DEV_WARNINGS        "Whether to add extra warning for developpers to cxx flags" OFF )
 option( DQM4hep_DOXYGEN_DOC         "Set to OFF to skip build/install Documentation" OFF )
+option( DQM4hep_BUILD_STATIC_LIBS        "Set to ON to build with static libraries (required on slc6) " OFF )
 
+if ( CMAKE_SYSTEM MATCHES ".el6.")
+  message (WARNING "DQM4hep: Running on redhat6 - Setting DQM4hep_BUILD_STATIC_LIBS to true")
+  set( DQM4hep_BUILD_STATIC_LIBS ON )
+endif()
+  
 include( DQM4hepBuild )
 dqm4hep_set_version( DQM4hep
   MAJOR ${DQM4hep_VERSION_MAJOR}

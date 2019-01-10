@@ -368,7 +368,14 @@ function( dqm4hep_add_library binary building )
         dqm4hep_include_directories( "${pkg_incs}" )
         add_definitions ( ${pkg_defs} )
         #
-        add_library ( ${binary} SHARED ${sources} )
+
+        if (DQM4hep_BUILD_STATIC_LIBS)
+          set( LIB_TYPE "STATIC" ) 
+        else ()
+          set( LIB_TYPE "SHARED" ) 
+        endif()
+
+        add_library ( ${binary} ${LIB_TYPE} ${sources} )
         target_link_libraries ( ${binary} ${pkg_libs} )
         if ( "${${pkg}_VERSION}" STREQUAL "" OR "${${pkg}_SOVERSION}" STREQUAL "" )
           message ( FATAL_ERROR "BAD Package versions: VERSION[${pkg}_VERSION] ${${pkg}_VERSION} SOVERSION[${pkg}_SOVERSION] ${${pkg}_SOVERSION} " )
@@ -377,6 +384,7 @@ function( dqm4hep_add_library binary building )
         #
         if ( NOT ${ARG_NOINSTALL} )
           install ( TARGETS ${binary}  
+            ARCHIVE DESTINATION lib
             LIBRARY DESTINATION lib 
             RUNTIME DESTINATION bin)
         endif()
@@ -384,7 +392,7 @@ function( dqm4hep_add_library binary building )
         if( ${ARG_PLUGIN_DLL} )
           get_property(plugin_dlls GLOBAL PROPERTY DQM4hep_PLUGIN_DLL )
           dqm4hep_make_unique_list ( new_plugin_dlls 
-          VALUES ${plugin_dlls} ${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_SHARED_LIBRARY_PREFIX}${binary}${CMAKE_SHARED_LIBRARY_SUFFIX} )
+          VALUES ${plugin_dlls} ${CMAKE_INSTALL_PREFIX}/lib/${CMAKE_${LIB_TYPE}_LIBRARY_PREFIX}${binary}${CMAKE_${LIB_TYPE}_LIBRARY_SUFFIX} )
           set_property(GLOBAL PROPERTY DQM4hep_PLUGIN_DLL ${new_plugin_dlls} )
         endif()
       else()
